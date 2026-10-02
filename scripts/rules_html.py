@@ -30,10 +30,46 @@ for ln in lines:
         heads.append((len(m.group(1)), m.group(2), head_id(m.group(2))))
 IDS = {h[2] for h in heads}
 PRICE_ID = next(h[2] for h in heads if h[1].startswith("Справочник цен"))
+APP_ID = next(h[2] for h in heads if h[1].startswith("Приложение А"))
+
+def sec_ids(cell):
+    """«8.4, А.1», «7.3–7.4», «Справочник цен» → id разделов"""
+    out = []
+    for m in re.finditer(r"А\.(\d)|(\d{1,2})\.(\d{1,2})|(?<![\d.])(\d{1,2})(?![\d.])|Справочник цен|Приложение А", cell):
+        if m.group(1): sid = f"s-a{m.group(1)}"
+        elif m.group(2): sid = f"s-{m.group(2)}-{m.group(3)}"
+        elif m.group(4): sid = f"s-{m.group(4)}"
+        elif m.group(0) == "Справочник цен": sid = PRICE_ID
+        else: sid = APP_ID
+        if sid in IDS:
+            out.append((m.group(0), sid))
+    return out
+
+def status_label(st):
+    st = st.strip()
+    if st.startswith("утверждено мастером"): return "ok", "утверждено мастером"
+    if st.startswith("частично"): return "part", "частично утверждено"
+    if st.startswith("решение игрока") or st.startswith("утверждено игроком"): return "pl", "решение игрока"
+    if st.startswith("предложение"): return "prop", "предложение"
+    return "prop", "изменено"
+
+CHANGED = {}
+_in = False
+for ln in lines:
+    if ln.startswith("| Раздел | Правка | Статус |"):
+        _in = True; continue
+    if _in:
+        if not ln.startswith("|"):
+            break
+        if ln.startswith("| ---"):
+            continue
+        c = [x.strip() for x in ln.strip().strip("|").split("|")]
+        for _, sid in sec_ids(c[0]):
+            CHANGED.setdefault(sid, status_label(c[2]))
 
 # ---------- инлайн ----------
 def link(target, label):
-    return f'<button class="ref" data-go="{target}">{label}</button>'
+    return f'<a class="ref" href="#{target}">{label}</a>'
 
 def refs(t):
     # «раздел 6», «раздела 2», «разделе 4»
@@ -68,10 +104,17 @@ def inline(t, ref=True):
 # ---------- блоки ----------
 out, toc = [], []
 i, n = 0, len(lines)
+def first_col(c):
+    t = html.escape(c, quote=False)
+    for tok, sid in sorted(sec_ids(c), key=lambda x: -len(x[0])):
+        t = re.sub(rf"(?<![\w.>]){re.escape(html.escape(tok, quote=False))}(?![\w.<])", link(sid, html.escape(tok, quote=False)), t, count=1)
+    return t
+
 def table(rows, cls=""):
     cells = [[c.strip() for c in r.strip().strip("|").split("|")] for r in rows if not re.match(r"\s*\|\s*-", r)]
+    log = cells[0][:3] == ["Раздел", "Правка", "Статус"]
     h = "".join(f"<th>{inline(c)}</th>" for c in cells[0])
-    b = "".join("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in cells[1:])
+    b = "".join("<tr>" + "".join(f"<td>{first_col(c) if log and k == 0 else inline(c)}</td>" for k, c in enumerate(r)) + "</tr>" for r in cells[1:])
     return f'<div class="wrap{cls}"><table><thead><tr>{h}</tr></thead><tbody>{b}</tbody></table></div>'
 
 def para(t, indent=False):
@@ -97,8 +140,12 @@ while i < n:
             skip_first_h1 = False; i += 1; continue
         if lv <= 3:
             toc.append((lv, txt, hid))
-        top = '<button class="ref totop" data-toc>↑ оглавление</button>' if lv <= 2 else ""
-        out.append(f'<h{lv} id="{hid}">{inline(txt, False)}{top}</h{lv}>')
+        top = '<a class="ref totop" href="#toc-h">↑ оглавление</a>' if lv <= 2 else ""
+        badge = ""
+        if hid in CHANGED:
+            k, lab = CHANGED[hid]
+            badge = f'<span class="badge b-{k}">{lab}</span>'
+        out.append((lv, hid, f'<h{lv} id="{hid}">{inline(txt, False)}{badge}{top}</h{lv}>'))
         i += 1; continue
     s = ln.lstrip()
     ind = len(ln) - len(s) >= 2
@@ -135,8 +182,29 @@ while i < n:
         buf.append(lines[i].strip()); i += 1
     out.append(para(" ".join(buf), ind))
 
+# какие блоки показывать в режиме «только изменения»
+stack = {}
+flags = []
+for item in out:
+    if isinstance(item, tuple):
+        lv, hid, _ = item
+        for k in list(stack):
+            if k >= lv: del stack[k]
+        stack[lv] = hid in CHANGED
+    flags.append(any(stack.values()))
+for idx, item in enumerate(out):          # заголовок-родитель показывается, если изменено что-то внутри
+    if isinstance(item, tuple) and not flags[idx]:
+        lv = item[0]
+        for j in range(idx + 1, len(out)):
+            if isinstance(out[j], tuple) and out[j][0] <= lv: break
+            if flags[j]: flags[idx] = True; break
+def wrap_cls(h, chg):
+    if not chg: return h
+    return re.sub(r"^<(\w+)( class=\")?", lambda m: f'<{m.group(1)} class="chg ' if m.group(2) else f'<{m.group(1)} class="chg"', h, count=1)
+out = [wrap_cls(it[2] if isinstance(it, tuple) else it, flags[k]) for k, it in enumerate(out)]
+
 title = lines[0].lstrip("# ").strip()
-toc_html = "".join(f'<li class="t{lv}"><button class="ref" data-go="{hid}">{inline(txt, False)}</button></li>' for lv, txt, hid in toc)
+toc_html = "".join(f'<li class="t{lv}{" chg" if hid in CHANGED else ""}"><a class="ref" href="#{hid}">{inline(txt, False)}</a></li>' for lv, txt, hid in toc)
 
 page = f"""<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -148,13 +216,17 @@ page = f"""<!doctype html>
 *{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}}
 main{{max-width:920px;margin:0 auto;padding:0 16px 60px}}
 h1{{font-size:1.45rem;margin:1.4em 0 .4em;padding-top:.6em;border-top:2px solid var(--line)}}h2{{font-size:1.2rem;margin:1.6em 0 .5em}}h3{{font-size:1.05rem;margin:1.3em 0 .4em}}h4{{font-size:.98rem;margin:1.1em 0 .3em;color:var(--acc)}}
-h1,h2,h3,h4{{scroll-margin-top:64px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}}
+h1,h2,h3,h4{{scroll-margin-top:var(--bar,120px);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}}
+.badge{{font-size:.72rem;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--accbg);color:var(--acc)}}
+.b-ok{{background:#e3f0e1;color:#2f6b2a}}.b-pl{{background:#e4ebf5;color:#30507a}}.b-part{{background:#efe8d4;color:#6b5a1e}}
+@media (prefers-color-scheme:dark){{:root:not([data-theme="light"]) .b-ok{{background:#1f3320;color:#9fd39a}}:root:not([data-theme="light"]) .b-pl{{background:#1f2a3a;color:#9fbbe6}}:root:not([data-theme="light"]) .b-part{{background:#33301f;color:#e0cf8f}}}}
+body.onlychg #doc > :not(.chg){{display:none}}body.onlychg #toc li:not(.chg):not(.t1){{opacity:.45}}
 .flash{{background:var(--hl);transition:background .3s}}
 .bar{{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}}
 .bar input{{flex:1 1 200px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);min-width:0}}
 .bar button{{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}}
 .bar button[aria-pressed="true"]{{background:var(--accbg);color:var(--acc);border-color:var(--acc)}}.cnt{{color:var(--mut);font-size:.85rem}}
-.ref{{font:inherit;background:none;border:0;padding:0;color:var(--acc);cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-align:left}}
+.ref{{color:var(--acc);text-decoration:underline;text-underline-offset:2px}}.ref:visited{{color:var(--acc)}}
 .totop{{font-size:.75rem;font-weight:400;text-decoration:none;color:var(--mut)}}
 #toc ul{{list-style:none;padding:0;margin:0;columns:2 260px;column-gap:24px}}#toc li{{break-inside:avoid;margin:2px 0}}
 #toc .t1{{font-weight:700;margin-top:8px}}#toc .t3{{padding-left:16px;font-size:.9rem}}
@@ -171,7 +243,8 @@ code{{background:var(--accbg);padding:0 4px;border-radius:4px}}mark{{background:
 <div class="bar" id="bar">
 <input id="q" type="search" placeholder="Поиск по правилам">
 <button id="alt" aria-pressed="true" title="Показать или скрыть альтернативы для мастера">Альтернативы</button>
-<button data-toc>Оглавление</button>
+<button id="chg" aria-pressed="false" title="Показать только разделы, изменённые относительно v0.2">Только изменения</button>
+<a class="ref" href="#toc-h" style="text-decoration:none;padding:6px 4px">Оглавление</a>
 <span class="cnt" id="cnt"></span>
 </div>
 <nav id="toc"><h2 id="toc-h">Оглавление</h2><ul>{toc_html}</ul></nav>
@@ -179,10 +252,13 @@ code{{background:var(--accbg);padding:0 4px;border-radius:4px}}mark{{background:
 </main>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const off=()=>$('#bar').offsetHeight+8;
-function go(id){{const el=document.getElementById(id);if(!el)return;const y=el.getBoundingClientRect().top+scrollY-off();scrollTo({{top:y,behavior:'smooth'}});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1000)}}
-document.addEventListener('click',e=>{{const b=e.target.closest('[data-go],[data-toc]');if(!b)return;e.preventDefault();
- if(b.dataset.toc!==undefined){{clearQ();go('toc-h');return}} clearQ();go(b.dataset.go)}});
+const setBar=()=>document.documentElement.style.setProperty('--bar',($('#bar').offsetHeight+8)+'px');
+setBar();addEventListener('resize',setBar);
+function flash(){{const id=decodeURIComponent(location.hash.slice(1));const el=id&&document.getElementById(id);if(!el)return;el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1000)}}
+document.addEventListener('click',e=>{{const a=e.target.closest('a[href^="#"]');if(a)clearQ()}});
+addEventListener('hashchange',flash);
+addEventListener('load',()=>{{setBar();if(location.hash){{const el=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(el){{el.scrollIntoView();flash()}}}}}});
+const chgBtn=$('#chg');chgBtn.onclick=()=>{{const v=chgBtn.getAttribute('aria-pressed')!=='true';chgBtn.setAttribute('aria-pressed',v);document.body.classList.toggle('onlychg',v);setBar()}};
 const altBtn=$('#alt');let altOn=true;try{{altOn=localStorage.getItem('alc-alt')!=='0'}}catch(e){{}}
 function setAlt(v){{altOn=v;document.body.classList.toggle('noalt',!v);altBtn.setAttribute('aria-pressed',v);try{{localStorage.setItem('alc-alt',v?'1':'0')}}catch(e){{}}}}
 altBtn.onclick=()=>setAlt(!altOn);setAlt(altOn);
