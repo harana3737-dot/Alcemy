@@ -43,7 +43,7 @@ rows = []
 items = [(f"зелье {l}.{l}" + (" (выше мастерства)" if l > MAST else ""), P_SL[l] + (5 + l - MAST if l > MAST else 0), l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], 4) for l in range(1, 5)]
 for n, ml in [("I", 1), ("II", 2), ("III", 3), ("IV", 4)]:
     price, herbs, ess, sl, cl, h = INK[n]
-    items.append((f"чернила {n}" + (" (выше мастерства)" if ml > MAST else ""), sl + (5 + ml - MAST if ml > MAST else 0), herbs + ess, price * .85, CAT_PRICE[cl], 8 // h))
+    items.append((f"чернила {n}" + (" (выше мастерства)" if ml > MAST else ""), sl + (5 + ml - MAST if ml > MAST else 0), herbs + ess, price * .75, CAT_PRICE[cl], 8 // h))
 for name, sl, mat, price, cat, per_day in items:
     res = []
     for pts in (0, 2, 5):
