@@ -69,3 +69,20 @@ def growth(extra=0, guidance=False):
 
 GROWTH = {"базовый": growth(), "с помощником (+2)": growth(2), "с «Волшебным указанием»": growth(0, True),
           "с повязкой интеллекта (+4)": growth(4), "повязка + указание": growth(4, True)}
+
+# 6. предметы для дней варки (Талис: Инт 10, бонус +4); цены — покупка по XGE, среднее
+def _ink2_day(b):
+    price, herbs, ess, sl, cl, h = INK["II"]
+    return scenario(b, sl, herbs + ess, price * .85, CAT_PRICE[cl], .5, h)["per_day"]
+_g0 = growth()
+ITEMS_ALCH = []
+for name, rar, extra, price, buy in [("Повязка интеллекта", "необычная, настройка", 4, 350, "≈350 (100–600)"),
+                                     ("Камень удачи", "необычный, настройка", 1, 350, "≈350 (100–600)"),
+                                     ("Повязка + камень удачи", "две настройки", 5, 700, "≈700"),
+                                     ("Камень Йоун «Интеллект»", "очень редкий, настройка", 1, None, "купить почти невозможно"),
+                                     ("Фолиант ясной мысли", "очень редкий, навсегда", 1, None, "купить почти невозможно"),
+                                     ("Камень Йоун «Мастерство»", "легендарный, настройка", 1, None, "только сюжетно")]:
+    gain = _ink2_day(4 + extra) - _ink2_day(4)
+    g = growth(extra)
+    ITEMS_ALCH.append((name, rar, extra, buy, gain, price / gain if price else None,
+                       sum(r[6] for r in _g0) - sum(r[6] for r in g), sum(r[5] for r in _g0) - sum(r[5] for r in g)))
