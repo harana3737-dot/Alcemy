@@ -50,7 +50,7 @@ EN = {  # русское название заклинания → англий�
     "Видение невидимого": "See Invisibility", "Поиск предмета": "Locate Object", "Поиск ловушек": "Find Traps",
     "Поиск животных или растений": "Locate Animals or Plants", "Гадание": "Augury",
     "Малое восстановление": "Lesser Restoration", "Нетленные останки": "Gentle Repose", "Огненный клинок": "Flame Blade",
-    "Слепота/глухота": "Blindness/Deafness", "Хлыст разума Таши": "Tasha's Mind Whip", "Удержание личности": "Hold Person",
+    "Слепота/глухота": "Blindness/Deafness", "Психическая плеть Таши": "Tasha's Mind Whip", "Удержание личности": "Hold Person",
     "Внушение": "Suggestion", "Луч слабости": "Ray of Enfeeblement", "Дребезги": "Shatter",
     "Палящий луч Аганаццара": "Aganazzar's Scorcher", "Снежный шквал Снилока": "Snilloc's Snowball Swarm",
     "Кислотная стрела Мелфа": "Melf's Acid Arrow", "Паутина": "Web", "Тьма": "Darkness", "Тишина": "Silence",
