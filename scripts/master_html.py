@@ -1,10 +1,12 @@
 """HTML-версия «Для мастера — вопросы и изменения.md»: оглавление, светлая и тёмная тема.
-Запуск: python3 scripts/master_html.py"""
+Запуск: python3 scripts/master_html.py [имя файла без .md]"""
 import html, re, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-SRC = ROOT / "Для мастера — вопросы и изменения.md"
-OUT = ROOT / "Для мастера — вопросы и изменения.html"
+import sys
+NAME = sys.argv[1] if len(sys.argv) > 1 else "Для мастера — вопросы и изменения"
+SRC = ROOT / f"{NAME}.md"
+OUT = ROOT / f"{NAME}.html"
 
 
 def inline(t):
@@ -69,10 +71,12 @@ while i < len(lines):
     i += 1
 flush()
 
+TITLE = html.escape(re.sub(r"^# ", "", lines[0]).replace("Алхимия Талиса: ", "").replace(" — для мастера", ""))
+TITLE = TITLE[:1].upper() + TITLE[1:]
 toc_html = "".join(f'<li class="t{lv}"><a href="#{hid}">{inline(t)}</a></li>' for lv, t, hid in toc if lv <= 4)
 page = f"""<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Вопросы и изменения для мастера</title>
+<title>{TITLE}</title>
 <style>
 :root{{--bg:#faf8f4;--fg:#1f1d1a;--mut:#6b655c;--card:#ffffff;--line:#e2ddd3;--acc:#8a5a14;--accbg:#f5ead7}}
 @media (prefers-color-scheme:dark){{:root:not([data-theme="light"]){{--bg:#17161a;--fg:#ebe7df;--mut:#a59f94;--card:#211f24;--line:#36333a;--acc:#e3b26b;--accbg:#2f2a22;color-scheme:dark}}}}
