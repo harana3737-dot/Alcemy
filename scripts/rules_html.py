@@ -7,6 +7,8 @@ SRC = ROOT / "Алхимия Талиса — правила v0.3 (чернов�
 OUT = ROOT / "Алхимия Талиса — правила v0.3.html"
 
 lines = SRC.read_text(encoding="utf-8").splitlines()
+JOURNAL = ROOT / "Журнал решений.md"
+chg_lines = JOURNAL.read_text(encoding="utf-8").splitlines()   # таблица изменений относительно v0.2
 
 # ---------- id заголовков ----------
 TR = dict(zip("абвгдеёжзийклмнопрстуфхцчшщъыьэюя", "a b v g d e e zh z i y k l m n o p r s t u f h ts ch sh sch _ y _ e yu ya".split()))
@@ -55,7 +57,7 @@ def status_label(st):
 
 CHANGED = {}
 _in = False
-for ln in lines:
+for ln in chg_lines:
     if ln.startswith("| Раздел | Правка | Статус |"):
         _in = True; continue
     if _in:
