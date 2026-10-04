@@ -122,6 +122,12 @@ for c in C:
         c["note"] = NOTE_EDIT[n]
     c["open"] = OPEN.get(n)
     c["changed"] = CHANGED.get(n)
+exec(open(HERE / "tasks.py", encoding="utf-8").read())
+ESS_TYPES = ["Тело", "Разум", "Чувства", "Движение", "Стихия", "Покров", "Вода/дыхание", "Смерть/душа", "Эфир"]
+for c in C:
+    c["tasks"] = tasks_of(c["name"])
+    found = [t for t in ESS_TYPES if t in c["ess"]]
+    c["ess_types"] = found if found and not c["ess"].startswith("по ") else (["по характеристике (Сноровка)"] if c["ess"].startswith("по ") else ["особая: " + c["ess"]])
     if c["note"] and "[решает мастер]" in c["note"].replace("\\", "") and not c["open"]:
         c["open"] = "см. примечание"
 
@@ -205,6 +211,27 @@ def params(c):
     return rows
 
 
+def action_short(c):
+    k = c["cls"]
+    if k == "chg":
+        return "применить — бонусное действие" if "бонусное действие" in c["src_raw"] else "применить — действие"
+    return {"rea": "реакция", "fl": "бросок — действие", "oils": "удар маслом", "oilw": "нанести — действие",
+            "salve": "нанести — действие"}.get(k) or ("выпить — бонусное действие" if "бонусное" in USE_OVR.get(c["name"], USE[k]) else USE_OVR.get(c["name"], USE[k]))
+
+
+def conc_short(c):
+    if c["cls"] in ("chg", "rea", "fl", "oils"):
+        return "без концентрации" if not c["conc"] or c["conc"].startswith("нет") else "концентрация"
+    if c["cls"] == "eff":
+        return "алхимическая концентрация" if c["a89"].startswith("да") else "без концентрации"
+    return "без концентрации"
+
+
+def card_tags(c):
+    dur = c["dur"].split(";")[0].split(" (")[0]
+    return [t.lower() for t in c["tasks"]] + [CLS[c["cls"]]] + c["ess_types"] + [conc_short(c), action_short(c), dur]
+
+
 def recipe(c):
     l = c["lvl"]
     if c["cls"] in ("chg", "rea", "fl", "oils"):
@@ -227,7 +254,7 @@ def card(c):
     head = f"{ROM[l]} · {RAR[l]} · {CLS[c['cls']]}"
     st = status(c) + (" · есть открытый вопрос" if c["open"] else "")
     out = [f'<a id="{c["id"]}"></a>', f"### {c['name']}", "", f"**{head}**", "", f"*{st[0].upper() + st[1:]}*", "",
-           "| Параметр | Значение |", "| --- | --- |"]
+           f"**Теги:** {' · '.join(card_tags(c))}", "", "| Параметр | Значение |", "| --- | --- |"]
     out += [f"| {k} | {v} |" for k, v in params(c)]
     out += ["", f"**Эффект.** {c['eff']}"]
     if c["mech"]:
@@ -266,7 +293,7 @@ md.append("Черновик, 02.10.2026. Собрано из `реестр_эл�
           "Названия заклинаний даны по русскому переводу с английским оригиналом в скобках.\n")
 md.append(f"Всего карточек: {len(C)}. Все — **черновики**, ни один рецепт не утверждён.\n")
 md.append('<a id="nav"></a>\n\n## Навигация\n')
-md.append("- [Как читать карточку](#how)\n- [По уровням](#by-level)\n- [По классам](#by-class)\n- [По формулам](#by-family)\n- [Алфавитный указатель](#by-abc)\n- [Карточки](#cards)\n- [Не эликсиры и убранные](#removed)\n- [Что найдено при сверке](#found)\n")
+md.append("- [Как читать карточку](#how)\n- [По уровням](#by-level)\n- [По классам](#by-class)\n- [По задаче](#by-task)\n- [Боевой индекс](#by-combat)\n- [По эссенциям](#by-ess)\n- [По формулам](#by-family)\n- [Алфавитный указатель](#by-abc)\n- [Карточки](#cards)\n- [Не эликсиры и убранные](#removed)\n- [Что найдено при сверке](#found)\n")
 
 md.append('<a id="how"></a>\n\n## Как читать карточку\n')
 md.append("""- **Заголовок:** уровень · редкость · класс (8.6). «Официальный» — зелье из DMG или другой книги, работает по своему тексту с поправками системы.
@@ -290,6 +317,30 @@ md.append('<a id="by-class"></a>\n\n## По классам\n')
 for k in CLS_ORDER:
     items = [c for c in cards if c["cls"] == k]
     md.append(f"**{CLS[k].capitalize()}** ({len(items)}): " + ", ".join(f"{link(c)} {ROM[c['lvl']]}" for c in items) + "\n")
+
+md.append('<a id="by-task"></a>\n\n## По задаче\n')
+md.append("Задача — для чего эликсир чаще всего нужен; у многих две. Внутри — по уровню: название, уровень, класс, цена.\n")
+for t in TASKS:
+    items = [c for c in cards if t in c["tasks"]]
+    md.append(f"**{t}** ({len(items)}): " + "; ".join(f"{link(c)} {ROM[c['lvl']]} · {CLS[c['cls']]} · {c['price']} зм" for c in items) + "\n")
+
+md.append('<a id="by-combat"></a>\n\n## Боевой индекс\n')
+md.append("Эликсиры для урона, контроля, защиты и усиления: как применяются, концентрация и цена.\n")
+md.append("| Эликсир | Ур. | Класс | Применение | Концентрация | Цена, зм |\n| --- | --- | --- | --- | --- | --- |")
+for c in cards:
+    if set(c["tasks"]) & {"Урон", "Контроль", "Защита", "Усиление"}:
+        md.append(f"| {link(c)} | {ROM[c['lvl']]} | {CLS[c['cls']]} | {action_short(c)} | {conc_short(c)} | {c['price']} |")
+md.append("")
+
+md.append('<a id="by-ess"></a>\n\n## По эссенциям\n')
+md.append("Какая эссенция нужна: тип и эликсиры с уровнем и основой (лечебная или ядовитая). Эликсиры с выбором эссенции стоят в нескольких группах.\n")
+ess = {}
+for c in cards:
+    for t in c["ess_types"]:
+        ess.setdefault(t, []).append(c)
+for t in ESS_TYPES + sorted(k for k in ess if k not in ESS_TYPES):
+    if t in ess:
+        md.append(f"**{t}** ({len(ess[t])}): " + "; ".join(f"{link(c)} {ROM[c['lvl']]} ({c['base'][:-2]}ая основа)" for c in ess[t]) + "\n")
 
 md.append('<a id="by-family"></a>\n\n## По формулам\n')
 md.append("Формула — рецепт на класс доставки и тип эссенции; открывается по ступеням редкости (обычная I–II, необычная III–V, редкая VI–VII, очень редкая VIII–IX). Первая варка нового варианта — с СЛ +2. Масла и мази — один рецепт на все уровни, как у чернил.\n")
@@ -345,9 +396,9 @@ import csv
 with open(ROOT / "Реестр эликсиров.csv", "w", encoding="utf-8-sig", newline="") as fh:
     w = csv.writer(fh)
     w.writerow(["id", "название", "уровень", "редкость", "класс", "формула", "эссенция", "основа", "травы (число или ценность)",
-                "токсичность", "алхимическая концентрация", "цена, зм", "источник", "статус", "карточка"])
+                "токсичность", "алхимическая концентрация", "цена, зм", "источник", "статус", "задачи", "карточка"])
     for c in cards:
         w.writerow([c["id"], c["name"], ROM[c["lvl"]], RAR[c["lvl"]], CLS[c["cls"]], c["fam"] or "", c["ess"], c["base"],
                     recipe(c)[0][1], c["tox"], c["a89"], c["price"], c["src_raw"],
-                    status(c) + (" · есть открытый вопрос" if c["open"] else ""), f"Карточки эликсиров.md#{c['id']}"])
+                    status(c) + (" · есть открытый вопрос" if c["open"] else ""), ", ".join(c["tasks"]), f"Карточки эликсиров.md#{c['id']}"])
 print(len(C), "cards")

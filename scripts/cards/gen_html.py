@@ -35,8 +35,9 @@ def card_html(c):
         tags += '<span class="tag">домашний</span>'
     if c["open"]:
         tags += '<span class="tag open">открытый вопрос</span>'
-    out = [f'<article class="card" id="{c["id"]}" data-lvl="{l}" data-cls="{c["cls"]}" data-fam="{tx(c["fam"] or "")}" data-name="{tx(c["name"].lower())}">',
+    out = [f'<article class="card" id="{c["id"]}" data-lvl="{l}" data-cls="{c["cls"]}" data-fam="{tx(c["fam"] or "")}" data-task="{tx("|".join(c["tasks"]))}" data-ess="{tx("|".join(c["ess_types"]))}" data-name="{tx(c["name"].lower())}">',
            f'<h3>{tx(c["name"])}</h3><div class="tags">{tags}</div>']
+    out.append(f'<p class="tagline">{tx(" · ".join(card_tags(c)))}</p>')
     if c["changed"]:
         out.append(f'<p class="chgd">Изменено относительно источника: {tx(c["changed"])}.</p>')
     out.append('<dl class="quick">' + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in quick) + "</dl>")
@@ -61,6 +62,9 @@ index_rows = "".join(
     for c in cards)
 lvl_opts = "".join(f'<option value="{l}">{ROM[l]} · {RAR[l]}</option>' for l in range(1, 11))
 cls_opts = "".join(f'<option value="{k}">{CLS[k]}</option>' for k in CLS_ORDER)
+task_opts = "".join(f'<option value="{t}">{t}</option>' for t in TASKS)
+_ess = sorted({t for c in C for t in c['ess_types']}, key=lambda t: (ESS_TYPES.index(t) if t in ESS_TYPES else 99, t))
+ess_opts = "".join(f'<option value="{tx(t)}">{tx(t)}</option>' for t in _ess)
 fam_opts = "".join(f'<option value="{tx(f)}">{tx(f)}</option>' for f in sorted(fams))
 removed = md_removed = "\n".join(md)[("\n".join(md)).index("| Предмет | Куда |"):("\n".join(md)).index('<a id="found">')]
 found = "\n".join(md)[("\n".join(md)).index("- **Масло стихии"):]
@@ -101,7 +105,7 @@ th{{color:var(--mut);font-weight:600}}td.num{{text-align:right;white-space:nowra
 dl.quick{{grid-template-columns:auto 1fr}}details.brew{{margin-top:10px;font-size:.88rem}}details.brew summary{{font-weight:600;color:var(--mut)}}details.brew dl{{margin-top:6px}}
 #idx thead th{{position:sticky;top:var(--bar,110px);z-index:2;cursor:pointer;user-select:none}}#idx thead th::after{{content:' ↕';color:var(--line)}}
 .wrap.idx{{overflow:visible}}a.lnk{{color:var(--acc)}}
-.card.flash{{background:var(--hl);transition:background .2s}}.card h3{{margin:0 0 6px;font-size:1.1rem}}
+.card.flash{{background:var(--hl);transition:background .2s}}.card h3{{margin:0 0 6px;font-size:1.1rem}}.tagline{{margin:0 0 6px;font-size:.82rem;color:var(--mut)}}
 .tags{{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}}.tag{{font-size:.78rem;padding:1px 8px;border-radius:99px;background:var(--accbg);color:var(--acc)}}
 .tag.lv{{font-weight:700}}.tag.open{{background:#f7e0d6;color:#8a3a14}}.chgd{{margin:0 0 6px;font-size:.88rem;color:var(--acc)}}.mech{{margin:8px 0 0}}.openq{{margin:8px 0 0;color:#8a3a14}}dl{{display:grid;grid-template-columns:minmax(110px,30%) 1fr;gap:4px 12px;margin:0;font-size:.9rem}}
 dt{{color:var(--mut)}}dd{{margin:0}}.eff{{margin:10px 0 0}}.alt{{margin:6px 0 0}}.note{{margin:8px 0 0;padding:6px 10px;border-left:3px solid var(--line);color:var(--mut);font-size:.9rem}}
@@ -117,6 +121,8 @@ body{{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(sa
 <input id="q" type="search" placeholder="Поиск по названию или тексту">
 <select id="fl"><option value="">Все уровни</option>{lvl_opts}</select>
 <select id="fc"><option value="">Все классы</option>{cls_opts}</select>
+<select id="ft"><option value="">Все задачи</option>{task_opts}</select>
+<select id="fe"><option value="">Все эссенции</option>{ess_opts}</select>
 <select id="ff"><option value="">Все формулы</option>{fam_opts}</select>
 <span class="cnt" id="cnt"></span>
 </div>
@@ -131,7 +137,7 @@ body{{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(sa
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 let _closed=[];addEventListener('beforeprint',()=>{{_closed=$$('details:not([open])');_closed.forEach(d=>d.open=true)}});addEventListener('afterprint',()=>{{_closed.forEach(d=>d.open=false);_closed=[]}});
 const setBar=()=>document.documentElement.style.setProperty('--bar',($('#top').offsetHeight+8)+'px');setBar();addEventListener('resize',setBar);
-function resetFilters(){{$('#q').value='';$('#fl').value='';$('#fc').value='';$('#ff').value='';apply()}}
+function resetFilters(){{$('#q').value='';$('#fl').value='';$('#fc').value='';$('#ff').value='';$('#ft').value='';$('#fe').value='';apply()}}
 function onHash(){{const id=decodeURIComponent(location.hash.slice(1));const el=id&&document.getElementById(id);if(!el)return;
  if(el.classList.contains('card')&&el.style.display==='none'){{resetFilters();el.scrollIntoView()}}
  if(el.classList.contains('card')){{el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),900)}}}}
@@ -141,11 +147,11 @@ let sortK=-1,sortD=1;$$('#idx thead th').forEach((th,k)=>th.onclick=()=>{{sortD=
  const v=r=>{{const c=r.children[k];return c.dataset.v!==undefined?parseFloat(c.dataset.v)||0:c.textContent.toLowerCase()}};
  [...tb.rows].sort((a,b)=>{{const x=v(a),y=v(b);return (x>y?1:x<y?-1:0)*sortD}}).forEach(r=>tb.appendChild(r))}});
 const texts=new Map($$('.card').map(c=>[c.id,c.textContent.toLowerCase()]));
-function apply(){{const q=$('#q').value.trim().toLowerCase(),l=$('#fl').value,k=$('#fc').value,f=$('#ff').value;let n=0;
- $$('.card').forEach(c=>{{const ok=(!l||c.dataset.lvl===l)&&(!k||c.dataset.cls===k)&&(!f||c.dataset.fam===f)&&(!q||texts.get(c.id).includes(q));c.style.display=ok?'':'none';if(ok)n++}});
+function apply(){{const q=$('#q').value.trim().toLowerCase(),l=$('#fl').value,k=$('#fc').value,f=$('#ff').value,t=$('#ft').value,e=$('#fe').value;let n=0;
+ $$('.card').forEach(c=>{{const ok=(!l||c.dataset.lvl===l)&&(!k||c.dataset.cls===k)&&(!f||c.dataset.fam===f)&&(!t||c.dataset.task.split('|').includes(t))&&(!e||c.dataset.ess.split('|').includes(e))&&(!q||texts.get(c.id).includes(q));c.style.display=ok?'':'none';if(ok)n++}});
  $$('#idx tbody tr').forEach(r=>{{r.style.display=document.getElementById(r.dataset.go).style.display}});
  $('#cnt').textContent=n+' из {len(C)}'}}
-['#q','#fl','#fc','#ff'].forEach(s=>$(s).addEventListener('input',apply));apply();addEventListener('load',()=>{{setBar();if(location.hash){{onHash();const el=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(el)el.scrollIntoView()}}}});
+['#q','#fl','#fc','#ff','#ft','#fe'].forEach(s=>$(s).addEventListener('input',apply));apply();addEventListener('load',()=>{{setBar();if(location.hash){{onHash();const el=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(el)el.scrollIntoView()}}}});
 </script></body></html>"""
 open(ROOT / "Карточки эликсиров.html", "w", encoding="utf-8").write(page)
 print("html ok", len(page))
