@@ -81,7 +81,7 @@ def md_list(t):
 HOW = md[md.index('<a id="how"></a>\n\n## Как читать карточку\n') + 1]
 
 page = f"""<!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Карточки эликсиров</title>
 <style>
 :root{{--bg:#faf8f4;--fg:#22201c;--mut:#6b655b;--card:#fff;--line:#e4dfd5;--acc:#7a4b12;--accbg:#f3e9da;--hl:#fff3c4}}
@@ -90,7 +90,7 @@ page = f"""<!doctype html>
 *{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}}
 main{{max-width:900px;margin:0 auto;padding:16px}}h1{{font-size:1.5rem;margin:.2em 0}}h2{{font-size:1.15rem;margin:1.6em 0 .5em}}
 .sub{{color:var(--mut);font-size:.9rem}}
-.bar{{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px}}
+.bar{{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px}}
 .bar input,.bar select{{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);min-width:0}}
 .bar input{{flex:1 1 200px}}.bar select{{flex:1 1 130px}}.cnt{{color:var(--mut);font-size:.85rem;align-self:center}}
 .lnk{{font:inherit;background:none;border:0;padding:0;color:var(--acc);cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:2px}}
@@ -107,6 +107,8 @@ dl.quick{{grid-template-columns:auto 1fr}}details.brew{{margin-top:10px;font-siz
 dt{{color:var(--mut)}}dd{{margin:0}}.eff{{margin:10px 0 0}}.alt{{margin:6px 0 0}}.note{{margin:8px 0 0;padding:6px 10px;border-left:3px solid var(--line);color:var(--mut);font-size:.9rem}}
 .top{{display:block;margin-top:10px;font-size:.85rem}}details{{margin:8px 0}}summary{{cursor:pointer;font-weight:600}}
 @media (max-width:560px){{dl{{grid-template-columns:1fr}}dt{{margin-top:4px}}}}
+body{{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}}
+@media print{{:root:not(#print){{--bg:#fff;--fg:#111;--mut:#555;--card:#fff;--line:#bbb;color-scheme:light}}.bar,.top{{display:none}}.card{{break-inside:avoid}}#idx thead th{{position:static}}a.lnk,.lnk{{color:inherit}}}}
 </style></head><body><main>
 <h1>Карточки эликсиров — Алхимия Талиса</h1>
 <p class="sub">Черновик, 02.10.2026 · {len(C)} карточек · реестр эликсиров + правила v0.3 · эффекты по PHB 2014 и DMG 2014</p>
@@ -127,6 +129,7 @@ dt{{color:var(--mut)}}dd{{margin:0}}.eff{{margin:10px 0 0}}.alt{{margin:6px 0 0}
 </main>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let _closed=[];addEventListener('beforeprint',()=>{{_closed=$$('details:not([open])');_closed.forEach(d=>d.open=true)}});addEventListener('afterprint',()=>{{_closed.forEach(d=>d.open=false);_closed=[]}});
 const setBar=()=>document.documentElement.style.setProperty('--bar',($('#top').offsetHeight+8)+'px');setBar();addEventListener('resize',setBar);
 function resetFilters(){{$('#q').value='';$('#fl').value='';$('#fc').value='';$('#ff').value='';apply()}}
 function onHash(){{const id=decodeURIComponent(location.hash.slice(1));const el=id&&document.getElementById(id);if(!el)return;

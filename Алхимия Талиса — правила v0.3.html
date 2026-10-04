@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Алхимия Талиса v0.3</title>
 <style>
 :root{--bg:#faf8f4;--fg:#22201c;--mut:#6b655b;--card:#fff;--line:#e4dfd5;--acc:#7a4b12;--accbg:#f3e9da;--hl:#fff3c4;--alt:#5b6b7a}
@@ -14,7 +14,7 @@ h1,h2,h3,h4{scroll-margin-top:var(--bar,120px);display:flex;align-items:baseline
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .b-ok{background:#1f3320;color:#9fd39a}:root:not([data-theme="light"]) .b-pl{background:#1f2a3a;color:#9fbbe6}:root:not([data-theme="light"]) .b-part{background:#33301f;color:#e0cf8f}}
 body.onlychg #doc > :not(.chg){display:none}body.onlychg #toc li:not(.chg):not(.t1){opacity:.45}
 .flash{background:var(--hl);transition:background .3s}
-.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .bar input{flex:1 1 200px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);min-width:0}
 .bar button{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
 .bar button[aria-pressed="true"]{background:var(--accbg);color:var(--acc);border-color:var(--acc)}.cnt{color:var(--mut);font-size:.85rem}
@@ -30,6 +30,8 @@ body.noalt .alt{display:none}
 .note{margin:8px 0;padding:6px 12px;border-left:3px solid var(--line);color:var(--mut);font-size:.92rem}
 code{background:var(--accbg);padding:0 4px;border-radius:4px}mark{background:var(--hl);color:inherit}
 .hidden{display:none!important}
+body{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+@media print{:root:not(#print){--bg:#fff;--fg:#111;--mut:#555;--card:#fff;--line:#bbb;color-scheme:light}.bar,.totop{display:none}#toc ul{columns:1}a.ref{color:inherit}}
 </style></head><body><main>
 <h1 style="border:0;margin-top:.6em">Алхимия Талиса — правила v0.3 (черновик на утверждение)</h1>
 <div class="bar" id="bar">
