@@ -46,6 +46,8 @@ def card_html(c):
         out.append(f'<p class="mech"><b>Особые правила.</b> {tx(c["mech"])}</p>')
     if c["open"]:
         out.append(f'<p class="openq"><b>Открытый вопрос.</b> {tx(c["open"])}</p>')
+    if "Контрольный яд" in c["tasks"]:
+        out.append('<p class="mech"><b>Кандидат в контрольный яд</b> (8.6, черновик): наносится на оружие или подливается, без концентрации, до конца третьего хода цели. Пока мастер не подтвердит — заряд.</p>')
     if c["alt"]:
         out.append(f'<p class="alt"><i>Альтернатива: {tx(c["alt"])}.</i></p>')
     det = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in brew)
