@@ -17,59 +17,82 @@ def inline(t):
 
 
 lines = SRC.read_text(encoding="utf-8").splitlines()
-body, toc, n = [], [], 0
-i = 0
-para = []
+toc, n = [], 0
 
 
-def flush():
-    global para
-    if para:
-        body.append("<p>" + inline(" ".join(para)) + "</p>")
-        para = []
+def render(lines):
+    """Блоки md → HTML: заголовки, абзацы, списки, таблицы, цитаты (>), разделители (---)."""
+    global n
+    body, para, i = [], [], 0
 
+    def flush():
+        if para:
+            txt = ""
+            for k, ln in enumerate(para):
+                txt += inline(ln.strip()) + ("<br>" if ln.endswith("  ") and k < len(para) - 1 else " ")
+            body.append("<p>" + txt.strip() + "</p>")
+            para.clear()
 
-while i < len(lines):
-    ln = lines[i]
-    m = re.match(r"(#{1,4}) (.+)", ln)
-    if m:
-        flush()
-        lv, txt = len(m.group(1)), m.group(2)
-        if lv == 1:
-            body.append(f"<h1>{inline(txt)}</h1>")
+    while i < len(lines):
+        ln = lines[i]
+        m = re.match(r"(#{1,4}) (.+)", ln)
+        if m:
+            flush()
+            lv, txt = len(m.group(1)), m.group(2)
+            if lv == 1:
+                body.append(f"<h1>{inline(txt)}</h1>")
+            else:
+                n += 1
+                hid = f"h{n}"
+                toc.append((lv, txt, hid))
+                body.append(f'<h{lv} id="{hid}">{inline(txt)}</h{lv}>')
+            i += 1
+            continue
+        if ln.startswith(">"):
+            flush()
+            inner = []
+            while i < len(lines) and lines[i].startswith(">"):
+                inner.append(re.sub(r"^> ?", "", lines[i]))
+                i += 1
+            body.append("<blockquote>" + "".join(render(inner)) + "</blockquote>")
+            continue
+        if ln.strip() == "---":
+            flush()
+            body.append("<hr>")
+            i += 1
+            continue
+        if ln.startswith("|"):
+            flush()
+            rows = []
+            while i < len(lines) and lines[i].startswith("|"):
+                if not lines[i].startswith("| ---"):
+                    rows.append([c.strip() for c in lines[i].strip().strip("|").split("|")])
+                i += 1
+            head, rest = rows[0], rows[1:]
+            tb = "<div class=\"wrap\"><table><thead><tr>" + "".join(f"<th>{inline(c)}</th>" for c in head) + "</tr></thead><tbody>"
+            tb += "".join("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in rest) + "</tbody></table></div>"
+            body.append(tb)
+            continue
+        for pat, tag in ((r"\s*- ", "ul"), (r"\d+\. ", "ol")):
+            if re.match(pat, ln) and (tag == "ul" or i + 1 < len(lines) and re.match(pat, lines[i + 1])):
+                flush()
+                items = []
+                while i < len(lines) and re.match(pat, lines[i]):
+                    items.append(re.sub("^" + pat, "", lines[i]))
+                    i += 1
+                body.append(f"<{tag}>" + "".join(f"<li>{inline(x)}</li>" for x in items) + f"</{tag}>")
+                break
         else:
-            n += 1
-            hid = f"h{n}"
-            toc.append((lv, txt, hid))
-            body.append(f'<h{lv} id="{hid}">{inline(txt)}</h{lv}>')
-        i += 1
-        continue
-    if ln.startswith("|"):
-        flush()
-        rows = []
-        while i < len(lines) and lines[i].startswith("|"):
-            if not lines[i].startswith("| ---"):
-                rows.append([c.strip() for c in lines[i].strip().strip("|").split("|")])
+            if not ln.strip():
+                flush()
+            else:
+                para.append(ln)
             i += 1
-        head, rest = rows[0], rows[1:]
-        t = "<div class=\"wrap\"><table><thead><tr>" + "".join(f"<th>{inline(c)}</th>" for c in head) + "</tr></thead><tbody>"
-        t += "".join("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in rest) + "</tbody></table></div>"
-        body.append(t)
-        continue
-    if re.match(r"\s*- ", ln):
-        flush()
-        items = []
-        while i < len(lines) and re.match(r"\s*- ", lines[i]):
-            items.append(re.sub(r"^\s*- ", "", lines[i]))
-            i += 1
-        body.append("<ul>" + "".join(f"<li>{inline(x)}</li>" for x in items) + "</ul>")
-        continue
-    if not ln.strip():
-        flush()
-    else:
-        para.append(ln.strip())
-    i += 1
-flush()
+    flush()
+    return body
+
+
+body = render(lines)
 
 TITLE = html.escape(re.sub(r"^# ", "", lines[0]).replace("Алхимия Талиса: ", "").replace(" — для мастера", ""))
 TITLE = TITLE[:1].upper() + TITLE[1:]
@@ -86,7 +109,7 @@ main{{max-width:820px;margin:0 auto;padding:16px 16px 60px}}
 h1{{font-size:1.55rem;line-height:1.25;text-wrap:balance}}h2{{font-size:1.3rem;margin:2em 0 .6em;padding-top:.6em;border-top:2px solid var(--line)}}
 h3{{font-size:1.1rem;color:var(--acc);margin:1.6em 0 .4em}}h4{{font-size:1.02rem;margin:1.6em 0 .4em;padding:8px 12px;background:var(--accbg);border-radius:8px}}
 p{{margin:.55em 0}}ul{{margin:.4em 0;padding-left:1.3em}}li{{margin:.2em 0}}
-a{{color:var(--acc)}}i{{color:var(--mut)}}
+a{{color:var(--acc)}}i{{color:var(--mut)}}blockquote{{margin:.8em 0;padding:.4em 14px;border-left:3px solid var(--acc);background:var(--card);border-radius:0 8px 8px 0}}blockquote p{{margin:.45em 0}}hr{{border:0;border-top:1px solid var(--line);margin:1.2em 0}}
 nav{{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin:12px 0}}
 nav ul{{list-style:none;padding:0;margin:0}}nav .t2{{font-weight:700;margin-top:6px}}nav .t3{{padding-left:12px;color:var(--mut);font-size:.92rem;margin-top:4px}}nav .t4{{padding-left:24px;font-size:.92rem}}
 .wrap{{overflow-x:auto;margin:8px 0}}table{{border-collapse:collapse;width:100%;font-size:.92rem;font-variant-numeric:tabular-nums}}
