@@ -92,25 +92,52 @@ footer{color:var(--muted);font-size:.88rem}
 
   <section class="step">
     <h2><b>4</b>Время и партии</h2>
+    <div class="tw"><table>
+      <tr><th>Что</th><th>Попытка</th></tr>
+      <tr><td>Зелья, яды, противоядия, эликсиры I–II</td><td>2 часа</td></tr>
+      <tr><td>Эликсиры III–V</td><td>4 часа</td></tr>
+      <tr><td>Чернила заговор–V</td><td>2–4 часа</td></tr>
+      <tr><td>Эликсиры и чернила VI–VII</td><td>объём работы 90</td></tr>
+      <tr><td>Эликсиры и чернила VIII–IX</td><td>объём работы 240</td></tr>
+    </table></div>
     <div class="two">
-      <div class="tw"><table>
-        <tr><th>Что</th><th>Попытка</th></tr>
-        <tr><td>Зелья, яды, эликсиры I–II</td><td>2 часа</td></tr>
-        <tr><td>Эликсиры III–V</td><td>4 часа</td></tr>
-        <tr><td>Чернила заговор–V</td><td>2–4 часа</td></tr>
-        <tr><td>VI–VII</td><td>объём работы 90</td></tr>
-        <tr><td>VIII–IX</td><td>объём работы 240</td></tr>
-      </table></div>
-      <div class="tw"><table>
-        <tr><th>Мастерство</th><th class="n">1.1</th><th class="n">2.2</th><th class="n">3.3</th><th class="n">4.4</th><th class="n">5.5</th></tr>
-        <tr><td>1</td><td class="n">2</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
-        <tr><td>2</td><td class="n">4</td><td class="n">2</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
-        <tr><td>3</td><td class="n">6</td><td class="n">5</td><td class="n">4</td><td class="n">—</td><td class="n">—</td></tr>
-        <tr><td>4</td><td class="n">8</td><td class="n">6</td><td class="n">5</td><td class="n">4</td><td class="n">—</td></tr>
-        <tr><td>5</td><td class="n">10</td><td class="n">8</td><td class="n">6</td><td class="n">5</td><td class="n">4</td></tr>
-      </table></div>
+      <div class="tw">
+        <p class="muted">Доз в партии зелий и ядов</p>
+        <table>
+          <tr><th>Мастерство</th><th class="n">1.1</th><th class="n">2.2</th><th class="n">3.3</th><th class="n">4.4</th><th class="n">5.5</th></tr>
+          <tr><td>1</td><td class="n">2</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+          <tr><td>2</td><td class="n">4</td><td class="n">2</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+          <tr><td>3</td><td class="n">6</td><td class="n">5</td><td class="n">4</td><td class="n">—</td><td class="n">—</td></tr>
+          <tr><td>4</td><td class="n">8</td><td class="n">6</td><td class="n">5</td><td class="n">4</td><td class="n">—</td></tr>
+          <tr><td>5</td><td class="n">10</td><td class="n">8</td><td class="n">6</td><td class="n">5</td><td class="n">4</td></tr>
+          <tr><td>6+</td><td class="n">10</td><td class="n">10</td><td class="n">8</td><td class="n">6</td><td class="n">5</td></tr>
+        </table>
+      </div>
+      <div class="tw">
+        <p class="muted">Доз в партии эликсиров (в скобках — в мастерской лаборатории)</p>
+        <table>
+          <tr><th>Мастерство</th><th class="n">I</th><th class="n">II</th><th class="n">III</th><th class="n">IV</th><th class="n">V</th></tr>
+          <tr><td>1</td><td class="n">2</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+          <tr><td>2</td><td class="n">3</td><td class="n">2</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+          <tr><td>3</td><td class="n">3 (4)</td><td class="n">3</td><td class="n">2</td><td class="n">—</td><td class="n">—</td></tr>
+          <tr><td>4</td><td class="n">3 (4)</td><td class="n">3 (4)</td><td class="n">2 (3)</td><td class="n">2</td><td class="n">—</td></tr>
+          <tr><td>5+</td><td class="n">3 (4)</td><td class="n">3 (4)</td><td class="n">2 (3)</td><td class="n">2 (3)</td><td class="n">2</td></tr>
+        </table>
+      </div>
     </div>
-    <p class="muted">Справа — доз в партии зелий. Эликсиры I–II — до 3, III–V — до 2. Заряды, склянки, масла кары, чернила и противоядия партиями не варятся. Одна активная варка за раз.</p>
+    <p class="muted">Партия — только один и тот же известный рецепт; у эликсиров — освоенный. В партию эликсиров входят эликсиры-эффекты, масла оружия и мази I–V, включая официальные зелья.</p>
+    <div>
+      <p><b>Партиями не варится</b> — по одной дозе за попытку:</p>
+      <ul>
+        <li>зелья и яды 6.6 и выше;</li>
+        <li>заряды и метательные склянки;</li>
+        <li>масла кары;</li>
+        <li>чернила;</li>
+        <li>противоядия;</li>
+        <li>всё VI уровня и выше — объёмом работы, одной дозой.</li>
+      </ul>
+    </div>
+    <p class="muted">Одна активная варка за раз.</p>
   </section>
 
   <section class="step">
