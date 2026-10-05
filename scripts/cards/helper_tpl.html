@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Помощник варки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prata&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ea; --panel:#fffdf8; --ink:#1f2421; --muted:#6a6f69; --line:#ddd6c8;
+  --acc:#2f7d6d; --acc-soft:#e1efe9; --gold:#a7781d; --gold-soft:#f5ead2;
+  --warn:#b4632a; --bad:#a83f3f; --ok:#2f7d6d; --chip:#efeadf;
+  --shadow:0 1px 2px rgba(40,30,10,.06),0 4px 16px rgba(40,30,10,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151917; --panel:#1d2320; --ink:#e7e6df; --muted:#9aa29c; --line:#323a36;
+    --acc:#5fb8a3; --acc-soft:#203430; --gold:#d6a94a; --gold-soft:#342b19;
+    --warn:#dc8c55; --bad:#d97373; --ok:#5fb8a3; --chip:#262d29; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151917; --panel:#1d2320; --ink:#e7e6df; --muted:#9aa29c; --line:#323a36;
+  --acc:#5fb8a3; --acc-soft:#203430; --gold:#d6a94a; --gold-soft:#342b19;
+  --warn:#dc8c55; --bad:#d97373; --ok:#5fb8a3; --chip:#262d29; --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Golos Text",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
+header h1{font:400 28px/1.15 Prata,serif;margin:0 0 4px}
+header p{margin:0;color:var(--muted);font-size:14px}
+.grid{display:grid;gap:16px;margin-top:18px}
+@media(min-width:880px){.grid{grid-template-columns:360px 1fr;align-items:start}.side{position:sticky;top:12px}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.card h2{font:400 18px/1.2 Prata,serif;margin:0 0 10px}
+label.f{display:block;font-size:12px;color:var(--muted);margin:0 0 4px;text-transform:uppercase;letter-spacing:.04em}
+input[type=search],input[type=number]{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.row{display:flex;gap:10px}
+.row>div{flex:1;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:4px 10px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:var(--panel)}
+.list{max-height:340px;overflow:auto;margin:0 -6px;padding:0 6px}
+.item{display:flex;gap:8px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-radius:8px;padding:7px 8px;cursor:pointer}
+.item:hover{background:var(--chip)}
+.item[aria-current=true]{background:var(--acc-soft)}
+.lv{font:500 12px "JetBrains Mono",monospace;color:var(--acc);min-width:30px}
+.item .nm{flex:1;min-width:0}
+.item .kl{font-size:12px;color:var(--muted);white-space:nowrap}
+.count{font-size:12px;color:var(--muted);margin-top:6px}
+.toggles{display:grid;gap:4px}
+.tg{display:flex;gap:9px;align-items:flex-start;padding:6px 4px;border-radius:8px;cursor:pointer;font-size:14px}
+.tg:hover{background:var(--chip)}
+.tg input{margin:3px 0 0;accent-color:var(--acc);width:16px;height:16px;flex:none}
+.tg small{display:block;color:var(--muted);font-size:12px}
+.sect{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 4px}
+.title{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:baseline}
+.title h2{font-size:24px;margin:0}
+.badge{font-size:12px;border-radius:999px;padding:2px 9px;background:var(--chip);color:var(--muted)}
+.picks{display:grid;gap:10px;margin-top:12px}
+@media(min-width:560px){.picks{grid-template-columns:1fr 1fr}}
+.pick{border-radius:12px;padding:12px;border:1px solid var(--line)}
+.pick.p5{background:var(--acc-soft);border-color:transparent}
+.pick.p20{background:var(--gold-soft);border-color:transparent}
+.pick .h{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.pick .b{font-weight:600;font-size:16px;margin:2px 0 4px}
+.pick .w{font-size:13px;color:var(--muted)}
+.pick .alt{font-size:13px;margin-top:6px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px}
+@media(min-width:560px){.facts{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.fact{background:var(--bg);border-radius:10px;padding:8px 10px;min-width:0}
+.fact .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.fact .v{font:500 16px "JetBrains Mono",monospace;overflow-wrap:anywhere}
+.fact .v.t{font:500 14px/1.35 "Golos Text",sans-serif}
+.bars{margin-top:8px;display:grid;gap:6px}
+.bar{display:grid;grid-template-columns:118px 1fr 46px;gap:8px;align-items:center;font-size:13px}
+.track{height:10px;background:var(--bg);border-radius:6px;overflow:hidden}
+.fill{height:100%;border-radius:6px}
+.pct{font:500 13px "JetBrains Mono",monospace;text-align:right}
+.note{font-size:13px;color:var(--muted);margin:8px 0 0}
+.eff{font-size:14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.empty{color:var(--muted);padding:30px 0;text-align:center}
+.tbtn{float:right;font:inherit;font-size:12px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:3px 10px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <button class="tbtn" id="theme" type="button">тема</button>
+  <h1>Помощник варки</h1>
+  <p>Выбери рецепт из __N__ и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. Правила v0.3; материал игрока, не карточки мастера.</p>
+</header>
+<div class="grid">
+  <div class="side">
+    <div class="card">
+      <div class="row">
+        <div><label class="f" for="m">Мастерство</label><input id="m" type="number" min="1" max="10" value="2"></div>
+        <div><label class="f" for="b">Бонус проверки</label><input id="b" type="number" min="-5" max="30" value="4"></div>
+      </div>
+      <p class="note">Бонус — с Интеллектом, инструментами, мастерством и рабочим местом (у Талиса +4). При смене мастерства бонус сдвигается сам.</p>
+      <div class="sect">Рецепт</div>
+      <input id="q" type="search" placeholder="Название, эссенция, формула…" autocomplete="off">
+      <div class="chips" id="cls"></div>
+      <div class="list" id="list" role="listbox" aria-label="Рецепты"></div>
+      <div class="count" id="count"></div>
+    </div>
+  </div>
+  <div>
+    <div class="card" id="out"><div class="empty">Выбери рецепт слева</div></div>
+    <div class="card" id="sit" style="margin-top:16px"></div>
+  </div>
+</div>
+</div>
+<script id="data" type="application/json">__DATA__</script>
+<script>
+const D=JSON.parse(document.getElementById('data').textContent), CLS=__CLS__;
+const ORDER=["eff","chg","psn","rea","fl","oilw","oils","salve"];
+const ROM=["","I","II","III","IV","V","VI","VII","VIII","IX","X"];
+const DC=[12,12,13,15,17,19,21,23,25,27];
+const MB=m=>m>=10?5:m>=8?4:m>=6?3:m>=4?2:m>=2?1:0;
+const $=id=>document.getElementById(id);
+const S={sel:null,cls:"all",t:{}};
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+// тема
+(function(){const t=ls.get('theme');if(t)document.documentElement.dataset.theme=t;
+ $('theme').onclick=()=>{const cur=document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+ const n=cur==='dark'?'light':'dark';document.documentElement.dataset.theme=n;ls.set('theme',n)}})();
+
+// мастерство и бонус
+let lastM=+($('m').value);
+const sm=ls.get('m'),sb=ls.get('b');if(sm){$('m').value=sm;lastM=+sm}if(sb)$('b').value=sb;
+$('m').oninput=()=>{const m=Math.max(1,Math.min(10,+$('m').value||1));$('b').value=(+$('b').value||0)+MB(m)-MB(lastM);lastM=m;ls.set('m',m);ls.set('b',$('b').value);render()};
+$('b').oninput=()=>{ls.set('b',$('b').value);render()};
+
+// фильтр
+const cls=$('cls');
+[["all","все"],...ORDER.map(k=>[k,CLS[k]])].forEach(([k,t])=>{const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;b.dataset.k=k;b.setAttribute('aria-pressed',k==='all');b.onclick=()=>{S.cls=k;[...cls.children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.k===k));list()};cls.appendChild(b)});
+$('q').oninput=list;
+function list(){
+  const q=$('q').value.trim().toLowerCase(), L=$('list'); L.innerHTML='';
+  const r=D.map((c,i)=>[c,i]).filter(([c])=>(S.cls==='all'||c.k===S.cls)&&(!q||(c.n+' '+c.e+' '+c.f+' '+c.tk.join(' ')).toLowerCase().includes(q)));
+  r.forEach(([c,i])=>{const b=document.createElement('button');b.type='button';b.className='item';b.setAttribute('role','option');
+    b.setAttribute('aria-current',S.sel===i);b.innerHTML=`<span class="lv">${ROM[c.l]}</span><span class="nm"></span><span class="kl">${CLS[c.k]}</span>`;
+    b.querySelector('.nm').textContent=c.n;b.onclick=()=>{S.sel=i;ls.set('sel',c.n);list();render();if(innerWidth<880)$('out').scrollIntoView({behavior:'smooth'})};L.appendChild(b)});
+  $('count').textContent=r.length?`${r.length} из ${D.length}`:'Ничего не нашлось';
+}
+
+// ситуации: [ключ, подпись, пояснение, классы или функция-фильтр]
+const hasSave=c=>c.s&&c.s!=='нет';
+const instant=c=>/^мгновенно/.test(c.d);
+const toxic=c=>!/^0/.test(c.t);
+const HERB_HALF=["chg","psn","rea","fl","oils"];
+const SIT=[
+ ["sale","На продажу","экономия трав и лишний флакон выгоднее любого баффа",()=>true],
+ ["first","Первая варка этого рецепта","СЛ +2 (8.4); партии — только для освоенного рецепта",()=>true],
+ ["ess","Эссенция нестабильна","СЛ +2 (9.3)",c=>c.k!=='oilw'&&c.k!=='salve'],
+ ["help","Есть помощник","+2 к проверке; мастерство помощника не ниже твоего − 2",()=>true],
+ ["lab","Мастерская лаборатория","партия эликсиров на 1 дозу больше",()=>true],
+ ["--","Для себя: как применишь",""],
+ ["pour","Подлить тайно","в еду или питьё",c=>c.k==='eff'],
+ ["feed","Влить союзнику","бонусным действием: лежит без сознания или нет времени",c=>c.k==='eff'],
+ ["long","Пить заранее, эффекта мало","нужен эффект подольше",c=>c.k==='eff'&&!instant(c)],
+ ["tox","Токсичность поджимает","несколько доз за день",c=>c.k==='eff'&&toxic(c)],
+ ["early","Выпить до боя, применить позже","окно 4 часа",c=>c.k==='chg'||c.k==='rea'],
+ ["twice","Нужно применить дважды","одной дозой",c=>c.k==='chg'||c.k==='rea'],
+ ["hard","Цель с сильным спасброском","поднять СЛ",c=>(['chg','rea','fl','oils'].includes(c.k))&&hasSave(c)],
+ ["ally","Союзники попадут в область","",c=>c.k==='fl'&&!!c.ar],
+ ["far","Бросать издалека","60 фт вместо 30",c=>c.k==='fl'],
+ ["wide","Нужно накрыть больше врагов","",c=>c.k==='fl'&&!!c.ar],
+ ["ammo","Масло на стрелы или болты","",c=>c.k==='oilw'],
+ ["prep","Нанести заранее","",c=>c.k==='oils'],
+ ["big","Мазать большое существо","",c=>c.k==='salve'],
+ ["spare","Нужна запасная доза","",()=>true],
+];
+// бонусы 5+ и 20 по ситуации (8.12)
+const B5={pour:["Незаметное","без вкуса, запаха и цвета; заметить — Внимательность СЛ 15"],
+ feed:["Лёгкий глоток","влить другому бонусным действием"],
+ long:["Долгое действие","длительность ×1,5, не больше +1 часа"],
+ tox:["Чистый","токсичность этой дозы уходит за 10 минут отдыха"],
+ early:["Долгое окно","применить в течение 4 часов после выпивания"],
+ hard:["Сильная привязка","+1 к табличной СЛ"],
+ ally:["Щадящая","до двух существ в области автоматически проходят спасбросок"],
+ far:["Дальний бросок","бросок на 60 фт"],
+ ammo:["Больше боеприпасов","флакон на 10 боеприпасов вместо 5"],
+ prep:["Долгое масло","кара держится на оружии 2 часа"],
+ big:["Густая мазь","хватает на существо на категорию больше, мазать вдвое быстрее"]};
+const B20={long:["Двойной срок","длительность ×2, не больше +8 часов"],
+ twice:["Двойной заряд","два применения за окно; токсичность один раз"],
+ hard:["Крепкая привязка","+2 к табличной СЛ"],
+ wide:["Широкая склянка","область на 5 фт больше"],
+ spare:["Ещё одна доза","+1 флакон"]};
+
+function sitList(c){
+  const box=$('sit');box.innerHTML='<h2>Ситуация</h2>';
+  const g=document.createElement('div');g.className='toggles';box.appendChild(g);
+  SIT.forEach(([k,t,h,f])=>{
+    if(k==='--'){const s=document.createElement('div');s.className='sect';s.textContent=t;g.appendChild(s);return}
+    if(c&&!f(c))return;
+    if(k==='lab'&&c&&!batchable(c))return;
+    const l=document.createElement('label');l.className='tg';
+    l.innerHTML=`<input type="checkbox"><span><span class="t"></span>${h?'<small></small>':''}</span>`;
+    l.querySelector('.t').textContent=t;if(h)l.querySelector('small').textContent=h;
+    const i=l.querySelector('input');i.checked=!!S.t[k];i.onchange=()=>{S.t[k]=i.checked;render(true)};g.appendChild(l)});
+}
+
+const batchable=c=>['eff','oilw','salve'].includes(c.k)&&c.l<=5;
+function brew(c,M,B,t){
+  let dc=DC[c.l-1], add=[];
+  if(c.l>M){dc+=5+(c.l-M);add.push(`выше мастерства: +5 + ${c.l-M}`)}
+  if(t.first){dc+=2;add.push('первая варка +2')}
+  if(t.ess&&!['oilw','salve'].includes(c.k)){dc+=2;add.push('эссенция +2')}
+  const bonus=B+(t.help?2:0);
+  let n=1, nwhy='';
+  if(!batchable(c))nwhy=c.l>=6?'VI+ — одной дозой':'заряды, склянки и масла кары партиями не варятся';
+  else if(c.l>M)nwhy='выше мастерства — одной дозой';
+  else if(t.first)nwhy='рецепт ещё не освоен';
+  else{n=Math.min(M-c.l+2,(c.l<=2?3:2)+(t.lab?1:0));nwhy='(мастерство − уровень) + 2'}
+  const time=c.l<=2?'2 часа':c.l<=5?'4 часа':c.l<=7?'объём 90':c.l<=9?'объём 240':'объём 500';
+  const tnote=c.l<=5?'':c.l<=7?'≈5 подходов по 2 часа':c.l<=9?'≈12 подходов по 2 часа':'≈24 подхода, сюжетные условия';
+  const cat=c.l<=2?'не нужен':c.l<=5?'I порядка':c.l<=7?'II порядка':c.l<=9?'III порядка':'IV порядка';
+  // шансы одной проверки
+  const p={n20:.05,hi:0,ok:0,un:0,fail:.05};
+  for(let r=2;r<=19;r++){const x=r+bonus;
+    if(x>=dc+5)p.hi+=.05;else if(x>=dc)p.ok+=.05;else if(x>=dc-4)p.un+=.05;else p.fail+=.05}
+  return {dc,add,bonus,n,nwhy,time,tnote,cat,p};
+}
+
+function pickBonuses(c,t){
+  const r={b5:null,w5:'',b20:null,w20:'',alt5:[],alt20:[]};
+  if(t.sale){
+    r.b5='Экономия трав'+(HERB_HALF.includes(c.k)?' (половина трав)':'');
+    r.w5='на продажу: деньги сразу, а бафф покупателю цену не поднимает';
+    r.b20='Ещё одна доза';r.w20='+1 флакон на продажу — дороже любого бонуса';
+    return r;
+  }
+  const on=k=>!!t[k]&&SIT.find(s=>s[0]===k)[3](c);
+  const c5=Object.keys(B5).filter(on), c20=Object.keys(B20).filter(on);
+  if(c5.length){r.b5=B5[c5[0]][0];r.w5=B5[c5[0]][1];r.alt5=c5.slice(1).map(k=>B5[k][0])}
+  else{r.b5=c.b5;r.w5='по умолчанию для этого рецепта'}
+  if(c20.length){r.b20=B20[c20[0]][0];r.w20=B20[c20[0]][1];r.alt20=c20.slice(1).map(k=>B20[k][0])}
+  else{r.b20=c.b20;r.w20='по умолчанию для этого рецепта'}
+  if(c5.length>=2)r.alt20.push(`Два бонуса: ${B5[c5[0]][0]} + ${B5[c5[1]][0]}`);
+  r.alt5.push('Экономия трав'+(HERB_HALF.includes(c.k)?' (половина трав)':''));
+  return r;
+}
+
+const pct=x=>Math.round(x*100)+'%';
+function render(keepSit){
+  if(S.sel===null){sitList(null);return}
+  const c=D[S.sel], M=Math.max(1,Math.min(10,+$('m').value||1)), B=+$('b').value||0;
+  if(!keepSit)sitList(c);
+  const r=brew(c,M,B,S.t), q=pickBonuses(c,S.t), p=r.p;
+  const good=p.n20+p.hi+p.ok;
+  const o=$('out');
+  o.innerHTML=`<div class="title"><h2></h2><span class="badge">${ROM[c.l]} · ${CLS[c.k]}</span><span class="badge e"></span></div>
+  <div class="picks">
+    <div class="pick p5"><div class="h">Успех на 5+</div><div class="b" id="b5"></div><div class="w" id="w5"></div><div class="alt" id="a5"></div></div>
+    <div class="pick p20"><div class="h">Натуральная 20</div><div class="b" id="b20"></div><div class="w" id="w20"></div><div class="alt" id="a20"></div></div>
+  </div>
+  <div class="facts">
+    <div class="fact"><div class="k">СЛ</div><div class="v">${r.dc}</div></div>
+    <div class="fact"><div class="k">Бонус</div><div class="v">${r.bonus>=0?'+':''}${r.bonus}</div></div>
+    <div class="fact"><div class="k">Доз за варку</div><div class="v">${r.n}</div></div>
+    <div class="fact"><div class="k">Время</div><div class="v t">${r.time}</div></div>
+    <div class="fact"><div class="k">Катализатор</div><div class="v t">${r.cat}</div></div>
+    <div class="fact"><div class="k">Токсичность</div><div class="v t" id="tx"></div></div>
+    <div class="fact"><div class="k">Длительность</div><div class="v t" id="du"></div></div>
+    <div class="fact"><div class="k">Цена</div><div class="v t">${c.p} зм</div></div>
+  </div>
+  <p class="note">${[r.add.length?'СЛ: '+r.add.join(', '):'',r.nwhy?'Доз: '+r.nwhy:'',r.tnote].filter(Boolean).join('. ')}.</p>
+  <div class="sect">Шансы на каждую дозу</div>
+  <div class="bars">
+    ${bar('Натуральная 20',p.n20,'var(--gold)')}${bar('Успех на 5+',p.hi,'var(--acc)')}${bar('Успех',p.ok,'var(--ok)')}
+    ${bar('Нестабильный',p.un,'var(--warn)')}${bar('Провал',p.fail,'var(--bad)')}
+  </div>
+  <p class="note">Годных доз в среднем: ${(good*r.n).toFixed(1)} из ${r.n} (успех ${pct(good)}).${c.l===M?` В рост мастерства — ≈${((good+p.n20)*r.n).toFixed(1)} за варку.`:''} В «Провал» входит натуральная 1 (5%, осечка).${c.l>=6?' VI+: шансы — для завершающей проверки без меток качества и дефектов (±2 от подходов, 6.3).':''}</p>
+  <div class="eff"><b>Эффект.</b> <span id="ef"></span>${c.s&&c.s!=='нет'?` <span class="badge">спасбросок ${c.s}</span>`:''}${c.ar?` <span class="badge">${c.ar}</span>`:''}</div>`;
+  o.querySelector('h2').textContent=c.n; o.querySelector('.badge.e').textContent=c.e+(c.f?' · '+c.f:'');
+  $('b5').textContent=q.b5;$('w5').textContent=q.w5;$('b20').textContent=q.b20;$('w20').textContent=q.w20;
+  $('a5').textContent=q.alt5.length?'Ещё подходит: '+q.alt5.join(', '):'';
+  $('a20').textContent=q.alt20.length?'Ещё подходит: '+q.alt20.join(', '):'';
+  $('tx').textContent=c.t;$('du').textContent=c.d;$('ef').textContent=c.eff;
+}
+function bar(t,x,col){return `<div class="bar"><span>${t}</span><span class="track"><span class="fill" style="display:block;width:${x*100}%;background:${col}"></span></span><span class="pct">${pct(x)}</span></div>`}
+
+const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
+if(si>=0)S.sel=si;
+list();render();
+</script>
+</body>
+</html>
