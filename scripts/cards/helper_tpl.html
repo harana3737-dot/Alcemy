@@ -544,6 +544,8 @@ setTimeout(async()=>{
     if(!shared){const old=await db.collection('data/users/'+id).doc('belt').get().catch(()=>null);if(old&&old.exists)snap=old}
     if(snap.exists){const d=snap.data();if(d&&d.s&&(d.u||0)>=(ST.u||0)){const x=JSON.parse(d.s);if(x&&x.v===1)ST=x}}
     if(!shared||(ST.u||0)>su)save();
+    // подхватывать правки из других вкладок, устройств и от Claude
+    DOC.onSnapshot(sn=>{if(!sn.exists||saveT&&sn.metadata&&sn.metadata.hasPendingWrites)return;const d=sn.data();if(!d||!d.s||(d.u||0)<=(ST.u||0))return;try{const x=JSON.parse(d.s);if(x&&x.v===1){ST=x;ls.set('belt',d.s);UNDO=[];renderBelt();if(!$('tab-jour').hidden)renderJournal()}}catch(e){}},()=>{});
     setSave('сохраняется в аккаунте');renderBelt();
   }catch(e){setSave('сохраняется в этом браузере')}
   finally{if(matInit()){ST.u=Date.now();save()}migrate();if(ST.seed===undefined)applySeed();else if(ST.seed!==SEED.id)syncSeed();else renderBelt()}
