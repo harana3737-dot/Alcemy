@@ -250,6 +250,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 <div id="tab-jour" hidden>
   <div class="card"><h2>Варка зелий и эликсиров</h2><div id="jrec"></div>
     <p class="note">Под каждую дозу 5+ и 20 — выбор бонуса, рекомендованный отмечен ★. Годные дозы уходят в сумку Талиса, бонус пишется на флакон. Если уровень зелья равен мастерству, успехи сами добавляются в рост мастерства (натуральная 20 — за два). Эликсир выбирается из каталога по названию; то же есть в карточке рецепта на вкладке «Варка».</p></div>
+  <div class="card" style="margin-top:16px"><h2>Долгая варка (VI+)</h2><div id="jvol"></div>
+    <p class="note">6.3. Подход — проверка против СЛ: успех — итог в прогресс; 5+ — метка; 10+ — 2 метки; 1–4 — половина и заминка (три заминки = дефект); провал на 5+ — дефект; нат. 20 — прогресс ×2 и метка; нат. 1 — минус к20 и дефект. Неделя простоя бесплатна, дальше +1 дефект в неделю, через месяц испорчено.</p></div>
   <div class="card" style="margin-top:16px"><h2>Варка чернил</h2><div id="jink"></div>
     <p class="note">Набор за раз, без партий. Матрица — половина лечебных и половина ядовитых трав на ⅓ цены набора, травы не ниже уровня набора (10.1, правило мастера); эссенция уровня набора, тип даёт резонанс (+1 к Начертанию). Два успешных набора своего уровня = одно зелье в рост мастерства, натуральная 20 — сама по себе одно (3.2).</p></div>
   <div class="card" style="margin-top:16px"><h2>Катализатор из сырья</h2><div id="jcat"></div>
@@ -442,7 +444,10 @@ function render(keepSit){
   <div class="eff"><b>Эффект.</b> <span id="ef"></span>${c.s&&c.s!=='нет'?` <span class="badge">спасбросок ${c.s}</span>`:''}${c.ar?` <span class="badge">${c.ar}</span>`:''}</div>
   <div id="crec" style="margin-top:12px"></div>
   <div class="acts"><button type="button" class="btn" id="toBag">В сумку: ${r.n}</button>${DRINK(c)?'<button type="button" class="btn soft" id="toDrink">Выпить сейчас</button>':''}</div>`;
-  recForm($('crec'),{name:c.n,lvl:c.l,card:c});
+  if(c.l>=6){const cb=$('crec');cb.innerHTML=`<div class="sect">Долгая варка — объём ${VOLUME(c.l)} (6.3)</div><div class="rres"></div><button type="button" class="btn soft vstart">Начать долгую варку</button> <span class="note vsm"></span>`;
+    resArea(cb,c.n,c.l,c,{n20:0,hi:0,ok:1,un:0,fl:0});
+    cb.querySelector('.vstart').onclick=()=>{const sp=volStart(cb,c,null);cb.querySelector('.vsm').textContent=`Начата: подходы — на вкладке «Журнал». Расход: ${sp||'—'}.`;cb.querySelector('.vstart').disabled=true}}
+  else recForm($('crec'),{name:c.n,lvl:c.l,card:c});
   $('toBag').onclick=()=>{addBag(c.n,r.n);$('toBag').textContent='Добавлено ✓'};
   if($('toDrink'))$('toDrink').onclick=()=>{tab('belt');$('dq').value=c.n;DM={};BAGPICK=null;fillDrink();$('dq').scrollIntoView({block:'center'})};
   o.querySelector('h2').textContent=c.n; o.querySelector('.badge.e').textContent=c.e+(c.f?' · '+c.f:'');
@@ -761,6 +766,7 @@ async function masteryTrack(M){
   await JDB.collection('tracks').doc(id).set(data);return {id,...data};
 }
 function renderJournal(){
+  renderVol();
   if($('jink')&&$('jink')._upd&&!$('tab-jour').hidden)setTimeout(()=>{$('jink')._upd();['janti','jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())},0);
   const root=$('jgroups');if(!root)return;root.innerHTML='';
   if(!JDB){root.innerHTML='<p class="note">Журнал хранится на claude.ai: открой страницу там и войди в аккаунт.</p>';return}
@@ -882,8 +888,8 @@ function recForm(box,opts){
   let sale=!!(opts.name&&S.t.sale);
   const cur=()=>{const n=opts.name||(rn.value.trim());const c=opts.card||byName(n)||null;const lvl=c?c.l:(opts.lvl||+rl.value);
     const k={};box.querySelectorAll('[data-k]').forEach(i=>k[i.dataset.k]=Math.max(0,Math.min(10,+i.value||0)));return {n,c,lvl,k}};
-  const upd=()=>{box.querySelectorAll('.rmode .chip').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.s==='1')===sale));const x=cur();bonusArea(box,x.n,x.lvl,x.c,x.k,sale);defArea(box,x.n,x.lvl,x.c,x.k);resArea(box,x.n,x.lvl,x.c,x.k)};
-  box.addEventListener('change',e=>{if(e.target.matches('.b5s,.b20s,.tw1,.tw2')){const x=cur();resArea(box,x.n,x.lvl,x.c,x.k)}});
+  const upd=()=>{box.querySelectorAll('.rmode .chip').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.s==='1')===sale));const x=cur();bonusArea(box,x.n,x.lvl,x.c,x.k,sale);defArea(box,x.n,x.lvl,x.c,x.k);if(!opts.noUse)resArea(box,x.n,x.lvl,x.c,x.k)};
+  box.addEventListener('change',e=>{if(!opts.noUse&&e.target.matches('.b5s,.b20s,.tw1,.tw2')){const x=cur();resArea(box,x.n,x.lvl,x.c,x.k)}});
   box.querySelectorAll('.rmode .chip').forEach(b=>b.onclick=()=>{sale=b.dataset.s==='1';upd()});
   box.querySelectorAll('[data-k]').forEach(i=>i.oninput=upd);
   if(rn)rn.oninput=()=>{const c=byName(rn.value.trim());if(c){rl.value=c.l;rl.disabled=true}else{rl.disabled=false;const m=rn.value.match(/(\d+)\.\1\b/);if(m&&+m[1]<=10)rl.value=m[1]}upd()};
@@ -907,14 +913,14 @@ function recForm(box,opts){
       const add=(nm,q,note,card)=>{if(!q)return;const b=ST.bag.find(b=>b.who==='p1'&&b.n===nm&&(b.note||'')===(note||''));if(b)b.q+=q;else ST.bag.push({n:nm,q,who:'p1',...(note?{note}:{}),...(card?{card}:{})})};
       doses.forEach(d=>add(d.n,1,d.note));
       const dfs=[...box.querySelectorAll('.dfs')].map(x=>x.value);for(let i=0;i<k.un;i++){const d=dfs[i];add(n+' (нестабильное)',1,d?'дефект: '+defShort(d):'дефект: ещё не назначен',c?c.n:null)}
-      spent=applyUse(box);
+      spent=opts.noUse?'':applyUse(box);
       logx(`Сварено «${n}»: ${doses.length} годных${k.un?`, ${k.un} нестабильных`:''}${k.fl?`, провалов ${k.fl}`:''}${spent?'. Расход: '+spent:''}`)});
     const notes=doses.filter(d=>d.note||d.n!==n).map(d=>d.n!==n?d.n:d.note);
     let msg=(spent?`Расход: ${spent}. `:'')+`В сумку Талиса: ${doses.length}${k.un?` + ${k.un} нестабильных`:''}${notes.length?` (${notes.join(', ')})`:''}.`;
     const grow=k.ok+k.hi+2*k.n20;
     if(lvl===M&&grow){const t=await masteryTrack(M);if(t&&await jAdd(TR.find(x=>x.id===t.id)||t,grow,`${n}: ${good} успешных${k.n20?`, нат. 20 ×${k.n20}`:''}`))msg+=` В рост мастерства ${M} → ${M+1}: +${grow}.`;else if(!JDB)msg+=' Журнал недоступен вне claude.ai.'}
     else if(grow)msg+=` В рост мастерства не идёт: уровень ${lvl}, мастерство ${M}.`;
-    box.querySelector('.rmsg').textContent=msg;box.querySelectorAll('[data-k]').forEach(i=>i.value=0);upd();
+    box.querySelector('.rmsg').textContent=msg;box.querySelectorAll('[data-k]').forEach(i=>i.value=0);upd();if(opts.onDone)opts.onDone();
   };
 }
 
@@ -929,6 +935,8 @@ function matInit(){if(!ST.mat||ST.matSeed===undefined){ST.mat=JSON.parse(JSON.st
   let ch=false;if(ST.mat.gold===undefined){ST.mat.gold=SEED.mat.gold;ch=true}
   ST.mat.ess.forEach(e=>{if(e.id==='e4'&&!e.st){e.st='fresh';ch=true}});
   ST.mat.cat.forEach(x=>{if(!x.stable){x.stable=5;ch=true}});return ch}
+function essParseAll(c){const parts=String(c.e).split(' + ');const first=essParse({e:parts[0],l:c.l});
+  return [first,...parts.slice(1).map(x=>{const p=essParse({e:x,l:first.l});if(!/\s(X|IX|VIII|VII|VI|V|IV|III|II|I)\b/.test(x))p.l=first.l;return p})]}
 function essParse(c){const m=String(c.e).match(/^(.*?)\s+(X|IX|VIII|VII|VI|V|IV|III|II|I)\b/);return m?{type:m[1],l:ROM.indexOf(m[2])}:{type:String(c.e),l:c.l}}
 const essMatch=(it,type)=>it.types.some(t=>t===type||type.startsWith(t)||t.startsWith(type));
 // смешанные травы на сумму: [{k, min, v}] — годятся для предметов уровня ≤ min (Ж-85: чернила — правило мастера, заряды и склянки — по аналогии)
@@ -962,7 +970,7 @@ function planUse(n,lvl,c,k,box){
   const P={att,kind,saved,byValue,lvl};
   if(byValue){const v=parseFloat(String(c.p).replace(/\s/g,'').replace(',','.'))||0;P.value=Math.max(0,att-saved/2)*v/3}
   else P.herbs={l:lvl,q:Math.max(0,att-saved)*lvl};
-  if(c)P.ess={...essParse(c),q:att};
+  if(c)P.ess=essParseAll(c).map(e=>({...e,q:att}));
   if(lvl>=3)P.cat={o:ORD(lvl),q:att};
   return P;
 }
@@ -974,9 +982,9 @@ function resArea(box,n,lvl,c,k){
   if(P.herbs){const have=herbCount(P.kind,P.herbs.l);
     rows.push(`${KIND[P.kind]} травы ур. ${P.herbs.l}: <b>${P.herbs.q}</b> из ${fmtZ(have)}${have<P.herbs.q?' <span class="bad">не хватает</span>':''}${P.saved?` <small>(экономия трав на ${P.saved})</small>`:''}`)}
   else{const have=herbValue(P.kind,P.lvl);rows.push(`${KIND[P.kind]} травы ур. ${P.lvl}+ на <b>${fmtZ(P.value)} зм</b> из ${fmtZ(have)} (по ценности, ⅓ цены)${have<P.value?' <span class="bad">не хватает</span>':''}${P.saved?` <small>(экономия на ${P.saved} — половина)</small>`:''}`)}
-  if(P.ess){const opts=ST.mat.ess.filter(e=>e.q>0).sort((a,b)=>(essMatch(b,P.ess.type)-essMatch(a,P.ess.type))||(a.l-b.l));
-    const fit=opts.filter(e=>essMatch(e,P.ess.type)&&e.l>=P.ess.l), def=fit.find(e=>e.q>=P.att)||fit[0];
-    rows.push(`Эссенция ${esc(P.ess.type)} ${ROM[P.ess.l]||''} ×${P.att}: <select class="res-e" aria-label="Эссенция">${opts.map(e=>`<option value="${e.id}" ${def&&e.id===def.id?'selected':''}>${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${e.q})</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${!def?' <span class="bad">подходящей нет</span>':def.q<P.att?` <span class="bad">есть только ${def.q}</span>`:''}${def&&def.l>P.ess.l?' <small>(эссенция выше уровня)</small>':''}${def&&def.st==='good'?' <small>(отличная: +1 к проверке)</small>':''}${def&&def.st==='bad'?' <span class="wr">нестабильная: +2 к СЛ</span>':''}`)}
+  if(P.ess)P.ess.forEach((E,ei)=>{const opts=ST.mat.ess.filter(e=>e.q>0).sort((a,b)=>(essMatch(b,E.type)-essMatch(a,E.type))||(a.l-b.l));
+    const fit=opts.filter(e=>essMatch(e,E.type)&&e.l>=E.l), def=fit.find(e=>e.q>=P.att)||fit[0];
+    rows.push(`Эссенция ${esc(E.type)} ${ROM[E.l]||''} ×${P.att}: <select class="res-e res-e${ei}" aria-label="Эссенция">${opts.map(e=>`<option value="${e.id}" ${def&&e.id===def.id?'selected':''}>${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${e.q})</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${!def?' <span class="bad">подходящей нет</span>':def.q<P.att?` <span class="bad">есть только ${def.q}</span>`:''}${def&&def.l>E.l?' <small>(эссенция выше уровня)</small>':''}${def&&def.st==='good'?' <small>(отличная: +1 к проверке)</small>':''}${def&&def.st==='bad'?' <span class="wr">нестабильная: +2 к СЛ</span>':''}`)})
   if(P.cat){const opts=ST.mat.cat.filter(x=>x.o===P.cat.o&&x.used<10);const def=opts[0];
     let w='';if(def){const from=def.used+1,to=def.used+P.att;if(to>10)w=' <span class="bad">не хватит применений</span>';else if(to>stab(def))w=` <span class="wr">применения ${Math.max(stab(def)+1,from)}–${to}: проверка нестабильности (5.2)</span>`}
     rows.push(`Катализатор ${ROM[P.cat.o]} порядка ×${P.att}: <select class="res-c" aria-label="Катализатор">${opts.map(x=>`<option value="${x.id}">${ROM[x.o]} порядка — ${x.used}/10</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${def?w:' <span class="bad">нет катализатора</span>'}`)}
@@ -991,7 +999,7 @@ function applyUse(box){ // вызывается внутри mutate
     else out.push(`травы ур. ${P.herbs.l} не списаны: нужно ${fmtZ(P.herbs.q)}, было ${fmtZ(had)}`)}
   if(P.value&&herbValue(P.kind,P.lvl)<P.value-1e-9)out.push(`травы ур. ${P.lvl}+ не списаны: нужно на ${fmtZ(P.value)} зм, было на ${fmtZ(herbValue(P.kind,P.lvl))}`);
   else if(P.value){out.push(`${KIND[P.kind].toLowerCase()} травы на ${fmtZ(P.value)} зм: ${takeValue(P.kind,P.value,P.lvl)}`)}
-  const es=box.querySelector('.res-e');if(P.ess&&es&&es.value){const e=ST.mat.ess.find(x=>x.id===es.value);if(e){const t=Math.min(e.q,P.att);e.q-=t;out.push(`эссенция «${e.n}» −${t}`)}}
+  if(P.ess)P.ess.forEach((E,ei)=>{const es=box.querySelector('.res-e'+ei);if(es&&es.value){const e=ST.mat.ess.find(x=>x.id===es.value);if(e){const t=Math.min(e.q,P.att);e.q=+(e.q-t).toFixed(2);out.push(`эссенция «${e.n}» −${fmtZ(t)}`)}}});
   const cs=box.querySelector('.res-c');if(P.cat&&cs&&cs.value){const x=ST.mat.cat.find(y=>y.id===cs.value);if(x){x.used=Math.min(10,x.used+P.att);out.push(`катализатор ${ROM[x.o]} — ${x.used}/10`)}}
   ST.mat.herbs=ST.mat.herbs.filter(h=>h.q>0);ST.mat.ess=ST.mat.ess.filter(e=>e.q>0);
   return out.join(', ');
@@ -1133,6 +1141,15 @@ function inkForm(box){
     const ie=box.querySelector('.ie');if(keep!==undefined&&[...ie.options].some(o=>o.value===keep))ie.value=keep;
   };
   il.onchange=upd;lael.onchange=upd;box._upd=upd;upd();
+  const vb=document.createElement('button');vb.type='button';vb.className='btn soft ivol';vb.textContent='Начать долгую варку';vb.hidden=true;box.querySelector('.iout').after(vb);
+  const syncV=()=>{const big=+il.value>=6;box.querySelector('.iout').hidden=big;vb.hidden=!big};il.addEventListener('change',syncV);syncV();
+  vb.onclick=()=>{const l=+il.value,half=INK.price[l]/6,minL=Math.max(1,l),sp=box.querySelector('.isp').value.trim(),ieV=box.querySelector('.ie')?.value,icV=box.querySelector('.ic')?.value;let essT='';
+    const s2=volStart(null,null,{l,name:inkName(l),spell:sp,get essT(){return essT},spend:()=>{const out=[];
+      ['heal','poison'].forEach(k=>{if(herbValue(k,minL)>=half-1e-9)out.push(`${KIND[k].toLowerCase()} ${takeValue(k,half,minL)}`);else out.push(`${KIND[k].toLowerCase()} не списаны: нужно на ${fmtZ(half)} зм`)});
+      if(ieV){const e=ST.mat.ess.find(x=>x.id===ieV);if(e){e.q=+(e.q-1).toFixed(2);essT=e.types[0];out.push(`эссенция «${e.n}» −1`)}}
+      if(icV){const x=ST.mat.cat.find(y=>y.id===icV);if(x){x.used=Math.min(10,x.used+1);out.push(`катализатор ${ROM[x.o]} — ${x.used}/10`)}}
+      ST.mat.ess=ST.mat.ess.filter(e=>e.q>1e-9);return out.join(', ')}});
+    const v=vols()[vols().length-1];if(v)v.ess=essT;box.querySelector('.imsg').textContent=`Начата долгая варка: подходы — ниже, в «Долгой варке». Расход: ${s2}.`;upd()};
   box.querySelectorAll('.iout .chip').forEach(b=>b.onclick=async()=>{
     const o=b.dataset.o, l=+il.value, M=Math.max(1,Math.min(10,+$('m').value||1)), half=INK.price[l]/6, minL=Math.max(1,l);
     const sp=box.querySelector('.isp').value.trim(), ieV=box.querySelector('.ie')?.value, icV=box.querySelector('.ic')?.value;
@@ -1311,6 +1328,80 @@ function essForm(box){
   });
 }
 catForm($('jcat'));essForm($('jess'));
+
+// ===== Объём работы VI+ (6.3): подходы по 2 часа, прогресс, метки качества, заминки, дефекты, простой =====
+const VOLUME=l=>l>=10?500:l>=8?240:90;
+const WEEK=7*1440, MONTH=30*1440;
+const vols=()=>{if(!ST.vol)ST.vol=[];return ST.vol};
+function volIdle(v){const idle=ST.T-v.last;return {weeks:Math.floor(idle/WEEK),def:Math.max(0,Math.floor(idle/WEEK)-1),ruined:idle>=MONTH}}
+function volMod(v){const d=v.def+volIdle(v).def;return Math.max(-2,Math.min(2,v.marks-d))}
+// старт: материалы одной попытки тратятся сразу
+function volStart(box,c,ink){ // c — карточка эликсира, или ink={l,name,spend()}
+  const l=c?c.l:ink.l, M=Math.max(1,Math.min(10,+$('m').value||1));
+  let dc=c?DC[l-1]:INK.dc[l];if(l>M)dc+=5+(l-M);
+  let spent='';
+  mutate(()=>{spent=c?applyUse(box):ink.spend();
+    vols().push({id:uid(),kind:c?'elixir':'ink',n:c?c.n:ink.name,l,dc,volume:VOLUME(l),prog:0,marks:0,hitch:0,def:0,t0:ST.T,last:ST.T,log:[],ess:ink?ink.essT:'',spell:ink?ink.spell:''});
+    logx(`Начата долгая варка «${c?c.n:ink.name}» (объём ${VOLUME(l)}). Расход: ${spent||'—'}`)});
+  return spent;
+}
+function volApproach(v,face,total,help,minus){
+  const dc=v.dc;let add=0,txt='';
+  if(face===20){add=2*total;v.marks++;txt='нат. 20: прогресс ×2, +1 метка'}
+  else if(face===1){add=-Math.max(0,minus||0);v.def++;txt=`нат. 1: −${minus||0} прогресса, +1 дефект`}
+  else if(total>=dc+10){add=total;v.marks+=2;txt='успех на 10+: +2 метки'}
+  else if(total>=dc+5){add=total;v.marks++;txt='успех на 5+: +1 метка'}
+  else if(total>=dc){add=total;txt='успех'}
+  else if(total>=dc-4){add=Math.floor(total/2);v.hitch++;txt='провал на 1–4: половина, +1 заминка'}
+  else{add=0;v.def++;txt='провал на 5+: +1 дефект'}
+  if(help&&add>0){add+=2;txt+=', помощник +2'}
+  if(v.hitch>=3){v.hitch-=3;v.def++;txt+='; три заминки → дефект'}
+  v.prog=Math.max(0,v.prog+add);v.last=ST.T;
+  v.log.unshift({T:ST.T,t:`к20 ${face}, итог ${total}: ${txt} (${add>=0?'+':''}${add})`});v.log=v.log.slice(0,12);
+  return txt;
+}
+function renderVol(){
+  const box=$('jvol');if(!box)return;box.innerHTML='';
+  const list=ST.vol||[];
+  if(!list.length){box.innerHTML='<p class="note">Нет начатых. Эликсир VI+ начинается кнопкой «Начать долгую варку» в карточке рецепта на вкладке «Варка», чернила VI+ — в «Варке чернил».</p>';return}
+  list.forEach(v=>{
+    const id=volIdle(v), mod=volMod(v), done=v.prog>=v.volume;
+    const c=document.createElement('div');c.className='card jc';
+    c.innerHTML=`<div class="phead"><b class="vn"></b><span class="tox">${fmtZ(v.prog)} / ${v.volume}</span></div>
+      <div class="track" style="margin:8px 0"><span class="fill" style="display:block;width:${Math.min(100,v.prog/v.volume*100)}%;background:${done?'var(--gold)':'var(--acc)'}"></span></div>
+      <div class="st"><span class="badge">СЛ ${v.dc}</span><span class="badge gd">меток ${v.marks}</span><span class="badge">заминок ${v.hitch}/3</span><span class="badge ${v.def+id.def?'bad':''}">дефектов ${v.def}${id.def?` + ${id.def} за простой`:''}</span><span class="badge">к завершению ${mod>=0?'+':''}${mod}</span></div>
+      ${id.ruined?'<p class="note" style="color:var(--bad)">Месяц простоя — варка испорчена (6.3).</p>':id.weeks>=1?`<p class="note" style="color:var(--warn)">Простой ${id.weeks} нед.: первая неделя бесплатно, дальше +1 дефект в неделю, через месяц варка испорчена.</p>`:''}
+      <div class="vbody"></div><div class="log vlog" style="margin-top:8px"></div>
+      <div class="btns"><button type="button" class="btn sm ghost vdel">Бросить варку</button></div>`;
+    c.querySelector('.vn').textContent=v.n+(v.kind==='ink'?'':` (${ROM[v.l]})`);
+    c.querySelector('.vlog').innerHTML=v.log.slice(0,5).map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join('');
+    const body=c.querySelector('.vbody');
+    if(!done&&!id.ruined){
+      body.innerHTML=`<div class="row" style="flex-wrap:wrap;margin-top:6px"><div style="flex:0 0 74px"><label class="f">к20</label><input class="vf" type="number" min="1" max="20" placeholder="к20"></div>
+        <div style="flex:0 0 84px"><label class="f">Итог</label><input class="vt" type="number" placeholder="итог"></div>
+        <div style="flex:0 0 96px" class="vmw" hidden><label class="f">Вычесть к20</label><input class="vm" type="number" min="1" max="20"></div>
+        <div style="flex:1 1 140px;align-self:end"><button type="button" class="btn soft vgo">Подход (2 часа)</button></div></div>
+        <label class="tg"><input type="checkbox" class="vh"><span>Помощник (+2 к прогрессу подхода, 6.4)</span></label>
+        <label class="tg"><input type="checkbox" class="vclk" checked><span>Сдвинуть время в игре на 2 часа</span></label><span class="note vmsg"></span>`;
+      const vf=body.querySelector('.vf'), mw=body.querySelector('.vmw');vf.oninput=()=>{mw.hidden=+vf.value!==1};
+      body.querySelector('.vgo').onclick=()=>{const f=+vf.value, t=+body.querySelector('.vt').value;if(!f||f<1||f>20)return vf.focus();if(f!==1&&!body.querySelector('.vt').value)return body.querySelector('.vt').focus();
+        const help=body.querySelector('.vh').checked, clk=body.querySelector('.vclk').checked;let txt='';
+        mutate(()=>{if(clk)ST.T+=120;txt=volApproach(v,f,t,help,+body.querySelector('.vm').value||0);logx(`Долгая варка «${v.n}»: ${txt}`)})};
+    }else if(done){
+      body.innerHTML=`<p class="note" style="margin:6px 0">Объём набран. Завершающая проверка — СЛ ${v.dc}, модификатор ${mod>=0?'+':''}${mod} (метки − дефекты, от −2 до +2). Бонусы 5+ и 20, дефекты и осечка — только по ней.</p><div class="vfin"></div>`;
+      const fin=body.querySelector('.vfin');
+      if(v.kind==='elixir'){const card=byName(v.n);recForm(fin,{name:v.n,lvl:v.l,card,noUse:true,onDone:()=>mutate(()=>{ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» завершена`)})})}
+      else{fin.innerHTML=`<div class="chips">${[['n20','нат. 20'],['hi','успех 5+'],['ok','успех'],['un','провал 1–4'],['fl','провал 5+'],['n1','нат. 1']].map(([k,t])=>`<button type="button" class="chip" data-o="${k}">${t}</button>`).join('')}</div>`;
+        fin.querySelectorAll('.chip').forEach(b=>b.onclick=async()=>{const o=b.dataset.o,M=Math.max(1,Math.min(10,+$('m').value||1));
+          mutate(()=>{if(INKQ[o]){const [q,md]=INKQ[o];const nm=`${inkName(v.l)} — ${q} (${md})`;const note=[v.ess?`эссенция: ${v.ess}`:'',v.spell?`для «${v.spell}»`:''].filter(Boolean).join(' · ');
+              const bb=ST.bag.find(x=>x.who==='p1'&&x.n===nm&&(x.note||'')===note);if(bb)bb.q++;else ST.bag.push({n:nm,q:1,who:'p1',...(note?{note}:{})})}
+            ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» завершена: ${b.textContent}`)});
+          const g=o==='n20'?1:(o==='hi'||o==='ok')?0.5:0;if(g&&v.l===M){const t=await masteryTrack(M);if(t)await jAdd(TR.find(x=>x.id===t.id)||t,g,`${inkName(v.l)}: ${b.textContent}`)}})}
+    }
+    c.querySelector('.vdel').onclick=()=>{if(c.querySelector('.vdel').dataset.sure){mutate(()=>{ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» брошена`)})}else{c.querySelector('.vdel').dataset.sure=1;c.querySelector('.vdel').textContent='Точно бросить? Материалы не вернутся'}};
+    box.appendChild(c);
+  });
+}
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;
