@@ -117,7 +117,7 @@ body{{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(sa
 @media print{{:root:not(#print){{--bg:#fff;--fg:#111;--mut:#555;--card:#fff;--line:#bbb;color-scheme:light}}.bar,.top{{display:none}}.card{{break-inside:avoid}}#idx thead th{{position:static}}a.lnk,.lnk{{color:inherit}}}}
 </style></head><body><main>
 <h1>Карточки эликсиров — Алхимия Талиса</h1>
-<p class="sub">Черновик, 02.10.2026 · {len(C)} карточек · реестр эликсиров + правила v0.3 · эффекты по PHB 2014 и DMG 2014</p>
+<p class="sub">Черновик, 05.10.2026 · {len(C)} карточек · реестр эликсиров + правила v0.3 · эффекты по PHB 2014 и DMG 2014</p>
 <details><summary>Как читать карточку</summary>{md_list(HOW)}</details>
 <div class="bar" id="top">
 <input id="q" type="search" placeholder="Поиск по названию или тексту">
