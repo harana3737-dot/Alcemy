@@ -929,7 +929,7 @@ recForm($('jrec'),{});
 // ===== Материалы Талиса: травы, эссенции, катализаторы; расход при записи варки =====
 const HERB_P=[0,0.1,0.5,1,2,4,8,16,32,64,128];
 const ORD=l=>l<=2?0:l<=5?1:l<=7?2:l<=9?3:4;
-const KIND={heal:'Лечебные',poison:'Ядовитые'};
+const KIND={heal:'Лечебные',poison:'Ядовитые',any:'Любые'};
 const fmtZ=v=>(Math.round(v*100)/100).toString().replace('.',',');
 function matInit(){if(!ST.mat||ST.matSeed===undefined){ST.mat=JSON.parse(JSON.stringify(SEED.mat));ST.matSeed=SEED.mid;return true}
   let ch=false;if(ST.mat.gold===undefined){ST.mat.gold=SEED.mat.gold;ch=true}
@@ -941,10 +941,11 @@ function essParse(c){const m=String(c.e).match(/^(.*?)\s+(X|IX|VIII|VII|VI|V|IV|
 const essMatch=(it,type)=>it.types.some(t=>t===type||type.startsWith(t)||t.startsWith(type));
 // смешанные травы на сумму: [{k, min, v}] — годятся для предметов уровня ≤ min (Ж-85: чернила — правило мастера, заряды и склянки — по аналогии)
 const pools=()=>{if(!ST.mat.pools){ST.mat.pools=[];const o=ST.mat.pool||{};['heal','poison'].forEach(k=>{if(o[k])ST.mat.pools.push({k,min:1,v:o[k]})});delete ST.mat.pool}return ST.mat.pools};
-function herbValue(kind,minL=1){return ST.mat.herbs.filter(h=>h.k===kind&&h.l>=minL).reduce((s,h)=>s+h.q*HERB_P[h.l],0)+pools().filter(p=>p.k===kind&&p.min>=minL).reduce((s,p)=>s+p.v,0)}
+function herbValue(kind,minL=1){if(kind==='any')return herbValue('heal',minL)+herbValue('poison',minL);return ST.mat.herbs.filter(h=>h.k===kind&&h.l>=minL).reduce((s,h)=>s+h.q*HERB_P[h.l],0)+pools().filter(p=>p.k===kind&&p.min>=minL).reduce((s,p)=>s+p.v,0)}
 function herbCount(kind,lvl){return ST.mat.herbs.filter(h=>h.k===kind&&h.l===lvl).reduce((s,h)=>s+h.q,0)}
 // по ценности: сначала смешанные (от ближнего уровня), потом поштучные от дешёвых; от травы можно взять часть
 function takeValue(kind,need,minL=1){
+  if(kind==='any'){const h=Math.min(need,herbValue('heal',minL));const a=h>1e-9?'лечебные: '+takeValue('heal',h,minL):'';const b=need-h>1e-9?'ядовитые: '+takeValue('poison',need-h,minL):'';return [a,b].filter(Boolean).join('; ')}
   const used=[];
   pools().filter(p=>p.k===kind&&p.min>=minL&&p.v>0).sort((a,b)=>a.min-b.min).forEach(p=>{if(need<=1e-9)return;const t=Math.min(p.v,need);p.v=+(p.v-t).toFixed(2);need-=t;used.push(`смешанные от ур. ${p.min} −${fmtZ(+t.toFixed(2))} зм`)});
   ST.mat.pools=pools().filter(p=>p.v>1e-9);
@@ -972,6 +973,7 @@ function planUse(n,lvl,c,k,box){
   else P.herbs={l:lvl,q:Math.max(0,att-saved)*lvl};
   if(c)P.ess=essParseAll(c).map(e=>({...e,q:att}));
   if(lvl>=3)P.cat={o:ORD(lvl),q:att};
+  if(c&&c.cm)P.cm={...c.cm,q:att};
   return P;
 }
 function resArea(box,n,lvl,c,k){
@@ -988,6 +990,10 @@ function resArea(box,n,lvl,c,k){
   if(P.cat){const opts=ST.mat.cat.filter(x=>x.o===P.cat.o&&x.used<10);const def=opts[0];
     let w='';if(def){const from=def.used+1,to=def.used+P.att;if(to>10)w=' <span class="bad">не хватит применений</span>';else if(to>stab(def))w=` <span class="wr">применения ${Math.max(stab(def)+1,from)}–${to}: проверка нестабильности (5.2)</span>`}
     rows.push(`Катализатор ${ROM[P.cat.o]} порядка ×${P.att}: <select class="res-c" aria-label="Катализатор">${opts.map(x=>`<option value="${x.id}">${ROM[x.o]} порядка — ${x.used}/10</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${def?w:' <span class="bad">нет катализатора</span>'}`)}
+  if(P.cm){const have=ST.mat.other.filter(o=>o.q>0&&o.n.toLowerCase().includes(P.cm.k));
+    if(P.cm.use){const it=have[0],gold=ST.mat.gold||0,need=P.cm.gp*P.cm.q;
+      rows.push(`Компонент: ${esc(P.cm.t)} ×${P.cm.q} — тратится при каждой попытке (8.10): <select class="res-m" aria-label="Компонент"><option value="other" ${it?'selected':''} ${it?'':'disabled'}>из «Прочего»${it?` (${esc(it.n)}: ${it.q})`:' — нет'}</option><option value="gold" ${!it&&gold>=need?'selected':''}>оплатить монетами (−${need} зм)</option><option value="" ${!it&&gold<need?'selected':''}>не списывать</option></select>${!it&&gold<need?' <span class="bad">нет компонента и монет</span>':it&&it.q<P.cm.q?` <span class="bad">есть только ${it.q}</span>`:''}`)}
+    else rows.push(`Инструмент рецепта: ${esc(P.cm.t)} — нужен при варке, не тратится (8.10). ${have.length?`Есть: ${esc(have[0].n)}.`:'<span class="bad">В «Прочем» нет</span> — добавь, если есть.'}`)}
   const pl=n=>n%10===1&&n%100!==11?'попытку':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'попытки':'попыток';
   ar.innerHTML=`<div class="sect">Расход на ${P.att} ${pl(P.att)}</div><div class="resb">${rows.map(r=>`<div>${r}</div>`).join('')}</div>`;
   ar.querySelectorAll('select').forEach(x=>{if(keep[x.className]!==undefined&&[...x.options].some(o=>o.value===keep[x.className]))x.value=keep[x.className]});
@@ -1001,6 +1007,9 @@ function applyUse(box){ // вызывается внутри mutate
   else if(P.value){out.push(`${KIND[P.kind].toLowerCase()} травы на ${fmtZ(P.value)} зм: ${takeValue(P.kind,P.value,P.lvl)}`)}
   if(P.ess)P.ess.forEach((E,ei)=>{const es=box.querySelector('.res-e'+ei);if(es&&es.value){const e=ST.mat.ess.find(x=>x.id===es.value);if(e){const t=Math.min(e.q,P.att);e.q=+(e.q-t).toFixed(2);out.push(`эссенция «${e.n}» −${fmtZ(t)}`)}}});
   const cs=box.querySelector('.res-c');if(P.cat&&cs&&cs.value){const x=ST.mat.cat.find(y=>y.id===cs.value);if(x){x.used=Math.min(10,x.used+P.att);out.push(`катализатор ${ROM[x.o]} — ${x.used}/10`)}}
+  const ms=box.querySelector('.res-m');if(P.cm&&P.cm.use&&ms&&ms.value){
+    if(ms.value==='other'){const it=ST.mat.other.find(o=>o.q>0&&o.n.toLowerCase().includes(P.cm.k));if(it){const t=Math.min(it.q,P.cm.q);it.q-=t;out.push(`«${it.n}» −${t}`)}}
+    else if(ms.value==='gold'){const need=P.cm.gp*P.cm.q;if((ST.mat.gold||0)>=need){ST.mat.gold=+((ST.mat.gold||0)-need).toFixed(2);out.push(`${P.cm.k}: −${need} зм монетами`)}else out.push(`${P.cm.k} не оплачена: монет ${fmtZ(ST.mat.gold||0)}`)}}
   ST.mat.herbs=ST.mat.herbs.filter(h=>h.q>0);ST.mat.ess=ST.mat.ess.filter(e=>e.q>0);
   return out.join(', ');
 }
