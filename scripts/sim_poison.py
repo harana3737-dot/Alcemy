@@ -32,30 +32,21 @@ P=[("Безудержный смех I",13,"wis",lambda m:m["intelligence"]>4,"e
    ("Слабоумие VIII",18,"int",lambda m:True,"none",None)]
 BANDS=[(0,2),(3,5),(6,9),(10,13),(14,17),(18,30)]
 def cimm(m,c): return c and any(x["index"]==c for x in m.get("condition_immunities",[]))
-out=[]
-for name,dc,ab,who,rep,cond in P:
-    row=[name,dc,ab.upper()]
-    for lo,hi in BANDS:
-        mons=[m for m in M if lo<=m["challenge_rating"]<=hi]
-        n=len(mons); el=[m for m in mons if who(m) and not immune(m) and not cimm(m,cond)]
-        lr=[m for m in el if has(m,"Legendary Resistance")]
-        nl=[m for m in el if m not in lr]
-        if not nl: row.append((n,len(el)/n if n else 0,len(lr),None,None,None));continue
-        pf=[];turns=[];spell=[]
-        for m in nl:
-            b=save(m,ab); adv=has(m,"Magic Resistance")
-            adv_p=resist(m)            # сопротивление яду -> преимущество (8.6, предложение)
-            q=pfail(b,dc,adv or adv_p)
-            # повтор: без преимущества от сопротивления? применяем те же
-            s=1-q
-            if rep=="end": t=1+(1-s)+(1-s)**2; ts=sum((1-s)**k for k in range(10))
-            else: t=3; ts=10
-            pf.append(q); turns.append(q*t); spell.append(q*ts)
-        row.append((n,len(el)/n,len(lr),st.mean(pf),st.mean(turns),st.mean(spell)))
-    out.append(row)
-print("ПО:",BANDS)
-for r in out:
-    print(r[0],r[1],r[2])
-    for (lo,hi),c in zip(BANDS,r[3:]):
-        n,el,lr,pf,t,ts=c
-        print(f"   {lo}-{hi}: n={n} годны={el:.0%} легенд={lr}"+(f" провал={pf:.0%} ходов={t:.2f} (заклинание {ts:.2f})" if pf is not None else ""))
+NOCAP = {"Слепота/глухота II", "Слабоумие VIII"}   # заклинания без концентрации — у яда нет предела в 3 хода
+for name, dc, ab, who, rep, cond in P:
+    print(name, dc, ab.upper())
+    for lo, hi in BANDS:
+        mons = [m for m in M if lo <= m["challenge_rating"] <= hi]; n = len(mons)
+        el = [m for m in mons if who(m) and not immune(m) and not cimm(m, cond)]
+        if not el:
+            print(f"   ПО {lo}-{hi}: годны 0%"); continue
+        pf, T, S, T2, nlr = [], [], [], [], 0
+        for m in el:
+            if has(m, "Legendary Resistance"):          # первая доза сгорает
+                nlr += 1; pf.append(0); T.append(0); S.append(0); T2.append(0); continue
+            q = pfail(save(m, ab), dc, has(m, "Magic Resistance") or resist(m)); s = 1 - q
+            ts = sum((1 - s) ** k for k in range(10)) if rep == "end" else 10
+            t = ts if name in NOCAP else (1 + (1 - s) + (1 - s) ** 2 if rep == "end" else 3)
+            pf.append(q); T.append(q * t); S.append(q * ts); T2.append((1 - (1 - q) ** 2) * t)
+        print(f"   ПО {lo}-{hi}: годны {len(el)/n:.0%} (ЛС у {nlr}) | провал {st.mean(pf):.0%} | ходов {st.mean(T):.2f}"
+              f" vs заклинание {st.mean(S):.2f} | 2 дозы: {st.mean(T2):.2f}")
