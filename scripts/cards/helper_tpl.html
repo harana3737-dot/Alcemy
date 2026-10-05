@@ -636,9 +636,15 @@ function renderBag(){
     r.innerHTML=`<span class="nm"></span><button type="button" class="btn sm" aria-label="Меньше">−</button><span class="q">${b.q}</span><button type="button" class="btn sm" aria-label="Больше">+</button><button type="button" class="btn sm soft">${drink?'Выпить':'Потратить'}</button>${others.length?`<select class="give" aria-label="Отдать один" style="width:auto;padding:3px 4px;font-size:12px"><option value="">отдать</option>${others.map(p=>`<option value="${p.id}">→ ${esc(p.name)}</option>`).join('')}</select>`:''}`;
     const sub=[c.l?ROM[c.l]+' · '+CLS[c.k]:'',b.note||''].filter(Boolean).join(' · ');
     r.querySelector('.nm').innerHTML=`${esc(b.n)}<small>${esc(sub)}</small>`;
+    if(b.note==='дефект: ещё не назначен'){const base=b.n.replace(/ \(нестабильное\)$/,''),cc=bagCard(b)||byName(base),lv=cc?cc.l:+((base.match(/(\d+)\.\1/)||[])[1]||1);
+      const sel=document.createElement('select');sel.style.cssText='width:auto;max-width:100%;padding:3px 4px;font-size:12px;margin-top:4px;display:block';sel.setAttribute('aria-label','Назначить дефект');
+      sel.innerHTML='<option value="">назначить дефект…</option>'+defectList(base,lv,cc).map((d,j)=>`<option value="${esc(d)}">${j+1}. ${esc(d)}</option>`).join('');
+      sel.onchange=()=>{if(!sel.value)return;const nt='дефект: '+defShort(sel.value);mutate(()=>{const same=ST.bag.find(x=>x!==b&&x.who===b.who&&x.n===b.n&&x.note===nt);
+        if(b.q>1){b.q--;if(same)same.q++;else ST.bag.push({...b,q:1,note:nt})}else if(same){same.q++;b.q=0}else b.note=nt;logx(`«${b.n}»: ${nt}`)})};
+      r.querySelector('.nm').appendChild(sel)}
     const bs=r.querySelectorAll('button');
     bs[0].onclick=()=>mutate(()=>{b.q--});bs[1].onclick=()=>mutate(()=>{b.q++});
-    bs[2].onclick=drink?()=>{$('dq').value=c.n;$('dwho').value=b.who;DM={};const NM={'Долгое действие':'long','Двойной срок':'dbl','Чистый':'clean','Долгое окно':'lwin','Двойной заряд':'twin'};String(b.note||'').split(' + ').forEach(x=>{if(NM[x])DM[NM[x]]=true});BAGPICK=b.who;fillDrink();$('dq').scrollIntoView({behavior:'smooth',block:'center'})}
+    bs[2].onclick=drink?()=>{$('dq').value=c.n;$('dwho').value=b.who;DM={};const NM={'Долгое действие':'long','Двойной срок':'dbl','Чистый':'clean','Долгое окно':'lwin','Двойной заряд':'twin','дефект: Короткое':'short','дефект: Тяжёлое':'heavy'};String(b.note||'').split(' + ').forEach(x=>{if(NM[x])DM[NM[x]]=true});BAGPICK=b.who;fillDrink();$('dq').scrollIntoView({behavior:'smooth',block:'center'})}
       :()=>mutate(()=>{b.q--;logx(`${P(b.who).name}: потрачено «${b.n}», осталось ${b.q}`)});
     const g=r.querySelector('.give');if(g)g.onchange=()=>{const to=g.value;if(!to)return;mutate(()=>{b.q--;
       const t=ST.bag.find(x=>x.who===to&&x.n===b.n);if(t)t.q++;else ST.bag.push({n:b.n,q:1,who:to,...(b.card?{card:b.card}:{}),...(b.note?{note:b.note}:{})});
@@ -800,7 +806,7 @@ $('jfAdd').onclick=async()=>{
 // ===== Запись варки: сумка + журнал =====
 // ===== Бонусы 5+ и 20 при записи варки (7.7 зелья и яды, 8.12 эликсиры) =====
 const KEEP_OFF=new Set(['Экономия трав','Ещё одно','Ещё одна доза','Выше уровнем','Два бонуса']);
-function potKind(n){return /^Яд\b/.test(n)?'poison':/лечени/i.test(n)?'heal':'potion'}
+function potKind(n){return /^Яд(\s|$)/.test(n)?'poison':/лечени/i.test(n)?'heal':'potion'}
 function bonusLists(n,lvl,c){
   if(c){ // эликсир по классу (8.12)
     const k=c.k, L5=['Экономия трав'], L20=['Ещё одна доза','Два бонуса'];
@@ -856,13 +862,14 @@ function recForm(box,opts){
    <div class="recg">${[['n20','Нат. 20'],['hi','Успех 5+'],['ok','Успех'],['un','Нестаб.'],['fl','Провал']].map(([k,t])=>`<label><span>${t}</span><input type="number" min="0" max="10" value="0" data-k="${k}"></label>`).join('')}</div>
    <div class="chips rmode" style="margin:6px 0"><button type="button" class="chip" data-s="0">для себя</button><button type="button" class="chip" data-s="1">на продажу</button></div>
    <div class="rb"></div>
+   <div class="rd"></div>
    <div class="rres"></div>
    <button type="button" class="btn soft rgo">Записать</button><span class="note rmsg" style="margin-left:8px"></span>`;
   const rn=box.querySelector('.rn'), rl=box.querySelector('.rl');
   let sale=!!(opts.name&&S.t.sale);
   const cur=()=>{const n=opts.name||(rn.value.trim());const c=opts.card||byName(n)||null;const lvl=c?c.l:(opts.lvl||+rl.value);
     const k={};box.querySelectorAll('[data-k]').forEach(i=>k[i.dataset.k]=Math.max(0,Math.min(10,+i.value||0)));return {n,c,lvl,k}};
-  const upd=()=>{box.querySelectorAll('.rmode .chip').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.s==='1')===sale));const x=cur();bonusArea(box,x.n,x.lvl,x.c,x.k,sale);resArea(box,x.n,x.lvl,x.c,x.k)};
+  const upd=()=>{box.querySelectorAll('.rmode .chip').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.s==='1')===sale));const x=cur();bonusArea(box,x.n,x.lvl,x.c,x.k,sale);defArea(box,x.n,x.lvl,x.c,x.k);resArea(box,x.n,x.lvl,x.c,x.k)};
   box.addEventListener('change',e=>{if(e.target.matches('.b5s,.b20s,.tw1,.tw2')){const x=cur();resArea(box,x.n,x.lvl,x.c,x.k)}});
   box.querySelectorAll('.rmode .chip').forEach(b=>b.onclick=()=>{sale=b.dataset.s==='1';upd()});
   box.querySelectorAll('[data-k]').forEach(i=>i.oninput=upd);
@@ -884,8 +891,9 @@ function recForm(box,opts){
       else doses.push({n,note:v})});
     let spent='';
     mutate(()=>{
-      const add=(nm,q,note)=>{if(!q)return;const b=ST.bag.find(b=>b.who==='p1'&&b.n===nm&&(b.note||'')===(note||''));if(b)b.q+=q;else ST.bag.push({n:nm,q,who:'p1',...(note?{note}:{}),...(c&&nm===n?{}:{})})};
-      doses.forEach(d=>add(d.n,1,d.note));add(n+' (нестабильное)',k.un,'дефект определяет мастер');
+      const add=(nm,q,note,card)=>{if(!q)return;const b=ST.bag.find(b=>b.who==='p1'&&b.n===nm&&(b.note||'')===(note||''));if(b)b.q+=q;else ST.bag.push({n:nm,q,who:'p1',...(note?{note}:{}),...(card?{card}:{})})};
+      doses.forEach(d=>add(d.n,1,d.note));
+      const dfs=[...box.querySelectorAll('.dfs')].map(x=>x.value);for(let i=0;i<k.un;i++){const d=dfs[i];add(n+' (нестабильное)',1,d?'дефект: '+defShort(d):'дефект: ещё не назначен',c?c.n:null)}
       spent=applyUse(box);
       logx(`Сварено «${n}»: ${doses.length} годных${k.un?`, ${k.un} нестабильных`:''}${k.fl?`, провалов ${k.fl}`:''}${spent?'. Расход: '+spent:''}`)});
     const notes=doses.filter(d=>d.note||d.n!==n).map(d=>d.n!==n?d.n:d.note);
@@ -1130,6 +1138,31 @@ function inkForm(box){
   });
 }
 inkForm($('jink'));
+
+// ===== Дефекты нестабильных доз (7.8 зелья и яды, 8.13 эликсиры) — выбираешь тот, что назначил мастер =====
+function defectList(n,lvl,c){
+  if(c){
+    if(c.k==='fl')return ['Слабая: −2 к табличной СЛ','Малая: область на 5 фт меньше','Медленная: срабатывает в начале следующего хода бросающего','Светится: тусклый свет 5 фт на бросающем 1 минуту, помеха на Скрытность','Неровная: −1 на каждом кубе урона (не ниже 1)','Выдыхается: годно 3 дня'];
+    const ch=['chg','rea','psn'].includes(c.k), oil=['oilw','oils','salve'].includes(c.k);
+    return [ch?'Короткое: окно 10 минут':'Короткое: длительность вдвое меньше',oil?'Короткое (вместо «Тяжёлого»): длительность вдвое меньше':'Тяжёлое: токсичность +1',
+      'Медленное: эффект начинается в начале следующего хода','Светится: тусклый свет 5 фт на время эффекта, помеха на Скрытность',
+      (ch||c.k==='oils')?'Слабая привязка: −2 к табличной СЛ или атаке':'Горькое: выпить — действием','Выдыхается: годно 3 дня'];
+  }
+  if(potKind(n)==='poison')return ['Слабый: −2 к урону каждого раунда (не ниже 1)','Медленный: урон начинается со следующего раунда','Липкий: наносится на оружие 1 минуту','Короткий: держится 3 атаки вместо 5','Выдыхается: годно 3 дня',lvl>=6?'Тусклый: шанс триггера вдвое меньше':'Короткий (к6 = 6 до 6.6): 3 атаки вместо 5'];
+  return ['Слабое: −2 к лечению каждого раунда (не ниже 1)','Медленное: лечение начинается со следующего раунда','Горькое: выпить — действие, а не бонусное действие','Мутит: помеха на следующий бросок атаки или проверку','Выдыхается: годно 3 дня',lvl>=6?'Тусклое: шанс триггера вдвое меньше':'Горькое (к6 = 6 до 6.6): выпить — действие'];
+}
+const defShort=d=>d.split(':')[0].replace(/ \(.*\)$/,'');
+function defArea(box,n,lvl,c,cnt){
+  const ar=box.querySelector('.rd');if(!ar)return;
+  const keep={};ar.querySelectorAll('select').forEach(x=>keep[x.dataset.i]=x.value);
+  if(!n||!cnt.un){ar.innerHTML='';ar.dataset.key='';return}
+  const L=defectList(n,lvl,c);
+  let h=`<div class="sect">Дефекты нестабильных — ${c?'8.13':'7.8'}${c&&c.k==='fl'?', склянка':''}</div>`;
+  for(let i=0;i<cnt.un;i++)h+=`<div class="brow"><span>1–4 №${i+1}</span><select class="dfs" data-i="${i}" aria-label="Дефект"><option value="">— мастер ещё не назначил</option>${L.map((d,j)=>`<option value="${esc(d)}">${j+1}. ${esc(d)}</option>`).join('')}</select></div>`;
+  ar.innerHTML=h;
+  if(ar.dataset.key===n+'|'+lvl)ar.querySelectorAll('select').forEach(x=>{const v=keep[x.dataset.i];if(v&&[...x.options].some(o=>o.value===v))x.value=v});
+  ar.dataset.key=n+'|'+lvl;
+}
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;
