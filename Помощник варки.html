@@ -259,7 +259,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
   <div class="card" style="margin-top:16px"><h2>Переработка эссенций</h2><div id="jess"></div>
     <p class="note">9.3. Свежий трофей можно варить и так, но влажный живёт до долгого отдыха (с консервацией — до 7 дней). Переработанная эссенция хранится месяц и дольше; отличная даёт +1 к проверке варки, нестабильная — +2 к СЛ и живёт 24 часа.</p></div>
   <div class="card" style="margin-top:16px"><h2>Варка противоядий</h2><div id="janti"></div>
-    <p class="note">7.9, черновик. По одному за попытку, 2 часа. Матрица — ⅓ цены поровну лечебными и ядовитыми травами; уровни трав в 7.9 не ограничены. Два противоядия = одно зелье уровня ступени в рост мастерства (слабое — 4.4).</p></div>
+    <p class="note">7.9, черновик. По одному за попытку, 2 часа. Матрица — ⅓ цены поровну лечебными и ядовитыми травами, не ниже уровня ступени (4 / 6 / 8 / 10), выше можно — как у чернил (Ж-85). Два противоядия = одно зелье уровня ступени в рост мастерства (слабое — 4.4).</p></div>
   <div class="status note" id="jstat" style="margin:12px 0 0"></div>
   <div id="jgroups"></div>
   <details class="card" style="margin-top:16px"><summary>Добавить запись</summary>
@@ -1244,7 +1244,7 @@ function antiForm(box){
     box.querySelector('.afacts').innerHTML=`СЛ <b>${dc}</b>${over?` (с мастерства ${a.m}; выше мастерства: +5 + ${a.m-M})`:''} · бонус ${B>=0?'+':''}${B} · 2 часа · катализатор ${ROM[a.o]} порядка · эссенция не нужна · цена ${a.p} зм.<br>Шансы: успех ${pct(ch.n20+ch.hi+ch.ok)}, нестабильное ${pct(ch.un)}, провал ${pct(ch.fl)}. <span style="color:var(--warn)">Рецепт — отдельный на ступень (купить или восстановить по образцу).</span>`;
     if(!ST.mat){box.querySelector('.ares').innerHTML='';return}
     const half=a.p/6, cat=ST.mat.cat.filter(x=>x.o===a.o&&x.used<10), keep=box.querySelector('.ac')?.value;
-    const rows=[['heal','Лечебные'],['poison','Ядовитые']].map(([k,t])=>{const h=herbValue(k,1);return `${t} травы на <b>${fmtZ(half)} зм</b> из ${fmtZ(h)}${h<half-1e-9?' <span class="bad">не хватает</span>':''}`});
+    const rows=[['heal','Лечебные'],['poison','Ядовитые']].map(([k,t])=>{const h=herbValue(k,a.m);return `${t} травы ур. ${a.m}+ на <b>${fmtZ(half)} зм</b> из ${fmtZ(h)}${h<half-1e-9?' <span class="bad">не хватает</span>':''}`});
     rows.push(`Катализатор ${ROM[a.o]} порядка: <select class="ac" aria-label="Катализатор">${cat.map(x=>`<option value="${x.id}">${x.used}/10</option>`).join('')}<option value="">не списывать</option></select>${cat.length?(cat[0].used>=stab(cat[0])?' <span class="wr">проверка нестабильности (5.2)</span>':''):' <span class="bad">нет катализатора</span>'}`);
     box.querySelector('.ares').innerHTML=`<div class="sect">Расход</div><div class="resb">${rows.map(r=>`<div>${r}</div>`).join('')}</div>`;
     const ac=box.querySelector('.ac');if(keep!==undefined&&[...ac.options].some(o=>o.value===keep))ac.value=keep;
@@ -1254,7 +1254,7 @@ function antiForm(box){
     const o=b.dataset.o, a=ANTI[+al.value], M=Math.max(1,Math.min(10,+$('m').value||1)), half=a.p/6, acV=box.querySelector('.ac')?.value;
     let spent='',res='';
     mutate(()=>{const out=[];
-      ['heal','poison'].forEach(k=>{if(herbValue(k,1)>=half-1e-9)out.push(`${KIND[k].toLowerCase()} ${takeValue(k,half,1)}`);else out.push(`${KIND[k].toLowerCase()} не списаны: нужно на ${fmtZ(half)} зм`)});
+      ['heal','poison'].forEach(k=>{if(herbValue(k,a.m)>=half-1e-9)out.push(`${KIND[k].toLowerCase()} ${takeValue(k,half,a.m)}`);else out.push(`${KIND[k].toLowerCase()} ур. ${a.m}+ не списаны: нужно на ${fmtZ(half)} зм`)});
       if(acV){const x=ST.mat.cat.find(y=>y.id===acV);if(x){x.used=Math.min(10,x.used+1);out.push(`катализатор ${ROM[x.o]} — ${x.used}/10`)}}
       spent=out.join(', ');
       const put=(nm,note)=>{const bb=ST.bag.find(x=>x.who==='p1'&&x.n===nm&&(x.note||'')===(note||''));if(bb)bb.q++;else ST.bag.push({n:nm,q:1,who:'p1',...(note?{note}:{})})};
