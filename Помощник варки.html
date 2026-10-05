@@ -93,8 +93,10 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
 .tb:empty{display:none}
 .tb.hot{background:var(--bad)}
 #tab-belt{margin-top:18px}
-.bgrid{display:grid;gap:16px;margin-top:16px}
-@media(min-width:880px){.bgrid{grid-template-columns:1fr 1fr;align-items:start}}
+.bgrid{display:grid;gap:16px;margin-top:16px;grid-template-columns:minmax(0,1fr)}
+.bgrid>div,.grid>div{min-width:0}
+.row>div select,.bagi select{max-width:100%}
+@media(min-width:880px){.bgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
 .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .btn{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:7px 12px;cursor:pointer}
 .btn:hover{border-color:var(--acc)}
@@ -156,6 +158,11 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 .resb{font-size:13px;display:grid;gap:6px;background:var(--bg);border-radius:10px;padding:8px 10px}
 .resb select{width:auto;max-width:100%;padding:4px 6px;font-size:13px}
 .resb .bad{color:var(--bad);font-weight:600}.resb .wr{color:var(--warn)}.resb small{color:var(--muted)}
+.sugg{display:grid;gap:2px;margin-top:4px;max-height:44vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px}
+.sugg[hidden],.sugg:empty{display:none}
+.sugg button{font:inherit;font-size:14px;text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;color:var(--ink);cursor:pointer}
+.sugg button:hover,.sugg button:focus-visible{background:var(--chip)}
+.sugg small{color:var(--muted);margin-left:6px;font-size:12px}
 </style>
 </head>
 <body>
@@ -211,7 +218,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
   <div>
     <div class="card"><h2>Выпить</h2>
       <label class="f" for="dq">Что</label>
-      <input id="dq" list="dlist" type="search" placeholder="Эликсир или заряд…" autocomplete="off">
+      <input id="dq" data-list="dlist" type="search" placeholder="Эликсир или заряд…" autocomplete="off">
       <datalist id="dlist"></datalist><datalist id="bagList"></datalist><datalist id="essList"><option value="Тело"><option value="Движение"><option value="Покров"><option value="Разум"><option value="Чувства"><option value="Смерть/душа"><option value="Вода/дыхание"><option value="Эфир"><option value="Стихия: огонь"><option value="Стихия: холод"><option value="Стихия: молния"><option value="Стихия: звук"><option value="Стихия: кислота"></datalist>
       <div class="row" style="margin-top:10px">
         <div><label class="f" for="dwho">Кто пьёт</label><select id="dwho"></select></div>
@@ -651,7 +658,7 @@ function renderBag(){
       logx(`${P(b.who).name} → ${P(to).name}: «${b.n}»`)})};
     box.appendChild(r)});
   const f=document.createElement('div');f.className='row';f.style.marginTop='10px';
-  f.innerHTML=`<div><input id="bagN" list="bagList" type="search" placeholder="Положить: название" autocomplete="off"></div><div style="flex:.35"><input id="bagQ" type="number" min="1" value="1" aria-label="Сколько"></div><div style="flex:none"><button type="button" class="btn" id="bagAdd">+</button></div>`;
+  f.innerHTML=`<div><input id="bagN" data-list="bagList" type="search" placeholder="Положить: название" autocomplete="off"></div><div style="flex:.35"><input id="bagQ" type="number" min="1" value="1" aria-label="Сколько"></div><div style="flex:none"><button type="button" class="btn" id="bagAdd">+</button></div>`;
   box.appendChild(f);
   $('bagAdd').onclick=()=>{const n=$('bagN').value.trim();if(!n)return;addBag(n,Math.max(1,+$('bagQ').value||1),BAGWHO)};
   {const sb=document.createElement('button');sb.type='button';sb.className='btn sm'+(ST.seed!==SEED.id?' soft':' ghost');sb.style.marginTop='10px';
@@ -858,7 +865,7 @@ function bonusArea(box,n,lvl,c,cnt,sale){
 }
 function recForm(box,opts){
   box.innerHTML=`<div class="sect">Записать варку</div>
-   ${opts.name?'':`<div class="row"><div><input class="rn" list="potList" type="search" placeholder="Зелье или эликсир, например «Зелье лечения 2.2»" aria-label="Что варила" autocomplete="off"></div><div style="flex:.4"><select class="rl" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${l}.${l}</option>`).join('')}</select></div></div>`}
+   ${opts.name?'':`<div class="row"><div><input class="rn" data-list="potList" type="search" placeholder="Зелье или эликсир, например «Зелье лечения 2.2»" aria-label="Что варила" autocomplete="off"></div><div style="flex:.4"><select class="rl" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${l}.${l}</option>`).join('')}</select></div></div>`}
    <div class="recg">${[['n20','Нат. 20'],['hi','Успех 5+'],['ok','Успех'],['un','Нестаб.'],['fl','Провал']].map(([k,t])=>`<label><span>${t}</span><input type="number" min="0" max="10" value="0" data-k="${k}"></label>`).join('')}</div>
    <div class="chips rmode" style="margin:6px 0"><button type="button" class="chip" data-s="0">для себя</button><button type="button" class="chip" data-s="1">на продажу</button></div>
    <div class="rb"></div>
@@ -1011,7 +1018,7 @@ function renderMat(){
   if(!ST.mat.ess.length)box.insertAdjacentHTML('beforeend','<div class="note">Нет</div>');
   ST.mat.ess.forEach(e=>row(e.n,`${e.types.join(' / ')} ${ROM[e.l]}${e.note?' · '+e.note:''}`,e.q,()=>mutate(()=>{e.q--;ST.mat.ess=ST.mat.ess.filter(x=>x.q>0)}),()=>mutate(()=>{e.q++})));
   const fe=document.createElement('div');fe.className='row';fe.style.marginTop='6px';fe.style.flexWrap='wrap';
-  fe.innerHTML=`<div style="flex:1 1 130px"><input id="men" type="search" placeholder="Что (чешуя, пыль…)" aria-label="Название"></div><div style="flex:1 1 120px"><input id="met" list="essList" type="search" placeholder="Тип" aria-label="Тип эссенции"></div><div style="flex:0 0 74px"><select id="mel" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${ROM[l]}</option>`).join('')}</select></div><div style="flex:none"><button type="button" class="btn" id="mea">+</button></div>`;
+  fe.innerHTML=`<div style="flex:1 1 130px"><input id="men" type="search" placeholder="Что (чешуя, пыль…)" aria-label="Название"></div><div style="flex:1 1 120px"><input id="met" data-list="essList" type="search" placeholder="Тип" aria-label="Тип эссенции"></div><div style="flex:0 0 74px"><select id="mel" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${ROM[l]}</option>`).join('')}</select></div><div style="flex:none"><button type="button" class="btn" id="mea">+</button></div>`;
   box.appendChild(fe);
   $('mea').onclick=()=>{const t=$('met').value.trim();if(!t)return $('met').focus();const n=$('men').value.trim()||('Эссенция '+t);const l=+$('mel').value;
     mutate(()=>{ST.mat.ess.push({id:uid(),n,types:t.split('/').length>2?[t]:[t],l,q:1,note:''});logx(`Материалы: эссенция «${n}» (${t} ${ROM[l]})`)})};
@@ -1163,6 +1170,26 @@ function defArea(box,n,lvl,c,cnt){
   if(ar.dataset.key===n+'|'+lvl)ar.querySelectorAll('select').forEach(x=>{const v=keep[x.dataset.i];if(v&&[...x.options].some(o=>o.value===v))x.value=v});
   ar.dataset.key=n+'|'+lvl;
 }
+
+// ===== Подсказки под полем вместо системного выпадающего списка (на телефоне он закрывал клавиатуру) =====
+function sugShow(inp){
+  const dl=document.getElementById(inp.dataset.list);if(!dl)return;
+  let b=inp._sug;if(!b){b=document.createElement('div');b.className='sugg';b.setAttribute('role','listbox');inp.insertAdjacentElement('afterend',b);inp._sug=b}
+  const q=inp.value.trim().toLowerCase();
+  if(inp._pick!==undefined&&inp._pick===inp.value){b.innerHTML='';return}delete inp._pick;
+  if(!q){b.innerHTML='';return}
+  const all=[...dl.options].map(o=>({v:o.value,l:o.label&&o.label!==o.value?o.label:''}));
+  const m=all.filter(o=>o.v.toLowerCase().includes(q)).sort((a,c)=>(c.v.toLowerCase().startsWith(q)-a.v.toLowerCase().startsWith(q))||a.v.localeCompare(c.v,'ru')).slice(0,8);
+  if(!m.length||(m.length===1&&m[0].v.toLowerCase()===q)){b.innerHTML='';return}
+  b.innerHTML='';b.hidden=false;
+  m.forEach(o=>{const x=document.createElement('button');x.type='button';x.setAttribute('role','option');x.textContent=o.v;
+    if(o.l){const sm=document.createElement('small');sm.textContent=o.l;x.appendChild(sm)}
+    x.addEventListener('pointerdown',e=>e.preventDefault());
+    x.onclick=()=>{inp.value=o.v;inp._pick=o.v;b.innerHTML='';inp.dispatchEvent(new Event('input',{bubbles:true}))};b.appendChild(x)});
+}
+document.addEventListener('input',e=>{const t=e.target;if(t.matches&&t.matches('input[data-list]'))sugShow(t)});
+document.addEventListener('focusin',e=>{const t=e.target;if(t.matches&&t.matches('input[data-list]')){if(innerWidth<880)setTimeout(()=>{try{t.scrollIntoView({block:'start',behavior:'smooth'})}catch(_){}},300);sugShow(t)}});
+document.addEventListener('focusout',e=>{const t=e.target;if(t._sug)setTimeout(()=>{if(document.activeElement!==t)t._sug.innerHTML=''},200)});
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;
