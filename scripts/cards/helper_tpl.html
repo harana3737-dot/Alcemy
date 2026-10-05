@@ -252,6 +252,10 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <p class="note">Под каждую дозу 5+ и 20 — выбор бонуса, рекомендованный отмечен ★. Годные дозы уходят в сумку Талиса, бонус пишется на флакон. Если уровень зелья равен мастерству, успехи сами добавляются в рост мастерства (натуральная 20 — за два). Эликсир выбирается из каталога по названию; то же есть в карточке рецепта на вкладке «Варка».</p></div>
   <div class="card" style="margin-top:16px"><h2>Варка чернил</h2><div id="jink"></div>
     <p class="note">Набор за раз, без партий. Матрица — половина лечебных и половина ядовитых трав на ⅓ цены набора, травы не ниже уровня набора (10.1, правило мастера); эссенция уровня набора, тип даёт резонанс (+1 к Начертанию). Два успешных набора своего уровня = одно зелье в рост мастерства, натуральная 20 — сама по себе одно (3.2).</p></div>
+  <div class="card" style="margin-top:16px"><h2>Катализатор из сырья</h2><div id="jcat"></div>
+    <p class="note">5.3. Провал на 5+ — сырьё потеряно; провал на 1–4 — катализатор нестабилен: 3 стабильных применения вместо 5. Сырьё — из «Прочего» в материалах.</p></div>
+  <div class="card" style="margin-top:16px"><h2>Переработка эссенций</h2><div id="jess"></div>
+    <p class="note">9.3. Свежий трофей можно варить и так, но влажный живёт до долгого отдыха (с консервацией — до 7 дней). Переработанная эссенция хранится месяц и дольше; отличная даёт +1 к проверке варки, нестабильная — +2 к СЛ и живёт 24 часа.</p></div>
   <div class="card" style="margin-top:16px"><h2>Варка противоядий</h2><div id="janti"></div>
     <p class="note">7.9, черновик. По одному за попытку, 2 часа. Матрица — ⅓ цены поровну лечебными и ядовитыми травами; уровни трав в 7.9 не ограничены. Два противоядия = одно зелье уровня ступени в рост мастерства (слабое — 4.4).</p></div>
   <div class="status note" id="jstat" style="margin:12px 0 0"></div>
@@ -728,7 +732,7 @@ function renderBelt(){
 
 // вкладки
 function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';ls.set('tab',t);if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd()}}
+  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';ls.set('tab',t);if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
@@ -757,7 +761,7 @@ async function masteryTrack(M){
   await JDB.collection('tracks').doc(id).set(data);return {id,...data};
 }
 function renderJournal(){
-  if($('jink')&&$('jink')._upd&&!$('tab-jour').hidden)setTimeout(()=>{$('jink')._upd();if($('janti')._upd)$('janti')._upd()},0);
+  if($('jink')&&$('jink')._upd&&!$('tab-jour').hidden)setTimeout(()=>{$('jink')._upd();['janti','jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())},0);
   const root=$('jgroups');if(!root)return;root.innerHTML='';
   if(!JDB){root.innerHTML='<p class="note">Журнал хранится на claude.ai: открой страницу там и войди в аккаунт.</p>';return}
   if(!TR.length){root.innerHTML='<p class="note">Записей пока нет — добавь первую внизу.</p>';return}
@@ -922,7 +926,9 @@ const ORD=l=>l<=2?0:l<=5?1:l<=7?2:l<=9?3:4;
 const KIND={heal:'Лечебные',poison:'Ядовитые'};
 const fmtZ=v=>(Math.round(v*100)/100).toString().replace('.',',');
 function matInit(){if(!ST.mat||ST.matSeed===undefined){ST.mat=JSON.parse(JSON.stringify(SEED.mat));ST.matSeed=SEED.mid;return true}
-  if(ST.mat.gold===undefined){ST.mat.gold=SEED.mat.gold;return true}return false}
+  let ch=false;if(ST.mat.gold===undefined){ST.mat.gold=SEED.mat.gold;ch=true}
+  ST.mat.ess.forEach(e=>{if(e.id==='e4'&&!e.st){e.st='fresh';ch=true}});
+  ST.mat.cat.forEach(x=>{if(!x.stable){x.stable=5;ch=true}});return ch}
 function essParse(c){const m=String(c.e).match(/^(.*?)\s+(X|IX|VIII|VII|VI|V|IV|III|II|I)\b/);return m?{type:m[1],l:ROM.indexOf(m[2])}:{type:String(c.e),l:c.l}}
 const essMatch=(it,type)=>it.types.some(t=>t===type||type.startsWith(t)||t.startsWith(type));
 // смешанные травы на сумму: [{k, min, v}] — годятся для предметов уровня ≤ min (Ж-85: чернила — правило мастера, заряды и склянки — по аналогии)
@@ -970,9 +976,9 @@ function resArea(box,n,lvl,c,k){
   else{const have=herbValue(P.kind,P.lvl);rows.push(`${KIND[P.kind]} травы ур. ${P.lvl}+ на <b>${fmtZ(P.value)} зм</b> из ${fmtZ(have)} (по ценности, ⅓ цены)${have<P.value?' <span class="bad">не хватает</span>':''}${P.saved?` <small>(экономия на ${P.saved} — половина)</small>`:''}`)}
   if(P.ess){const opts=ST.mat.ess.filter(e=>e.q>0).sort((a,b)=>(essMatch(b,P.ess.type)-essMatch(a,P.ess.type))||(a.l-b.l));
     const fit=opts.filter(e=>essMatch(e,P.ess.type)&&e.l>=P.ess.l), def=fit.find(e=>e.q>=P.att)||fit[0];
-    rows.push(`Эссенция ${esc(P.ess.type)} ${ROM[P.ess.l]||''} ×${P.att}: <select class="res-e" aria-label="Эссенция">${opts.map(e=>`<option value="${e.id}" ${def&&e.id===def.id?'selected':''}>${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${e.q})</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${!def?' <span class="bad">подходящей нет</span>':def.q<P.att?` <span class="bad">есть только ${def.q}</span>`:''}${def&&def.l>P.ess.l?' <small>(эссенция выше уровня)</small>':''}`)}
+    rows.push(`Эссенция ${esc(P.ess.type)} ${ROM[P.ess.l]||''} ×${P.att}: <select class="res-e" aria-label="Эссенция">${opts.map(e=>`<option value="${e.id}" ${def&&e.id===def.id?'selected':''}>${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${e.q})</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${!def?' <span class="bad">подходящей нет</span>':def.q<P.att?` <span class="bad">есть только ${def.q}</span>`:''}${def&&def.l>P.ess.l?' <small>(эссенция выше уровня)</small>':''}${def&&def.st==='good'?' <small>(отличная: +1 к проверке)</small>':''}${def&&def.st==='bad'?' <span class="wr">нестабильная: +2 к СЛ</span>':''}`)}
   if(P.cat){const opts=ST.mat.cat.filter(x=>x.o===P.cat.o&&x.used<10);const def=opts[0];
-    let w='';if(def){const from=def.used+1,to=def.used+P.att;if(to>10)w=' <span class="bad">не хватит применений</span>';else if(to>5)w=` <span class="wr">применения ${Math.max(6,from)}–${to}: проверка нестабильности (5.2)</span>`}
+    let w='';if(def){const from=def.used+1,to=def.used+P.att;if(to>10)w=' <span class="bad">не хватит применений</span>';else if(to>stab(def))w=` <span class="wr">применения ${Math.max(stab(def)+1,from)}–${to}: проверка нестабильности (5.2)</span>`}
     rows.push(`Катализатор ${ROM[P.cat.o]} порядка ×${P.att}: <select class="res-c" aria-label="Катализатор">${opts.map(x=>`<option value="${x.id}">${ROM[x.o]} порядка — ${x.used}/10</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${def?w:' <span class="bad">нет катализатора</span>'}`)}
   const pl=n=>n%10===1&&n%100!==11?'попытку':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'попытки':'попыток';
   ar.innerHTML=`<div class="sect">Расход на ${P.att} ${pl(P.att)}</div><div class="resb">${rows.map(r=>`<div>${r}</div>`).join('')}</div>`;
@@ -1018,23 +1024,26 @@ function renderMat(){
       logx(`Материалы: ${KIND[k].toLowerCase()} травы ур. ${l} +${fmtZ(q)}${gp?` (на ${fmtZ(v)} зм)`:''}`)})};
   sec('Эссенции');
   if(!ST.mat.ess.length)box.insertAdjacentHTML('beforeend','<div class="note">Нет</div>');
-  ST.mat.ess.forEach(e=>row(e.n,`${e.types.join(' / ')} ${ROM[e.l]}${e.note?' · '+e.note:''}`,e.q,()=>mutate(()=>{e.q--;ST.mat.ess=ST.mat.ess.filter(x=>x.q>0)}),()=>mutate(()=>{e.q++})));
+  ST.mat.ess.forEach(e=>row(e.n,`${e.types.join(' / ')} ${ROM[e.l]}${e.note?' · '+e.note:(e.st&&ESS_ST[e.st]?' · '+ESS_ST[e.st]:'')}`,fmtZ(e.q),()=>mutate(()=>{e.q--;ST.mat.ess=ST.mat.ess.filter(x=>x.q>0)}),()=>mutate(()=>{e.q++})));
   const fe=document.createElement('div');fe.className='row';fe.style.marginTop='6px';fe.style.flexWrap='wrap';
-  fe.innerHTML=`<div style="flex:1 1 130px"><input id="men" type="search" placeholder="Что (чешуя, пыль…)" aria-label="Название"></div><div style="flex:1 1 120px"><input id="met" data-list="essList" type="search" placeholder="Тип" aria-label="Тип эссенции"></div><div style="flex:0 0 74px"><select id="mel" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${ROM[l]}</option>`).join('')}</select></div><div style="flex:none"><button type="button" class="btn" id="mea">+</button></div>`;
+  fe.innerHTML=`<div style="flex:1 1 130px"><input id="men" type="search" placeholder="Что (чешуя, пыль…)" aria-label="Название"></div><div style="flex:1 1 120px"><input id="met" data-list="essList" type="search" placeholder="Тип" aria-label="Тип эссенции"></div><div style="flex:0 0 74px"><select id="mel" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${ROM[l]}</option>`).join('')}</select></div><div style="flex:none"><button type="button" class="btn" id="mea">+</button></div><label class="tg" style="flex:1 1 100%"><input type="checkbox" id="mef"><span>Влажный трофей, ещё не переработан (9.3)</span></label>`;
   box.appendChild(fe);
   $('mea').onclick=()=>{const t=$('met').value.trim();if(!t)return $('met').focus();const n=$('men').value.trim()||('Эссенция '+t);const l=+$('mel').value;
-    mutate(()=>{ST.mat.ess.push({id:uid(),n,types:t.split('/').length>2?[t]:[t],l,q:1,note:''});logx(`Материалы: эссенция «${n}» (${t} ${ROM[l]})`)})};
+    mutate(()=>{ST.mat.ess.push({id:uid(),n,types:[t],l,q:1,note:'',st:$('mef').checked?'fresh':'stable'});logx(`Материалы: эссенция «${n}» (${t} ${ROM[l]})`)})};
   sec('Катализаторы');
   if(!ST.mat.cat.length)box.insertAdjacentHTML('beforeend','<div class="note">Нет готовых</div>');
-  ST.mat.cat.forEach(x=>{const r=row(`Катализатор ${ROM[x.o]} порядка`,x.used>=10?'исчерпан':x.used>=5?'дальше — проверки нестабильности (5.2)':'стабильный',`${x.used}/10`,
+  ST.mat.cat.forEach(x=>{const r=row(`Катализатор ${ROM[x.o]} порядка`,(x.used>=10?'исчерпан':x.used>=stab(x)?'дальше — проверки нестабильности (5.2)':`стабильных применений ещё ${stab(x)-x.used}`)+(x.note?' · '+x.note:''),`${x.used}/10`,
       ()=>mutate(()=>{x.used=Math.max(0,x.used-1)}),()=>mutate(()=>{x.used=Math.min(10,x.used+1)}),'<button type="button" class="btn sm ghost" aria-label="Убрать">×</button>');
     r.querySelectorAll('button')[2].onclick=()=>mutate(()=>{ST.mat.cat=ST.mat.cat.filter(y=>y!==x);logx(`Материалы: катализатор ${ROM[x.o]} убран`)})});
   const fc=document.createElement('div');fc.className='btns';
   fc.innerHTML=[1,2,3,4].map(o=>`<button type="button" class="btn sm" data-o="${o}">+ катализатор ${ROM[o]}</button>`).join('');
-  fc.querySelectorAll('button').forEach(b=>b.onclick=()=>mutate(()=>{ST.mat.cat.push({id:uid(),o:+b.dataset.o,used:0});logx(`Материалы: катализатор ${ROM[+b.dataset.o]} порядка`)}));
+  fc.querySelectorAll('button').forEach(b=>b.onclick=()=>mutate(()=>{ST.mat.cat.push({id:uid(),o:+b.dataset.o,used:0,stable:5});logx(`Материалы: катализатор ${ROM[+b.dataset.o]} порядка`)}));
   box.appendChild(fc);
   sec('Прочее (вручную)');
   ST.mat.other.filter(o=>o.q>0).forEach(o=>row(o.n,o.note,o.q,()=>mutate(()=>{o.q--}),()=>mutate(()=>{o.q++})));
+  const fo=document.createElement('div');fo.className='row';fo.style.marginTop='6px';
+  fo.innerHTML=`<div><input id="mon" type="search" placeholder="Сырьё, трофей, компонент…" aria-label="Название"></div><div style="flex:none"><button type="button" class="btn" id="moa">+</button></div>`;box.appendChild(fo);
+  $('moa').onclick=()=>{const n=$('mon').value.trim();if(!n)return $('mon').focus();mutate(()=>{const o=ST.mat.other.find(x=>x.n===n);if(o)o.q++;else ST.mat.other.push({n,q:1,note:''});logx(`Материалы: «${n}» +1`)})};
   const rb=document.createElement('button');rb.type='button';rb.className='btn sm ghost';rb.style.marginTop='10px';rb.textContent='Взять материалы заново из листа персонажа';
   rb.onclick=()=>mutate(()=>{ST.mat=JSON.parse(JSON.stringify(SEED.mat));ST.matSeed=SEED.mid;logx('Материалы взяты из листа персонажа')});box.appendChild(rb);
 }
@@ -1119,7 +1128,7 @@ function inkForm(box){
     const cat=ord?ST.mat.cat.filter(x=>x.o===ord&&x.used<10):[];
     const rows=[['heal','Лечебные'],['poison','Ядовитые']].map(([k,t])=>{const have=herbValue(k,minL);return `${t} травы ур. ${minL}+ на <b>${fmtZ(half)} зм</b> из ${fmtZ(have)}${have<half-1e-9?' <span class="bad">не хватает</span>':''}`});
     rows.push(`Эссенция ур. ${l?ROM[l]:'I'}+ ×${l?1:'½'} (тип — резонанс): <select class="ie" aria-label="Эссенция">${fit.map(e=>`<option value="${e.id}">${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${fmtZ(e.q)})</option>`).join('')}<option value="">не списывать</option></select>${fit.length?'':' <span class="bad">подходящей нет</span>'}${fit.length&&fit[0].l>Math.max(1,l)?' <small>(выше уровнем — избыток теряется)</small>':''}`);
-    if(ord)rows.push(`Катализатор ${ROM[ord]} порядка: <select class="ic" aria-label="Катализатор">${cat.map(x=>`<option value="${x.id}">${x.used}/10</option>`).join('')}<option value="">не списывать</option></select>${cat.length?(cat[0].used>=5?' <span class="wr">проверка нестабильности (5.2)</span>':''):' <span class="bad">нет катализатора</span>'}`);
+    if(ord)rows.push(`Катализатор ${ROM[ord]} порядка: <select class="ic" aria-label="Катализатор">${cat.map(x=>`<option value="${x.id}">${x.used}/10</option>`).join('')}<option value="">не списывать</option></select>${cat.length?(cat[0].used>=stab(cat[0])?' <span class="wr">проверка нестабильности (5.2)</span>':''):' <span class="bad">нет катализатора</span>'}`);
     box.querySelector('.ires').innerHTML=`<div class="sect">Расход на набор</div><div class="resb">${rows.map(r=>`<div>${r}</div>`).join('')}</div>`;
     const ie=box.querySelector('.ie');if(keep!==undefined&&[...ie.options].some(o=>o.value===keep))ie.value=keep;
   };
@@ -1210,7 +1219,7 @@ function antiForm(box){
     if(!ST.mat){box.querySelector('.ares').innerHTML='';return}
     const half=a.p/6, cat=ST.mat.cat.filter(x=>x.o===a.o&&x.used<10), keep=box.querySelector('.ac')?.value;
     const rows=[['heal','Лечебные'],['poison','Ядовитые']].map(([k,t])=>{const h=herbValue(k,1);return `${t} травы на <b>${fmtZ(half)} зм</b> из ${fmtZ(h)}${h<half-1e-9?' <span class="bad">не хватает</span>':''}`});
-    rows.push(`Катализатор ${ROM[a.o]} порядка: <select class="ac" aria-label="Катализатор">${cat.map(x=>`<option value="${x.id}">${x.used}/10</option>`).join('')}<option value="">не списывать</option></select>${cat.length?(cat[0].used>=5?' <span class="wr">проверка нестабильности (5.2)</span>':''):' <span class="bad">нет катализатора</span>'}`);
+    rows.push(`Катализатор ${ROM[a.o]} порядка: <select class="ac" aria-label="Катализатор">${cat.map(x=>`<option value="${x.id}">${x.used}/10</option>`).join('')}<option value="">не списывать</option></select>${cat.length?(cat[0].used>=stab(cat[0])?' <span class="wr">проверка нестабильности (5.2)</span>':''):' <span class="bad">нет катализатора</span>'}`);
     box.querySelector('.ares').innerHTML=`<div class="sect">Расход</div><div class="resb">${rows.map(r=>`<div>${r}</div>`).join('')}</div>`;
     const ac=box.querySelector('.ac');if(keep!==undefined&&[...ac.options].some(o=>o.value===keep))ac.value=keep;
   };
@@ -1237,6 +1246,71 @@ function antiForm(box){
   });
 }
 antiForm($('janti'));
+
+// ===== Изготовление катализатора из сырья (5.3) и переработка трофеев в эссенцию (9.3) =====
+const CAT_DC=[0,11,17,21,25];
+const stab=x=>x.stable||5;
+const OUT6=[['n20','нат. 20'],['hi','успех 5+'],['ok','успех'],['un','провал 1–4'],['fl','провал 5+'],['n1','нат. 1']];
+function chancesTxt(dc,B){const ch={n20:.05,hi:0,ok:0,un:0,fl:.05};for(let r=2;r<=19;r++){const x=r+B;if(x>=dc+5)ch.hi+=.05;else if(x>=dc)ch.ok+=.05;else if(x>=dc-4)ch.un+=.05;else ch.fl+=.05}return ch}
+function catForm(box){
+  box.innerHTML=`<div class="row" style="flex-wrap:wrap"><div style="flex:1 1 180px"><label class="f">Сырьё (из «Прочего»)</label><select class="cr"></select></div>
+     <div style="flex:0 0 110px"><label class="f">Порядок</label><select class="co">${[1,2,3,4].map(o=>`<option value="${o}">${ROM[o]}</option>`).join('')}</select></div></div>
+   <div class="cfacts note" style="margin:6px 0"></div>
+   <div class="chips cout">${OUT6.map(([k,t])=>`<button type="button" class="chip" data-o="${k}">${t}</button>`).join('')}</div><span class="note cmsg"></span>`;
+  const cr=box.querySelector('.cr'), co=box.querySelector('.co');
+  const upd=()=>{
+    const keep=cr.value, items=ST.mat?ST.mat.other.filter(o=>o.q>0):[];
+    cr.innerHTML=items.map((o,i)=>`<option value="${i}">${esc(o.n)} (${o.q})</option>`).join('')||'<option value="">нет сырья</option>';
+    const auto=items.findIndex(o=>/катализ/i.test(o.n));if(keep!==''&&+keep<items.length)cr.value=keep;else if(auto>=0)cr.value=String(auto);
+    const it=items[+cr.value];if(it&&box._auto!==it.n){const m=it.n.match(/\b(IV|III|II|I) порядка/);if(m)co.value=String(ROM.indexOf(m[1]));box._auto=it.n}
+    const o=+co.value, B=+$('b').value||0, dc=CAT_DC[o], ch=chancesTxt(dc,B);
+    box.querySelector('.cfacts').innerHTML=`СЛ <b>${dc}</b> (СЛ зелья младшего уровня, для которого он нужен) · бонус ${B>=0?'+':''}${B}. Шансы: готов ${pct(ch.n20+ch.hi+ch.ok)}, нестабильный ${pct(ch.un)}, сырьё потеряно ${pct(ch.fl)}.${o===4?' <span style="color:var(--warn)">IV — только из сюжетного сырья, только себе.</span>':''} Время 5.3 не задаёт — у мастера.`;
+  };
+  co.onchange=upd;cr.onchange=()=>{box._auto=null;upd()};box._upd=upd;upd();
+  box.querySelectorAll('.cout .chip').forEach(b=>b.onclick=()=>{
+    const items=ST.mat.other.filter(o=>o.q>0), it=items[+cr.value];if(!it)return;const o=+co.value, r=b.dataset.o;let res='';
+    mutate(()=>{it.q--;
+      if(['n20','hi','ok'].includes(r)){ST.mat.cat.push({id:uid(),o,used:0,stable:5});res=`Готов катализатор ${ROM[o]} порядка (0/10).`}
+      else if(r==='un'){ST.mat.cat.push({id:uid(),o,used:0,stable:3,note:'нестабильный (5.3)'});res=`Нестабильный катализатор ${ROM[o]}: 3 стабильных применения, дальше проверки (5.2).`}
+      else res=r==='n1'?'Сырьё потеряно и осечка (таблица раздела 2).':'Сырьё потеряно.';
+      logx(`Катализатор из «${it.n}»: ${b.textContent}. ${res}`)});
+    box.querySelector('.cmsg').textContent=res;upd();
+  });
+}
+const ESS_ST={fresh:'трофей, не переработан',stable:'',good:'отличная: +1 к проверке варки',bad:'нестабильная: +2 к СЛ варки, 24 часа'};
+function essForm(box){
+  box.innerHTML=`<div class="row"><div><label class="f">Трофей или эссенция</label><select class="er"></select></div><div style="flex:0 0 96px"><label class="f">Бонус</label><input class="eb" type="number" aria-label="Бонус проверки переработки"></div></div>
+   <div class="efacts note" style="margin:6px 0"></div>
+   <div class="chips eout">${OUT6.map(([k,t])=>`<button type="button" class="chip" data-o="${k}">${t}</button>`).join('')}</div><span class="note emsg"></span>`;
+  const er=box.querySelector('.er'), eb=box.querySelector('.eb');
+  // по умолчанию: бонус варки минус бонус мастерства и рабочее место (+1); у Талиса +2
+  const EB=()=>eb.value===''?((+$('b').value||0)-MB(Math.max(1,Math.min(10,+$('m').value||1)))-1):(+eb.value||0);
+  eb.placeholder=String(EB());eb.oninput=()=>upd();
+  const upd=()=>{
+    const keep=er.value, items=ST.mat?ST.mat.ess.filter(e=>e.q>0&&(e.st==='fresh'||e.st==='bad')):[];
+    er.innerHTML=items.map(e=>`<option value="${e.id}">${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${fmtZ(e.q)})${e.st==='bad'?' · нестабильная':''}</option>`).join('')||'<option value="">нечего перерабатывать</option>';
+    if(keep&&items.some(e=>e.id===keep))er.value=keep;
+    const e=items.find(x=>x.id===er.value);
+    if(!e){box.querySelector('.efacts').textContent='Все эссенции стабильны. Новый трофей добавь в «Материалах» с отметкой «трофей».';return}
+    const dc=10+e.l, ch=chancesTxt(dc,EB());
+    box.querySelector('.efacts').innerHTML=`1 час на одну единицу · СЛ <b>${dc}</b> (10 + уровень) · Интеллект + инструменты, без мастерства и места. Шансы: стабильная ${pct(ch.ok)}, отличная ${pct(ch.hi+ch.n20)}, нестабильная ${pct(ch.un)}, испорчен ${pct(ch.fl)}.${e.note?`<br><small>${esc(e.note)}</small>`:''}`;
+  };
+  er.onchange=upd;box._upd=upd;upd();
+  box.querySelectorAll('.eout .chip').forEach(b=>b.onclick=()=>{
+    const e=ST.mat.ess.find(x=>x.id===er.value);if(!e)return;const r=b.dataset.o;let res='';
+    mutate(()=>{
+      const st=r==='ok'?'stable':(r==='hi'||r==='n20')?'good':r==='un'?'bad':null;
+      const one={...e,id:uid(),q:1};e.q=+(e.q-1).toFixed(2);
+      if(st){one.st=st;one.note=[ESS_ST[st],'переработана'].filter(Boolean).join(' · ');
+        const same=ST.mat.ess.find(x=>x!==e&&x.n===one.n&&x.l===one.l&&x.st===st&&x.types.join()===one.types.join());if(same)same.q++;else ST.mat.ess.push(one);
+        res=`«${e.n}» → ${st==='stable'?'стабильная эссенция':ESS_ST[st]}.`}
+      else res=`«${e.n}» испорчен${r==='n1'?' и осечка (таблица раздела 2)':''}.`;
+      ST.mat.ess=ST.mat.ess.filter(x=>x.q>1e-9);
+      logx(`Переработка: ${b.textContent}. ${res}`)});
+    box.querySelector('.emsg').textContent=res+' Время: 1 час.';upd();
+  });
+}
+catForm($('jcat'));essForm($('jess'));
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;
