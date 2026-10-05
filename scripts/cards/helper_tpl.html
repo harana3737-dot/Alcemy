@@ -27,6 +27,7 @@
   --warn:#dc8c55; --bad:#d97373; --ok:#5fb8a3; --chip:#262d29; --shadow:none;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 "Golos Text",system-ui,sans-serif;-webkit-text-size-adjust:100%}
 .wrap{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
@@ -85,6 +86,60 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
 .eff{font-size:14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .empty{color:var(--muted);padding:30px 0;text-align:center}
 .tbtn{float:right;font:inherit;font-size:12px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:3px 10px;cursor:pointer}
+.tabs{display:flex;gap:6px;margin-top:16px;border-bottom:1px solid var(--line)}
+.tabs button{font:inherit;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:8px 12px;cursor:pointer;margin-bottom:-1px}
+.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--acc);font-weight:600}
+.tb{font:500 11px "JetBrains Mono",monospace;background:var(--acc);color:var(--panel);border-radius:999px;padding:1px 6px;margin-left:3px}
+.tb:empty{display:none}
+.tb.hot{background:var(--bad)}
+#tab-belt{margin-top:18px}
+.bgrid{display:grid;gap:16px;margin-top:16px}
+@media(min-width:880px){.bgrid{grid-template-columns:1fr 1fr;align-items:start}}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:7px 12px;cursor:pointer}
+.btn:hover{border-color:var(--acc)}
+.btn.soft{background:var(--acc-soft);border-color:transparent}
+.btn.ghost{color:var(--muted)}
+.btn.big{width:100%;background:var(--acc);color:var(--panel);border-color:var(--acc);font-weight:600;padding:10px;margin-top:10px}
+.btn.sm{font-size:12px;padding:3px 9px;border-radius:8px}
+.btn.warn{border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:default}
+select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 8px}
+.ctop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.clock .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.now{font:400 24px Prata,serif}
+.savest{font-size:12px;color:var(--muted);text-align:right}
+.prev{font-size:14px;margin-top:10px;padding:10px;border-radius:10px;background:var(--bg)}
+.prev:empty{display:none}
+.prev .bad{color:var(--bad);font-weight:600}
+.prev .wr{color:var(--warn)}
+.od{margin-top:10px;padding:12px;border-radius:12px;background:var(--gold-soft)}
+.od b{display:block;margin-bottom:6px}
+.pcard{margin-bottom:16px}
+.phead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.phead h2{margin:0}
+.meter{display:flex;gap:3px;margin:10px 0 4px}
+.seg{flex:1;height:12px;border-radius:3px;background:var(--bg);border:1px solid var(--line)}
+.seg.on{background:var(--acc);border-color:var(--acc)}
+.seg.over{background:var(--bad);border-color:var(--bad)}
+.tox{font:500 14px "JetBrains Mono",monospace}
+.st{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.st .badge.bad{background:var(--bad);color:var(--panel)}
+.st .badge.gd{background:var(--gold-soft);color:var(--gold)}
+.ent{display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.ent .nm{flex:1;min-width:0}
+.ent .nm small{display:block;color:var(--muted);font-size:12px}
+.ent .tv{font:500 13px "JetBrains Mono",monospace;color:var(--muted);white-space:nowrap}
+.ent.res{opacity:.7}
+.ent .cc{color:var(--gold);font-size:12px}
+.bagi{display:flex;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line);font-size:14px}
+.bagi .nm{flex:1;min-width:0}
+.bagi .nm small{display:block;color:var(--muted);font-size:12px}
+.bagi .q{font:500 14px "JetBrains Mono",monospace;min-width:22px;text-align:center}
+.log{font-size:13px;max-height:260px;overflow:auto}
+.log div{padding:3px 0;border-top:1px solid var(--line)}
+.log span{font:500 12px "JetBrains Mono",monospace;color:var(--muted);margin-right:6px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 </style>
 </head>
 <body>
@@ -92,9 +147,13 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
 <header>
   <button class="tbtn" id="theme" type="button">тема</button>
   <h1>Помощник варки</h1>
-  <p>Выбери рецепт из __N__ и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. Правила v0.3; материал игрока, не карточки мастера.</p>
+  <p>Выбери рецепт из __N__ и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. На вкладке «Пояс» — сумка, выпитое, токсичность, алхимическая концентрация и отдых. Правила v0.3; материал игрока, не карточки мастера.</p>
 </header>
-<div class="grid">
+<nav class="tabs" role="tablist">
+  <button type="button" role="tab" data-tab="brew" aria-selected="true">Варка</button>
+  <button type="button" role="tab" data-tab="belt" aria-selected="false">Пояс <span id="beltBadge" class="tb"></span></button>
+</nav>
+<div class="grid" id="tab-brew">
   <div class="side">
     <div class="card">
       <div class="row">
@@ -113,6 +172,54 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
     <div class="card" id="out"><div class="empty">Выбери рецепт слева</div></div>
     <div class="card" id="sit" style="margin-top:16px"></div>
   </div>
+</div>
+<div id="tab-belt" hidden><div class="card clock">
+  <div class="ctop"><div><div class="k">Время в игре</div><div class="now" id="now"></div></div>
+    <div class="savest" id="savest"></div></div>
+  <div class="btns">
+    <button type="button" class="btn" data-adv="1">+1 мин</button>
+    <button type="button" class="btn" data-adv="10">+10 мин</button>
+    <button type="button" class="btn" data-adv="60">+1 час</button>
+    <button type="button" class="btn" id="setTime">Задать…</button>
+  </div>
+  <div class="btns">
+    <button type="button" class="btn soft" id="rest10">Передышка 10 мин</button>
+    <button type="button" class="btn soft" id="restS">Короткий отдых</button>
+    <button type="button" class="btn soft" id="restL">Долгий отдых</button>
+    <button type="button" class="btn ghost" id="undo">Отменить</button>
+  </div>
+  <p class="note">Короткий отдых — 1 час, снимает остаточную токсичность. Передышка 10 минут снимает её только у доз с бонусом «Чистый». Долгий отдых — 8 часов: токсичность обнуляется, интоксикация уходит, истощение −1.</p>
+</div>
+<div class="bgrid">
+  <div>
+    <div class="card"><h2>Выпить</h2>
+      <label class="f" for="dq">Что</label>
+      <input id="dq" list="dlist" type="search" placeholder="Эликсир или заряд…" autocomplete="off">
+      <datalist id="dlist"></datalist>
+      <div class="row" style="margin-top:10px">
+        <div><label class="f" for="dwho">Кто пьёт</label><select id="dwho"></select></div>
+        <div><label class="f" for="dtox">Токсичность</label><input id="dtox" type="number" min="0" max="10" value="0"></div>
+        <div><label class="f" for="ddur" id="ddurL">Минут</label><input id="ddur" type="number" min="0" value="60"></div>
+      </div>
+      <div class="sect">Бонус или дефект дозы</div>
+      <div class="toggles" id="dmods"></div>
+      <div id="dprev" class="prev"></div>
+      <button type="button" class="btn big" id="drink">Выпить</button>
+      <div id="odpanel"></div>
+    </div>
+    <div class="card" style="margin-top:16px"><h2>Сумка</h2><div id="bag"></div>
+      <p class="note">Сваренное добавляется кнопкой «В сумку» на вкладке «Варка». Выпитое отсюда списывается само.</p></div>
+  </div>
+  <div>
+    <div id="people"></div>
+    <div class="card" style="margin-top:16px"><h2>Кто ещё пьёт</h2>
+      <div class="row"><div><label class="f" for="pn">Имя</label><input id="pn" type="search" placeholder="Например, Фаэнон"></div>
+      <div style="flex:.5"><label class="f" for="pl">Предел</label><input id="pl" type="number" min="0" max="20" value="6"></div></div>
+      <p class="note">Предел — модификатор Телосложения + бонус мастерства + 2 (8.7).</p>
+      <button type="button" class="btn" id="addp">Добавить</button></div>
+    <div class="card" style="margin-top:16px"><h2>Журнал</h2><div id="log" class="log"></div></div>
+  </div>
+</div>
 </div>
 </div>
 <script id="data" type="application/json">__DATA__</script>
@@ -279,7 +386,10 @@ function render(keepSit){
     ${bar('Нестабильный',p.un,'var(--warn)')}${bar('Провал',p.fail,'var(--bad)')}
   </div>
   <p class="note">Годных доз в среднем: ${(good*r.n).toFixed(1)} из ${r.n} (успех ${pct(good)}).${c.l===M?` В рост мастерства — ≈${((good+p.n20)*r.n).toFixed(1)} за варку.`:''} В «Провал» входит натуральная 1 (5%, осечка).${c.l>=6?' VI+: шансы — для завершающей проверки без меток качества и дефектов (±2 от подходов, 6.3).':''}</p>
-  <div class="eff"><b>Эффект.</b> <span id="ef"></span>${c.s&&c.s!=='нет'?` <span class="badge">спасбросок ${c.s}</span>`:''}${c.ar?` <span class="badge">${c.ar}</span>`:''}</div>`;
+  <div class="eff"><b>Эффект.</b> <span id="ef"></span>${c.s&&c.s!=='нет'?` <span class="badge">спасбросок ${c.s}</span>`:''}${c.ar?` <span class="badge">${c.ar}</span>`:''}</div>
+  <div class="acts"><button type="button" class="btn" id="toBag">В сумку: ${r.n}</button>${DRINK(c)?'<button type="button" class="btn soft" id="toDrink">Выпить сейчас</button>':''}</div>`;
+  $('toBag').onclick=()=>{addBag(c.n,r.n);$('toBag').textContent='Добавлено ✓'};
+  if($('toDrink'))$('toDrink').onclick=()=>{tab('belt');$('dq').value=c.n;DM={};BAGPICK=null;fillDrink();$('dq').scrollIntoView({block:'center'})};
   o.querySelector('h2').textContent=c.n; o.querySelector('.badge.e').textContent=c.e+(c.f?' · '+c.f:'');
   $('b5').textContent=q.b5;$('w5').textContent=q.w5;$('b20').textContent=q.b20;$('w20').textContent=q.w20;
   $('a5').textContent=q.alt5.length?'Ещё подходит: '+q.alt5.join(', '):'';
@@ -288,9 +398,233 @@ function render(keepSit){
 }
 function bar(t,x,col){return `<div class="bar"><span>${t}</span><span class="track"><span class="fill" style="display:block;width:${x*100}%;background:${col}"></span></span><span class="pct">${pct(x)}</span></div>`}
 
+// ===== Пояс: сумка, выпитое, токсичность (8.7), алхимическая концентрация (8.9), отдых =====
+const DRINK=c=>['eff','chg','rea'].includes(c.k);
+const isChg=c=>c.k==='chg'||c.k==='rea';
+const toxOf=c=>{const m=String(c.t).match(/^(\d+)/);return m?+m[1]:0};
+function durMin(d){
+  if(/^мгновенно/.test(d))return 0;
+  if(/^до (конца|начала)/.test(d))return 1;
+  if(/^сутки/.test(d))return 1440;
+  const m=d.match(/(\d+)(?:к\d+)?\s*(минут|час|сут)/);
+  if(m){const v=+m[1];return m[2]==='минут'?v:m[2]==='час'?v*60:v*1440}
+  return 60;
+}
+const byName=n=>D.find(c=>c.n===n);
+const uid=()=>Math.random().toString(36).slice(2,9);
+const NEW=()=>({v:1,u:0,T:8*60,people:[{id:'p1',name:'Талис',limit:7,exh:0,intox:false}],ent:[],rests:[],r10:[],lrs:[],trig:[],bag:[],log:[]});
+let ST=NEW(), UNDO=[], OD=null, BAGPICK=null;
+try{const x=JSON.parse(ls.get('belt')||'null');if(x&&x.v===1)ST=x}catch(e){}
+
+const pad=n=>String(n).padStart(2,'0');
+const fmtT=T=>`День ${Math.floor(T/1440)+1} · ${pad(Math.floor(T%1440/60))}:${pad(T%60)}`;
+const fmtD=m=>m>=1440?(Math.round(m/144)/10+' сут'):m>=60?(Math.floor(m/60)+' ч'+(m%60?' '+m%60+' мин':'')):m+' мин';
+const lastLR=()=>ST.lrs.length?ST.lrs[ST.lrs.length-1]:-1;
+const endOf=e=>Math.min(e.stopped??Infinity,e.t0+(e.k==='chg'?e.win:e.dur));
+const isActive=e=>ST.T<endOf(e);
+function toxLive(e){
+  if(lastLR()>=e.t0)return 0;
+  if(isActive(e))return e.tox;
+  const end=endOf(e), ref=e.k==='chg'?end:e.t0;
+  // эффект: пока действует или до короткого отдыха — что дольше; заряд: после применения или окна — до короткого отдыха
+  if(ST.rests.some(r=>r>=ref&&r>=e.t0))return 0;
+  if(e.clean&&ST.r10.concat(ST.rests).some(r=>r>=end))return 0;
+  return e.tox;
+}
+function trigCount(pid){const lr=lastLR();return ST.trig.filter(t=>t.who===pid&&t.T>lr&&!ST.rests.some(r=>r>=t.T)).length}
+function toxOfP(pid){return ST.ent.filter(e=>e.who===pid).reduce((s,e)=>s+toxLive(e),0)+Math.floor(trigCount(pid)/2)}
+const P=id=>ST.people.find(p=>p.id===id);
+
+function mutate(fn){UNDO.push(JSON.stringify(ST));if(UNDO.length>30)UNDO.shift();fn();tidy();ST.u=Date.now();save();renderBelt()}
+function logx(t){ST.log.unshift({T:ST.T,t});ST.log=ST.log.slice(0,80)}
+function tidy(){
+  ST.people.forEach(p=>{if(p.intox&&toxOfP(p.id)<=p.limit)p.intox=false});
+  ST.ent=ST.ent.filter(e=>isActive(e)||toxLive(e)>0);
+  const keep=Math.min(...ST.ent.map(e=>e.t0),ST.T)-1440;
+  ST.rests=ST.rests.filter(r=>r>=keep).slice(-40);ST.r10=ST.r10.filter(r=>r>=keep).slice(-40);ST.lrs=ST.lrs.slice(-3);
+  ST.trig=ST.trig.filter(t=>t.T>lastLR()).slice(-40);
+  ST.bag=ST.bag.filter(b=>b.q>0);
+}
+
+// хранение: аккаунт (db, личный документ) или браузер
+let DOC=null,saveT=null;
+const setSave=t=>{$('savest').textContent=t};
+function save(){
+  ls.set('belt',JSON.stringify(ST));
+  if(!DOC)return;
+  clearTimeout(saveT);
+  saveT=setTimeout(async()=>{try{await DOC.set({s:JSON.stringify(ST),u:ST.u});setSave('сохранено в аккаунте')}catch(e){setSave('в аккаунт не сохранилось, осталось в этом браузере')}},700);
+}
+(async()=>{
+  setSave('сохраняется в этом браузере');
+  try{
+    if(!window.claude||!window.claude.use)return;
+    const db=await window.claude.use('db'), user=await window.claude.use('user');
+    if(!db||!user)return;
+    const id=await user.id();if(!id)return;
+    DOC=db.collection('data/users/'+id).doc('belt');
+    const snap=await DOC.get();
+    if(snap.exists){const d=snap.data();if(d&&d.s&&(d.u||0)>=(ST.u||0)){const x=JSON.parse(d.s);if(x&&x.v===1)ST=x}}
+    else if(ST.u)save();
+    setSave('сохраняется в аккаунте');renderBelt();
+  }catch(e){setSave('сохраняется в этом браузере')}
+})();
+
+// время и отдых
+document.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>mutate(()=>{ST.T+=+b.dataset.adv}));
+$('rest10').onclick=()=>mutate(()=>{ST.T+=10;ST.r10.push(ST.T);logx('Передышка 10 минут')});
+$('restS').onclick=()=>mutate(()=>{ST.T+=60;ST.rests.push(ST.T);logx('Короткий отдых')});
+$('restL').onclick=()=>mutate(()=>{ST.T+=480;ST.lrs.push(ST.T);ST.rests.push(ST.T);ST.people.forEach(p=>{p.intox=false;p.exh=Math.max(0,p.exh-1)});OD=null;logx('Долгий отдых: токсичность 0, истощение −1')});
+$('undo').onclick=()=>{if(!UNDO.length)return;ST=JSON.parse(UNDO.pop());ST.u=Date.now();OD=null;save();renderBelt()};
+$('setTime').onclick=()=>{
+  const box=document.createElement('div');box.className='btns';
+  box.innerHTML=`<input id="tday" type="number" min="1" style="width:80px" value="${Math.floor(ST.T/1440)+1}"><input id="thm" type="time" style="width:auto;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px" value="${pad(Math.floor(ST.T%1440/60))}:${pad(ST.T%60)}"><button type="button" class="btn soft">Поставить</button>`;
+  $('setTime').parentNode.after(box);$('setTime').disabled=true;
+  box.querySelector('button').onclick=()=>{const d=Math.max(1,+$('tday').value||1),[h,m]=($('thm').value||'08:00').split(':').map(Number);
+    box.remove();$('setTime').disabled=false;mutate(()=>{ST.T=(d-1)*1440+h*60+m;logx('Время задано вручную')})};
+};
+
+// люди
+$('addp').onclick=()=>{const n=$('pn').value.trim();if(!n)return;mutate(()=>{ST.people.push({id:uid(),name:n,limit:Math.max(0,+$('pl').value||0),exh:0,intox:false})});$('pn').value=''};
+
+// форма «выпить»
+const MODS={eff:[["long","Долгое действие","×1,5, не больше +1 часа"],["dbl","Двойной срок","×2, не больше +8 часов"],["clean","Чистый","остаток уходит за 10 минут отдыха"],["short","Дефект «Короткое»","длительность вдвое меньше"],["heavy","Дефект «Тяжёлое»","токсичность +1"]],
+ chg:[["lwin","Долгое окно","4 часа на применение"],["twin","Двойной заряд","два применения за окно"],["short","Дефект «Короткое»","окно 10 минут"],["heavy","Дефект «Тяжёлое»","токсичность +1"]]};
+let DM={};
+const dl=$('dlist');D.filter(DRINK).forEach(c=>{const o=document.createElement('option');o.value=c.n;dl.appendChild(o)});
+function drinkCard(){return byName($('dq').value.trim())}
+function fillDrink(){
+  const c=drinkCard(), box=$('dmods');box.innerHTML='';
+  if(!c||!DRINK(c)){$('dprev').innerHTML=$('dq').value?'<span class="wr">Выбери эликсир или заряд из списка</span>':'';return}
+  const k=isChg(c)?'chg':'eff', inst=k==='eff'&&durMin(c.d)===0;
+  MODS[k].filter(m=>!(inst&&['long','dbl','short'].includes(m[0]))).forEach(([id,t,h])=>{
+    const l=document.createElement('label');l.className='tg';l.innerHTML=`<input type="checkbox"><span><span class="t"></span><small></small></span>`;
+    l.querySelector('.t').textContent=t;l.querySelector('small').textContent=h;const i=l.querySelector('input');i.checked=!!DM[id];
+    i.onchange=()=>{DM[id]=i.checked;if(id==='long'&&i.checked)DM.dbl=false;if(id==='dbl'&&i.checked)DM.long=false;fillDrink()};box.appendChild(l)});
+  let tox=toxOf(c)+(DM.heavy?1:0), dur;
+  if(k==='chg'){dur=DM.short?10:DM.lwin?240:60;$('ddurL').textContent='Окно, мин'}
+  else{const b=durMin(c.d);dur=b;if(DM.long)dur=Math.min(Math.round(b*1.5),b+60);if(DM.dbl)dur=Math.min(b*2,b+480);if(DM.short)dur=Math.round(dur/2);$('ddurL').textContent='Минут'}
+  $('dtox').value=tox;$('ddur').value=dur;preview();
+}
+function preview(){
+  const c=drinkCard();if(!c||!DRINK(c))return;
+  const p=P($('dwho').value);if(!p)return;
+  const now=toxOfP(p.id), add=Math.max(0,+$('dtox').value||0), aft=now+add, ex=aft-p.limit;
+  let h=`Токсичность ${p.name}: ${now} → <b>${aft}</b> из ${p.limit}.`;
+  if(ex>0)h+=` <span class="bad">Передозировка на ${ex}: спасбросок Телосложения СЛ ${10+2*ex}.</span>`;
+  if(c.a){const cur=ST.ent.find(e=>e.who===p.id&&e.a&&isActive(e));if(cur)h+=` <span class="wr">Алхимическая концентрация: «${esc(cur.n)}» прекратится.</span>`}
+  const bi=ST.bag.findIndex(b=>b.n===c.n);
+  if(bi>=0)h+=`<label class="tg" style="padding:6px 0 0"><input type="checkbox" id="fromBag" ${BAGPICK!==false?'checked':''}><span>Списать из сумки (там ${ST.bag[bi].q})</span></label>`;
+  $('dprev').innerHTML=h;
+  const fb=$('fromBag');if(fb)fb.onchange=()=>{BAGPICK=fb.checked};
+}
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+$('dq').oninput=()=>{DM={};BAGPICK=null;fillDrink()};
+$('dwho').onchange=preview;$('dtox').oninput=preview;$('ddur').oninput=preview;
+$('drink').onclick=()=>{
+  const c=drinkCard();if(!c||!DRINK(c)){fillDrink();return}
+  const p=P($('dwho').value);if(!p)return;
+  const fb=$('fromBag'), useBag=fb&&fb.checked;
+  mutate(()=>{
+    const k=isChg(c)?'chg':'eff', tox=Math.max(0,+$('dtox').value||0), d=Math.max(0,+$('ddur').value||0);
+    if(c.a){ST.ent.filter(e=>e.who===p.id&&e.a&&isActive(e)).forEach(e=>{e.stopped=ST.T;logx(`${p.name}: «${e.n}» прекратился (алхимическая концентрация)`)})}
+    const before=toxOfP(p.id);
+    ST.ent.push({id:uid(),who:p.id,n:c.n,k,t0:ST.T,tox,dur:k==='eff'?d:0,win:k==='chg'?d:0,uses:0,max:DM.twin?2:1,a:!!c.a,clean:!!DM.clean,stopped:null});
+    if(useBag){const b=ST.bag.find(b=>b.n===c.n);if(b)b.q--}
+    const aft=before+tox, ex=aft-p.limit;
+    logx(`${p.name} выпивает «${c.n}» (+${tox}, всего ${aft} из ${p.limit})`);
+    OD=ex>0?{who:p.id,ex,n:c.n}:null;
+  });
+  DM={};BAGPICK=null;$('dq').value='';fillDrink();
+};
+function renderOD(){
+  const box=$('odpanel');if(!OD){box.innerHTML='';return}
+  const p=P(OD.who);if(!p){OD=null;box.innerHTML='';return}
+  box.innerHTML=`<div class="od"><b>Передозировка: ${esc(p.name)}, превышение ${OD.ex}</b>Спасбросок Телосложения СЛ ${10+2*OD.ex}. Эффект «${esc(OD.n)}» действует в любом случае.
+  <div class="btns"><button type="button" class="btn soft" id="odok">Прошёл</button><button type="button" class="btn warn" id="odno">Провалил</button></div></div>`;
+  $('odok').onclick=()=>mutate(()=>{logx(`${p.name}: спасбросок от передозировки пройден`);OD=null});
+  $('odno').onclick=()=>mutate(()=>{p.intox=true;let t=`${p.name}: интоксикация, ${OD.ex}к6 урона без типа`;if(OD.ex>=3){p.exh++;t+=', +1 истощение'}logx(t);OD=null});
+}
+
+// сумка
+function addBag(n,q){mutate(()=>{const b=ST.bag.find(b=>b.n===n);if(b)b.q+=q;else ST.bag.push({n,q});logx(`В сумку: «${n}» ×${q}`)})}
+function renderBag(){
+  const box=$('bag');box.innerHTML='';
+  if(!ST.bag.length){box.innerHTML='<div class="note">Пусто</div>';return}
+  ST.bag.forEach((b,i)=>{const c=byName(b.n)||{};const r=document.createElement('div');r.className='bagi';
+    r.innerHTML=`<span class="nm"></span><button type="button" class="btn sm">−</button><span class="q">${b.q}</span><button type="button" class="btn sm">+</button>${c.k&&DRINK(c)?'<button type="button" class="btn sm soft">Выпить</button>':''}`;
+    r.querySelector('.nm').innerHTML=`${esc(b.n)}<small>${c.l?ROM[c.l]+' · '+CLS[c.k]:''}</small>`;
+    const bs=r.querySelectorAll('button');
+    bs[0].onclick=()=>mutate(()=>{b.q--});bs[1].onclick=()=>mutate(()=>{b.q++});
+    if(bs[2])bs[2].onclick=()=>{$('dq').value=b.n;DM={};BAGPICK=true;fillDrink();$('dq').scrollIntoView({behavior:'smooth',block:'center'})};
+    box.appendChild(r)});
+}
+
+// люди и активные эффекты
+function renderPeople(){
+  const box=$('people');box.innerHTML='';
+  const sel=$('dwho'), cur=sel.value;sel.innerHTML='';
+  ST.people.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name;sel.appendChild(o)});
+  sel.value=ST.people.some(p=>p.id===cur)?cur:ST.people[0]?.id;
+  ST.people.forEach(p=>{
+    const tox=toxOfP(p.id), tc=trigCount(p.id), over=tox>p.limit;
+    const card=document.createElement('div');card.className='card pcard';
+    const n=Math.max(p.limit,tox);
+    const conc=ST.ent.find(e=>e.who===p.id&&e.a&&isActive(e));
+    card.innerHTML=`<div class="phead"><h2></h2><span class="tox">${tox} / ${p.limit}</span></div>
+      <div class="meter">${Array.from({length:n},(_,i)=>`<span class="seg ${i<tox?(i>=p.limit?'over':'on'):''}"></span>`).join('')}</div>
+      <div class="st">${p.intox&&over?'<span class="badge bad">Интоксикация: помеха на атаки, проверки и спасброски концентрации</span>':over?'<span class="badge gd">Выше предела</span>':''}
+      ${conc?`<span class="badge gd">Алх. концентрация: ${esc(conc.n)}</span>`:''}
+      ${p.exh?`<span class="badge bad">Истощение ${p.exh}</span>`:''}
+      ${tc?`<span class="badge">Триггеры зелий: ${tc} → +${Math.floor(tc/2)}</span>`:''}</div>
+      <div class="ents"></div>
+      <div class="btns"><button type="button" class="btn sm" data-a="trig">+ сработал триггер зелья</button>
+      <button type="button" class="btn sm" data-a="exh+">Истощение +1</button><button type="button" class="btn sm" data-a="exh-">−1</button>
+      <label class="note" style="margin:0;display:flex;gap:6px;align-items:center">Предел <input type="number" min="0" max="20" value="${p.limit}" style="width:64px;padding:4px 6px"></label>
+      ${ST.people.length>1?'<button type="button" class="btn sm ghost" data-a="del">Убрать</button>':''}</div>`;
+    card.querySelector('h2').textContent=p.name;
+    const es=card.querySelector('.ents');
+    const list=ST.ent.filter(e=>e.who===p.id).sort((a,b)=>isActive(b)-isActive(a)||b.t0-a.t0);
+    if(!list.length)es.innerHTML='<div class="note">Ничего не действует</div>';
+    list.forEach(e=>{
+      const act=isActive(e), tv=toxLive(e), left=endOf(e)-ST.T;
+      const r=document.createElement('div');r.className='ent'+(act?'':' res');
+      let sub;
+      if(e.k==='chg')sub=act?`окно ещё ${fmtD(left)} · применено ${e.uses} из ${e.max}`:'применён или окно закрыто · токсичность до короткого отдыха';
+      else sub=act?`ещё ${fmtD(left)}`:(e.clean?'закончился · остаток уходит за 10 минут отдыха':'закончился · токсичность до короткого отдыха');
+      r.innerHTML=`<span class="nm"><span></span><small>${sub}${e.a?' · <span class="cc">алх. концентрация</span>':''}</small></span><span class="tv">+${tv}</span>
+        ${act&&e.k==='chg'?'<button type="button" class="btn sm soft" data-e="use">Применил</button>':''}
+        ${act?'<button type="button" class="btn sm" data-e="stop">Закончить</button>':''}
+        <button type="button" class="btn sm ghost" data-e="del" aria-label="Удалить запись">×</button>`;
+      r.querySelector('.nm>span').textContent=e.n;
+      r.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>mutate(()=>{
+        if(b.dataset.e==='use'){e.uses++;logx(`${p.name}: «${e.n}» применён`);if(e.uses>=e.max)e.stopped=ST.T}
+        else if(b.dataset.e==='stop'){e.stopped=ST.T;logx(`${p.name}: «${e.n}» закончен`)}
+        else ST.ent=ST.ent.filter(x=>x!==e)}));
+      es.appendChild(r)});
+    card.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>mutate(()=>{const a=b.dataset.a;
+      if(a==='trig'){ST.trig.push({who:p.id,T:ST.T});logx(`${p.name}: сработал триггер зелья`)}
+      else if(a==='exh+')p.exh++;else if(a==='exh-')p.exh=Math.max(0,p.exh-1);
+      else if(a==='del'){ST.people=ST.people.filter(x=>x!==p);ST.ent=ST.ent.filter(x=>x.who!==p.id)}}));
+    const li=card.querySelector('input[type=number]');li.onchange=()=>mutate(()=>{p.limit=Math.max(0,+li.value||0)});
+    box.appendChild(card)});
+}
+function renderBelt(){
+  $('now').textContent=fmtT(ST.T);
+  renderPeople();renderBag();renderOD();preview();
+  $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
+  $('undo').disabled=!UNDO.length;
+  const t=ST.people[0];if(t){const x=toxOfP(t.id);const b=$('beltBadge');b.textContent=x?`${x}/${t.limit}`:'';b.classList.toggle('hot',x>t.limit)}
+}
+
+// вкладки
+function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';ls.set('tab',t);if(t==='belt')renderBelt()}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;
-list();render();
+list();render();renderBelt();tab(ls.get('tab')==='belt'?'belt':'brew');
 </script>
 </body>
 </html>
