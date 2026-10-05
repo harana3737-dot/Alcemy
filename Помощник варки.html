@@ -146,6 +146,13 @@ select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px 
 .jc{margin-top:10px}.jc.done{border-color:var(--gold)}
 details.card summary{cursor:pointer;font:400 16px Prata,serif}
 #tab-jour{margin-top:18px}
+.recm{background:var(--acc-soft);border-radius:10px;padding:8px 10px;font-size:14px;display:grid;gap:4px;margin:6px 0}
+.recm small{color:var(--muted)}
+.brow{display:flex;gap:8px;align-items:center;margin-top:6px;font-size:13px;flex-wrap:wrap}
+.brow>span:first-child{min-width:52px;color:var(--muted);font:500 12px "JetBrains Mono",monospace}
+.brow select{flex:1;min-width:150px;width:auto;padding:6px}
+.brow .two{display:flex;gap:6px;flex:1 1 100%}
+.brow .two[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -230,7 +237,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 </div>
 <div id="tab-jour" hidden>
   <div class="card"><h2>Варка зелий</h2><div id="jrec"></div>
-    <p class="note">Годные дозы уходят в сумку Талиса. Если уровень зелья равен мастерству, успехи сами добавляются в рост мастерства (натуральная 20 — за два). Эликсиры записываются так же — на вкладке «Варка», в карточке рецепта.</p></div>
+    <p class="note">Под каждую дозу 5+ и 20 — выбор бонуса, рекомендованный отмечен ★. Годные дозы уходят в сумку Талиса, бонус пишется на флакон. Если уровень зелья равен мастерству, успехи сами добавляются в рост мастерства (натуральная 20 — за два). Эликсиры записываются так же — на вкладке «Варка», в карточке рецепта.</p></div>
   <div class="status note" id="jstat" style="margin:12px 0 0"></div>
   <div id="jgroups"></div>
   <details class="card" style="margin-top:16px"><summary>Добавить запись</summary>
@@ -415,7 +422,7 @@ function render(keepSit){
   <div class="eff"><b>Эффект.</b> <span id="ef"></span>${c.s&&c.s!=='нет'?` <span class="badge">спасбросок ${c.s}</span>`:''}${c.ar?` <span class="badge">${c.ar}</span>`:''}</div>
   <div id="crec" style="margin-top:12px"></div>
   <div class="acts"><button type="button" class="btn" id="toBag">В сумку: ${r.n}</button>${DRINK(c)?'<button type="button" class="btn soft" id="toDrink">Выпить сейчас</button>':''}</div>`;
-  recForm($('crec'),{name:c.n,lvl:c.l});
+  recForm($('crec'),{name:c.n,lvl:c.l,card:c});
   $('toBag').onclick=()=>{addBag(c.n,r.n);$('toBag').textContent='Добавлено ✓'};
   if($('toDrink'))$('toDrink').onclick=()=>{tab('belt');$('dq').value=c.n;DM={};BAGPICK=null;fillDrink();$('dq').scrollIntoView({block:'center'})};
   o.querySelector('h2').textContent=c.n; o.querySelector('.badge.e').textContent=c.e+(c.f?' · '+c.f:'');
@@ -623,7 +630,7 @@ function renderBag(){
     r.querySelector('.nm').innerHTML=`${esc(b.n)}<small>${esc(sub)}</small>`;
     const bs=r.querySelectorAll('button');
     bs[0].onclick=()=>mutate(()=>{b.q--});bs[1].onclick=()=>mutate(()=>{b.q++});
-    bs[2].onclick=drink?()=>{$('dq').value=c.n;$('dwho').value=b.who;DM={};BAGPICK=b.who;fillDrink();$('dq').scrollIntoView({behavior:'smooth',block:'center'})}
+    bs[2].onclick=drink?()=>{$('dq').value=c.n;$('dwho').value=b.who;DM={};const NM={'Долгое действие':'long','Двойной срок':'dbl','Чистый':'clean','Долгое окно':'lwin','Двойной заряд':'twin'};String(b.note||'').split(' + ').forEach(x=>{if(NM[x])DM[NM[x]]=true});BAGPICK=b.who;fillDrink();$('dq').scrollIntoView({behavior:'smooth',block:'center'})}
       :()=>mutate(()=>{b.q--;logx(`${P(b.who).name}: потрачено «${b.n}», осталось ${b.q}`)});
     const g=r.querySelector('.give');if(g)g.onchange=()=>{const to=g.value;if(!to)return;mutate(()=>{b.q--;
       const t=ST.bag.find(x=>x.who===to&&x.n===b.n);if(t)t.q++;else ST.bag.push({n:b.n,q:1,who:to,...(b.card?{card:b.card}:{}),...(b.note?{note:b.note}:{})});
@@ -772,31 +779,101 @@ $('jfAdd').onclick=async()=>{
 };
 
 // ===== Запись варки: сумка + журнал =====
+// ===== Бонусы 5+ и 20 при записи варки (7.7 зелья и яды, 8.12 эликсиры) =====
+const KEEP_OFF=new Set(['Экономия трав','Ещё одно','Ещё одна доза','Выше уровнем','Два бонуса']);
+function potKind(n){return /^Яд\b/.test(n)?'poison':/лечени/i.test(n)?'heal':'potion'}
+function bonusLists(n,lvl,c){
+  if(c){ // эликсир по классу (8.12)
+    const k=c.k, L5=['Экономия трав'], L20=['Ещё одна доза','Два бонуса'];
+    if(k==='eff'){L5.push('Незаметное','Долгое действие','Чистый','Лёгкий глоток');L20.push('Двойной срок')}
+    else if(['chg','rea','psn'].includes(k)){L5.push('Сильная привязка','Долгое окно');if(/dice/.test(c.up))L5.push('Усиленное заклинание');L20.push('Крепкая привязка','Двойной заряд');if(c.up!=='none'&&c.up!=='other')L20.push('Полное усиление')}
+    else if(k==='fl'){L5.push('Сильная привязка','Дальний бросок','Щадящая');if(c.tk.includes('Урон'))L5.push('Ровный взрыв');L20.push('Крепкая привязка','Широкая склянка','Затяжная склянка')}
+    else if(k==='oilw'){L5.push('Долгое масло','Быстрое нанесение','Больше боеприпасов');L20.push('Усиленное масло')}
+    else if(k==='oils'){L5.push('Долгое масло','Сильная привязка');L20.push('Крепкая привязка','Двойная кара')}
+    else if(k==='salve'){L5.push('Долгое масло','Густая мазь')}
+    return {L5,L20};
+  }
+  const ps=potKind(n)==='poison';
+  const L5=['Экономия трав',ps?'Крепкий яд':'Крепкая отдача',ps?'Долгий яд':'Лёгкий глоток'];
+  if(lvl>=6)L5.push('Направленный триггер');if(lvl>=4)L5.push(ps?'Сдвоенный яд':'Сдвоенная отдача');L5.push('Незаметное');
+  const L20=['Ещё одно'];if(lvl<=9)L20.push('Выше уровнем');L20.push('Два бонуса');if(!ps&&lvl>=6)L20.push('Двойной триггер');
+  return {L5,L20};
+}
+const short=s=>String(s).split(' (')[0].split('; ')[0];
+function recommend(n,lvl,c,sale){
+  if(c){
+    if(sale)return {r5:'Экономия трав',w5:'на продажу: бафф цену не поднимает',r20:'Ещё одна доза',w20:'лишний флакон на продажу'};
+    const L=bonusLists(n,lvl,c);let r5=short(c.b5),r20=short(c.b20);
+    if(!L.L5.includes(r5))r5=L.L5.find(x=>r5.startsWith(x))||L.L5[1]||L.L5[0];
+    if(!L.L20.includes(r20))r20=L.L20.find(x=>r20.startsWith(x))||'Ещё одна доза';
+    return {r5,w5:'по разбору для этого рецепта: '+c.b5,r20,w20:'по разбору для этого рецепта: '+c.b20};
+  }
+  const ps=potKind(n)==='poison';
+  const UP_SELF=[1,5,9], UP_SALE=[1,2,5,7,9];
+  const up=(sale?UP_SALE:UP_SELF).includes(lvl)&&lvl<=9;
+  const r20=up?'Выше уровнем':'Ещё одно', w20=up?`скачок к ${lvl+1}.${lvl+1} выгоднее лишнего флакона ${sale?'по золоту':'по хитам'}`:`лишний флакон ${sale?'дороже':'больше хитов'}, чем уровень выше`;
+  if(sale)return {r5:'Экономия трав',w5:'на продажу: крепкая цену не поднимает',r20,w20};
+  if(lvl<=4)return {r5:ps?'Крепкий яд':'Крепкая отдача',w5:ps?'+2 к урону каждого раунда — до 4.4 выгоднее экономии':'+2 за раунд: до 4.4 это +22–80% лечения, травы стоят копейки',r20,w20};
+  return {r5:ps?'Долгий яд':'Сдвоенная отдача',w5:ps?'6 атак вместо 5':'лечение двух раундов сразу — поднять упавшего; в запас — экономия трав',r20,w20};
+}
+function bonusArea(box,n,lvl,c,cnt,sale){
+  const ar=box.querySelector('.rb');
+  const keep={};ar.querySelectorAll('select').forEach(x=>{keep[x.className+x.dataset.i]=x.value});
+  if(!n||(!cnt.hi&&!cnt.n20)){ar.innerHTML='';return}
+  const L=bonusLists(n,lvl,c), R=recommend(n,lvl,c,sale);
+  const sel=(list,rec,cls,i)=>`<select class="${cls}" data-i="${i}" aria-label="Бонус">${list.map(x=>`<option value="${x}" ${x===rec?'selected':''}>${x===rec?'★ ':''}${x}</option>`).join('')}</select>`;
+  let h=`<div class="recm"><div><b>Рекомендовано на 5+:</b> ${esc(R.r5)} <small>— ${esc(R.w5)}</small></div><div><b>Рекомендовано на 20:</b> ${esc(R.r20)} <small>— ${esc(R.w20)}</small></div></div>`;
+  for(let i=0;i<cnt.hi;i++)h+=`<div class="brow"><span>5+ №${i+1}</span>${sel(L.L5,R.r5,'b5s',i)}</div>`;
+  for(let i=0;i<cnt.n20;i++)h+=`<div class="brow"><span>20 №${i+1}</span>${sel(L.L20,R.r20,'b20s',i)}<span class="two" hidden>${sel(L.L5,R.r5,'tw1',i)}${sel(L.L5.filter(x=>x!==R.r5),'','tw2',i)}</span></div>`;
+  h+=`<p class="note">Варианты — ${c?'8.12, класс «'+CLS[c.k]+'»':'7.7, '+(potKind(n)==='poison'?'яды':'зелья')}. Бонус, который остаётся на флаконе, запишется на него в сумке.</p>`;
+  ar.innerHTML=h;
+  if(ar.dataset.key===n+'|'+lvl+'|'+sale)ar.querySelectorAll('select').forEach(x=>{const v=keep[x.className+x.dataset.i];if(v&&[...x.options].some(o=>o.value===v))x.value=v});
+  ar.dataset.key=n+'|'+lvl+'|'+sale;
+  ar.querySelectorAll('.b20s').forEach(s=>{const two=s.parentNode.querySelector('.two');const f=()=>{two.hidden=s.value!=='Два бонуса'};s.onchange=f;f()});
+}
 function recForm(box,opts){
-  // opts: {name, lvl} — для рецепта из каталога; без них — поля названия и уровня (зелья)
   box.innerHTML=`<div class="sect">Записать варку</div>
    ${opts.name?'':`<div class="row"><div><input class="rn" list="potList" type="search" placeholder="Зелье, например «Зелье лечения 2.2»" aria-label="Что варила" autocomplete="off"></div><div style="flex:.4"><select class="rl" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${l}.${l}</option>`).join('')}</select></div></div>`}
-   <div class="recg">${[['n20','Нат. 20'],['hi','Успех 5+'],['ok','Успех'],['un','Нестаб.'],['fl','Провал']].map(([k,t])=>`<label><span>${t}</span><input type="number" min="0" value="0" data-k="${k}"></label>`).join('')}</div>
-   <label class="tg"><input type="checkbox" class="rx"><span>На натуральной 20 брала «Ещё одну дозу»</span></label>
+   <div class="recg">${[['n20','Нат. 20'],['hi','Успех 5+'],['ok','Успех'],['un','Нестаб.'],['fl','Провал']].map(([k,t])=>`<label><span>${t}</span><input type="number" min="0" max="10" value="0" data-k="${k}"></label>`).join('')}</div>
+   <div class="chips rmode" style="margin:6px 0"><button type="button" class="chip" data-s="0">для себя</button><button type="button" class="chip" data-s="1">на продажу</button></div>
+   <div class="rb"></div>
    <button type="button" class="btn soft rgo">Записать</button><span class="note rmsg" style="margin-left:8px"></span>`;
   const rn=box.querySelector('.rn'), rl=box.querySelector('.rl');
-  if(rn)rn.oninput=()=>{const m=rn.value.match(/(\d+)\.\1\b/);if(m&&+m[1]<=10)rl.value=m[1]};
+  let sale=!!(opts.name&&S.t.sale);
+  const cur=()=>{const n=opts.name||(rn.value.trim());const c=opts.card||byName(n)||null;const lvl=c?c.l:(opts.lvl||+rl.value);
+    const k={};box.querySelectorAll('[data-k]').forEach(i=>k[i.dataset.k]=Math.max(0,Math.min(10,+i.value||0)));return {n,c,lvl,k}};
+  const upd=()=>{box.querySelectorAll('.rmode .chip').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.s==='1')===sale));const x=cur();bonusArea(box,x.n,x.lvl,x.c,x.k,sale)};
+  box.querySelectorAll('.rmode .chip').forEach(b=>b.onclick=()=>{sale=b.dataset.s==='1';upd()});
+  box.querySelectorAll('[data-k]').forEach(i=>i.oninput=upd);
+  if(rn)rn.oninput=()=>{const m=rn.value.match(/(\d+)\.\1\b/);if(m&&+m[1]<=10)rl.value=m[1];upd()};
+  if(rl)rl.onchange=upd;
+  upd();
   box.querySelector('.rgo').onclick=async()=>{
-    const n=opts.name||(rn.value.trim()), lvl=opts.lvl||+rl.value;if(!n)return rn.focus();
-    const k={};box.querySelectorAll('[data-k]').forEach(i=>k[i.dataset.k]=Math.max(0,+i.value||0));
-    const good=k.n20+k.hi+k.ok, extra=box.querySelector('.rx').checked?k.n20:0, M=Math.max(1,Math.min(10,+$('m').value||1));
+    const {n,c,lvl,k}=cur();if(!n)return rn.focus();
+    const good=k.n20+k.hi+k.ok, M=Math.max(1,Math.min(10,+$('m').value||1));
     if(!good&&!k.un&&!k.fl)return;
+    const doses=[]; // [{name, note}]
+    for(let i=0;i<k.ok;i++)doses.push({n,note:''});
+    box.querySelectorAll('.b5s').forEach(s=>doses.push({n,note:KEEP_OFF.has(s.value)?'':s.value}));
+    box.querySelectorAll('.b20s').forEach(s=>{const v=s.value;
+      if(v==='Ещё одно'||v==='Ещё одна доза'){doses.push({n,note:''},{n,note:''})}
+      else if(v==='Выше уровнем'){doses.push({n:n.replace(/(\d+)\.\1\b/,`${lvl+1}.${lvl+1}`),note:''})}
+      else if(v==='Два бонуса'){const row=s.parentNode;const a=row.querySelector('.tw1').value,b=row.querySelector('.tw2').value;
+        doses.push({n,note:[a,b].filter(x=>x&&!KEEP_OFF.has(x)).join(' + ')})}
+      else doses.push({n,note:v})});
     mutate(()=>{
-      const add=(nm,q,note)=>{if(!q)return;const b=ST.bag.find(b=>b.who==='p1'&&b.n===nm);if(b)b.q+=q;else ST.bag.push({n:nm,q,who:'p1',...(note?{note}:{})})};
-      add(n,good+extra);add(n+' (нестабильное)',k.un,'дефект определяет мастер');
-      logx(`Сварено «${n}»: ${good+extra} годных${k.un?`, ${k.un} нестабильных`:''}${k.fl?`, провалов ${k.fl}`:''}`)});
-    let msg=`В сумку Талиса: ${good+extra}${k.un?` + ${k.un} нестабильных`:''}.`;
+      const add=(nm,q,note)=>{if(!q)return;const b=ST.bag.find(b=>b.who==='p1'&&b.n===nm&&(b.note||'')===(note||''));if(b)b.q+=q;else ST.bag.push({n:nm,q,who:'p1',...(note?{note}:{}),...(c&&nm===n?{}:{})})};
+      doses.forEach(d=>add(d.n,1,d.note));add(n+' (нестабильное)',k.un,'дефект определяет мастер');
+      logx(`Сварено «${n}»: ${doses.length} годных${k.un?`, ${k.un} нестабильных`:''}${k.fl?`, провалов ${k.fl}`:''}`)});
+    const notes=doses.filter(d=>d.note||d.n!==n).map(d=>d.n!==n?d.n:d.note);
+    let msg=`В сумку Талиса: ${doses.length}${k.un?` + ${k.un} нестабильных`:''}${notes.length?` (${notes.join(', ')})`:''}.`;
     const grow=k.ok+k.hi+2*k.n20;
     if(lvl===M&&grow){const t=await masteryTrack(M);if(t&&await jAdd(TR.find(x=>x.id===t.id)||t,grow,`${n}: ${good} успешных${k.n20?`, нат. 20 ×${k.n20}`:''}`))msg+=` В рост мастерства ${M} → ${M+1}: +${grow}.`;else if(!JDB)msg+=' Журнал недоступен вне claude.ai.'}
     else if(grow)msg+=` В рост мастерства не идёт: уровень ${lvl}, мастерство ${M}.`;
-    box.querySelector('.rmsg').textContent=msg;box.querySelectorAll('[data-k]').forEach(i=>i.value=0);
+    box.querySelector('.rmsg').textContent=msg;box.querySelectorAll('[data-k]').forEach(i=>i.value=0);upd();
   };
 }
+
 recForm($('jrec'),{});
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
