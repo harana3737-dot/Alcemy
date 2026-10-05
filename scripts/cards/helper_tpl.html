@@ -140,6 +140,12 @@ select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px 
 .log div{padding:3px 0;border-top:1px solid var(--line)}
 .log span{font:500 12px "JetBrains Mono",monospace;color:var(--muted);margin-right:6px}
 .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.recg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:10px 0 4px}
+.recg label{display:grid;gap:2px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.recg input{padding:6px;text-align:center}
+.jc{margin-top:10px}.jc.done{border-color:var(--gold)}
+details.card summary{cursor:pointer;font:400 16px Prata,serif}
+#tab-jour{margin-top:18px}
 </style>
 </head>
 <body>
@@ -147,11 +153,12 @@ select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px 
 <header>
   <button class="tbtn" id="theme" type="button">тема</button>
   <h1>Помощник варки</h1>
-  <p>Выбери рецепт из __N__ и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. На вкладке «Пояс» — сумка, выпитое, токсичность, алхимическая концентрация и отдых. Правила v0.3; материал игрока, не карточки мастера.</p>
+  <p>Выбери рецепт из __N__ и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. «Пояс» — сумка, выпитое, токсичность, концентрация и отдых. «Журнал» — мастерство, рецепты, исследования; записанная варка сама идёт в сумку и в рост мастерства. Правила v0.3; материал игрока, не карточки мастера.</p>
 </header>
 <nav class="tabs" role="tablist">
   <button type="button" role="tab" data-tab="brew" aria-selected="true">Варка</button>
   <button type="button" role="tab" data-tab="belt" aria-selected="false">Пояс <span id="beltBadge" class="tb"></span></button>
+  <button type="button" role="tab" data-tab="jour" aria-selected="false">Журнал</button>
 </nav>
 <div class="grid" id="tab-brew">
   <div class="side">
@@ -220,6 +227,24 @@ select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px 
     <div class="card" style="margin-top:16px"><h2>Журнал</h2><div id="log" class="log"></div></div>
   </div>
 </div>
+</div>
+<div id="tab-jour" hidden>
+  <div class="card"><h2>Варка зелий</h2><div id="jrec"></div>
+    <p class="note">Годные дозы уходят в сумку Талиса. Если уровень зелья равен мастерству, успехи сами добавляются в рост мастерства (натуральная 20 — за два). Эликсиры записываются так же — на вкладке «Варка», в карточке рецепта.</p></div>
+  <div class="status note" id="jstat" style="margin:12px 0 0"></div>
+  <div id="jgroups"></div>
+  <details class="card" style="margin-top:16px"><summary>Добавить запись</summary>
+    <div class="row" style="margin-top:10px;flex-wrap:wrap">
+      <div style="flex:1 1 200px"><label class="f" for="jfName">Название</label><input id="jfName" type="search" maxlength="80" placeholder="Рецепт 3.3 по образцу"></div>
+      <div style="flex:1 1 140px"><label class="f" for="jfGroup">Раздел</label><select id="jfGroup"><option value="mastery">Мастерство</option><option value="recipe" selected>Рецепты</option><option value="research">Исследования</option><option value="project">Сюжетные проекты</option></select></div>
+      <div style="flex:1 1 160px"><label class="f" for="jfMode">Как считать</label><select id="jfMode"><option value="marks">Отметки (1 / 2 / 3)</option><option value="count">Успехи (+1, нат. 20 = 2)</option><option value="roll">Результат броска</option></select></div>
+      <div style="flex:0 1 90px"><label class="f" for="jfTarget">Цель</label><input id="jfTarget" type="number" min="1" value="3"></div>
+      <div style="flex:0 1 90px"><label class="f" for="jfCur">Уже есть</label><input id="jfCur" type="number" min="0" value="0"></div>
+    </div>
+    <label class="f" for="jfRule" style="margin-top:8px">Правило или заметка</label><input id="jfRule" type="search" maxlength="240" placeholder="СЛ 11, образец даёт +2">
+    <button type="button" class="btn soft" id="jfAdd" style="margin-top:10px">Добавить</button>
+  </details>
+  <datalist id="potList"><option value="Зелье лечения 1.1"><option value="Зелье лечения 2.2"><option value="Яд 1.1"><option value="Зелье 3.3"></datalist>
 </div>
 </div>
 <script id="seed" type="application/json">__SEED__</script>
@@ -388,7 +413,9 @@ function render(keepSit){
   </div>
   <p class="note">Годных доз в среднем: ${(good*r.n).toFixed(1)} из ${r.n} (успех ${pct(good)}).${c.l===M?` В рост мастерства — ≈${((good+p.n20)*r.n).toFixed(1)} за варку.`:''} В «Провал» входит натуральная 1 (5%, осечка).${c.l>=6?' VI+: шансы — для завершающей проверки без меток качества и дефектов (±2 от подходов, 6.3).':''}</p>
   <div class="eff"><b>Эффект.</b> <span id="ef"></span>${c.s&&c.s!=='нет'?` <span class="badge">спасбросок ${c.s}</span>`:''}${c.ar?` <span class="badge">${c.ar}</span>`:''}</div>
+  <div id="crec" style="margin-top:12px"></div>
   <div class="acts"><button type="button" class="btn" id="toBag">В сумку: ${r.n}</button>${DRINK(c)?'<button type="button" class="btn soft" id="toDrink">Выпить сейчас</button>':''}</div>`;
+  recForm($('crec'),{name:c.n,lvl:c.l});
   $('toBag').onclick=()=>{addBag(c.n,r.n);$('toBag').textContent='Добавлено ✓'};
   if($('toDrink'))$('toDrink').onclick=()=>{tab('belt');$('dq').value=c.n;DM={};BAGPICK=null;fillDrink();$('dq').scrollIntoView({block:'center'})};
   o.querySelector('h2').textContent=c.n; o.querySelector('.badge.e').textContent=c.e+(c.f?' · '+c.f:'');
@@ -467,10 +494,12 @@ setTimeout(async()=>{
     const db=await window.claude.use('db'), user=await window.claude.use('user');
     if(!db||!user)return;
     const id=await user.id();if(!id)return;
-    DOC=db.collection('data/users/'+id).doc('belt');
-    const snap=await DOC.get();
+    JDB=db;db.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется автоматически.');renderJournal()},()=>jstat('Связь с журналом потеряна — обнови страницу.',true));
+    DOC=db.collection('belt').doc('state');
+    let snap=await DOC.get();const shared=snap.exists, su=shared?(snap.data().u||0):-1;
+    if(!shared){const old=await db.collection('data/users/'+id).doc('belt').get().catch(()=>null);if(old&&old.exists)snap=old}
     if(snap.exists){const d=snap.data();if(d&&d.s&&(d.u||0)>=(ST.u||0)){const x=JSON.parse(d.s);if(x&&x.v===1)ST=x}}
-    else if(ST.u)save();
+    if(!shared||(ST.u||0)>su)save();
     setSave('сохраняется в аккаунте');renderBelt();
   }catch(e){setSave('сохраняется в этом браузере')}
   finally{migrate();if(ST.seed===undefined)applySeed();else if(ST.seed!==SEED.id)syncSeed();else renderBelt()}
@@ -668,12 +697,111 @@ function renderBelt(){
 
 // вкладки
 function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';ls.set('tab',t);if(t==='belt')renderBelt()}
+  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';ls.set('tab',t);if(t==='belt')renderBelt();if(t==='jour')renderJournal()}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+
+// ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
+let JDB=null, TR=[], JBUSY=new Set(), JDEL=null;
+const JG=[["mastery","Мастерство"],["recipe","Рецепты"],["research","Исследования"],["project","Сюжетные проекты"]];
+const JQ={marks:[[1,"успех +1"],[2,"на 5+ +2"],[3,"нат. 20 +3"]],count:[[1,"успех +1"],[2,"нат. 20 +2"]],roll:[]};
+const MGOAL=m=>m===1?10:m===2?15:m===3?20:25;
+const jstat=(t,err)=>{const s=$('jstat');if(s){s.textContent=t;s.style.color=err?'var(--bad)':''}};
+const fmtDay=t=>{try{return new Date(t).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'})}catch(e){return''}};
+async function jUpdate(id,patch){
+  if(!JDB||JBUSY.has(id))return false;JBUSY.add(id);renderJournal();
+  try{await JDB.collection('tracks').doc(id).update(patch);jstat('Сохранено');return true}
+  catch(e){jstat(e&&e.code==='quota_exceeded'?'Хранилище переполнено: удали старые записи.':'Не сохранилось, попробуй ещё раз.',true);return false}
+  finally{JBUSY.delete(id);renderJournal()}
+}
+function jAdd(t,d,note){
+  const cur=(+t.current||0)+d, log=(Array.isArray(t.log)?t.log:[]).concat([{t:Date.now(),d,note}]).slice(-30);
+  const patch={current:cur,log};if(cur>=(+t.target||1))patch.done=true;return jUpdate(t.id,patch);
+}
+async function masteryTrack(M){
+  const name=`Мастерство ${M} → ${M+1}`;let t=TR.find(x=>x.group==='mastery'&&x.name===name);
+  if(t||!JDB)return t;
+  const id=`mastery-${M}-${M+1}`;
+  const data={name,group:'mastery',mode:'count',target:MGOAL(M),current:0,done:false,log:[],order:M,
+    rule:`Успешные зелья ${M}.${M} (каждая доза партии), натуральная 20 = 2. Эликсир ${ROM[M]} = зелье ${M}.`};
+  await JDB.collection('tracks').doc(id).set(data);return {id,...data};
+}
+function renderJournal(){
+  const root=$('jgroups');if(!root)return;root.innerHTML='';
+  if(!JDB){root.innerHTML='<p class="note">Журнал хранится на claude.ai: открой страницу там и войди в аккаунт.</p>';return}
+  if(!TR.length){root.innerHTML='<p class="note">Записей пока нет — добавь первую внизу.</p>';return}
+  JG.forEach(([g,label])=>{
+    const items=TR.filter(t=>(t.group||'recipe')===g).sort((a,b)=>(!!a.done-!!b.done)||((a.order??99)-(b.order??99)));
+    if(!items.length)return;
+    const sec=document.createElement('div');sec.innerHTML=`<div class="sect">${label} · ${items.length}</div>`;
+    items.forEach(t=>sec.appendChild(jCard(t)));root.appendChild(sec)});
+}
+function jCard(t){
+  const c=document.createElement('div');c.className='card jc'+(t.done?' done':'');
+  const cur=+t.current||0, tgt=Math.max(1,+t.target||1), dis=JBUSY.has(t.id);
+  c.innerHTML=`<div class="phead"><b class="jn"></b><span class="tox">${t.done?'готово':cur+' / '+tgt}</span></div>
+   <div class="track" style="margin:8px 0"><span class="fill" style="display:block;width:${Math.min(100,cur/tgt*100)}%;background:${t.done?'var(--gold)':'var(--acc)'}"></span></div>
+   <p class="note jr" style="margin:0 0 6px"></p>`;
+  c.querySelector('.jn').textContent=t.name||'Без названия';c.querySelector('.jr').textContent=t.rule||'';
+  if(!t.done){
+    const row=document.createElement('div');row.className='btns';
+    (JQ[t.mode]||[]).forEach(([d,lab])=>{const b=document.createElement('button');b.type='button';b.className='btn sm';b.textContent=lab;b.disabled=dis;b.onclick=()=>jAdd(t,d,'');row.appendChild(b)});
+    row.insertAdjacentHTML('beforeend',`<input type="number" placeholder="${t.mode==='roll'?'бросок':'число'}" aria-label="Сколько добавить" style="width:84px;padding:4px 8px"><input type="search" placeholder="заметка" aria-label="Заметка" style="flex:1;min-width:90px;width:auto;padding:4px 8px"><button type="button" class="btn sm soft">Добавить</button>`);
+    const [n,m]=row.querySelectorAll('input'), go=row.lastElementChild;go.disabled=dis;
+    go.onclick=()=>{const v=+n.value;if(!n.value||!isFinite(v))return n.focus();jAdd(t,v,m.value.trim())};
+    c.appendChild(row);
+  }
+  const log=Array.isArray(t.log)?t.log.slice(-5).reverse():[];
+  if(log.length){const l=document.createElement('div');l.className='log';l.style.marginTop='8px';
+    l.innerHTML=log.map(e=>`<div><span>${(e.d>0?'+':'')+e.d}</span>${esc(e.note||'')} <span style="float:right">${fmtDay(e.t)}</span></div>`).join('');c.appendChild(l)}
+  const a=document.createElement('div');a.className='btns';
+  if(log.length&&!t.done){const u=document.createElement('button');u.type='button';u.className='btn sm ghost';u.textContent='Отменить последнее';u.disabled=dis;
+    u.onclick=()=>{const lg=t.log.slice(),last=lg.pop();jUpdate(t.id,{current:(+t.current||0)-(+last.d||0),log:lg})};a.appendChild(u)}
+  const dn=document.createElement('button');dn.type='button';dn.className='btn sm ghost';dn.textContent=t.done?'Вернуть в работу':'Отметить готовым';dn.disabled=dis;dn.onclick=()=>jUpdate(t.id,{done:!t.done});a.appendChild(dn);
+  if(JDEL===t.id){a.insertAdjacentHTML('beforeend','<button type="button" class="btn sm warn">Удалить навсегда</button><button type="button" class="btn sm ghost">Не удалять</button>');
+    const [y,no]=[...a.querySelectorAll('button')].slice(-2);
+    y.onclick=async()=>{JBUSY.add(t.id);try{await JDB.collection('tracks').doc(t.id).delete();JDEL=null}catch(e){jstat('Не удалилось',true)}finally{JBUSY.delete(t.id);renderJournal()}};
+    no.onclick=()=>{JDEL=null;renderJournal()}}
+  else{const d=document.createElement('button');d.type='button';d.className='btn sm ghost';d.textContent='Удалить';d.disabled=dis;d.onclick=()=>{JDEL=t.id;renderJournal()};a.appendChild(d)}
+  c.appendChild(a);return c;
+}
+$('jfMode').onchange=()=>{const m=$('jfMode').value;$('jfTarget').value=m==='roll'?100:m==='count'?15:3};
+$('jfAdd').onclick=async()=>{
+  if(!JDB)return;const name=$('jfName').value.trim();if(!name)return $('jfName').focus();
+  const data={name,group:$('jfGroup').value,mode:$('jfMode').value,target:Math.max(1,+$('jfTarget').value||1),current:Math.max(0,+$('jfCur').value||0),rule:$('jfRule').value.trim(),done:false,log:[],order:Date.now()};
+  try{await JDB.collection('tracks').add(data);$('jfName').value='';$('jfRule').value='';jstat('Добавлено')}catch(e){jstat('Не добавилось',true)}
+};
+
+// ===== Запись варки: сумка + журнал =====
+function recForm(box,opts){
+  // opts: {name, lvl} — для рецепта из каталога; без них — поля названия и уровня (зелья)
+  box.innerHTML=`<div class="sect">Записать варку</div>
+   ${opts.name?'':`<div class="row"><div><input class="rn" list="potList" type="search" placeholder="Зелье, например «Зелье лечения 2.2»" aria-label="Что варила" autocomplete="off"></div><div style="flex:.4"><select class="rl" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${l}.${l}</option>`).join('')}</select></div></div>`}
+   <div class="recg">${[['n20','Нат. 20'],['hi','Успех 5+'],['ok','Успех'],['un','Нестаб.'],['fl','Провал']].map(([k,t])=>`<label><span>${t}</span><input type="number" min="0" value="0" data-k="${k}"></label>`).join('')}</div>
+   <label class="tg"><input type="checkbox" class="rx"><span>На натуральной 20 брала «Ещё одну дозу»</span></label>
+   <button type="button" class="btn soft rgo">Записать</button><span class="note rmsg" style="margin-left:8px"></span>`;
+  const rn=box.querySelector('.rn'), rl=box.querySelector('.rl');
+  if(rn)rn.oninput=()=>{const m=rn.value.match(/(\d+)\.\1\b/);if(m&&+m[1]<=10)rl.value=m[1]};
+  box.querySelector('.rgo').onclick=async()=>{
+    const n=opts.name||(rn.value.trim()), lvl=opts.lvl||+rl.value;if(!n)return rn.focus();
+    const k={};box.querySelectorAll('[data-k]').forEach(i=>k[i.dataset.k]=Math.max(0,+i.value||0));
+    const good=k.n20+k.hi+k.ok, extra=box.querySelector('.rx').checked?k.n20:0, M=Math.max(1,Math.min(10,+$('m').value||1));
+    if(!good&&!k.un&&!k.fl)return;
+    mutate(()=>{
+      const add=(nm,q,note)=>{if(!q)return;const b=ST.bag.find(b=>b.who==='p1'&&b.n===nm);if(b)b.q+=q;else ST.bag.push({n:nm,q,who:'p1',...(note?{note}:{})})};
+      add(n,good+extra);add(n+' (нестабильное)',k.un,'дефект определяет мастер');
+      logx(`Сварено «${n}»: ${good+extra} годных${k.un?`, ${k.un} нестабильных`:''}${k.fl?`, провалов ${k.fl}`:''}`)});
+    let msg=`В сумку Талиса: ${good+extra}${k.un?` + ${k.un} нестабильных`:''}.`;
+    const grow=k.ok+k.hi+2*k.n20;
+    if(lvl===M&&grow){const t=await masteryTrack(M);if(t&&await jAdd(TR.find(x=>x.id===t.id)||t,grow,`${n}: ${good} успешных${k.n20?`, нат. 20 ×${k.n20}`:''}`))msg+=` В рост мастерства ${M} → ${M+1}: +${grow}.`;else if(!JDB)msg+=' Журнал недоступен вне claude.ai.'}
+    else if(grow)msg+=` В рост мастерства не идёт: уровень ${lvl}, мастерство ${M}.`;
+    box.querySelector('.rmsg').textContent=msg;box.querySelectorAll('[data-k]').forEach(i=>i.value=0);
+  };
+}
+recForm($('jrec'),{});
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;
-list();render();renderBelt();tab(ls.get('tab')==='belt'?'belt':'brew');
+list();render();renderBelt();tab(['belt','jour'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
 </body>
 </html>
