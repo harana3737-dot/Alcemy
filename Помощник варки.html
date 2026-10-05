@@ -243,6 +243,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 <div id="tab-jour" hidden>
   <div class="card"><h2>Варка зелий и эликсиров</h2><div id="jrec"></div>
     <p class="note">Под каждую дозу 5+ и 20 — выбор бонуса, рекомендованный отмечен ★. Годные дозы уходят в сумку Талиса, бонус пишется на флакон. Если уровень зелья равен мастерству, успехи сами добавляются в рост мастерства (натуральная 20 — за два). Эликсир выбирается из каталога по названию; то же есть в карточке рецепта на вкладке «Варка».</p></div>
+  <div class="card" style="margin-top:16px"><h2>Варка чернил</h2><div id="jink"></div>
+    <p class="note">Набор за раз, без партий. Матрица — половина лечебных и половина ядовитых трав на ⅓ цены набора, травы не ниже уровня набора (10.1, правило мастера); эссенция уровня набора, тип даёт резонанс (+1 к Начертанию). Два успешных набора своего уровня = одно зелье в рост мастерства, натуральная 20 — сама по себе одно (3.2).</p></div>
   <div class="status note" id="jstat" style="margin:12px 0 0"></div>
   <div id="jgroups"></div>
   <details class="card" style="margin-top:16px"><summary>Добавить запись</summary>
@@ -711,7 +713,7 @@ function renderBelt(){
 
 // вкладки
 function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';ls.set('tab',t);if(t==='belt')renderBelt();if(t==='jour')renderJournal()}
+  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';ls.set('tab',t);if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd()}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
@@ -740,6 +742,7 @@ async function masteryTrack(M){
   await JDB.collection('tracks').doc(id).set(data);return {id,...data};
 }
 function renderJournal(){
+  if($('jink')&&$('jink')._upd&&!$('tab-jour').hidden)setTimeout(()=>$('jink')._upd(),0);
   const root=$('jgroups');if(!root)return;root.innerHTML='';
   if(!JDB){root.innerHTML='<p class="note">Журнал хранится на claude.ai: открой страницу там и войди в аккаунт.</p>';return}
   if(!TR.length){root.innerHTML='<p class="note">Записей пока нет — добавь первую внизу.</p>';return}
@@ -752,7 +755,7 @@ function renderJournal(){
 function jCard(t){
   const c=document.createElement('div');c.className='card jc'+(t.done?' done':'');
   const cur=+t.current||0, tgt=Math.max(1,+t.target||1), dis=JBUSY.has(t.id);
-  c.innerHTML=`<div class="phead"><b class="jn"></b><span class="tox">${t.done?'готово':cur+' / '+tgt}</span></div>
+  c.innerHTML=`<div class="phead"><b class="jn"></b><span class="tox">${t.done?'готово':fmtZ(cur)+' / '+tgt}</span></div>
    <div class="track" style="margin:8px 0"><span class="fill" style="display:block;width:${Math.min(100,cur/tgt*100)}%;background:${t.done?'var(--gold)':'var(--acc)'}"></span></div>
    <p class="note jr" style="margin:0 0 6px"></p>`;
   c.querySelector('.jn').textContent=t.name||'Без названия';c.querySelector('.jr').textContent=t.rule||'';
@@ -775,7 +778,7 @@ function jCard(t){
   }
   const log=Array.isArray(t.log)?t.log.slice(-5).reverse():[];
   if(log.length){const l=document.createElement('div');l.className='log';l.style.marginTop='8px';
-    l.innerHTML=log.map(e=>`<div><span>${(e.d>0?'+':'')+e.d}</span>${esc(e.note||'')} <span style="float:right">${fmtDay(e.t)}</span></div>`).join('');c.appendChild(l)}
+    l.innerHTML=log.map(e=>`<div><span>${(e.d>0?'+':'')+fmtZ(e.d)}</span>${esc(e.note||'')} <span style="float:right">${fmtDay(e.t)}</span></div>`).join('');c.appendChild(l)}
   const a=document.createElement('div');a.className='btns';
   if(log.length&&!t.done){const u=document.createElement('button');u.type='button';u.className='btn sm ghost';u.textContent='Отменить последнее';u.disabled=dis;
     u.onclick=()=>{const lg=t.log.slice(),last=lg.pop();jUpdate(t.id,{current:(+t.current||0)-(+last.d||0),log:lg})};a.appendChild(u)}
@@ -1067,6 +1070,66 @@ function sampleBtn(t){
     await jUpdate(t.id,{current:cur,log:lg,sampleUsed:true,...(cur>=(+t.target||1)?{done:true}:{})})};
   return btn;
 }
+
+// ===== Варка чернил (10.1–10.5) =====
+const INK={dc:[10,12,12,13,15,17,19,21,23,25],price:[15,30,120,300,1200,2500,7500,12500,25000,50000],
+  time:['2 часа','2 часа','2 часа','4 часа','4 часа','4 часа','объём 90','объём 90','объём 240','объём 240'],
+  place:['инструменты','инструменты','инструменты','инструменты','рабочее место','рабочее место','полная лаборатория','полная лаборатория','полная лаборатория','мастерская лаборатория']};
+const inkName=l=>l?`Чернила ${ROM[l]}`:'Чернила заговора';
+const INKQ={n20:['отличные','+4'],hi:['качественные','+2'],ok:['стандартные','±0'],un:['нестабильные','−2']};
+function inkForm(box){
+  box.innerHTML=`<div class="row" style="flex-wrap:wrap">
+     <div style="flex:0 0 120px"><label class="f">Уровень</label><select class="il">${INK.dc.map((_,l)=>`<option value="${l}">${l?ROM[l]:'заговор'}</option>`).join('')}</select></div>
+     <div style="flex:1 1 160px"><label class="f">Для заклинания (резонанс)</label><input class="isp" type="search" placeholder="необязательно" autocomplete="off"></div></div>
+   <label class="tg"><input type="checkbox" class="ilael"><span>Лаэль помогает 30 минут и знает заклинание<small>+1 к проверке (10.5)</small></span></label>
+   <div class="ifacts note" style="margin:6px 0"></div>
+   <div class="ires"></div>
+   <div class="sect">Результат</div>
+   <div class="chips iout">${[['n20','нат. 20'],['hi','успех 5+'],['ok','успех'],['un','провал 1–4'],['fl','провал 5+'],['n1','нат. 1']].map(([k,t])=>`<button type="button" class="chip" data-o="${k}">${t}</button>`).join('')}</div>
+   <span class="note imsg"></span>`;
+  const il=box.querySelector('.il'), lael=box.querySelector('.ilael');
+  il.value=String(Math.min(9,Math.max(0,+$('m').value||1)));
+  const upd=()=>{
+    const l=+il.value, M=Math.max(1,Math.min(10,+$('m').value||1)), B=(+$('b').value||0)+(lael.checked?1:0);
+    let dc=INK.dc[l];const over=l>M;if(over)dc+=5+(l-M);
+    const ch={n20:.05,hi:0,ok:0,un:0,fl:.05};for(let r=2;r<=19;r++){const x=r+B;if(x>=dc+5)ch.hi+=.05;else if(x>=dc)ch.ok+=.05;else if(x>=dc-4)ch.un+=.05;else ch.fl+=.05}
+    const ord=ORD(Math.max(1,l));const ink=TR.find(t=>t.id==='research-ink');
+    box.querySelector('.ifacts').innerHTML=`СЛ <b>${dc}</b>${over?` (выше мастерства: +5 + ${l-M})`:''} · бонус ${B>=0?'+':''}${B} · ${INK.time[l]} · катализатор ${ord?ROM[ord]+' порядка':'не нужен'} · место: ${INK.place[l]}.<br>Шансы: отличные ${pct(ch.n20)}, качественные ${pct(ch.hi)}, стандартные ${pct(ch.ok)}, нестабильные ${pct(ch.un)}, испорчены ${pct(ch.fl)}.${ink&&!ink.done?` <span style="color:var(--warn)">Рецепт чернил ещё не исследован (${ink.current}/${ink.target}).</span>`:''}`;
+    if(!ST.mat){box.querySelector('.ires').innerHTML='';return}
+    const half=INK.price[l]/6, minL=Math.max(1,l), ess=ST.mat.ess.filter(e=>e.q>0).sort((a,b)=>a.l-b.l), need=l?1:0.5;
+    const fit=ess.filter(e=>e.l>=Math.max(1,l));
+    const keep=box.querySelector('.ie')?.value;
+    const cat=ord?ST.mat.cat.filter(x=>x.o===ord&&x.used<10):[];
+    const rows=[['heal','Лечебные'],['poison','Ядовитые']].map(([k,t])=>{const have=herbValue(k,minL);return `${t} травы ур. ${minL}+ на <b>${fmtZ(half)} зм</b> из ${fmtZ(have)}${have<half-1e-9?' <span class="bad">не хватает</span>':''}`});
+    rows.push(`Эссенция ур. ${l?ROM[l]:'I'}+ ×${l?1:'½'} (тип — резонанс): <select class="ie" aria-label="Эссенция">${fit.map(e=>`<option value="${e.id}">${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${fmtZ(e.q)})</option>`).join('')}<option value="">не списывать</option></select>${fit.length?'':' <span class="bad">подходящей нет</span>'}${fit.length&&fit[0].l>Math.max(1,l)?' <small>(выше уровнем — избыток теряется)</small>':''}`);
+    if(ord)rows.push(`Катализатор ${ROM[ord]} порядка: <select class="ic" aria-label="Катализатор">${cat.map(x=>`<option value="${x.id}">${x.used}/10</option>`).join('')}<option value="">не списывать</option></select>${cat.length?(cat[0].used>=5?' <span class="wr">проверка нестабильности (5.2)</span>':''):' <span class="bad">нет катализатора</span>'}`);
+    box.querySelector('.ires').innerHTML=`<div class="sect">Расход на набор</div><div class="resb">${rows.map(r=>`<div>${r}</div>`).join('')}</div>`;
+    const ie=box.querySelector('.ie');if(keep!==undefined&&[...ie.options].some(o=>o.value===keep))ie.value=keep;
+  };
+  il.onchange=upd;lael.onchange=upd;box._upd=upd;upd();
+  box.querySelectorAll('.iout .chip').forEach(b=>b.onclick=async()=>{
+    const o=b.dataset.o, l=+il.value, M=Math.max(1,Math.min(10,+$('m').value||1)), half=INK.price[l]/6, minL=Math.max(1,l);
+    const sp=box.querySelector('.isp').value.trim(), ieV=box.querySelector('.ie')?.value, icV=box.querySelector('.ic')?.value;
+    let spent='', res='';
+    mutate(()=>{const out=[];
+      ['heal','poison'].forEach(k=>{if(herbValue(k,minL)>=half-1e-9)out.push(`${KIND[k].toLowerCase()} ${takeValue(k,half,minL)}`);else out.push(`${KIND[k].toLowerCase()} не списаны: нужно на ${fmtZ(half)} зм`)});
+      let essT='';if(ieV){const e=ST.mat.ess.find(x=>x.id===ieV);if(e){const t=Math.min(e.q,l?1:0.5);e.q=+(e.q-t).toFixed(2);essT=e.types[0];out.push(`эссенция «${e.n}» −${fmtZ(t)}`)}}
+      if(icV){const x=ST.mat.cat.find(y=>y.id===icV);if(x){x.used=Math.min(10,x.used+1);out.push(`катализатор ${ROM[x.o]} — ${x.used}/10`)}}
+      ST.mat.ess=ST.mat.ess.filter(e=>e.q>1e-9);
+      spent=out.join(', ');
+      if(INKQ[o]){const [q,mod]=INKQ[o];const nm=`${inkName(l)} — ${q} (${mod})`;const note=[essT?`эссенция: ${essT}`:'',sp?`для «${sp}»`:''].filter(Boolean).join(' · ');
+        const bb=ST.bag.find(x=>x.who==='p1'&&x.n===nm&&(x.note||'')===note);if(bb)bb.q++;else ST.bag.push({n:nm,q:1,who:'p1',...(note?{note}:{})});res=`В сумку: «${nm}».`}
+      else res=o==='n1'?'Осечка (таблица раздела 2), материалы испорчены.':'Набор не создан, материалы потеряны.';
+      logx(`Варка чернил ${l?ROM[l]:'заговора'}: ${b.textContent}. ${res} Расход: ${spent}`)});
+    // рост мастерства: 2 набора своего уровня = 1 зелье, нат. 20 — сам по себе 1 (3.2)
+    let msg=res+' Расход: '+spent+'.';
+    const g=o==='n20'?1:(o==='hi'||o==='ok')?0.5:0;
+    if(g&&l===M){const t=await masteryTrack(M);if(t&&await jAdd(TR.find(x=>x.id===t.id)||t,g,`${inkName(l)}: ${b.textContent}`))msg+=` В рост мастерства ${M} → ${M+1}: +${fmtZ(g)}.`}
+    else if(g)msg+=` В рост мастерства не идёт: чернила ${l?ROM[l]:'заговора'}, мастерство ${M}.`;
+    box.querySelector('.imsg').textContent=msg;upd();
+  });
+}
+inkForm($('jink'));
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;
