@@ -252,6 +252,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <p class="note">Под каждую дозу 5+ и 20 — выбор бонуса, рекомендованный отмечен ★. Годные дозы уходят в сумку Талиса, бонус пишется на флакон. Если уровень зелья равен мастерству, успехи сами добавляются в рост мастерства (натуральная 20 — за два). Эликсир выбирается из каталога по названию; то же есть в карточке рецепта на вкладке «Варка».</p></div>
   <div class="card" style="margin-top:16px"><h2>Варка чернил</h2><div id="jink"></div>
     <p class="note">Набор за раз, без партий. Матрица — половина лечебных и половина ядовитых трав на ⅓ цены набора, травы не ниже уровня набора (10.1, правило мастера); эссенция уровня набора, тип даёт резонанс (+1 к Начертанию). Два успешных набора своего уровня = одно зелье в рост мастерства, натуральная 20 — сама по себе одно (3.2).</p></div>
+  <div class="card" style="margin-top:16px"><h2>Варка противоядий</h2><div id="janti"></div>
+    <p class="note">7.9, черновик. По одному за попытку, 2 часа. Матрица — ⅓ цены поровну лечебными и ядовитыми травами; уровни трав в 7.9 не ограничены. Два противоядия = одно зелье уровня ступени в рост мастерства (слабое — 4.4).</p></div>
   <div class="status note" id="jstat" style="margin:12px 0 0"></div>
   <div id="jgroups"></div>
   <details class="card" style="margin-top:16px"><summary>Добавить запись</summary>
@@ -726,7 +728,7 @@ function renderBelt(){
 
 // вкладки
 function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';ls.set('tab',t);if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd()}}
+  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';ls.set('tab',t);if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd()}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
@@ -755,7 +757,7 @@ async function masteryTrack(M){
   await JDB.collection('tracks').doc(id).set(data);return {id,...data};
 }
 function renderJournal(){
-  if($('jink')&&$('jink')._upd&&!$('tab-jour').hidden)setTimeout(()=>$('jink')._upd(),0);
+  if($('jink')&&$('jink')._upd&&!$('tab-jour').hidden)setTimeout(()=>{$('jink')._upd();if($('janti')._upd)$('janti')._upd()},0);
   const root=$('jgroups');if(!root)return;root.innerHTML='';
   if(!JDB){root.innerHTML='<p class="note">Журнал хранится на claude.ai: открой страницу там и войди в аккаунт.</p>';return}
   if(!TR.length){root.innerHTML='<p class="note">Записей пока нет — добавь первую внизу.</p>';return}
@@ -1190,6 +1192,51 @@ function sugShow(inp){
 document.addEventListener('input',e=>{const t=e.target;if(t.matches&&t.matches('input[data-list]'))sugShow(t)});
 document.addEventListener('focusin',e=>{const t=e.target;if(t.matches&&t.matches('input[data-list]')){if(innerWidth<880)setTimeout(()=>{try{t.scrollIntoView({block:'start',behavior:'smooth'})}catch(_){}},300);sugShow(t)}});
 document.addEventListener('focusout',e=>{const t=e.target;if(t._sug)setTimeout(()=>{if(document.activeElement!==t)t._sug.innerHTML=''},200)});
+
+// ===== Варка противоядий (7.9, черновик): по образцу чернил, без эссенции =====
+const ANTI=[{t:'слабое',r:'1–5',m:4,dc:13,o:1,p:50},{t:'среднее',r:'6–7',m:6,dc:17,o:2,p:250},{t:'сильное',r:'8–9',m:8,dc:21,o:3,p:1500},{t:'легендарное',r:'10',m:10,dc:25,o:4,p:4000}];
+const antiName=a=>`Противоядие ${a.t} (нейтрализует яды ${a.r} уровней)`;
+function antiForm(box){
+  box.innerHTML=`<div class="row"><div style="flex:0 0 160px"><label class="f">Ступень</label><select class="al">${ANTI.map((a,i)=>`<option value="${i}">${a.t[0].toUpperCase()+a.t.slice(1)} (${a.r})</option>`).join('')}</select></div></div>
+   <div class="afacts note" style="margin:6px 0"></div><div class="ares"></div>
+   <div class="sect">Результат</div>
+   <div class="chips aout">${[['n20','нат. 20'],['hi','успех 5+'],['ok','успех'],['un','провал 1–4'],['fl','провал 5+'],['n1','нат. 1']].map(([k,t])=>`<button type="button" class="chip" data-o="${k}">${t}</button>`).join('')}</div>
+   <span class="note amsg"></span>`;
+  const al=box.querySelector('.al');
+  const upd=()=>{const a=ANTI[+al.value], M=Math.max(1,Math.min(10,+$('m').value||1)), B=+$('b').value||0;
+    let dc=a.dc;const over=a.m>M;if(over)dc+=5+(a.m-M);
+    const ch={n20:.05,hi:0,ok:0,un:0,fl:.05};for(let r=2;r<=19;r++){const x=r+B;if(x>=dc+5)ch.hi+=.05;else if(x>=dc)ch.ok+=.05;else if(x>=dc-4)ch.un+=.05;else ch.fl+=.05}
+    box.querySelector('.afacts').innerHTML=`СЛ <b>${dc}</b>${over?` (с мастерства ${a.m}; выше мастерства: +5 + ${a.m-M})`:''} · бонус ${B>=0?'+':''}${B} · 2 часа · катализатор ${ROM[a.o]} порядка · эссенция не нужна · цена ${a.p} зм.<br>Шансы: успех ${pct(ch.n20+ch.hi+ch.ok)}, нестабильное ${pct(ch.un)}, провал ${pct(ch.fl)}. <span style="color:var(--warn)">Рецепт — отдельный на ступень (купить или восстановить по образцу).</span>`;
+    if(!ST.mat){box.querySelector('.ares').innerHTML='';return}
+    const half=a.p/6, cat=ST.mat.cat.filter(x=>x.o===a.o&&x.used<10), keep=box.querySelector('.ac')?.value;
+    const rows=[['heal','Лечебные'],['poison','Ядовитые']].map(([k,t])=>{const h=herbValue(k,1);return `${t} травы на <b>${fmtZ(half)} зм</b> из ${fmtZ(h)}${h<half-1e-9?' <span class="bad">не хватает</span>':''}`});
+    rows.push(`Катализатор ${ROM[a.o]} порядка: <select class="ac" aria-label="Катализатор">${cat.map(x=>`<option value="${x.id}">${x.used}/10</option>`).join('')}<option value="">не списывать</option></select>${cat.length?(cat[0].used>=5?' <span class="wr">проверка нестабильности (5.2)</span>':''):' <span class="bad">нет катализатора</span>'}`);
+    box.querySelector('.ares').innerHTML=`<div class="sect">Расход</div><div class="resb">${rows.map(r=>`<div>${r}</div>`).join('')}</div>`;
+    const ac=box.querySelector('.ac');if(keep!==undefined&&[...ac.options].some(o=>o.value===keep))ac.value=keep;
+  };
+  al.onchange=upd;box._upd=upd;upd();
+  box.querySelectorAll('.aout .chip').forEach(b=>b.onclick=async()=>{
+    const o=b.dataset.o, a=ANTI[+al.value], M=Math.max(1,Math.min(10,+$('m').value||1)), half=a.p/6, acV=box.querySelector('.ac')?.value;
+    let spent='',res='';
+    mutate(()=>{const out=[];
+      ['heal','poison'].forEach(k=>{if(herbValue(k,1)>=half-1e-9)out.push(`${KIND[k].toLowerCase()} ${takeValue(k,half,1)}`);else out.push(`${KIND[k].toLowerCase()} не списаны: нужно на ${fmtZ(half)} зм`)});
+      if(acV){const x=ST.mat.cat.find(y=>y.id===acV);if(x){x.used=Math.min(10,x.used+1);out.push(`катализатор ${ROM[x.o]} — ${x.used}/10`)}}
+      spent=out.join(', ');
+      const put=(nm,note)=>{const bb=ST.bag.find(x=>x.who==='p1'&&x.n===nm&&(x.note||'')===(note||''));if(bb)bb.q++;else ST.bag.push({n:nm,q:1,who:'p1',...(note?{note}:{})})};
+      if(['n20','hi','ok'].includes(o)){put(antiName(a),'');res=`В сумку: «${antiName(a)}».`}
+      else if(o==='un'){put(antiName(a)+' (нестабильное)','дефект определяет мастер');res='Нестабильное — в сумку, дефект у мастера.'}
+      else res=o==='n1'?'Осечка (таблица раздела 2), материалы испорчены.':'Не создано, материалы потеряны.';
+      logx(`Варка противоядия (${a.t}): ${b.textContent}. ${res} Расход: ${spent}`)});
+    let msg=res+' Расход: '+spent+'.';
+    // рост: два противоядия = одно зелье уровня ступени (7.9); нат. 20 — как у чернил, сама по себе одно
+    const g=o==='n20'?1:(o==='hi'||o==='ok')?0.5:0;
+    if(g&&a.m===M){const t=await masteryTrack(M);if(t&&await jAdd(TR.find(x=>x.id===t.id)||t,g,`${antiName(a)}: ${b.textContent}`))msg+=` В рост мастерства ${M} → ${M+1}: +${fmtZ(g)}.`}
+    else if(g)msg+=` В рост мастерства не идёт: ступень ${a.m}.${a.m}, мастерство ${M}.`;
+    if(o==='hi'||o==='n20')msg+=' Бонусы 5+ и 20 для противоядий в 7.7 не заданы — у мастера.';
+    box.querySelector('.amsg').textContent=msg;upd();
+  });
+}
+antiForm($('janti'));
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;
