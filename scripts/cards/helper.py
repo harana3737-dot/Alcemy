@@ -1,7 +1,7 @@
 """Помощник варки — интерактивная страница игрока: рецепт + ситуация → бонус 5+ и 20, СЛ, партия, шансы;
 вкладка «Пояс» — сумка, выпитое, токсичность (8.7), алхимическая концентрация (8.9), отдых.
 Не для карточек мастера. Запуск: python3 scripts/cards/helper.py → «Помощник варки.html»."""
-import json, pathlib
+import hashlib, json, pathlib, re
 HERE = pathlib.Path(__file__).resolve().parent
 _g = {"__file__": str(HERE / "quality.py")}
 exec(open(HERE / "quality.py", encoding="utf-8").read().split("\n\ncards = sorted")[0], _g)
@@ -14,9 +14,31 @@ for c in sorted(C, key=lambda c: (c["lvl"], CLS_ORDER.index(c["cls"]), c["name"]
                      p=c["price"], a=c["a89"].startswith("да"), s=_g["saves"](c), ar=_g["area"](c) or "", tk=c["tasks"],
                      up=_g["UPCAST"].get(c["name"], "none"), b5=b5, b20=b20, eff=c["eff"]))
 
+# Сумка из листа персонажа: блоки «Зелья и расходники» и «На разборку»
+CARD_OF = {"Зелье сопротивления (некротика)": "Сопротивление", "Зелье подводного дыхания": "Водное дыхание"}
+sheet = (pathlib.Path(ROOT) / "Талис — лист персонажа.md").read_text(encoding="utf-8")
+seed, block = [], None
+for line in sheet.split("## Снаряжение", 1)[1].split("\n"):
+    t = line.strip()
+    if t in ("Зелья и расходники", "На разборку"):
+        block = t
+    elif t and not t.startswith("•"):
+        block = None
+    elif t and block:
+        n = t.lstrip("• ").strip()
+        m = re.search(r"\s*(?:×(\d+)|\((\d+) исп\.\))$", n)
+        q = int(m.group(1) or m.group(2)) if m else 1
+        n = n[:m.start()] if m else n
+        it = dict(n=n, q=q, note="на разборку" if block == "На разборку" else "")
+        if n in CARD_OF:
+            it["card"] = CARD_OF[n]
+        seed.append(it)
+seed_id = hashlib.sha1(json.dumps(seed, ensure_ascii=False).encode()).hexdigest()[:10]
+
 js = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
 html = (HERE / "helper_tpl.html").read_text(encoding="utf-8")
 html = html.replace("__DATA__", js).replace("__CLS__", json.dumps(CLS, ensure_ascii=False)).replace("__N__", str(len(data)))
+html = html.replace("__SEED__", json.dumps(dict(id=seed_id, items=seed), ensure_ascii=False).replace("</", "<\\/"))
 out = pathlib.Path(ROOT) / "Помощник варки.html"
 out.write_text(html, encoding="utf-8")
-print(out, len(data), len(html))
+print(out, len(data), len(html), seed_id, seed)

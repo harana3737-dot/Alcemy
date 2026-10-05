@@ -208,7 +208,7 @@ select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px 
       <div id="odpanel"></div>
     </div>
     <div class="card" style="margin-top:16px"><h2>Сумка</h2><div id="bag"></div>
-      <p class="note">Сваренное добавляется кнопкой «В сумку» на вкладке «Варка». Выпитое отсюда списывается само.</p></div>
+      <p class="note">Сваренное добавляется кнопкой «В сумку» на вкладке «Варка». Выпитое отсюда списывается само. Зелья 1.1–10.10 токсичности не дают — их просто тратишь.</p></div>
   </div>
   <div>
     <div id="people"></div>
@@ -222,6 +222,7 @@ select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px 
 </div>
 </div>
 </div>
+<script id="seed" type="application/json">__SEED__</script>
 <script id="data" type="application/json">__DATA__</script>
 <script>
 const D=JSON.parse(document.getElementById('data').textContent), CLS=__CLS__;
@@ -411,6 +412,10 @@ function durMin(d){
   return 60;
 }
 const byName=n=>D.find(c=>c.n===n);
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+let DM={};
+const SEED=JSON.parse($('seed').textContent);
+const bagCard=b=>byName(b.card||b.n);
 const uid=()=>Math.random().toString(36).slice(2,9);
 const NEW=()=>({v:1,u:0,T:8*60,people:[{id:'p1',name:'Талис',limit:7,exh:0,intox:false}],ent:[],rests:[],r10:[],lrs:[],trig:[],bag:[],log:[]});
 let ST=NEW(), UNDO=[], OD=null, BAGPICK=null;
@@ -443,7 +448,7 @@ function tidy(){
   const keep=Math.min(...ST.ent.map(e=>e.t0),ST.T)-1440;
   ST.rests=ST.rests.filter(r=>r>=keep).slice(-40);ST.r10=ST.r10.filter(r=>r>=keep).slice(-40);ST.lrs=ST.lrs.slice(-3);
   ST.trig=ST.trig.filter(t=>t.T>lastLR()).slice(-40);
-  ST.bag=ST.bag.filter(b=>b.q>0);
+  ST.bag=ST.bag.filter(b=>b.q>0||SEED.items.some(it=>it.n===b.n&&b.q>=0));
 }
 
 // хранение: аккаунт (db, личный документ) или браузер
@@ -468,7 +473,11 @@ function save(){
     else if(ST.u)save();
     setSave('сохраняется в аккаунте');renderBelt();
   }catch(e){setSave('сохраняется в этом браузере')}
+  finally{if(ST.seed===undefined)applySeed();else renderBelt()}
 })();
+function applySeed(){mutate(()=>{
+  SEED.items.forEach(it=>{const b=ST.bag.find(b=>b.n===it.n);if(b){b.q=it.q;b.note=it.note;if(it.card)b.card=it.card}else ST.bag.push({...it})});
+  ST.seed=SEED.id;logx('Сумка взята из листа персонажа')})}
 
 // время и отдых
 document.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>mutate(()=>{ST.T+=+b.dataset.adv}));
@@ -490,7 +499,6 @@ $('addp').onclick=()=>{const n=$('pn').value.trim();if(!n)return;mutate(()=>{ST.
 // форма «выпить»
 const MODS={eff:[["long","Долгое действие","×1,5, не больше +1 часа"],["dbl","Двойной срок","×2, не больше +8 часов"],["clean","Чистый","остаток уходит за 10 минут отдыха"],["short","Дефект «Короткое»","длительность вдвое меньше"],["heavy","Дефект «Тяжёлое»","токсичность +1"]],
  chg:[["lwin","Долгое окно","4 часа на применение"],["twin","Двойной заряд","два применения за окно"],["short","Дефект «Короткое»","окно 10 минут"],["heavy","Дефект «Тяжёлое»","токсичность +1"]]};
-let DM={};
 const dl=$('dlist');D.filter(DRINK).forEach(c=>{const o=document.createElement('option');o.value=c.n;dl.appendChild(o)});
 function drinkCard(){return byName($('dq').value.trim())}
 function fillDrink(){
@@ -513,12 +521,11 @@ function preview(){
   let h=`Токсичность ${p.name}: ${now} → <b>${aft}</b> из ${p.limit}.`;
   if(ex>0)h+=` <span class="bad">Передозировка на ${ex}: спасбросок Телосложения СЛ ${10+2*ex}.</span>`;
   if(c.a){const cur=ST.ent.find(e=>e.who===p.id&&e.a&&isActive(e));if(cur)h+=` <span class="wr">Алхимическая концентрация: «${esc(cur.n)}» прекратится.</span>`}
-  const bi=ST.bag.findIndex(b=>b.n===c.n);
+  const bi=ST.bag.findIndex(b=>bagCard(b)===c&&b.q>0);
   if(bi>=0)h+=`<label class="tg" style="padding:6px 0 0"><input type="checkbox" id="fromBag" ${BAGPICK!==false?'checked':''}><span>Списать из сумки (там ${ST.bag[bi].q})</span></label>`;
   $('dprev').innerHTML=h;
   const fb=$('fromBag');if(fb)fb.onchange=()=>{BAGPICK=fb.checked};
 }
-const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 $('dq').oninput=()=>{DM={};BAGPICK=null;fillDrink()};
 $('dwho').onchange=preview;$('dtox').oninput=preview;$('ddur').oninput=preview;
 $('drink').onclick=()=>{
@@ -530,7 +537,7 @@ $('drink').onclick=()=>{
     if(c.a){ST.ent.filter(e=>e.who===p.id&&e.a&&isActive(e)).forEach(e=>{e.stopped=ST.T;logx(`${p.name}: «${e.n}» прекратился (алхимическая концентрация)`)})}
     const before=toxOfP(p.id);
     ST.ent.push({id:uid(),who:p.id,n:c.n,k,t0:ST.T,tox,dur:k==='eff'?d:0,win:k==='chg'?d:0,uses:0,max:DM.twin?2:1,a:!!c.a,clean:!!DM.clean,stopped:null});
-    if(useBag){const b=ST.bag.find(b=>b.n===c.n);if(b)b.q--}
+    if(useBag){const b=ST.bag.find(b=>bagCard(b)===c&&b.q>0);if(b)b.q--}
     const aft=before+tox, ex=aft-p.limit;
     logx(`${p.name} выпивает «${c.n}» (+${tox}, всего ${aft} из ${p.limit})`);
     OD=ex>0?{who:p.id,ex,n:c.n}:null;
@@ -550,14 +557,21 @@ function renderOD(){
 function addBag(n,q){mutate(()=>{const b=ST.bag.find(b=>b.n===n);if(b)b.q+=q;else ST.bag.push({n,q});logx(`В сумку: «${n}» ×${q}`)})}
 function renderBag(){
   const box=$('bag');box.innerHTML='';
-  if(!ST.bag.length){box.innerHTML='<div class="note">Пусто</div>';return}
-  ST.bag.forEach((b,i)=>{const c=byName(b.n)||{};const r=document.createElement('div');r.className='bagi';
-    r.innerHTML=`<span class="nm"></span><button type="button" class="btn sm">−</button><span class="q">${b.q}</span><button type="button" class="btn sm">+</button>${c.k&&DRINK(c)?'<button type="button" class="btn sm soft">Выпить</button>':''}`;
-    r.querySelector('.nm').innerHTML=`${esc(b.n)}<small>${c.l?ROM[c.l]+' · '+CLS[c.k]:''}</small>`;
+  const items=ST.bag.filter(b=>b.q>0);
+  if(!items.length)box.innerHTML='<div class="note">Пусто</div>';
+  items.forEach(b=>{const c=bagCard(b)||{};const r=document.createElement('div');r.className='bagi';
+    const drink=c.k&&DRINK(c);
+    r.innerHTML=`<span class="nm"></span><button type="button" class="btn sm" aria-label="Меньше">−</button><span class="q">${b.q}</span><button type="button" class="btn sm" aria-label="Больше">+</button><button type="button" class="btn sm soft">${drink?'Выпить':'Потратить'}</button>`;
+    const sub=[c.l?ROM[c.l]+' · '+CLS[c.k]:'',b.note||''].filter(Boolean).join(' · ');
+    r.querySelector('.nm').innerHTML=`${esc(b.n)}<small>${esc(sub)}</small>`;
     const bs=r.querySelectorAll('button');
     bs[0].onclick=()=>mutate(()=>{b.q--});bs[1].onclick=()=>mutate(()=>{b.q++});
-    if(bs[2])bs[2].onclick=()=>{$('dq').value=b.n;DM={};BAGPICK=true;fillDrink();$('dq').scrollIntoView({behavior:'smooth',block:'center'})};
+    bs[2].onclick=drink?()=>{$('dq').value=c.n;DM={};BAGPICK=true;fillDrink();$('dq').scrollIntoView({behavior:'smooth',block:'center'})}
+      :()=>mutate(()=>{b.q--;logx(`Потрачено: «${b.n}», осталось ${b.q}`)});
     box.appendChild(r)});
+  const sb=document.createElement('button');sb.type='button';sb.className='btn sm'+(ST.seed!==SEED.id?' soft':' ghost');sb.style.marginTop='10px';
+  sb.textContent=ST.seed!==SEED.id?'Лист персонажа обновился — взять сумку заново':'Взять заново из листа персонажа';
+  sb.onclick=applySeed;box.appendChild(sb);
 }
 
 // люди и активные эффекты
