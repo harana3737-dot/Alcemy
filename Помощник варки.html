@@ -778,6 +778,8 @@ async function masteryTrack(M){
   await JDB.collection('tracks').doc(id).set(data);return {id,...data};
 }
 function renderJournal(){
+  const keepJ={};document.querySelectorAll('#jgroups .jc[data-id]').forEach(c=>{keepJ[c.dataset.id]=[...c.querySelectorAll('input,select')].map(x=>x.type==='checkbox'?x.checked:x.value)});
+  setTimeout(()=>document.querySelectorAll('#jgroups .jc[data-id]').forEach(c=>{const k=keepJ[c.dataset.id];if(!k)return;[...c.querySelectorAll('input,select')].forEach((x,i)=>{if(k[i]===undefined)return;if(x.type==='checkbox')x.checked=k[i];else if(k[i]!=='')x.value=k[i]})}),0);
   renderVol();renderHours();
   if($('jink')&&$('jink')._upd&&!$('tab-jour').hidden)setTimeout(()=>{$('jink')._upd();['janti','jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())},0);
   const root=$('jgroups');if(!root)return;root.innerHTML='';
@@ -790,7 +792,7 @@ function renderJournal(){
     items.forEach(t=>sec.appendChild(jCard(t)));root.appendChild(sec)});
 }
 function jCard(t){
-  const c=document.createElement('div');c.className='card jc'+(t.done?' done':'');
+  const c=document.createElement('div');c.className='card jc'+(t.done?' done':'');c.dataset.id=t.id;
   const cur=+t.current||0, tgt=Math.max(1,+t.target||1), dis=JBUSY.has(t.id);
   c.innerHTML=`<div class="phead"><b class="jn"></b><span class="tox">${t.done?'готово':fmtZ(cur)+' / '+tgt}</span></div>
    <div class="track" style="margin:8px 0"><span class="fill" style="display:block;width:${Math.min(100,cur/tgt*100)}%;background:${t.done?'var(--gold)':'var(--acc)'}"></span></div>
@@ -808,18 +810,26 @@ function jCard(t){
       if(hv){const mult=+ms.value;let spent='';mutate(()=>{spent=spendProbe(t,mult);addHours(2,`попытка «${t.name}»`);logx(`Попытка «${t.name}»: +${v}${spent?'. Расход: '+spent:''}`)});
         jAdd(t,v,[m.value.trim(),mult===0?'нат. 20, травы не тратились':'',spent].filter(Boolean).join(' · '))}
       else if(stg){const o=ms.value,L=t.cost.loss||[0,0,0];const add=o==='ok'?v:o==='hi'?v+5:o==='un'?Math.floor(v/2):o==='n20'?2*v:0;const loss=o==='un'?L[0]:o==='fl'?L[1]:o==='n1'?L[2]:0;
-        let txt=`итог ${v}: ${ms.options[ms.selectedIndex].text}`;mutate(()=>{addHours(2,`подход «${t.name}»`);if(loss){if((ST.mat.gold||0)>=loss){spendGold(loss,'потери этапа');txt+=`, −${loss} зм`}else txt+=`, −${loss} зм не списаны: монет мало`}logx(`${t.name}: ${txt}`)});
-        jAdd(t,add,[m.value.trim(),txt,o==='hi'&&t.cost.mark?t.cost.mark:'',['fl','n1'].includes(o)&&t.cost.harm?t.cost.harm[o]:''].filter(Boolean).join(' · '))}
+        let txt=`итог ${v}: ${ms.options[ms.selectedIndex].text}`;if(loss)txt+=`, +${loss} зм к стоимости этапа`;mutate(()=>{addHours(2,`подход «${t.name}»`);logx(`${t.name}: ${txt}`)});
+        const note=[m.value.trim(),txt,o==='hi'&&t.cost.mark?t.cost.mark:'',['fl','n1'].includes(o)&&t.cost.harm?t.cost.harm[o]:''].filter(Boolean).join(' · ');
+        const cur=(+t.current||0)+add, lg=(Array.isArray(t.log)?t.log:[]).concat([{t:Date.now(),d:add,note}]).slice(-30);
+        jUpdate(t.id,{current:cur,log:lg,extra:(+t.extra||0)+loss,...(cur>=(+t.target||1)?{done:true}:{})})}
       else if(t.cost)probe(t,v,m.value.trim()||'проба');else jAdd(t,v,m.value.trim())};
     c.appendChild(row);
     if(t.cost){const ct=document.createElement('p');ct.className='note';ct.style.margin='6px 0 0';const w=costShort(t);
       ct.innerHTML=esc(costText(t))+(w.length?` <span style="color:var(--bad)">${esc(w.join('; '))}</span>`:'');c.appendChild(ct)}
-    if(stg&&!t.paid){const pb=document.createElement('button');pb.type='button';pb.className='btn sm soft';const it=t.cost.matItem&&ST.mat&&ST.mat.other.find(o=>o.q>0&&o.n===t.cost.matItem);
-      pb.textContent=it?`Израсходовать материалы этапа: «${it.n}»`:`Оплатить материалы этапа: ${t.cost.mat} зм`;pb.disabled=dis;
-      pb.onclick=async()=>{let txt='';mutate(()=>{if(it){it.q--;txt=`«${it.n}»`}else if((ST.mat.gold||0)>=t.cost.mat){spendGold(t.cost.mat,'материалы этапа');txt=`${t.cost.mat} зм`}else txt='не оплачено: монет мало';logx(`${t.name}: материалы — ${txt}`)});
-        if(!/не оплачено/.test(txt))await jUpdate(t.id,{paid:true})};const r3=document.createElement('div');r3.className='btns';r3.appendChild(pb);c.appendChild(r3)}
     const sb=sampleBtn(t);if(sb){const r2=document.createElement('div');r2.className='btns';r2.appendChild(sb);c.appendChild(r2)}
   }
+  if(t.cost&&t.cost.type==='stage'){const ex=+t.extra||0;
+    const ct=document.createElement('p');ct.className='note';ct.style.margin='6px 0 0';
+    ct.textContent=t.paid?`Этап оплачен: материалы ${t.cost.mat} зм${ex?` + потери ${ex} зм`:''}.`:`Стоимость этапа сейчас: материалы ${t.cost.mat} зм${ex?` + потери ${ex} зм = ${t.cost.mat+ex} зм`:''}. Списывается при завершении этапа.`;c.appendChild(ct);
+    if(t.done&&!t.paid){const it=t.cost.matItem&&ST.mat&&ST.mat.other.find(o=>o.q>0&&o.n===t.cost.matItem);
+      const pb=document.createElement('button');pb.type='button';pb.className='btn sm soft';pb.disabled=JBUSY.has(t.id);
+      pb.textContent=`Завершить этап: ${it?`«${it.n}»`:`${t.cost.mat} зм`}${ex?` + ${ex} зм потерь`:''}`;
+      pb.onclick=async()=>{let txt='';const need=(it?0:t.cost.mat)+ex;
+        mutate(()=>{if((ST.mat.gold||0)<need){txt='не хватает монет: нужно '+need+' зм';return}if(it){it.q--}if(need)spendGold(need,'этап '+t.name);txt=[it?`«${it.n}»`:'',need?`${need} зм`:''].filter(Boolean).join(' + ');logx(`${t.name} завершён: списано ${txt}`)});
+        if(/не хватает/.test(txt)){jstat(txt,true);return}await jUpdate(t.id,{paid:true})};
+      const r3=document.createElement('div');r3.className='btns';r3.appendChild(pb);c.appendChild(r3)}}
   const log=Array.isArray(t.log)?t.log.slice(-5).reverse():[];
   if(log.length){const l=document.createElement('div');l.className='log';l.style.marginTop='8px';
     l.innerHTML=log.map(e=>`<div><span>${(e.d>0?'+':'')+fmtZ(e.d)}</span>${esc(e.note||'')} <span style="float:right">${fmtDay(e.t)}</span></div>`).join('');c.appendChild(l)}
@@ -1111,7 +1121,7 @@ function renderMat(){
 const PROBE_OUT=[[1,'успех +1'],[2,'на 5+ +2'],[3,'нат. 20 +3'],[0,'провал 1–4'],[0,'провал 5+'],[0,'нат. 1']];
 function costText(t){
   const c=t.cost;if(!c)return '';
-  if(c.type==='stage')return `Подход — 2 часа. Материалы этапа: ${c.mat} зм${t.paid?' (оплачены)':''}. Потери на провалах: 1–4 −${c.loss[0]} зм, 5+ −${c.loss[1]} зм, нат. 1 −${c.loss[2]} зм; урон и прочее — в описании.`;
+  if(c.type==='stage')return `Подход — 2 часа. Провалы увеличивают стоимость этапа: 1–4 +${c.loss[0]} зм, 5+ +${c.loss[1]} зм, нат. 1 +${c.loss[2]} зм; урон и прочее — в описании.`;
   if(c.type==='herbval')return `Попытка: ${KIND[c.k].toLowerCase()} травы на ${c.value} зм (нат. 20 — не тратятся, нат. 1 — вдвое).`;
   const p=[];if(c.herbs)p.push(`${fmtZ(c.herbs)} ${KIND[c.k].toLowerCase()} травы ур. ${c.l}`);
   if(c.ess)p.push(`эссенция ${c.ess.type} ${ROM[c.ess.l]}`);if(c.gold)p.push(`реактивы ${c.gold} зм`);
