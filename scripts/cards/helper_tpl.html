@@ -701,6 +701,7 @@ function renderPeople(){
     box.appendChild(card)});
 }
 function renderBelt(){
+  if(typeof renderJournal==='function'&&!$('tab-jour').hidden)renderJournal();
   $('now').textContent=fmtT(ST.T);
   renderPeople();renderBag();renderMat();renderOD();preview();
   $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
@@ -757,11 +758,20 @@ function jCard(t){
   c.querySelector('.jn').textContent=t.name||'Без названия';c.querySelector('.jr').textContent=t.rule||'';
   if(!t.done){
     const row=document.createElement('div');row.className='btns';
-    (JQ[t.mode]||[]).forEach(([d,lab])=>{const b=document.createElement('button');b.type='button';b.className='btn sm';b.textContent=lab;b.disabled=dis;b.onclick=()=>jAdd(t,d,'');row.appendChild(b)});
-    row.insertAdjacentHTML('beforeend',`<input type="number" placeholder="${t.mode==='roll'?'бросок':'число'}" aria-label="Сколько добавить" style="width:84px;padding:4px 8px"><input type="search" placeholder="заметка" aria-label="Заметка" style="flex:1;min-width:90px;width:auto;padding:4px 8px"><button type="button" class="btn sm soft">Добавить</button>`);
-    const [n,m]=row.querySelectorAll('input'), go=row.lastElementChild;go.disabled=dis;
-    go.onclick=()=>{const v=+n.value;if(!n.value||!isFinite(v))return n.focus();jAdd(t,v,m.value.trim())};
+    const quick=t.cost&&t.mode==='marks'?PROBE_OUT:(JQ[t.mode]||[]);
+    quick.forEach(([d,lab])=>{const b=document.createElement('button');b.type='button';b.className='btn sm'+(d?'':' ghost');b.textContent=lab;b.disabled=dis;
+      b.onclick=()=>t.cost?probe(t,d,lab):jAdd(t,d,'');row.appendChild(b)});
+    const hv=t.cost&&t.cost.type==='herbval';
+    row.insertAdjacentHTML('beforeend',`<input type="number" placeholder="${t.mode==='roll'?'бросок':'число'}" aria-label="Сколько добавить" style="width:84px;padding:4px 8px">${hv?'<select aria-label="Исход" style="width:auto;padding:4px 6px;font-size:13px"><option value="1">обычный</option><option value="0">нат. 20</option><option value="2">нат. 1</option></select>':''}<input type="search" placeholder="заметка" aria-label="Заметка" style="flex:1;min-width:90px;width:auto;padding:4px 8px"><button type="button" class="btn sm soft">Добавить</button>`);
+    const ins=row.querySelectorAll('input'), n=ins[0], m=ins[ins.length-1], ms=row.querySelector('select'), go=row.lastElementChild;go.disabled=dis;
+    go.onclick=()=>{const v=+n.value;if(!n.value||!isFinite(v))return n.focus();
+      if(hv){const mult=+ms.value;let spent='';mutate(()=>{spent=spendProbe(t,mult);logx(`Попытка «${t.name}»: +${v}${spent?'. Расход: '+spent:''}`)});
+        jAdd(t,v,[m.value.trim(),mult===0?'нат. 20, травы не тратились':'',spent].filter(Boolean).join(' · '))}
+      else if(t.cost)probe(t,v,m.value.trim()||'проба');else jAdd(t,v,m.value.trim())};
     c.appendChild(row);
+    if(t.cost){const ct=document.createElement('p');ct.className='note';ct.style.margin='6px 0 0';const w=costShort(t);
+      ct.innerHTML=esc(costText(t))+(w.length?` <span style="color:var(--bad)">${esc(w.join('; '))}</span>`:'');c.appendChild(ct)}
+    const sb=sampleBtn(t);if(sb){const r2=document.createElement('div');r2.className='btns';r2.appendChild(sb);c.appendChild(r2)}
   }
   const log=Array.isArray(t.log)?t.log.slice(-5).reverse():[];
   if(log.length){const l=document.createElement('div');l.className='log';l.style.marginTop='8px';
@@ -891,7 +901,8 @@ const HERB_P=[0,0.1,0.5,1,2,4,8,16,32,64,128];
 const ORD=l=>l<=2?0:l<=5?1:l<=7?2:l<=9?3:4;
 const KIND={heal:'Лечебные',poison:'Ядовитые'};
 const fmtZ=v=>(Math.round(v*100)/100).toString().replace('.',',');
-function matInit(){if(!ST.mat||ST.matSeed===undefined){ST.mat=JSON.parse(JSON.stringify(SEED.mat));ST.matSeed=SEED.mid;return true}return false}
+function matInit(){if(!ST.mat||ST.matSeed===undefined){ST.mat=JSON.parse(JSON.stringify(SEED.mat));ST.matSeed=SEED.mid;return true}
+  if(ST.mat.gold===undefined){ST.mat.gold=SEED.mat.gold;return true}return false}
 function essParse(c){const m=String(c.e).match(/^(.*?)\s+(X|IX|VIII|VII|VI|V|IV|III|II|I)\b/);return m?{type:m[1],l:ROM.indexOf(m[2])}:{type:String(c.e),l:c.l}}
 const essMatch=(it,type)=>it.types.some(t=>t===type||type.startsWith(t)||t.startsWith(type));
 function herbValue(kind){return ST.mat.herbs.filter(h=>h.k===kind).reduce((s,h)=>s+h.q*HERB_P[h.l],0)}
@@ -929,9 +940,11 @@ function resArea(box,n,lvl,c,k){
 }
 function applyUse(box){ // вызывается внутри mutate
   const P=box._plan;if(!P)return '';const out=[];
-  if(P.herbs&&P.herbs.q){let h=ST.mat.herbs.find(x=>x.k===P.kind&&x.l===P.herbs.l);const had=h?h.q:0;if(h)h.q=Math.max(0,h.q-P.herbs.q);
-    out.push(`${KIND[P.kind].toLowerCase()} травы ур. ${P.herbs.l} −${Math.min(had,P.herbs.q)}${had<P.herbs.q?` (не хватило ${P.herbs.q-had})`:''}`)}
-  if(P.value){let need=P.value;const used={};
+  if(P.herbs&&P.herbs.q){let h=ST.mat.herbs.find(x=>x.k===P.kind&&x.l===P.herbs.l);const had=h?h.q:0;
+    if(had>=P.herbs.q){h.q=+(h.q-P.herbs.q).toFixed(4);out.push(`${KIND[P.kind].toLowerCase()} травы ур. ${P.herbs.l} −${fmtZ(P.herbs.q)}`)}
+    else out.push(`травы ур. ${P.herbs.l} не списаны: нужно ${fmtZ(P.herbs.q)}, было ${fmtZ(had)}`)}
+  if(P.value&&herbValue(P.kind)<P.value-1e-9)out.push(`травы не списаны: нужно на ${fmtZ(P.value)} зм, было на ${fmtZ(herbValue(P.kind))}`);
+  else if(P.value){let need=P.value;const used={};
     ST.mat.herbs.filter(h=>h.k===P.kind&&h.q>0).sort((a,b)=>a.l-b.l).forEach(h=>{while(need>1e-9&&h.q>0){h.q--;need-=HERB_P[h.l];used[h.l]=(used[h.l]||0)+1}});
     out.push(`${KIND[P.kind].toLowerCase()} травы ${Object.entries(used).map(([l,q])=>`ур. ${l} −${q}`).join(', ')||'—'}${need>1e-9?` (не хватило на ${fmtZ(need)} зм)`:''}`)}
   const es=box.querySelector('.res-e');if(P.ess&&es&&es.value){const e=ST.mat.ess.find(x=>x.id===es.value);if(e){const t=Math.min(e.q,P.att);e.q-=t;out.push(`эссенция «${e.n}» −${t}`)}}
@@ -947,10 +960,13 @@ function renderMat(){
     r.innerHTML=`<span class="nm"></span><button type="button" class="btn sm" aria-label="Меньше">−</button><span class="q">${q}</span><button type="button" class="btn sm" aria-label="Больше">+</button>${extra||''}`;
     r.querySelector('.nm').innerHTML=`${esc(label)}${sub?`<small>${esc(sub)}</small>`:''}`;
     const b=r.querySelectorAll('button');b[0].onclick=onm;b[1].onclick=onp;box.appendChild(r);return r};
+  sec('Деньги');
+  {const r=document.createElement('div');r.className='bagi';r.innerHTML=`<span class="nm">Монеты Талиса<small>реактивы проб списываются отсюда</small></span><input type="number" step="0.01" value="${ST.mat.gold??0}" aria-label="Монеты, зм" style="width:110px;padding:4px 8px"> <span class="note" style="margin:0">зм</span>`;
+   const gi=r.querySelector('input');gi.onchange=()=>mutate(()=>{const v=+gi.value||0;logx(`Монеты: ${fmtZ(ST.mat.gold||0)} → ${fmtZ(v)} зм`);ST.mat.gold=v});box.appendChild(r)}
   sec('Травы');
   const hs=[...ST.mat.herbs].sort((a,b)=>a.k.localeCompare(b.k)||a.l-b.l);
   if(!hs.length)box.insertAdjacentHTML('beforeend','<div class="note">Нет</div>');
-  hs.forEach(h=>row(`${KIND[h.k]}, ур. ${h.l}`,`${fmtZ(HERB_P[h.l])} зм за траву`,h.q,()=>mutate(()=>{h.q--;ST.mat.herbs=ST.mat.herbs.filter(x=>x.q>0)}),()=>mutate(()=>{h.q++})));
+  hs.forEach(h=>row(`${KIND[h.k]}, ур. ${h.l}`,`${fmtZ(HERB_P[h.l])} зм за траву`,fmtZ(h.q),()=>mutate(()=>{h.q=Math.max(0,+(h.q-1).toFixed(4));ST.mat.herbs=ST.mat.herbs.filter(x=>x.q>1e-9)}),()=>mutate(()=>{h.q++})));
   const fh=document.createElement('div');fh.className='row';fh.style.marginTop='6px';
   fh.innerHTML=`<div><select id="mhk" aria-label="Основа"><option value="heal">Лечебные</option><option value="poison">Ядовитые</option></select></div><div style="flex:.5"><select id="mhl" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option>${l}</option>`).join('')}</select></div><div style="flex:.45"><input id="mhq" type="number" min="1" value="1" aria-label="Сколько"></div><div style="flex:none"><button type="button" class="btn" id="mha">+</button></div>`;
   box.appendChild(fh);
@@ -976,6 +992,57 @@ function renderMat(){
   ST.mat.other.filter(o=>o.q>0).forEach(o=>row(o.n,o.note,o.q,()=>mutate(()=>{o.q--}),()=>mutate(()=>{o.q++})));
   const rb=document.createElement('button');rb.type='button';rb.className='btn sm ghost';rb.style.marginTop='10px';rb.textContent='Взять материалы заново из листа персонажа';
   rb.onclick=()=>mutate(()=>{ST.mat=JSON.parse(JSON.stringify(SEED.mat));ST.matSeed=SEED.mid;logx('Материалы взяты из листа персонажа')});box.appendChild(rb);
+}
+
+// ===== Пробы исследований: расход материалов (8.4) =====
+// t.cost: {type:'probe', k, l, herbs, ess:{type,l}, gold, sample}  — эксперимент или восстановление по образцу
+//         {type:'herbval', k, value}                                — чернила, масла и мази: травы на 30 зм за попытку
+const PROBE_OUT=[[1,'успех +1'],[2,'на 5+ +2'],[3,'нат. 20 +3'],[0,'провал 1–4'],[0,'провал 5+'],[0,'нат. 1']];
+function costText(t){
+  const c=t.cost;if(!c)return '';
+  if(c.type==='herbval')return `Попытка: ${KIND[c.k].toLowerCase()} травы на ${c.value} зм (нат. 20 — не тратятся, нат. 1 — вдвое).`;
+  const p=[];if(c.herbs)p.push(`${fmtZ(c.herbs)} ${KIND[c.k].toLowerCase()} травы ур. ${c.l}`);
+  if(c.ess)p.push(`эссенция ${c.ess.type} ${ROM[c.ess.l]}`);if(c.gold)p.push(`реактивы ${c.gold} зм`);
+  return 'Проба: '+p.join(', ')+'.';
+}
+function costShort(t,mult=1){ // чего не хватает
+  const c=t.cost;if(!c||!ST.mat)return [];const w=[];
+  if(c.type==='herbval'){if(herbValue(c.k)<c.value*mult)w.push(`трав на ${c.value*mult} зм нет (есть на ${fmtZ(herbValue(c.k))})`);return w}
+  if(c.herbs){const h=ST.mat.herbs.find(x=>x.k===c.k&&x.l===c.l);if(!h||h.q<c.herbs*mult)w.push(`трав ур. ${c.l} мало (есть ${fmtZ(h?h.q:0)})`)}
+  if(c.ess&&!ST.mat.ess.some(e=>e.q>0&&essMatch(e,c.ess.type)&&e.l>=c.ess.l))w.push(`нет эссенции ${c.ess.type} ${ROM[c.ess.l]}`);
+  if(c.gold&&(ST.mat.gold||0)<c.gold*mult)w.push(`денег на реактивы мало (${fmtZ(ST.mat.gold||0)} зм)`);
+  return w;
+}
+function spendProbe(t,mult){ // внутри mutate; возвращает текст расхода
+  const c=t.cost, out=[];if(!c||!mult)return '';
+  if(c.type==='herbval'&&herbValue(c.k)<c.value*mult-1e-9)out.push(`травы не списаны: нужно на ${c.value*mult} зм, было на ${fmtZ(herbValue(c.k))}`);
+  else if(c.type==='herbval'){let need=c.value*mult;const used={};
+    ST.mat.herbs.filter(h=>h.k===c.k&&h.q>0).sort((a,b)=>a.l-b.l).forEach(h=>{while(need>1e-9&&h.q>0){const take=Math.min(1,h.q);h.q=+(h.q-take).toFixed(4);need-=take*HERB_P[h.l];used[h.l]=(used[h.l]||0)+take}});
+    out.push(`травы ${Object.entries(used).map(([l,q])=>`ур. ${l} −${fmtZ(q)}`).join(', ')||'—'}${need>1e-9?` (не хватило на ${fmtZ(need)} зм)`:''}`)}
+  else{
+    if(c.herbs){const h=ST.mat.herbs.find(x=>x.k===c.k&&x.l===c.l);const had=h?h.q:0,need=c.herbs*mult;
+      if(had>=need-1e-9){h.q=+(h.q-need).toFixed(4);out.push(`травы ур. ${c.l} −${fmtZ(need)}`)}else out.push(`травы ур. ${c.l} не списаны: нужно ${fmtZ(need)}, было ${fmtZ(had)}`)}
+    if(c.ess){const e=ST.mat.ess.filter(e=>e.q>0&&essMatch(e,c.ess.type)&&e.l>=c.ess.l).sort((a,b)=>a.l-b.l)[0];
+      if(e){const take=Math.min(e.q,mult);e.q-=take;out.push(`эссенция «${e.n}» −${take}`)}else out.push(`эссенции ${c.ess.type} не было`)}
+    if(c.gold){if((ST.mat.gold||0)>=c.gold*mult){ST.mat.gold=+((ST.mat.gold||0)-c.gold*mult).toFixed(2);out.push(`реактивы −${c.gold*mult} зм`)}else out.push(`реактивы ${c.gold*mult} зм не списаны: монет ${fmtZ(ST.mat.gold||0)}`)}
+  }
+  ST.mat.herbs=ST.mat.herbs.filter(h=>h.q>1e-9);ST.mat.ess=ST.mat.ess.filter(e=>e.q>0);
+  return out.join(', ');
+}
+function probe(t,d,label,mult=1){
+  let spent='';
+  if(t.cost&&ST.mat)mutate(()=>{spent=spendProbe(t,mult);logx(`Проба «${t.name}»: ${label}${spent?'. Расход: '+spent:''}`)});
+  return jAdd(t,d,label+(spent?' · '+spent:''));
+}
+function sampleBtn(t){
+  const s=t.cost&&t.cost.sample;if(!s||t.sampleUsed)return null;
+  const b=ST.bag.find(x=>x.who==='p1'&&x.n===s&&x.q>0);
+  const btn=document.createElement('button');btn.type='button';btn.className='btn sm soft';
+  btn.textContent=b?`Разобрать образец «${s}» (+1)`:`Образца «${s}» нет в сумке`;btn.disabled=!b||JBUSY.has(t.id);
+  btn.onclick=async()=>{if(!b)return;mutate(()=>{b.q--;logx(`Разобран образец «${s}» для «${t.name}»`)});
+    const lg=(Array.isArray(t.log)?t.log:[]).concat([{t:Date.now(),d:1,note:`образец «${s}» разобран`}]).slice(-30);const cur=(+t.current||0)+1;
+    await jUpdate(t.id,{current:cur,log:lg,sampleUsed:true,...(cur>=(+t.target||1)?{done:true}:{})})};
+  return btn;
 }
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
