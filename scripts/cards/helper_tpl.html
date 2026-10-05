@@ -210,9 +210,9 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <button type="button" class="btn soft" id="rest10">Передышка 10 мин</button>
     <button type="button" class="btn soft" id="restS">Короткий отдых</button>
     <button type="button" class="btn soft" id="restL">Долгий отдых</button>
-    <button type="button" class="btn ghost" id="undo">Отменить</button>
+    <button type="button" class="btn ghost" id="undo" title="Отменяет пояс, сумку, материалы и часы. Записи журнала отменяются в самой записи">Отменить</button>
   </div>
-  <p class="note">Короткий отдых — 1 час, снимает остаточную токсичность. Передышка 10 минут снимает её только у доз с бонусом «Чистый». Долгий отдых — 8 часов: токсичность обнуляется, интоксикация уходит, истощение −1.</p>
+  <p class="note">Короткий отдых — 1 час, снимает остаточную токсичность. Передышка 10 минут снимает её только у доз с бонусом «Чистый». Долгий отдых — 8 часов: токсичность обнуляется, интоксикация уходит, истощение −1. «Отменить» откатывает пояс, сумку, материалы и часы; отметки и рост мастерства в журнале — кнопкой «Отменить последнее» в самой записи.</p>
 </div>
 <div class="bgrid">
   <div>
@@ -331,7 +331,7 @@ const HERB_HALF=["chg","psn","rea","fl","oils"];
 const SIT=[
  ["sale","На продажу","экономия трав и лишний флакон выгоднее любого баффа",()=>true],
  ["first","Первая варка этого рецепта","СЛ +2 (8.4); партии — только для освоенного рецепта",()=>true],
- ["ess","Эссенция нестабильна","СЛ +2 (9.3)",c=>c.k!=='oilw'&&c.k!=='salve'],
+ ["ess","Эссенция нестабильна","СЛ +2 (9.3)",()=>true],
  ["help","Есть помощник","+2 к проверке; мастерство помощника не ниже твоего − 2",()=>true],
  ["lab","Мастерская лаборатория","партия эликсиров на 1 дозу больше",()=>true],
  ["--","Для себя: как применишь",""],
@@ -386,7 +386,7 @@ function brew(c,M,B,t){
   let dc=DC[c.l-1], add=[];
   if(c.l>M){dc+=5+(c.l-M);add.push(`выше мастерства: +5 + ${c.l-M}`)}
   if(t.first){dc+=2;add.push('первая варка +2')}
-  if(t.ess&&!['oilw','salve'].includes(c.k)){dc+=2;add.push('эссенция +2')}
+  if(t.ess){dc+=2;add.push('эссенция +2')}
   const bonus=B+(t.help?2:0);
   let n=1, nwhy='';
   if(!batchable(c))nwhy=c.l>=6?'VI+ — одной дозой':'заряды, склянки и масла кары партиями не варятся';
@@ -454,9 +454,10 @@ function render(keepSit){
   <p class="note">Годных доз в среднем: ${(good*r.n).toFixed(1)} из ${r.n} (успех ${pct(good)}).${c.l===M?` В рост мастерства — ≈${((good+p.n20)*r.n).toFixed(1)} за варку.`:''} В «Провал» входит натуральная 1 (5%, осечка).${c.l>=6?' VI+: шансы — для завершающей проверки без меток качества и дефектов (±2 от подходов, 6.3).':''}</p>
   <div class="eff"><b>Эффект.</b> <span id="ef"></span>${c.s&&c.s!=='нет'?` <span class="badge">спасбросок ${c.s}</span>`:''}${c.ar?` <span class="badge">${c.ar}</span>`:''}</div>
   <div id="crec" style="margin-top:12px"></div>
-  <div class="acts"><button type="button" class="btn" id="toBag">В сумку: ${r.n}</button>${DRINK(c)?'<button type="button" class="btn soft" id="toDrink">Выпить сейчас</button>':''}</div>`;
+  <div class="acts"><button type="button" class="btn ghost" id="toBag" title="Без расхода материалов, часов и роста — для купленного или найденного">Положить в сумку без учёта: ${r.n}</button>${DRINK(c)?'<button type="button" class="btn soft" id="toDrink">Выпить сейчас</button>':''}</div>`;
   if(c.l>=6){const cb=$('crec');cb.innerHTML=`<div class="sect">Долгая варка — объём ${VOLUME(c.l)} (6.3)</div><div class="rres"></div><button type="button" class="btn soft vstart">Начать долгую варку</button> <span class="note vsm"></span>`;
     resArea(cb,c.n,c.l,c,{n20:0,hi:0,ok:1,un:0,fl:0});
+    if(vols().some(v=>v.n===c.n)){const vb=cb.querySelector('.vstart');vb.disabled=true;vb.textContent='Уже начата — подходы на вкладке «Журнал»'}
     cb.querySelector('.vstart').onclick=()=>{const sp=volStart(cb,c,null);cb.querySelector('.vsm').textContent=`Начата: подходы — на вкладке «Журнал». Расход: ${sp||'—'}.`;cb.querySelector('.vstart').disabled=true}}
   else recForm($('crec'),{name:c.n,lvl:c.l,card:c});
   $('toBag').onclick=()=>{addBag(c.n,r.n);$('toBag').textContent='Добавлено ✓'};
@@ -482,6 +483,8 @@ function durMin(d){
   return 60;
 }
 const byName=n=>D.find(c=>c.n===n);
+const CAT_DC=[0,11,17,21,25];
+const stab=x=>x.stable||5;
 const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 let DM={};
 const SEED=JSON.parse($('seed').textContent);
@@ -583,7 +586,7 @@ $('setTime').onclick=()=>{
   box.innerHTML=`<input id="tday" type="number" min="1" style="width:80px" value="${dayOf(ST.T)}"><input id="thm" type="time" style="width:auto;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px" value="${pad(Math.floor(ST.T%1440/60))}:${pad(ST.T%60)}"><button type="button" class="btn soft">Поставить</button>`;
   $('setTime').parentNode.after(box);$('setTime').disabled=true;
   box.querySelector('button').onclick=()=>{const d=Math.max(1,+$('tday').value||1),[h,m]=($('thm').value||'08:00').split(':').map(Number);
-    box.remove();$('setTime').disabled=false;mutate(()=>{ST.T=Math.max(0,(d-1-(ST.dayOff||0))*1440+h*60+m);logx('Время задано вручную')})};
+    box.remove();$('setTime').disabled=false;mutate(()=>{let t=(d-1-(ST.dayOff||0))*1440+h*60+m;if(t<0){ST.dayOff=d-1;t=h*60+m}ST.T=t;logx('Время задано вручную')})};
 };
 
 // люди
@@ -613,7 +616,7 @@ function fillDrink(){
 function preview(){
   const c=drinkCard();if(!c||!DRINK(c))return;
   const p=P($('dwho').value);if(!p)return;
-  const now=toxOfP(p.id), add=Math.max(0,+$('dtox').value||0), aft=now+add, ex=aft-p.limit;
+  const now=toxOfP(p.id), add=Math.max(0,+$('dtox').value||0), aft=now+add, ex=add>0?aft-p.limit:0;
   let h=`Токсичность ${p.name}: ${now} → <b>${aft}</b> из ${p.limit}.`;
   if(ex>0)h+=` <span class="bad">Передозировка на ${ex}: спасбросок Телосложения СЛ ${10+2*ex}.</span>`;
   if(c.a){const cur=ST.ent.find(e=>e.who===p.id&&e.a&&isActive(e));if(cur)h+=` <span class="wr">Алхимическая концентрация: «${esc(cur.n)}» прекратится.</span>`}
@@ -637,7 +640,7 @@ $('drink').onclick=()=>{
     const before=toxOfP(p.id);
     ST.ent.push({id:uid(),who:p.id,n:c.n,k,t0:ST.T,tox,dur:k==='eff'?d:0,win:k==='chg'?d:0,uses:0,max:DM.twin?2:1,a:!!c.a,clean:!!DM.clean,stopped:null});
     if(useBag){const b=ST.bag.find(b=>b.who===useBag&&bagCard(b)===c&&b.q>0);if(b)b.q--}
-    const aft=before+tox, ex=aft-p.limit;
+    const aft=before+tox, ex=tox>0?aft-p.limit:0;
     logx(`${p.name} выпивает «${c.n}» (+${tox}, всего ${aft} из ${p.limit})`);
     OD=ex>0?{who:p.id,ex,n:c.n}:null;
   });
@@ -830,7 +833,9 @@ function jCard(t){
       pb.textContent=`Завершить этап: ${it?`«${it.n}»`:`${t.cost.mat} зм`}${ex?` + ${ex} зм потерь`:''}`;
       pb.onclick=async()=>{let txt='';const need=(it?0:t.cost.mat)+ex;
         mutate(()=>{if((ST.mat.gold||0)<need){txt='не хватает монет: нужно '+need+' зм';return}if(it){it.q--}if(need)spendGold(need,'этап '+t.name);txt=[it?`«${it.n}»`:'',need?`${need} зм`:''].filter(Boolean).join(' + ');logx(`${t.name} завершён: списано ${txt}`)});
-        if(/не хватает/.test(txt)){jstat(txt,true);return}await jUpdate(t.id,{paid:true})};
+        if(/не хватает/.test(txt)){jstat(txt,true);return}await jUpdate(t.id,{paid:true});
+        // каждый завершённый этап — одна практика в рост мастерства (памятка мастера)
+        const M=Math.max(1,Math.min(10,+$('m').value||1)), mt=await masteryTrack(M);if(mt)await jAdd(TR.find(x=>x.id===mt.id)||mt,1,`${t.name} завершён — практика`)};
       const r3=document.createElement('div');r3.className='btns';r3.appendChild(pb);c.appendChild(r3)}}
   const log=Array.isArray(t.log)?t.log.slice(-5).reverse():[];
   if(log.length){const l=document.createElement('div');l.className='log';l.style.marginTop='8px';
@@ -850,7 +855,7 @@ const jfSync=()=>{const v=$('jfCost').value;document.querySelectorAll('.jfc').fo
   document.querySelector('.jfl').hidden=v==='val';document.querySelector('.jfe').hidden=v!=='exp';document.querySelector('.jfs').hidden=v==='val';document.querySelector('.jfv').hidden=v!=='val';
   const l=Math.max(1,Math.min(10,+$('jfL').value||1)), g=l<=2?5:l<=5?15:l<=7?50:150;
   $('jfCostNote').textContent=v==='exp'?`Проба: ¼ основы (${fmtZ(l/4)} травы ур. ${l}), одна эссенция уровня цели и реактивы ${g} зм (8.4).`:v==='smp'?`Проба: ¼ трав (${fmtZ(l/4)} ур. ${l}), без реактивов; образец разбирается целиком: +1 отметка (8.4).`:`Попытка: травы на ${+$('jfV').value||0} зм (нат. 20 — не тратятся, нат. 1 — вдвое).`;
-  if(v==='exp'||v==='smp'){$('jfMode').value='marks'}else $('jfMode').value='roll'};
+  if(v==='exp'||v==='smp'){$('jfMode').value='marks';$('jfTarget').value=l<=2?3:l<=5?4:l<=7?5:6}else{$('jfMode').value='roll';$('jfTarget').value=100}};
 ['jfCost','jfL','jfV'].forEach(i=>$(i).addEventListener('input',jfSync));$('jfCost').onchange=jfSync;setTimeout(jfSync,0);
 $('jfMode').onchange=()=>{const m=$('jfMode').value;$('jfTarget').value=m==='roll'?100:m==='count'?15:3};
 $('jfAdd').onclick=async()=>{
@@ -871,7 +876,7 @@ function bonusLists(n,lvl,c){
   if(c){ // эликсир по классу (8.12)
     const k=c.k, L5=['Экономия трав'], L20=['Ещё одна доза','Два бонуса'];
     if(k==='eff'){L5.push('Незаметное','Долгое действие','Чистый','Лёгкий глоток');L20.push('Двойной срок')}
-    else if(['chg','rea','psn'].includes(k)){L5.push('Сильная привязка','Долгое окно');if(/dice/.test(c.up))L5.push('Усиленное заклинание');L20.push('Крепкая привязка','Двойной заряд');if(c.up!=='none'&&c.up!=='other')L20.push('Полное усиление')}
+    else if(['chg','rea','psn'].includes(k)){L5.push('Сильная привязка');if(k!=='psn')L5.push('Долгое окно');if(/dice/.test(c.up))L5.push('Усиленное заклинание');L20.push('Крепкая привязка');if(k!=='psn')L20.push('Двойной заряд');if(c.up!=='none'&&c.up!=='other')L20.push('Полное усиление')}
     else if(k==='fl'){L5.push('Сильная привязка','Дальний бросок','Щадящая');if(c.tk.includes('Урон'))L5.push('Ровный взрыв');L20.push('Крепкая привязка','Широкая склянка','Затяжная склянка')}
     else if(k==='oilw'){L5.push('Долгое масло','Быстрое нанесение','Больше боеприпасов');L20.push('Усиленное масло')}
     else if(k==='oils'){L5.push('Долгое масло','Сильная привязка');L20.push('Крепкая привязка','Двойная кара')}
@@ -880,7 +885,7 @@ function bonusLists(n,lvl,c){
   }
   const ps=potKind(n)==='poison';
   const L5=['Экономия трав',ps?'Крепкий яд':'Крепкая отдача',ps?'Долгий яд':'Лёгкий глоток'];
-  if(lvl>=6)L5.push('Направленный триггер');if(lvl>=4)L5.push(ps?'Сдвоенный яд':'Сдвоенная отдача');L5.push('Незаметное');
+  if(lvl>=6&&lvl<=9)L5.push('Направленный триггер');if(lvl>=4)L5.push(ps?'Сдвоенный яд':'Сдвоенная отдача');L5.push('Незаметное');
   const L20=['Ещё одно'];if(lvl<=9)L20.push('Выше уровнем');L20.push('Два бонуса');if(!ps&&lvl>=6)L20.push('Двойной триггер');
   return {L5,L20};
 }
@@ -955,7 +960,7 @@ function recForm(box,opts){
       if(v==='Ещё одно'||v==='Ещё одна доза'){doses.push({n,note:''},{n,note:''})}
       else if(v==='Выше уровнем'){doses.push({n:n.replace(/(\d+)\.\1\b/,`${lvl+1}.${lvl+1}`),note:''})}
       else if(v==='Два бонуса'){const row=s.parentNode;const a=row.querySelector('.tw1').value,b=row.querySelector('.tw2').value;
-        doses.push({n,note:[a,b].filter(x=>x&&!KEEP_OFF.has(x)).join(' + ')})}
+        doses.push({n,note:[...new Set([a,b])].filter(x=>x&&!KEEP_OFF.has(x)).join(' + ')})}
       else doses.push({n,note:v})});
     let spent='';
     mutate(()=>{
@@ -1014,7 +1019,7 @@ function takeCount(kind,need,minL){
   return used.join(', ');
 }
 function savedCount(box){let n=0;box.querySelectorAll('.b5s').forEach(s=>{if(s.value==='Экономия трав')n++});
-  box.querySelectorAll('.b20s').forEach(s=>{if(s.value==='Два бонуса'){const r=s.parentNode;['.tw1','.tw2'].forEach(q=>{if(r.querySelector(q).value==='Экономия трав')n++})}});return n}
+  box.querySelectorAll('.b20s').forEach(s=>{if(s.value==='Два бонуса'){const r=s.parentNode;if([r.querySelector('.tw1').value,r.querySelector('.tw2').value].includes('Экономия трав'))n++}});return n}
 function planUse(n,lvl,c,k,box){
   const att=k.n20+k.hi+k.ok+k.un+k.fl;if(!att||!ST.mat)return null;
   const saved=Math.min(att,savedCount(box));
@@ -1123,6 +1128,7 @@ function renderMat(){
 const PROBE_OUT=[[1,'успех +1'],[2,'на 5+ +2'],[3,'нат. 20 +3'],[0,'провал 1–4'],[0,'провал 5+'],[0,'нат. 1']];
 function costText(t){
   const c=t.cost;if(!c)return '';
+  if(c.type==='stage'){c.loss=c.loss||[0,0,0];}
   if(c.type==='stage')return `Подход — 2 часа. Провалы увеличивают стоимость этапа: 1–4 +${c.loss[0]} зм, 5+ +${c.loss[1]} зм, нат. 1 +${c.loss[2]} зм; урон и прочее — в описании.`;
   if(c.type==='herbval')return `Попытка: ${KIND[c.k].toLowerCase()} травы на ${c.value} зм (нат. 20 — не тратятся, нат. 1 — вдвое).`;
   const p=[];if(c.herbs)p.push(`${fmtZ(c.herbs)} ${KIND[c.k].toLowerCase()} травы ур. ${c.l}`);
@@ -1151,7 +1157,7 @@ function spendProbe(t,mult){ // внутри mutate; возвращает тек
   ST.mat.herbs=ST.mat.herbs.filter(h=>h.q>1e-9);ST.mat.ess=ST.mat.ess.filter(e=>e.q>0);
   return out.join(', ');
 }
-const probeHours=t=>{const l=t.cost&&t.cost.l||1;return t.cost&&t.cost.type==='probe'?(l>=10?12:l>=8?6:2):2};
+const probeHours=t=>{const c=t.cost,l=c&&c.l||1;return c&&c.type==='probe'&&(c.ess||c.gold)?(l>=10?12:l>=8?6:2):2};
 function probe(t,d,label,mult=1){
   let spent='';
   if(t.cost&&ST.mat)mutate(()=>{spent=spendProbe(t,mult);addHours(probeHours(t),`проба «${t.name}»`);logx(`Проба «${t.name}»: ${label}${spent?'. Расход: '+spent:''}`)});
@@ -1244,7 +1250,7 @@ function defectList(n,lvl,c){
   if(c){
     if(c.k==='fl')return ['Слабая: −2 к табличной СЛ','Малая: область на 5 фт меньше','Медленная: срабатывает в начале следующего хода бросающего','Светится: тусклый свет 5 фт на бросающем 1 минуту, помеха на Скрытность','Неровная: −1 на каждом кубе урона (не ниже 1)','Выдыхается: годно 3 дня'];
     const ch=['chg','rea','psn'].includes(c.k), oil=['oilw','oils','salve'].includes(c.k);
-    return [ch?'Короткое: окно 10 минут':'Короткое: длительность вдвое меньше',oil?'Короткое (вместо «Тяжёлого»): длительность вдвое меньше':'Тяжёлое: токсичность +1',
+    return [ch&&c.k!=='psn'?'Короткое: окно 10 минут':'Короткое: длительность вдвое меньше',oil?'Короткое (вместо «Тяжёлого»): длительность вдвое меньше':'Тяжёлое: токсичность +1',
       'Медленное: эффект начинается в начале следующего хода','Светится: тусклый свет 5 фт на время эффекта, помеха на Скрытность',
       (ch||c.k==='oils')?'Слабая привязка: −2 к табличной СЛ или атаке':'Горькое: выпить — действием','Выдыхается: годно 3 дня'];
   }
@@ -1332,8 +1338,6 @@ function antiForm(box){
 antiForm($('janti'));
 
 // ===== Изготовление катализатора из сырья (5.3) и переработка трофеев в эссенцию (9.3) =====
-const CAT_DC=[0,11,17,21,25];
-const stab=x=>x.stable||5;
 const OUT6=[['n20','нат. 20'],['hi','успех 5+'],['ok','успех'],['un','провал 1–4'],['fl','провал 5+'],['n1','нат. 1']];
 function chancesTxt(dc,B){const ch={n20:.05,hi:0,ok:0,un:0,fl:.05};for(let r=2;r<=19;r++){const x=r+B;if(x>=dc+5)ch.hi+=.05;else if(x>=dc)ch.ok+=.05;else if(x>=dc-4)ch.un+=.05;else ch.fl+=.05}return ch}
 function catForm(box){
@@ -1410,7 +1414,7 @@ function volMod(v){const d=v.def+volIdle(v).def;return Math.max(-2,Math.min(2,v.
 // старт: материалы одной попытки тратятся сразу
 function volStart(box,c,ink){ // c — карточка эликсира, или ink={l,name,spend()}
   const l=c?c.l:ink.l, M=Math.max(1,Math.min(10,+$('m').value||1));
-  let dc=c?DC[l-1]:INK.dc[l];if(l>M)dc+=5+(l-M);
+  let dc=c?DC[l-1]:INK.dc[l];if(l>M)dc+=5+(l-M);if(c&&S.t.first)dc+=2;if(c&&S.t.ess)dc+=2;
   let spent='';
   mutate(()=>{spent=c?applyUse(box):ink.spend();
     vols().push({id:uid(),kind:c?'elixir':'ink',n:c?c.n:ink.name,l,dc,volume:VOLUME(l),prog:0,marks:0,hitch:0,def:0,t0:ST.T,last:ST.T,log:[],ess:ink?ink.essT:'',spell:ink?ink.spell:''});
@@ -1428,6 +1432,7 @@ function volApproach(v,face,total,help,minus){
   else{add=0;v.def++;txt='провал на 5+: +1 дефект'}
   if(help&&add>0){add+=2;txt+=', помощник +2'}
   if(v.hitch>=3){v.hitch-=3;v.def++;txt+='; три заминки → дефект'}
+  const idl=volIdle(v);if(idl.def){v.def+=idl.def;txt+=`; простой — +${idl.def} дефект`}
   v.prog=Math.max(0,v.prog+add);v.last=ST.T;
   v.log.unshift({T:ST.T,t:`к20 ${face}, итог ${total}: ${txt} (${add>=0?'+':''}${add})`});v.log=v.log.slice(0,12);
   return txt;
@@ -1513,7 +1518,7 @@ function batchInfo(n,lvl,c,M,lab){
   if(c.l>M)return {size:1,why:'выше мастерства — одной дозой',t};
   const sz=Math.min(M-c.l+2,(c.l<=2?3:2)+(lab?1:0));return {size:sz,why:`партия эликсиров до ${sz} (6.2)`,t,batch:true};
 }
-function brewHours(n,lvl,c,att,M){const b=batchInfo(n,lvl,c,M,S.t.lab);if(!att)return 0;return b.batch?Math.ceil(att/b.size)*b.t:att*b.t}
+function brewHours(n,lvl,c,att,M){const b=batchInfo(n,lvl,c,M,S.t.lab);if(!att)return 0;if(S.t.first&&b.batch)return att*b.t;return b.batch?Math.ceil(att/b.size)*b.t:att*b.t}
 // осечка (раздел 2)
 const MISHAP=['1. Ожог: 1к6 огнём или кислотой за порядок катализатора (не меньше 1к6) — тому, кто варит','2. Едкий дым: все в 10 фт — спасбросок Телосложения СЛ 12 или отравлены на 1 час','3. Посуда треснула: −1 к проверкам на этом месте, пока не починить (2 часа или 5 зм)','4. Катализатор треснул: следующая проверка нестабильности — с помехой; без катализатора — испорчены травы для следующей варки','5. Шум и вонь: соседи, стража, Гильдия; в Соборе — случайное событие','6. Странный результат: дебафф по усмотрению мастера'];
 function mishapPicker(el,what){
