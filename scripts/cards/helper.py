@@ -33,6 +33,11 @@ for line in sheet.split("## Снаряжение", 1)[1].split("\n"):
         if n in CARD_OF:
             it["card"] = CARD_OF[n]
         seed.append(it)
+for it in seed:
+    it["who"] = "p1"
+# Союзники — по строке «Зелья союзников» в листе
+ALLY = [dict(n="Зелье подводного дыхания", q=1, note="", card="Водное дыхание", who=w) for w in ("pF", "pL")]
+seed += ALLY
 seed_id = hashlib.sha1(json.dumps(seed, ensure_ascii=False).encode()).hexdigest()[:10]
 
 js = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")

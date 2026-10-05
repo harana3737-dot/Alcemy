@@ -448,7 +448,7 @@ function tidy(){
   const keep=Math.min(...ST.ent.map(e=>e.t0),ST.T)-1440;
   ST.rests=ST.rests.filter(r=>r>=keep).slice(-40);ST.r10=ST.r10.filter(r=>r>=keep).slice(-40);ST.lrs=ST.lrs.slice(-3);
   ST.trig=ST.trig.filter(t=>t.T>lastLR()).slice(-40);
-  ST.bag=ST.bag.filter(b=>ST.people.some(p=>p.id===b.who)&&(b.q>0||(b.who==='p1'&&SEED.items.some(it=>it.n===b.n))));
+  ST.bag=ST.bag.filter(b=>ST.people.some(p=>p.id===b.who)&&(b.q>0||SEED.items.some(it=>it.who===b.who&&it.n===b.n)));
 }
 
 // хранение: аккаунт (db, личный документ) или браузер
@@ -480,20 +480,22 @@ function migrate(){
   mutate(()=>{ST.bag.forEach(b=>{if(!b.who)b.who='p1'});
     if(!ST.allies){[['pF','Фаэнон'],['pL','Лаэль']].forEach(([id,name])=>{if(!ST.people.some(p=>p.name===name))ST.people.push({id,name,limit:6,exh:0,intox:false})});ST.allies=1;logx('Добавлены Фаэнон и Лаэль (предел 6)')}})}
 const myBag=w=>ST.bag.filter(b=>b.who===w);
-const seedQ=()=>Object.fromEntries(SEED.items.map(it=>[it.n,it.q]));
+const sk=it=>it.who+'|'+it.n;
+const seedQ=()=>Object.fromEntries(SEED.items.map(it=>[sk(it),it.q]));
+const normQ=q=>q&&Object.fromEntries(Object.entries(q).map(([k,v])=>[k.includes('|')?k:'p1|'+k,v]));
 function applySeed(){mutate(()=>{
-  SEED.items.forEach(it=>{const b=ST.bag.find(b=>b.who==='p1'&&b.n===it.n);if(b){b.q=it.q;b.note=it.note;if(it.card)b.card=it.card}else ST.bag.push({...it,who:'p1'})});
-  ST.seed=SEED.id;ST.seedQ=seedQ();logx('Сумка взята из листа персонажа')})}
+  SEED.items.forEach(it=>{const b=ST.bag.find(b=>b.who===it.who&&b.n===it.n);if(b){b.q=it.q;b.note=it.note;if(it.card)b.card=it.card}else ST.bag.push({...it})});
+  ST.seed=SEED.id;ST.seedQ=seedQ();logx('Сумки взяты из листа персонажа')})}
 // лист изменился: прибавить к сумке только разницу между старым и новым листом, отмеченное в трекере не трогать
 const LEGACY={"73c0a59648":{"Зелье лечения 2.2":2,"Зелье 3.3":3}};
 function syncSeed(){
-  const old=ST.seedQ||(LEGACY[ST.seed]?{...seedQ(),...LEGACY[ST.seed]}:null);
+  const old=normQ(ST.seedQ)||(LEGACY[ST.seed]?normQ({...Object.fromEntries(SEED.items.filter(it=>it.who==='p1').map(it=>[it.n,it.q])),...LEGACY[ST.seed]}):null);
   if(!old){renderBelt();return}
   mutate(()=>{const nw=seedQ(),ch=[];
     new Set([...Object.keys(old),...Object.keys(nw)]).forEach(n=>{const d=(nw[n]||0)-(old[n]||0);if(!d)return;
-      let b=ST.bag.find(b=>b.who==='p1'&&b.n===n);if(!b){const it=SEED.items.find(i=>i.n===n);if(!it)return;b={...it,q:0,who:'p1'};ST.bag.push(b)}
-      b.q=Math.max(0,b.q+d);ch.push(`«${n}» ${d>0?'+':''}${d}`)});
-    ST.seed=SEED.id;ST.seedQ=nw;logx('Сумка обновлена по листу: '+(ch.join(', ')||'без изменений'))})}
+      const [w,nm]=[n.split('|')[0],n.slice(n.indexOf('|')+1)];let b=ST.bag.find(b=>b.who===w&&b.n===nm);if(!b){const it=SEED.items.find(i=>sk(i)===n);if(!it)return;b={...it,q:0};ST.bag.push(b)}
+      b.q=Math.max(0,b.q+d);ch.push(`${P(b.who)?P(b.who).name+': ':''}«${b.n}» ${d>0?'+':''}${d}`)});
+    ST.seed=SEED.id;ST.seedQ=nw;logx('Сумки обновлены по листу: '+(ch.join(', ')||'без изменений'))})}
 
 // время и отдых
 document.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>mutate(()=>{ST.T+=+b.dataset.adv}));
@@ -602,8 +604,8 @@ function renderBag(){
   f.innerHTML=`<div><input id="bagN" list="bagList" type="search" placeholder="Положить: название" autocomplete="off"></div><div style="flex:.35"><input id="bagQ" type="number" min="1" value="1" aria-label="Сколько"></div><div style="flex:none"><button type="button" class="btn" id="bagAdd">+</button></div>`;
   box.appendChild(f);
   $('bagAdd').onclick=()=>{const n=$('bagN').value.trim();if(!n)return;addBag(n,Math.max(1,+$('bagQ').value||1),BAGWHO)};
-  if(BAGWHO==='p1'){const sb=document.createElement('button');sb.type='button';sb.className='btn sm'+(ST.seed!==SEED.id?' soft':' ghost');sb.style.marginTop='10px';
-    sb.textContent=ST.seed!==SEED.id?'Лист персонажа обновился — взять сумку заново':'Взять заново из листа персонажа';
+  {const sb=document.createElement('button');sb.type='button';sb.className='btn sm'+(ST.seed!==SEED.id?' soft':' ghost');sb.style.marginTop='10px';
+    sb.textContent=ST.seed!==SEED.id?'Лист персонажа обновился — взять сумки заново':'Взять сумки заново из листа персонажа';
     sb.onclick=applySeed;box.appendChild(sb)}
 }
 
