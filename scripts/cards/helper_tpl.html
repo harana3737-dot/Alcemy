@@ -153,6 +153,9 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 .brow select{flex:1;min-width:150px;width:auto;padding:6px}
 .brow .two{display:flex;gap:6px;flex:1 1 100%}
 .brow .two[hidden]{display:none!important}
+.resb{font-size:13px;display:grid;gap:6px;background:var(--bg);border-radius:10px;padding:8px 10px}
+.resb select{width:auto;max-width:100%;padding:4px 6px;font-size:13px}
+.resb .bad{color:var(--bad);font-weight:600}.resb .wr{color:var(--warn)}.resb small{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -209,7 +212,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <div class="card"><h2>Выпить</h2>
       <label class="f" for="dq">Что</label>
       <input id="dq" list="dlist" type="search" placeholder="Эликсир или заряд…" autocomplete="off">
-      <datalist id="dlist"></datalist><datalist id="bagList"></datalist>
+      <datalist id="dlist"></datalist><datalist id="bagList"></datalist><datalist id="essList"><option value="Тело"><option value="Движение"><option value="Покров"><option value="Разум"><option value="Чувства"><option value="Смерть/душа"><option value="Вода/дыхание"><option value="Эфир"><option value="Стихия: огонь"><option value="Стихия: холод"><option value="Стихия: молния"><option value="Стихия: звук"><option value="Стихия: кислота"></datalist>
       <div class="row" style="margin-top:10px">
         <div><label class="f" for="dwho">Кто пьёт</label><select id="dwho"></select></div>
         <div><label class="f" for="dtox">Токсичность</label><input id="dtox" type="number" min="0" max="10" value="0"></div>
@@ -223,6 +226,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     </div>
     <div class="card" style="margin-top:16px"><h2>Сумка</h2><div id="bag"></div>
       <p class="note">У каждого своя сумка. Сваренное кнопкой «В сумку» на вкладке «Варка» попадает к Талису; «отдать» передаёт один флакон. Выпитое отсюда списывается само. Зелья 1.1–10.10 токсичности не дают — их просто тратишь.</p></div>
+    <div class="card" style="margin-top:16px"><h2>Материалы Талиса</h2><div id="mat"></div>
+      <p class="note">«Записать варку» тратит травы, эссенцию и применения катализатора на каждую попытку, включая провалы; «Экономия трав» возвращает травы своей дозы (у зарядов, склянок и масел кары — половину).</p></div>
   </div>
   <div>
     <div id="people"></div>
@@ -509,7 +514,7 @@ setTimeout(async()=>{
     if(!shared||(ST.u||0)>su)save();
     setSave('сохраняется в аккаунте');renderBelt();
   }catch(e){setSave('сохраняется в этом браузере')}
-  finally{migrate();if(ST.seed===undefined)applySeed();else if(ST.seed!==SEED.id)syncSeed();else renderBelt()}
+  finally{if(matInit()){ST.u=Date.now();save()}migrate();if(ST.seed===undefined)applySeed();else if(ST.seed!==SEED.id)syncSeed();else renderBelt()}
 },0);
 function migrate(){
   const need=!ST.allies||ST.bag.some(b=>!b.who);if(!need)return;
@@ -697,7 +702,7 @@ function renderPeople(){
 }
 function renderBelt(){
   $('now').textContent=fmtT(ST.T);
-  renderPeople();renderBag();renderOD();preview();
+  renderPeople();renderBag();renderMat();renderOD();preview();
   $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
   $('undo').disabled=!UNDO.length;
   const t=ST.people[0];if(t){const x=toxOfP(t.id);const b=$('beltBadge');b.textContent=x?`${x}/${t.limit}`:'';b.classList.toggle('hot',x>t.limit)}
@@ -838,12 +843,14 @@ function recForm(box,opts){
    <div class="recg">${[['n20','Нат. 20'],['hi','Успех 5+'],['ok','Успех'],['un','Нестаб.'],['fl','Провал']].map(([k,t])=>`<label><span>${t}</span><input type="number" min="0" max="10" value="0" data-k="${k}"></label>`).join('')}</div>
    <div class="chips rmode" style="margin:6px 0"><button type="button" class="chip" data-s="0">для себя</button><button type="button" class="chip" data-s="1">на продажу</button></div>
    <div class="rb"></div>
+   <div class="rres"></div>
    <button type="button" class="btn soft rgo">Записать</button><span class="note rmsg" style="margin-left:8px"></span>`;
   const rn=box.querySelector('.rn'), rl=box.querySelector('.rl');
   let sale=!!(opts.name&&S.t.sale);
   const cur=()=>{const n=opts.name||(rn.value.trim());const c=opts.card||byName(n)||null;const lvl=c?c.l:(opts.lvl||+rl.value);
     const k={};box.querySelectorAll('[data-k]').forEach(i=>k[i.dataset.k]=Math.max(0,Math.min(10,+i.value||0)));return {n,c,lvl,k}};
-  const upd=()=>{box.querySelectorAll('.rmode .chip').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.s==='1')===sale));const x=cur();bonusArea(box,x.n,x.lvl,x.c,x.k,sale)};
+  const upd=()=>{box.querySelectorAll('.rmode .chip').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.s==='1')===sale));const x=cur();bonusArea(box,x.n,x.lvl,x.c,x.k,sale);resArea(box,x.n,x.lvl,x.c,x.k)};
+  box.addEventListener('change',e=>{if(e.target.matches('.b5s,.b20s,.tw1,.tw2')){const x=cur();resArea(box,x.n,x.lvl,x.c,x.k)}});
   box.querySelectorAll('.rmode .chip').forEach(b=>b.onclick=()=>{sale=b.dataset.s==='1';upd()});
   box.querySelectorAll('[data-k]').forEach(i=>i.oninput=upd);
   if(rn)rn.oninput=()=>{const c=byName(rn.value.trim());if(c){rl.value=c.l;rl.disabled=true}else{rl.disabled=false;const m=rn.value.match(/(\d+)\.\1\b/);if(m&&+m[1]<=10)rl.value=m[1]}upd()};
@@ -862,12 +869,14 @@ function recForm(box,opts){
       else if(v==='Два бонуса'){const row=s.parentNode;const a=row.querySelector('.tw1').value,b=row.querySelector('.tw2').value;
         doses.push({n,note:[a,b].filter(x=>x&&!KEEP_OFF.has(x)).join(' + ')})}
       else doses.push({n,note:v})});
+    let spent='';
     mutate(()=>{
       const add=(nm,q,note)=>{if(!q)return;const b=ST.bag.find(b=>b.who==='p1'&&b.n===nm&&(b.note||'')===(note||''));if(b)b.q+=q;else ST.bag.push({n:nm,q,who:'p1',...(note?{note}:{}),...(c&&nm===n?{}:{})})};
       doses.forEach(d=>add(d.n,1,d.note));add(n+' (нестабильное)',k.un,'дефект определяет мастер');
-      logx(`Сварено «${n}»: ${doses.length} годных${k.un?`, ${k.un} нестабильных`:''}${k.fl?`, провалов ${k.fl}`:''}`)});
+      spent=applyUse(box);
+      logx(`Сварено «${n}»: ${doses.length} годных${k.un?`, ${k.un} нестабильных`:''}${k.fl?`, провалов ${k.fl}`:''}${spent?'. Расход: '+spent:''}`)});
     const notes=doses.filter(d=>d.note||d.n!==n).map(d=>d.n!==n?d.n:d.note);
-    let msg=`В сумку Талиса: ${doses.length}${k.un?` + ${k.un} нестабильных`:''}${notes.length?` (${notes.join(', ')})`:''}.`;
+    let msg=(spent?`Расход: ${spent}. `:'')+`В сумку Талиса: ${doses.length}${k.un?` + ${k.un} нестабильных`:''}${notes.length?` (${notes.join(', ')})`:''}.`;
     const grow=k.ok+k.hi+2*k.n20;
     if(lvl===M&&grow){const t=await masteryTrack(M);if(t&&await jAdd(TR.find(x=>x.id===t.id)||t,grow,`${n}: ${good} успешных${k.n20?`, нат. 20 ×${k.n20}`:''}`))msg+=` В рост мастерства ${M} → ${M+1}: +${grow}.`;else if(!JDB)msg+=' Журнал недоступен вне claude.ai.'}
     else if(grow)msg+=` В рост мастерства не идёт: уровень ${lvl}, мастерство ${M}.`;
@@ -876,6 +885,98 @@ function recForm(box,opts){
 }
 
 recForm($('jrec'),{});
+
+// ===== Материалы Талиса: травы, эссенции, катализаторы; расход при записи варки =====
+const HERB_P=[0,0.1,0.5,1,2,4,8,16,32,64,128];
+const ORD=l=>l<=2?0:l<=5?1:l<=7?2:l<=9?3:4;
+const KIND={heal:'Лечебные',poison:'Ядовитые'};
+const fmtZ=v=>(Math.round(v*100)/100).toString().replace('.',',');
+function matInit(){if(!ST.mat||ST.matSeed===undefined){ST.mat=JSON.parse(JSON.stringify(SEED.mat));ST.matSeed=SEED.mid;return true}return false}
+function essParse(c){const m=String(c.e).match(/^(.*?)\s+(X|IX|VIII|VII|VI|V|IV|III|II|I)\b/);return m?{type:m[1],l:ROM.indexOf(m[2])}:{type:String(c.e),l:c.l}}
+const essMatch=(it,type)=>it.types.some(t=>t===type||type.startsWith(t)||t.startsWith(type));
+function herbValue(kind){return ST.mat.herbs.filter(h=>h.k===kind).reduce((s,h)=>s+h.q*HERB_P[h.l],0)}
+function savedCount(box){let n=0;box.querySelectorAll('.b5s').forEach(s=>{if(s.value==='Экономия трав')n++});
+  box.querySelectorAll('.b20s').forEach(s=>{if(s.value==='Два бонуса'){const r=s.parentNode;['.tw1','.tw2'].forEach(q=>{if(r.querySelector(q).value==='Экономия трав')n++})}});return n}
+function planUse(n,lvl,c,k,box){
+  const att=k.n20+k.hi+k.ok+k.un+k.fl;if(!att||!ST.mat)return null;
+  const saved=Math.min(att,savedCount(box));
+  const kind=c?(c.b==='ядовитая'?'poison':'heal'):(potKind(n)==='poison'?'poison':'heal');
+  const byValue=!!c&&['chg','psn','rea','fl','oils'].includes(c.k);
+  const P={att,kind,saved,byValue};
+  if(byValue){const v=parseFloat(String(c.p).replace(/\s/g,'').replace(',','.'))||0;P.value=Math.max(0,att-saved/2)*v/3}
+  else P.herbs={l:lvl,q:Math.max(0,att-saved)*lvl};
+  if(c)P.ess={...essParse(c),q:att};
+  if(lvl>=3)P.cat={o:ORD(lvl),q:att};
+  return P;
+}
+function resArea(box,n,lvl,c,k){
+  const ar=box.querySelector('.rres');if(!ar)return;
+  const keep={};ar.querySelectorAll('select').forEach(x=>keep[x.className]=x.value);
+  const P=planUse(n,lvl,c,k,box);box._plan=P;if(!P){ar.innerHTML='';return}
+  const rows=[];
+  if(P.herbs){const have=(ST.mat.herbs.find(h=>h.k===P.kind&&h.l===P.herbs.l)||{q:0}).q;
+    rows.push(`${KIND[P.kind]} травы ур. ${P.herbs.l}: <b>${P.herbs.q}</b> из ${have}${have<P.herbs.q?' <span class="bad">не хватает</span>':''}${P.saved?` <small>(экономия трав на ${P.saved})</small>`:''}`)}
+  else{const have=herbValue(P.kind);rows.push(`${KIND[P.kind]} травы на <b>${fmtZ(P.value)} зм</b> из ${fmtZ(have)} (по ценности, ⅓ цены)${have<P.value?' <span class="bad">не хватает</span>':''}${P.saved?` <small>(экономия на ${P.saved} — половина)</small>`:''}`)}
+  if(P.ess){const opts=ST.mat.ess.filter(e=>e.q>0).sort((a,b)=>(essMatch(b,P.ess.type)-essMatch(a,P.ess.type))||(a.l-b.l));
+    const fit=opts.filter(e=>essMatch(e,P.ess.type)&&e.l>=P.ess.l), def=fit.find(e=>e.q>=P.att)||fit[0];
+    rows.push(`Эссенция ${esc(P.ess.type)} ${ROM[P.ess.l]||''} ×${P.att}: <select class="res-e" aria-label="Эссенция">${opts.map(e=>`<option value="${e.id}" ${def&&e.id===def.id?'selected':''}>${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${e.q})</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${!def?' <span class="bad">подходящей нет</span>':def.q<P.att?` <span class="bad">есть только ${def.q}</span>`:''}${def&&def.l>P.ess.l?' <small>(эссенция выше уровня)</small>':''}`)}
+  if(P.cat){const opts=ST.mat.cat.filter(x=>x.o===P.cat.o&&x.used<10);const def=opts[0];
+    let w='';if(def){const from=def.used+1,to=def.used+P.att;if(to>10)w=' <span class="bad">не хватит применений</span>';else if(to>5)w=` <span class="wr">применения ${Math.max(6,from)}–${to}: проверка нестабильности (5.2)</span>`}
+    rows.push(`Катализатор ${ROM[P.cat.o]} порядка ×${P.att}: <select class="res-c" aria-label="Катализатор">${opts.map(x=>`<option value="${x.id}">${ROM[x.o]} порядка — ${x.used}/10</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${def?w:' <span class="bad">нет катализатора</span>'}`)}
+  const pl=n=>n%10===1&&n%100!==11?'попытку':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'попытки':'попыток';
+  ar.innerHTML=`<div class="sect">Расход на ${P.att} ${pl(P.att)}</div><div class="resb">${rows.map(r=>`<div>${r}</div>`).join('')}</div>`;
+  ar.querySelectorAll('select').forEach(x=>{if(keep[x.className]!==undefined&&[...x.options].some(o=>o.value===keep[x.className]))x.value=keep[x.className]});
+}
+function applyUse(box){ // вызывается внутри mutate
+  const P=box._plan;if(!P)return '';const out=[];
+  if(P.herbs&&P.herbs.q){let h=ST.mat.herbs.find(x=>x.k===P.kind&&x.l===P.herbs.l);const had=h?h.q:0;if(h)h.q=Math.max(0,h.q-P.herbs.q);
+    out.push(`${KIND[P.kind].toLowerCase()} травы ур. ${P.herbs.l} −${Math.min(had,P.herbs.q)}${had<P.herbs.q?` (не хватило ${P.herbs.q-had})`:''}`)}
+  if(P.value){let need=P.value;const used={};
+    ST.mat.herbs.filter(h=>h.k===P.kind&&h.q>0).sort((a,b)=>a.l-b.l).forEach(h=>{while(need>1e-9&&h.q>0){h.q--;need-=HERB_P[h.l];used[h.l]=(used[h.l]||0)+1}});
+    out.push(`${KIND[P.kind].toLowerCase()} травы ${Object.entries(used).map(([l,q])=>`ур. ${l} −${q}`).join(', ')||'—'}${need>1e-9?` (не хватило на ${fmtZ(need)} зм)`:''}`)}
+  const es=box.querySelector('.res-e');if(P.ess&&es&&es.value){const e=ST.mat.ess.find(x=>x.id===es.value);if(e){const t=Math.min(e.q,P.att);e.q-=t;out.push(`эссенция «${e.n}» −${t}`)}}
+  const cs=box.querySelector('.res-c');if(P.cat&&cs&&cs.value){const x=ST.mat.cat.find(y=>y.id===cs.value);if(x){x.used=Math.min(10,x.used+P.att);out.push(`катализатор ${ROM[x.o]} — ${x.used}/10`)}}
+  ST.mat.herbs=ST.mat.herbs.filter(h=>h.q>0);ST.mat.ess=ST.mat.ess.filter(e=>e.q>0);
+  return out.join(', ');
+}
+function renderMat(){
+  const box=$('mat');if(!box)return;box.innerHTML='';
+  if(!ST.mat){box.innerHTML='<div class="note">Загрузка…</div>';return}
+  const sec=(t)=>{const d=document.createElement('div');d.className='sect';d.textContent=t;box.appendChild(d)};
+  const row=(label,sub,q,onm,onp,extra)=>{const r=document.createElement('div');r.className='bagi';
+    r.innerHTML=`<span class="nm"></span><button type="button" class="btn sm" aria-label="Меньше">−</button><span class="q">${q}</span><button type="button" class="btn sm" aria-label="Больше">+</button>${extra||''}`;
+    r.querySelector('.nm').innerHTML=`${esc(label)}${sub?`<small>${esc(sub)}</small>`:''}`;
+    const b=r.querySelectorAll('button');b[0].onclick=onm;b[1].onclick=onp;box.appendChild(r);return r};
+  sec('Травы');
+  const hs=[...ST.mat.herbs].sort((a,b)=>a.k.localeCompare(b.k)||a.l-b.l);
+  if(!hs.length)box.insertAdjacentHTML('beforeend','<div class="note">Нет</div>');
+  hs.forEach(h=>row(`${KIND[h.k]}, ур. ${h.l}`,`${fmtZ(HERB_P[h.l])} зм за траву`,h.q,()=>mutate(()=>{h.q--;ST.mat.herbs=ST.mat.herbs.filter(x=>x.q>0)}),()=>mutate(()=>{h.q++})));
+  const fh=document.createElement('div');fh.className='row';fh.style.marginTop='6px';
+  fh.innerHTML=`<div><select id="mhk" aria-label="Основа"><option value="heal">Лечебные</option><option value="poison">Ядовитые</option></select></div><div style="flex:.5"><select id="mhl" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option>${l}</option>`).join('')}</select></div><div style="flex:.45"><input id="mhq" type="number" min="1" value="1" aria-label="Сколько"></div><div style="flex:none"><button type="button" class="btn" id="mha">+</button></div>`;
+  box.appendChild(fh);
+  $('mha').onclick=()=>{const k=$('mhk').value,l=+$('mhl').value,q=Math.max(1,+$('mhq').value||1);mutate(()=>{const h=ST.mat.herbs.find(x=>x.k===k&&x.l===l);if(h)h.q+=q;else ST.mat.herbs.push({k,l,q});logx(`Материалы: ${KIND[k].toLowerCase()} травы ур. ${l} +${q}`)})};
+  sec('Эссенции');
+  if(!ST.mat.ess.length)box.insertAdjacentHTML('beforeend','<div class="note">Нет</div>');
+  ST.mat.ess.forEach(e=>row(e.n,`${e.types.join(' / ')} ${ROM[e.l]}${e.note?' · '+e.note:''}`,e.q,()=>mutate(()=>{e.q--;ST.mat.ess=ST.mat.ess.filter(x=>x.q>0)}),()=>mutate(()=>{e.q++})));
+  const fe=document.createElement('div');fe.className='row';fe.style.marginTop='6px';fe.style.flexWrap='wrap';
+  fe.innerHTML=`<div style="flex:1 1 130px"><input id="men" type="search" placeholder="Что (чешуя, пыль…)" aria-label="Название"></div><div style="flex:1 1 120px"><input id="met" list="essList" type="search" placeholder="Тип" aria-label="Тип эссенции"></div><div style="flex:0 0 74px"><select id="mel" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${ROM[l]}</option>`).join('')}</select></div><div style="flex:none"><button type="button" class="btn" id="mea">+</button></div>`;
+  box.appendChild(fe);
+  $('mea').onclick=()=>{const t=$('met').value.trim();if(!t)return $('met').focus();const n=$('men').value.trim()||('Эссенция '+t);const l=+$('mel').value;
+    mutate(()=>{ST.mat.ess.push({id:uid(),n,types:t.split('/').length>2?[t]:[t],l,q:1,note:''});logx(`Материалы: эссенция «${n}» (${t} ${ROM[l]})`)})};
+  sec('Катализаторы');
+  if(!ST.mat.cat.length)box.insertAdjacentHTML('beforeend','<div class="note">Нет готовых</div>');
+  ST.mat.cat.forEach(x=>{const r=row(`Катализатор ${ROM[x.o]} порядка`,x.used>=10?'исчерпан':x.used>=5?'дальше — проверки нестабильности (5.2)':'стабильный',`${x.used}/10`,
+      ()=>mutate(()=>{x.used=Math.max(0,x.used-1)}),()=>mutate(()=>{x.used=Math.min(10,x.used+1)}),'<button type="button" class="btn sm ghost" aria-label="Убрать">×</button>');
+    r.querySelectorAll('button')[2].onclick=()=>mutate(()=>{ST.mat.cat=ST.mat.cat.filter(y=>y!==x);logx(`Материалы: катализатор ${ROM[x.o]} убран`)})});
+  const fc=document.createElement('div');fc.className='btns';
+  fc.innerHTML=[1,2,3,4].map(o=>`<button type="button" class="btn sm" data-o="${o}">+ катализатор ${ROM[o]}</button>`).join('');
+  fc.querySelectorAll('button').forEach(b=>b.onclick=()=>mutate(()=>{ST.mat.cat.push({id:uid(),o:+b.dataset.o,used:0});logx(`Материалы: катализатор ${ROM[+b.dataset.o]} порядка`)}));
+  box.appendChild(fc);
+  sec('Прочее (вручную)');
+  ST.mat.other.filter(o=>o.q>0).forEach(o=>row(o.n,o.note,o.q,()=>mutate(()=>{o.q--}),()=>mutate(()=>{o.q++})));
+  const rb=document.createElement('button');rb.type='button';rb.className='btn sm ghost';rb.style.marginTop='10px';rb.textContent='Взять материалы заново из листа персонажа';
+  rb.onclick=()=>mutate(()=>{ST.mat=JSON.parse(JSON.stringify(SEED.mat));ST.matSeed=SEED.mid;logx('Материалы взяты из листа персонажа')});box.appendChild(rb);
+}
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;
