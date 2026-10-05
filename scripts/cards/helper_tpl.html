@@ -236,8 +236,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 </div>
 </div>
 <div id="tab-jour" hidden>
-  <div class="card"><h2>Варка зелий</h2><div id="jrec"></div>
-    <p class="note">Под каждую дозу 5+ и 20 — выбор бонуса, рекомендованный отмечен ★. Годные дозы уходят в сумку Талиса, бонус пишется на флакон. Если уровень зелья равен мастерству, успехи сами добавляются в рост мастерства (натуральная 20 — за два). Эликсиры записываются так же — на вкладке «Варка», в карточке рецепта.</p></div>
+  <div class="card"><h2>Варка зелий и эликсиров</h2><div id="jrec"></div>
+    <p class="note">Под каждую дозу 5+ и 20 — выбор бонуса, рекомендованный отмечен ★. Годные дозы уходят в сумку Талиса, бонус пишется на флакон. Если уровень зелья равен мастерству, успехи сами добавляются в рост мастерства (натуральная 20 — за два). Эликсир выбирается из каталога по названию; то же есть в карточке рецепта на вкладке «Варка».</p></div>
   <div class="status note" id="jstat" style="margin:12px 0 0"></div>
   <div id="jgroups"></div>
   <details class="card" style="margin-top:16px"><summary>Добавить запись</summary>
@@ -556,6 +556,7 @@ const MODS={eff:[["long","Долгое действие","×1,5, не больш
 const ABC=(x,y)=>x.n.localeCompare(y.n,'ru');
 const dl=$('dlist');D.filter(DRINK).sort(ABC).forEach(c=>{const o=document.createElement('option');o.value=c.n;dl.appendChild(o)});
 const bl=$('bagList');[...D].sort(ABC).forEach(c=>{const o=document.createElement('option');o.value=c.n;bl.appendChild(o)});
+const pl=$('potList');[...D].sort(ABC).forEach(c=>{const o=document.createElement('option');o.value=c.n;o.label=ROM[c.l]+' · '+CLS[c.k];pl.appendChild(o)});
 function drinkCard(){return byName($('dq').value.trim())}
 function fillDrink(){
   const c=drinkCard(), box=$('dmods');box.innerHTML='';
@@ -833,7 +834,7 @@ function bonusArea(box,n,lvl,c,cnt,sale){
 }
 function recForm(box,opts){
   box.innerHTML=`<div class="sect">Записать варку</div>
-   ${opts.name?'':`<div class="row"><div><input class="rn" list="potList" type="search" placeholder="Зелье, например «Зелье лечения 2.2»" aria-label="Что варила" autocomplete="off"></div><div style="flex:.4"><select class="rl" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${l}.${l}</option>`).join('')}</select></div></div>`}
+   ${opts.name?'':`<div class="row"><div><input class="rn" list="potList" type="search" placeholder="Зелье или эликсир, например «Зелье лечения 2.2»" aria-label="Что варила" autocomplete="off"></div><div style="flex:.4"><select class="rl" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${l}.${l}</option>`).join('')}</select></div></div>`}
    <div class="recg">${[['n20','Нат. 20'],['hi','Успех 5+'],['ok','Успех'],['un','Нестаб.'],['fl','Провал']].map(([k,t])=>`<label><span>${t}</span><input type="number" min="0" max="10" value="0" data-k="${k}"></label>`).join('')}</div>
    <div class="chips rmode" style="margin:6px 0"><button type="button" class="chip" data-s="0">для себя</button><button type="button" class="chip" data-s="1">на продажу</button></div>
    <div class="rb"></div>
@@ -845,7 +846,7 @@ function recForm(box,opts){
   const upd=()=>{box.querySelectorAll('.rmode .chip').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.s==='1')===sale));const x=cur();bonusArea(box,x.n,x.lvl,x.c,x.k,sale)};
   box.querySelectorAll('.rmode .chip').forEach(b=>b.onclick=()=>{sale=b.dataset.s==='1';upd()});
   box.querySelectorAll('[data-k]').forEach(i=>i.oninput=upd);
-  if(rn)rn.oninput=()=>{const m=rn.value.match(/(\d+)\.\1\b/);if(m&&+m[1]<=10)rl.value=m[1];upd()};
+  if(rn)rn.oninput=()=>{const c=byName(rn.value.trim());if(c){rl.value=c.l;rl.disabled=true}else{rl.disabled=false;const m=rn.value.match(/(\d+)\.\1\b/);if(m&&+m[1]<=10)rl.value=m[1]}upd()};
   if(rl)rl.onchange=upd;
   upd();
   box.querySelector('.rgo').onclick=async()=>{
