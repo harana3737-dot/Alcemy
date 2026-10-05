@@ -29,10 +29,13 @@ def sim(bonus, sl, mat, price, cat, per_day, points, stop, days=100000, u=.5):
                     pts -= 1; ok = random.randint(1, 20) + bonus >= INSTAB[use - 6]
                 if not ok:
                     use = 0; continue
-            r = outcome(random.randint(1, 20), bonus, sl)
+            d = random.randint(1, 20); r = outcome(d, bonus, sl)
             if pts and (r == "fail" or (r == "unst" and reroll_unst)):
-                pts -= 1; r = outcome(random.randint(1, 20), bonus, sl)
+                pts -= 1; d = random.randint(1, 20); r = outcome(d, bonus, sl)
             profit += price if r == "ok" else price * u if r == "unst" else 0
+            if r == "ok":                       # бонусы 7.7 у зелий: 5+ — экономия трав, 20 — лучший вариант
+                b5, b20 = potion_bonus(mat, price)
+                profit += b20 if d == 20 else b5 if d + bonus >= sl + 5 else 0
             if use >= stop or not cat and use >= 5:
                 use = 0
     return profit / tries

@@ -18,17 +18,34 @@ INK = {
 }
 
 
-def roll(bonus, sl):
-    """→ 'ok' (успех, в т.ч. 5+ и нат. 20), 'unst' (провал 1–4), 'fail' (провал 5+ / нат. 1)"""
+def roll(bonus, sl, with_d=False):
+    """→ 'ok' (успех, в т.ч. 5+ и нат. 20), 'unst' (провал 1–4), 'fail' (провал 5+ / нат. 1); with_d — ещё и бросок"""
     d = random.randint(1, 20)
     if d == 1:
-        return "fail"
-    if d == 20:
-        return "ok"
-    t = d + bonus
-    if t >= sl:
-        return "ok"
-    return "unst" if sl - t <= 4 else "fail"
+        r = "fail"
+    elif d == 20 or d + bonus >= sl:
+        r = "ok"
+    else:
+        r = "unst" if sl - (d + bonus) <= 4 else "fail"
+    return (r, d) if with_d else r
+
+
+# Бонусы 7.7 у зелий на продажу: на 5+ — экономия трав, на 20 — лучшее из «ещё одно», «выше уровнем» (до 9.9)
+# и «два бонуса» (= экономия). Зелье опознаётся по стоимости трав (уровень × цена травы) — у чернил она другая.
+POT_LVL = {l * HERB[l]: l for l in HERB}
+
+
+def potion_bonus(mat, price):
+    l = POT_LVL.get(mat)
+    if l is None:
+        return 0.0, 0.0
+    up = price / P_PRICE[l] * P_PRICE[l + 1] - price if l <= 9 else 0.0
+    return mat, max(price, up, mat)
+
+
+def p_bonus(bonus, sl):
+    """доли бросков: успех на 5+ (без натуральной 20) и натуральная 20"""
+    return sum(1 for d in range(2, 20) if d + bonus >= sl + 5) / 20, 1 / 20
 
 
 def run_catalyst(bonus, sl, mat_cost, price, cat_price, stop_after, unst_value):
@@ -42,10 +59,12 @@ def run_catalyst(bonus, sl, mat_cost, price, cat_price, stop_after, unst_value):
                 break
         profit -= mat_cost
         tries += 1
-        r = roll(bonus, sl)
+        r, d = roll(bonus, sl, True)
         if r == "ok":
             profit += price
             oks += 1
+            b5, b20 = potion_bonus(mat_cost, price)
+            profit += b20 if d == 20 else b5 if d + bonus >= sl + 5 else 0
         elif r == "unst":
             profit += price * unst_value
     return profit, tries, oks
@@ -63,7 +82,9 @@ def probs(bonus, sl):
 
 def exact(bonus, sl, mat, price, cat, stop, unst_value):
     ok, un, _ = probs(bonus, sl)
-    v = ok * price + un * price * unst_value - mat
+    p5, p20 = p_bonus(bonus, sl)
+    b5, b20 = potion_bonus(mat, price)
+    v = ok * price + un * price * unst_value - mat + p5 * b5 + p20 * b20
     reach, E, T = 1.0, -cat, 0.0
     for use in range(1, stop + 1):
         if use > 5 and cat:

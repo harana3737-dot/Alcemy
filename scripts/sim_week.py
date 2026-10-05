@@ -27,7 +27,8 @@ def growth_row(m, extra=0, guidance=False):
     per = ok_rate(b, P_SL[m], guidance) + 0.05      # натуральная 20 — второй успех
     doses = NEED[m] / per
     hours = doses / BATCH.get(m, 1) * 2
-    return b, doses, hours, doses * base_cost(m)
+    p5, _ = p_bonus(b, P_SL[m])
+    return b, doses, hours, doses * (base_cost(m) - p5 * m * HERB[m])   # на 5+ — экономия трав (7.7)
 
 def ink_hour(m):
     """Доход в час на чернилах уровня m при бонусе Талиса на этом мастерстве (I–V; выше — как V)."""
