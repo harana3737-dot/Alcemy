@@ -905,14 +905,24 @@ function matInit(){if(!ST.mat||ST.matSeed===undefined){ST.mat=JSON.parse(JSON.st
   if(ST.mat.gold===undefined){ST.mat.gold=SEED.mat.gold;return true}return false}
 function essParse(c){const m=String(c.e).match(/^(.*?)\s+(X|IX|VIII|VII|VI|V|IV|III|II|I)\b/);return m?{type:m[1],l:ROM.indexOf(m[2])}:{type:String(c.e),l:c.l}}
 const essMatch=(it,type)=>it.types.some(t=>t===type||type.startsWith(t)||t.startsWith(type));
-const pool=()=>{if(!ST.mat.pool)ST.mat.pool={heal:0,poison:0};return ST.mat.pool};
-function herbValue(kind){return ST.mat.herbs.filter(h=>h.k===kind).reduce((s,h)=>s+h.q*HERB_P[h.l],0)+(pool()[kind]||0)}
-// травы по ценности (8.10, чернила): сперва смешанные на сумму, потом поштучные от дешёвых; от травы можно взять часть
-function takeValue(kind,need){
-  const used=[];const pl=pool();
-  if(pl[kind]>0&&need>1e-9){const t=Math.min(pl[kind],need);pl[kind]=+(pl[kind]-t).toFixed(2);need-=t;used.push(`смешанные −${fmtZ(t)} зм`)}
-  ST.mat.herbs.filter(h=>h.k===kind&&h.q>0).sort((a,b)=>a.l-b.l).forEach(h=>{if(need<=1e-9)return;
+// смешанные травы на сумму: [{k, min, v}] — годятся для предметов уровня ≤ min (Ж-85: чернила — правило мастера, заряды и склянки — по аналогии)
+const pools=()=>{if(!ST.mat.pools){ST.mat.pools=[];const o=ST.mat.pool||{};['heal','poison'].forEach(k=>{if(o[k])ST.mat.pools.push({k,min:1,v:o[k]})});delete ST.mat.pool}return ST.mat.pools};
+function herbValue(kind,minL=1){return ST.mat.herbs.filter(h=>h.k===kind&&h.l>=minL).reduce((s,h)=>s+h.q*HERB_P[h.l],0)+pools().filter(p=>p.k===kind&&p.min>=minL).reduce((s,p)=>s+p.v,0)}
+function herbCount(kind,lvl){return ST.mat.herbs.filter(h=>h.k===kind&&h.l===lvl).reduce((s,h)=>s+h.q,0)}
+// по ценности: сначала смешанные (от ближнего уровня), потом поштучные от дешёвых; от травы можно взять часть
+function takeValue(kind,need,minL=1){
+  const used=[];
+  pools().filter(p=>p.k===kind&&p.min>=minL&&p.v>0).sort((a,b)=>a.min-b.min).forEach(p=>{if(need<=1e-9)return;const t=Math.min(p.v,need);p.v=+(p.v-t).toFixed(2);need-=t;used.push(`смешанные от ур. ${p.min} −${fmtZ(+t.toFixed(2))} зм`)});
+  ST.mat.pools=pools().filter(p=>p.v>1e-9);
+  ST.mat.herbs.filter(h=>h.k===kind&&h.l>=minL&&h.q>0).sort((a,b)=>a.l-b.l).forEach(h=>{if(need<=1e-9)return;
     const t=Math.min(h.q,need/HERB_P[h.l]);h.q=+(h.q-t).toFixed(4);need-=t*HERB_P[h.l];used.push(`ур. ${h.l} −${fmtZ(+t.toFixed(2))}`)});
+  ST.mat.herbs=ST.mat.herbs.filter(h=>h.q>1e-9);
+  return used.join(', ');
+}
+// по числу (справочник «Травы»): N трав уровня предмета
+function takeCount(kind,need,minL){
+  const used=[];
+  ST.mat.herbs.filter(h=>h.k===kind&&h.l===minL&&h.q>0).sort((a,b)=>a.l-b.l).forEach(h=>{if(need<=1e-9)return;const t=Math.min(h.q,need);h.q=+(h.q-t).toFixed(4);need-=t;used.push(`ур. ${h.l} −${fmtZ(+t.toFixed(2))}`)});
   ST.mat.herbs=ST.mat.herbs.filter(h=>h.q>1e-9);
   return used.join(', ');
 }
@@ -923,7 +933,7 @@ function planUse(n,lvl,c,k,box){
   const saved=Math.min(att,savedCount(box));
   const kind=c?(c.b==='ядовитая'?'poison':'heal'):(potKind(n)==='poison'?'poison':'heal');
   const byValue=!!c&&['chg','psn','rea','fl','oils'].includes(c.k);
-  const P={att,kind,saved,byValue};
+  const P={att,kind,saved,byValue,lvl};
   if(byValue){const v=parseFloat(String(c.p).replace(/\s/g,'').replace(',','.'))||0;P.value=Math.max(0,att-saved/2)*v/3}
   else P.herbs={l:lvl,q:Math.max(0,att-saved)*lvl};
   if(c)P.ess={...essParse(c),q:att};
@@ -935,9 +945,9 @@ function resArea(box,n,lvl,c,k){
   const keep={};ar.querySelectorAll('select').forEach(x=>keep[x.className]=x.value);
   const P=planUse(n,lvl,c,k,box);box._plan=P;if(!P){ar.innerHTML='';return}
   const rows=[];
-  if(P.herbs){const have=(ST.mat.herbs.find(h=>h.k===P.kind&&h.l===P.herbs.l)||{q:0}).q;
-    rows.push(`${KIND[P.kind]} травы ур. ${P.herbs.l}: <b>${P.herbs.q}</b> из ${have}${have<P.herbs.q?' <span class="bad">не хватает</span>':''}${P.saved?` <small>(экономия трав на ${P.saved})</small>`:''}`)}
-  else{const have=herbValue(P.kind);rows.push(`${KIND[P.kind]} травы на <b>${fmtZ(P.value)} зм</b> из ${fmtZ(have)} (по ценности, ⅓ цены)${have<P.value?' <span class="bad">не хватает</span>':''}${P.saved?` <small>(экономия на ${P.saved} — половина)</small>`:''}`)}
+  if(P.herbs){const have=herbCount(P.kind,P.herbs.l);
+    rows.push(`${KIND[P.kind]} травы ур. ${P.herbs.l}: <b>${P.herbs.q}</b> из ${fmtZ(have)}${have<P.herbs.q?' <span class="bad">не хватает</span>':''}${P.saved?` <small>(экономия трав на ${P.saved})</small>`:''}`)}
+  else{const have=herbValue(P.kind,P.lvl);rows.push(`${KIND[P.kind]} травы ур. ${P.lvl}+ на <b>${fmtZ(P.value)} зм</b> из ${fmtZ(have)} (по ценности, ⅓ цены)${have<P.value?' <span class="bad">не хватает</span>':''}${P.saved?` <small>(экономия на ${P.saved} — половина)</small>`:''}`)}
   if(P.ess){const opts=ST.mat.ess.filter(e=>e.q>0).sort((a,b)=>(essMatch(b,P.ess.type)-essMatch(a,P.ess.type))||(a.l-b.l));
     const fit=opts.filter(e=>essMatch(e,P.ess.type)&&e.l>=P.ess.l), def=fit.find(e=>e.q>=P.att)||fit[0];
     rows.push(`Эссенция ${esc(P.ess.type)} ${ROM[P.ess.l]||''} ×${P.att}: <select class="res-e" aria-label="Эссенция">${opts.map(e=>`<option value="${e.id}" ${def&&e.id===def.id?'selected':''}>${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${e.q})</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${!def?' <span class="bad">подходящей нет</span>':def.q<P.att?` <span class="bad">есть только ${def.q}</span>`:''}${def&&def.l>P.ess.l?' <small>(эссенция выше уровня)</small>':''}`)}
@@ -950,11 +960,11 @@ function resArea(box,n,lvl,c,k){
 }
 function applyUse(box){ // вызывается внутри mutate
   const P=box._plan;if(!P)return '';const out=[];
-  if(P.herbs&&P.herbs.q){let h=ST.mat.herbs.find(x=>x.k===P.kind&&x.l===P.herbs.l);const had=h?h.q:0;
-    if(had>=P.herbs.q){h.q=+(h.q-P.herbs.q).toFixed(4);out.push(`${KIND[P.kind].toLowerCase()} травы ур. ${P.herbs.l} −${fmtZ(P.herbs.q)}`)}
+  if(P.herbs&&P.herbs.q){const had=herbCount(P.kind,P.herbs.l);
+    if(had>=P.herbs.q-1e-9)out.push(`${KIND[P.kind].toLowerCase()} травы ${takeCount(P.kind,P.herbs.q,P.herbs.l)}`);
     else out.push(`травы ур. ${P.herbs.l} не списаны: нужно ${fmtZ(P.herbs.q)}, было ${fmtZ(had)}`)}
-  if(P.value&&herbValue(P.kind)<P.value-1e-9)out.push(`травы не списаны: нужно на ${fmtZ(P.value)} зм, было на ${fmtZ(herbValue(P.kind))}`);
-  else if(P.value){out.push(`${KIND[P.kind].toLowerCase()} травы на ${fmtZ(P.value)} зм: ${takeValue(P.kind,P.value)}`)}
+  if(P.value&&herbValue(P.kind,P.lvl)<P.value-1e-9)out.push(`травы ур. ${P.lvl}+ не списаны: нужно на ${fmtZ(P.value)} зм, было на ${fmtZ(herbValue(P.kind,P.lvl))}`);
+  else if(P.value){out.push(`${KIND[P.kind].toLowerCase()} травы на ${fmtZ(P.value)} зм: ${takeValue(P.kind,P.value,P.lvl)}`)}
   const es=box.querySelector('.res-e');if(P.ess&&es&&es.value){const e=ST.mat.ess.find(x=>x.id===es.value);if(e){const t=Math.min(e.q,P.att);e.q-=t;out.push(`эссенция «${e.n}» −${t}`)}}
   const cs=box.querySelector('.res-c');if(P.cat&&cs&&cs.value){const x=ST.mat.cat.find(y=>y.id===cs.value);if(x){x.used=Math.min(10,x.used+P.att);out.push(`катализатор ${ROM[x.o]} — ${x.used}/10`)}}
   ST.mat.herbs=ST.mat.herbs.filter(h=>h.q>0);ST.mat.ess=ST.mat.ess.filter(e=>e.q>0);
@@ -973,18 +983,17 @@ function renderMat(){
    const gi=r.querySelector('input');gi.onchange=()=>mutate(()=>{const v=+gi.value||0;logx(`Монеты: ${fmtZ(ST.mat.gold||0)} → ${fmtZ(v)} зм`);ST.mat.gold=v});box.appendChild(r)}
   sec('Травы');
   const hs=[...ST.mat.herbs].sort((a,b)=>a.k.localeCompare(b.k)||a.l-b.l);
-  const pl=pool();
-  if(!hs.length&&!pl.heal&&!pl.poison)box.insertAdjacentHTML('beforeend','<div class="note">Нет</div>');
-  ['heal','poison'].forEach(k=>{if(!pl[k])return;const r=document.createElement('div');r.className='bagi';
-    r.innerHTML=`<span class="nm">${KIND[k]}, смешанные<small>на сумму: для зарядов, склянок, масел кары, чернил</small></span><input type="number" step="0.1" min="0" value="${pl[k]}" aria-label="Сумма, зм" style="width:96px;padding:4px 8px"> <span class="note" style="margin:0">зм</span>`;
-    const inp=r.querySelector('input');inp.onchange=()=>mutate(()=>{pl[k]=Math.max(0,+inp.value||0)});box.appendChild(r)});
+  const pls=pools();
+  if(!hs.length&&!pls.length)box.insertAdjacentHTML('beforeend','<div class="note">Нет</div>');
+  [...pls].sort((a,b)=>a.k.localeCompare(b.k)||a.min-b.min).forEach(pp=>{const r=document.createElement('div');r.className='bagi';
+    r.innerHTML=`<span class="nm">${KIND[pp.k]}, смешанные от ур. ${pp.min}<small>на сумму — для зарядов, склянок, масел кары, чернил до ур. ${pp.min}</small></span><input type="number" step="0.1" min="0" value="${pp.v}" aria-label="Сумма, зм" style="width:96px;padding:4px 8px"> <span class="note" style="margin:0">зм</span>`;
+    const inp=r.querySelector('input');inp.onchange=()=>mutate(()=>{pp.v=Math.max(0,+inp.value||0);ST.mat.pools=pools().filter(x=>x.v>0)});box.appendChild(r)});
   hs.forEach(h=>row(`${KIND[h.k]}, ур. ${h.l}`,`${fmtZ(HERB_P[h.l])} зм за траву`,fmtZ(h.q),()=>mutate(()=>{h.q=Math.max(0,+(h.q-1).toFixed(4));ST.mat.herbs=ST.mat.herbs.filter(x=>x.q>1e-9)}),()=>mutate(()=>{h.q++})));
   const fh=document.createElement('div');fh.className='row';fh.style.marginTop='6px';
-  fh.innerHTML=`<div><select id="mhk" aria-label="Основа"><option value="heal">Лечебные</option><option value="poison">Ядовитые</option></select></div><div style="flex:.6"><select id="mhl" aria-label="Уровень"><option value="0">смешанные</option>${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}" ${l===1?'selected':''}>ур. ${l}</option>`).join('')}</select></div><div style="flex:.45"><input id="mhq" type="number" min="0" step="0.1" value="1" aria-label="Сколько"></div><div style="flex:.45"><select id="mhu" aria-label="Единица"><option value="pc">шт.</option><option value="gp">зм</option></select></div><div style="flex:none"><button type="button" class="btn" id="mha">+</button></div>`;
+  fh.innerHTML=`<div><select id="mhk" aria-label="Основа"><option value="heal">Лечебные</option><option value="poison">Ядовитые</option></select></div><div style="flex:.55"><select id="mhl" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">ур. ${l}</option>`).join('')}</select></div><div style="flex:.45"><input id="mhq" type="number" min="0" step="0.1" value="1" aria-label="Сколько"></div><div style="flex:.7"><select id="mhu" aria-label="Как"><option value="pc">шт.</option><option value="gp">зм этого ур.</option><option value="mix">зм, смешанные от ур.</option></select></div><div style="flex:none"><button type="button" class="btn" id="mha">+</button></div>`;
   box.appendChild(fh);
-  const syncU=()=>{if($('mhl').value==='0'){$('mhu').value='gp';$('mhu').disabled=true}else $('mhu').disabled=false};$('mhl').onchange=syncU;syncU();
-  $('mha').onclick=()=>{const k=$('mhk').value,l=+$('mhl').value,v=Math.max(0,+$('mhq').value||0),gp=$('mhu').value==='gp';if(!v)return;
-    mutate(()=>{if(!l){pool()[k]=+((pool()[k]||0)+v).toFixed(2);logx(`Материалы: ${KIND[k].toLowerCase()} смешанные травы +${fmtZ(v)} зм`);return}
+  $('mha').onclick=()=>{const k=$('mhk').value,l=+$('mhl').value,v=Math.max(0,+$('mhq').value||0),u=$('mhu').value,gp=u==='gp';if(!v)return;
+    mutate(()=>{if(u==='mix'){const pp=pools().find(x=>x.k===k&&x.min===l);if(pp)pp.v=+(pp.v+v).toFixed(2);else pools().push({k,min:l,v});logx(`Материалы: ${KIND[k].toLowerCase()} смешанные травы от ур. ${l} +${fmtZ(v)} зм`);return}
       const q=gp?+(v/HERB_P[l]).toFixed(4):v;const h=ST.mat.herbs.find(x=>x.k===k&&x.l===l);if(h)h.q=+(h.q+q).toFixed(4);else ST.mat.herbs.push({k,l,q});
       logx(`Материалы: ${KIND[k].toLowerCase()} травы ур. ${l} +${fmtZ(q)}${gp?` (на ${fmtZ(v)} зм)`:''}`)})};
   sec('Эссенции');
@@ -1023,19 +1032,19 @@ function costText(t){
 }
 function costShort(t,mult=1){ // чего не хватает
   const c=t.cost;if(!c||!ST.mat)return [];const w=[];
-  if(c.type==='herbval'){if(herbValue(c.k)<c.value*mult)w.push(`трав на ${c.value*mult} зм нет (есть на ${fmtZ(herbValue(c.k))})`);return w}
-  if(c.herbs){const h=ST.mat.herbs.find(x=>x.k===c.k&&x.l===c.l);if(!h||h.q<c.herbs*mult)w.push(`трав ур. ${c.l} мало (есть ${fmtZ(h?h.q:0)})`)}
+  if(c.type==='herbval'){if(herbValue(c.k,c.l||1)<c.value*mult)w.push(`трав на ${c.value*mult} зм нет (есть на ${fmtZ(herbValue(c.k,c.l||1))})`);return w}
+  if(c.herbs){const hv=herbCount(c.k,c.l);if(hv<c.herbs*mult)w.push(`трав ур. ${c.l} мало (есть ${fmtZ(hv)})`)}
   if(c.ess&&!ST.mat.ess.some(e=>e.q>0&&essMatch(e,c.ess.type)&&e.l>=c.ess.l))w.push(`нет эссенции ${c.ess.type} ${ROM[c.ess.l]}`);
   if(c.gold&&(ST.mat.gold||0)<c.gold*mult)w.push(`денег на реактивы мало (${fmtZ(ST.mat.gold||0)} зм)`);
   return w;
 }
 function spendProbe(t,mult){ // внутри mutate; возвращает текст расхода
   const c=t.cost, out=[];if(!c||!mult)return '';
-  if(c.type==='herbval'&&herbValue(c.k)<c.value*mult-1e-9)out.push(`травы не списаны: нужно на ${c.value*mult} зм, было на ${fmtZ(herbValue(c.k))}`);
-  else if(c.type==='herbval'){out.push(`травы на ${c.value*mult} зм: ${takeValue(c.k,c.value*mult)}`)}
+  if(c.type==='herbval'&&herbValue(c.k,c.l||1)<c.value*mult-1e-9)out.push(`травы не списаны: нужно на ${c.value*mult} зм, было на ${fmtZ(herbValue(c.k,c.l||1))}`);
+  else if(c.type==='herbval'){out.push(`травы на ${c.value*mult} зм: ${takeValue(c.k,c.value*mult,c.l||1)}`)}
   else{
-    if(c.herbs){const h=ST.mat.herbs.find(x=>x.k===c.k&&x.l===c.l);const had=h?h.q:0,need=c.herbs*mult;
-      if(had>=need-1e-9){h.q=+(h.q-need).toFixed(4);out.push(`травы ур. ${c.l} −${fmtZ(need)}`)}else out.push(`травы ур. ${c.l} не списаны: нужно ${fmtZ(need)}, было ${fmtZ(had)}`)}
+    if(c.herbs){const had=herbCount(c.k,c.l),need=c.herbs*mult;
+      if(had>=need-1e-9)out.push(`травы ${takeCount(c.k,need,c.l)}`);else out.push(`травы ур. ${c.l} не списаны: нужно ${fmtZ(need)}, было ${fmtZ(had)}`)}
     if(c.ess){const e=ST.mat.ess.filter(e=>e.q>0&&essMatch(e,c.ess.type)&&e.l>=c.ess.l).sort((a,b)=>a.l-b.l)[0];
       if(e){const take=Math.min(e.q,mult);e.q-=take;out.push(`эссенция «${e.n}» −${take}`)}else out.push(`эссенции ${c.ess.type} не было`)}
     if(c.gold){if((ST.mat.gold||0)>=c.gold*mult){ST.mat.gold=+((ST.mat.gold||0)-c.gold*mult).toFixed(2);out.push(`реактивы −${c.gold*mult} зм`)}else out.push(`реактивы ${c.gold*mult} зм не списаны: монет ${fmtZ(ST.mat.gold||0)}`)}
