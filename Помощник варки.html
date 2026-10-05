@@ -515,8 +515,9 @@ $('addp').onclick=()=>{const n=$('pn').value.trim();if(!n)return;mutate(()=>{ST.
 // форма «выпить»
 const MODS={eff:[["long","Долгое действие","×1,5, не больше +1 часа"],["dbl","Двойной срок","×2, не больше +8 часов"],["clean","Чистый","остаток уходит за 10 минут отдыха"],["short","Дефект «Короткое»","длительность вдвое меньше"],["heavy","Дефект «Тяжёлое»","токсичность +1"]],
  chg:[["lwin","Долгое окно","4 часа на применение"],["twin","Двойной заряд","два применения за окно"],["short","Дефект «Короткое»","окно 10 минут"],["heavy","Дефект «Тяжёлое»","токсичность +1"]]};
-const dl=$('dlist');D.filter(DRINK).forEach(c=>{const o=document.createElement('option');o.value=c.n;dl.appendChild(o)});
-const bl=$('bagList');D.forEach(c=>{const o=document.createElement('option');o.value=c.n;bl.appendChild(o)});
+const ABC=(x,y)=>x.n.localeCompare(y.n,'ru');
+const dl=$('dlist');D.filter(DRINK).sort(ABC).forEach(c=>{const o=document.createElement('option');o.value=c.n;dl.appendChild(o)});
+const bl=$('bagList');[...D].sort(ABC).forEach(c=>{const o=document.createElement('option');o.value=c.n;bl.appendChild(o)});
 function drinkCard(){return byName($('dq').value.trim())}
 function fillDrink(){
   const c=drinkCard(), box=$('dmods');box.innerHTML='';
@@ -582,7 +583,7 @@ function renderBag(){
   ST.people.forEach(p=>{const n=myBag(p.id).reduce((s,b)=>s+b.q,0);const b=document.createElement('button');b.type='button';b.className='chip';
     b.setAttribute('aria-pressed',p.id===BAGWHO);b.textContent=p.name+(n?` · ${n}`:'');b.onclick=()=>{BAGWHO=p.id;renderBag()};ch.appendChild(b)});
   box.appendChild(ch);
-  const items=myBag(BAGWHO).filter(b=>b.q>0), others=ST.people.filter(p=>p.id!==BAGWHO);
+  const items=myBag(BAGWHO).filter(b=>b.q>0).sort(ABC), others=ST.people.filter(p=>p.id!==BAGWHO);
   if(!items.length){const e=document.createElement('div');e.className='note';e.textContent='Пусто';box.appendChild(e)}
   items.forEach(b=>{const c=bagCard(b)||{};const r=document.createElement('div');r.className='bagi';
     const drink=c.k&&DRINK(c);
