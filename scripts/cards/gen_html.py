@@ -46,8 +46,12 @@ def card_html(c):
         out.append(f'<p class="mech"><b>Особые правила.</b> {tx(c["mech"])}</p>')
     if c["open"]:
         out.append(f'<p class="openq"><b>Открытый вопрос.</b> {tx(c["open"])}</p>')
-    if "Контрольный яд" in c["tasks"]:
-        out.append('<p class="mech"><b>Контрольный яд</b> (8.6, временно принят — Ж-82, Ж-83): этот же рецепт можно сварить ядом — наносится на оружие или подливается, без концентрации, до конца третьего хода цели. Отдельного исследования нет, первая варка яда — СЛ +2.</p>')
+    if c["cls"] == "chg" and c["name"] in POISON_OF:
+        p_ = POISON_OF[c["name"]]
+        out.append(f'<p class="mech"><b>Как яд:</b> этот же рецепт варится ядом — <a class="lnk" href="#{p_["id"]}">{tx(p_["name"])}</a> (контрольный яд, 8.6): отдельного исследования нет, первая варка яда — СЛ +2.</p>')
+    if c["cls"] == "psn":
+        b_ = BASE_OF[c["name"]]
+        out.append(f'<p class="mech"><b>Вариант доставки заряда</b> <a class="lnk" href="#{b_["id"]}">{tx(b_["name"])}</a>: кто знает ступень формулы «{tx(c["fam"])}», варит и яд; первая варка — СЛ +2 (Ж-83). Токсичность получает только тот, кто яд выпил или съел.</p>')
     if c["alt"]:
         out.append(f'<p class="alt"><i>Альтернатива: {tx(c["alt"])}.</i></p>')
     det = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in brew)

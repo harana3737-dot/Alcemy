@@ -16,12 +16,13 @@ TIME = {1: "2 часа", 2: "2 часа", 3: "4 часа", 4: "4 часа", 5: "
         10: "объём работы 500 (≈24 подхода) и сюжетные условия"}
 TAB = {1: "13 / +5", 2: "13 / +5", 3: "15 / +7", 4: "15 / +7", 5: "17 / +9", 6: "17 / +9", 7: "18 / +10",
        8: "18 / +10", 9: "19 / +11", 10: "19 / +11"}
-CLS = {"eff": "эликсир-эффект", "chg": "заряд", "rea": "заряд-реакция", "fl": "метательная склянка",
+CLS = {"eff": "эликсир-эффект", "chg": "заряд", "psn": "контрольный яд", "rea": "заряд-реакция", "fl": "метательная склянка",
        "oilw": "масло оружия", "oils": "масло кары", "salve": "мазь"}
-CLS_ORDER = ["eff", "chg", "rea", "fl", "oilw", "oils", "salve"]
+CLS_ORDER = ["eff", "chg", "psn", "rea", "fl", "oilw", "oils", "salve"]
 USE = {
     "eff": "бонусное действие (выпить)",
     "chg": "бонусное действие (выпить), затем действие (применить в течение часа)",
+    "psn": "действие: нанести на колющее или рубящее оружие или один боеприпас",
     "rea": "бонусное действие (выпить заранее), затем реакция (применить в течение часа)",
     "fl": "действие: дальнобойная атака по точке на 30 фт, КД 10",
     "oilw": "действие (нанести на оружие или до 5 боеприпасов)",
@@ -72,7 +73,7 @@ EN = {  # русское название заклинания → англий�
     "Эфирность": "Etherealness", "Ускорение": "Haste", "Подчинение чудовища": "Dominate Monster",
     "Громовая кара": "Thunderous Smite", "Гневная кара": "Wrathful Smite", "Клеймящая кара": "Branding Smite",
     "Ослепляющая кара": "Blinding Smite", "Порыв ветра": "Gust of Wind",
-    "Туманное облако": "Fog Cloud", "Приливная волна": "Tidal Wave", "Усыхание": "Blight", "Град": "Ice Storm", "Ошеломляющая кара": "Staggering Smite", "Изгоняющая кара": "Banishing Smite", "Истинное зрение": "True Seeing", "Первородный оберег": "Primordial Ward", "Облачение пламени": "Investiture of Flame", "Облачение льда": "Investiture of Ice", "Облачение камня": "Investiture of Stone", "Облачение ветра": "Investiture of Wind", "Трансформация Тензера": "Tenser's Transformation", "Потусторонний облик Таши": "Tasha's Otherworldly Guise", "Звёздная корона": "Crown of Stars", "Сокрытие разума": "Mind Blank", "Цепная молния": "Chain Lightning", "Распад": "Disintegrate", "Вред": "Harm", "Ледяная сфера Отилюка": "Otiluke's Freezing Sphere", "Сглаз": "Eyebite", "Неудержимая пляска Отто": "Otto's Irresistible Dance", "Солнечный луч": "Sunbeam", "Ментальная тюрьма": "Mental Prison", "Массовое внушение": "Mass Suggestion", "Шар неуязвимости": "Globe of Invulnerability", "Стена льда": "Wall of Ice", "Божественное слово": "Divine Word", "Перст смерти": "Finger of Death", "Огненная буря": "Fire Storm", "Радужные брызги": "Prismatic Spray", "Обратная гравитация": "Reverse Gravity", "Огненный шар замедленного действия": "Delayed Blast Fireball", "Силовая клетка": "Forcecage", "Слабоумие": "Feeblemind", "Слово силы: оглушение": "Power Word Stun", "Солнечный ожог": "Sunburst", "Лабиринт": "Maze", "Антимагическое поле": "Antimagic Field", "Священная аура": "Holy Aura", "Испепеляющая туча": "Incendiary Cloud", "Ужасное увядание Аби-Далзима": "Abi-Dalzim's Horrid Wilting",
+    "Туманное облако": "Fog Cloud", "Приливная волна": "Tidal Wave", "Усыхание": "Blight", "Град": "Ice Storm", "Ошеломляющая кара": "Staggering Smite", "Изгоняющая кара": "Banishing Smite", "Истинное зрение": "True Seeing", "Первородный оберег": "Primordial Ward", "Облачение пламени": "Investiture of Flame", "Облачение льда": "Investiture of Ice", "Облачение камня": "Investiture of Stone", "Облачение ветра": "Investiture of Wind", "Трансформация Тензера": "Tenser's Transformation", "Потусторонний облик Таши": "Tasha's Otherworldly Guise", "Звёздная корона": "Crown of Stars", "Сокрытие разума": "Mind Blank", "Цепная молния": "Chain Lightning", "Распад": "Disintegrate", "Вред": "Harm", "Ледяная сфера Отилюка": "Otiluke's Freezing Sphere", "Сглаз": "Eyebite", "Неудержимая пляска Отто": "Otto's Irresistible Dance", "Солнечный луч": "Sunbeam", "Ментальная тюрьма": "Mental Prison", "Массовое внушение": "Mass Suggestion", "Шар неуязвимости": "Globe of Invulnerability", "Стена льда": "Wall of Ice", "Божественное слово": "Divine Word", "Перст смерти": "Finger of Death", "Огненная буря": "Fire Storm", "Радужные брызги": "Prismatic Spray", "Обратная гравитация": "Reverse Gravity", "Огненный шар замедленного действия": "Delayed Blast Fireball", "Силовая клетка": "Forcecage", "Слабоумие": "Feeblemind", "Слово силы: оглушение": "Power Word Stun", "Солнечный ожог": "Sunburst", "Лабиринт": "Maze", "Антимагическое поле": "Antimagic Field", "Священная аура": "Holy Aura", "Испепеляющая туча": "Incendiary Cloud", "Ужасное увядание Аби-Далзима": "Abi-Dalzim's Horrid Wilting", "Хождение по воде": "Water Walk", "Обнаружение существ": "Locate Creature", "Наблюдение": "Scrying", "Изнеможение": "Enervation", "Связь сущностей": "Tether Essence", "Слово силы: боль": "Power Word Pain", "Водоворот": "Maelstrom",
 }
 
 
@@ -110,8 +111,15 @@ for i, c in enumerate(C):
     c["src"] = add_en(c["src"])
 
 
+POISON_OF, BASE_OF = {}, {}
+for _c in C:
+    if _c["cls"] == "psn":
+        _b = next(x for x in C if x["cls"] == "chg" and x["name"] == _c["base_charge"])
+        POISON_OF[_b["name"]] = _c; BASE_OF[_c["name"]] = _b
+
+
 def is_charge(c):
-    return c["cls"] in ("chg", "rea", "fl", "oils")
+    return c["cls"] in ("chg", "psn", "rea", "fl", "oils")
 
 
 exec(open(HERE / "cards_meta.py", encoding="utf-8").read())
@@ -189,6 +197,12 @@ def params(c):
             use = f"выпить — бонусное действие; применить — {t} (окно 1 час)"
         rows = [("Применение", use), ("Дальность", src_range(c) or "—"), ("Спасбросок / атака", saves(c)), ("СЛ / атака", tab),
                 ("Обычная концентрация", c["conc"] or "нет"), ("Длительность", c["dur"])]
+    elif k == "psn":
+        rows = [("Нанесение", "действие — на колющее или рубящее оружие или один боеприпас (с чертой «Отравитель» — бонусное действие); вылить на клинок — бонусное действие, до конца хода; подлить в еду или питьё"),
+                ("Срабатывание", "первое попадание; держится до часа, промах дозу не тратит"),
+                ("Спасбросок", saves(c)), ("СЛ", TAB[l].split(" / ")[0] + " (табличная, 8.8)"),
+                ("Концентрация", "нет"), ("Длительность", c["dur"]),
+                ("Иммунитет", "иммунитет к яду или к состоянию «Отравлен» — яд не действует")]
     elif k == "fl":
         rows = [("Применение", "действие: дальнобойная атака по точке на 30 фт против КД 10 (Ловкость; бонус мастерства — после обучения); промах — склянка падает в 10 фт дальше или вбок"), ("Область", area(c) or "—"), ("Спасбросок", saves(c)),
                 ("СЛ", tab_dc), ("Обычная концентрация", c["conc"] or "нет"), ("Длительность", c["dur"])]
@@ -215,11 +229,13 @@ def action_short(c):
     k = c["cls"]
     if k == "chg":
         return "применить — бонусное действие" if "бонусное действие" in c["src_raw"] else "применить — действие"
-    return {"rea": "реакция", "fl": "бросок — действие", "oils": "удар маслом", "oilw": "нанести — действие",
+    return {"rea": "реакция", "psn": "нанести — действие", "fl": "бросок — действие", "oils": "удар маслом", "oilw": "нанести — действие",
             "salve": "нанести — действие"}.get(k) or ("выпить — бонусное действие" if "бонусное" in USE_OVR.get(c["name"], USE[k]) else USE_OVR.get(c["name"], USE[k]))
 
 
 def conc_short(c):
+    if c["cls"] == "psn":
+        return "без концентрации"
     if c["cls"] in ("chg", "rea", "fl", "oils"):
         return "без концентрации" if not c["conc"] or c["conc"].startswith("нет") else "концентрация"
     if c["cls"] == "eff":
@@ -229,12 +245,13 @@ def conc_short(c):
 
 def card_tags(c):
     dur = c["dur"].split(";")[0].split(" (")[0]
-    return [t.lower() for t in c["tasks"]] + [CLS[c["cls"]]] + c["ess_types"] + [conc_short(c), action_short(c), dur]
+    tags = [t.lower() for t in c["tasks"]] + [CLS[c["cls"]]] + c["ess_types"] + [conc_short(c), action_short(c), dur]
+    return list(dict.fromkeys(tags))
 
 
 def recipe(c):
     l = c["lvl"]
-    if c["cls"] in ("chg", "rea", "fl", "oils"):
+    if c["cls"] in ("chg", "psn", "rea", "fl", "oils"):
         p = int(c["price"].replace(" ", ""))
         v = round(p / 3) if p % 3 else p // 3
         herbs = f"{c['base'][:-2]}ые травы на {'≈' if p % 3 else ''}{v:,} зм (по ценности)".replace(",", " ")
@@ -269,8 +286,12 @@ def card(c):
     out += ["", "Варка:", "", "| Параметр | Значение |", "| --- | --- |"] + [f"| {k} | {v} |" for k, v in brew]
     if c["note"]:
         out += ["", f"> {c['note']}"]
-    if "Контрольный яд" in c["tasks"]:
-        out += ["", "> Контрольный яд (8.6, временно принят — Ж-82, Ж-83): этот же рецепт можно сварить ядом — наносится на оружие или подливается, без концентрации, до конца третьего хода цели. Отдельного исследования нет, первая варка яда — СЛ +2."]
+    if c["cls"] == "chg" and c["name"] in POISON_OF:
+        p = POISON_OF[c["name"]]
+        out += ["", f"> Этот же рецепт варится ядом — [{p['name']}](#{p['id']}) (контрольный яд, 8.6; Ж-82, Ж-83): отдельного исследования нет, первая варка яда — СЛ +2."]
+    if c["cls"] == "psn":
+        b = BASE_OF[c["name"]]
+        out += ["", f"> Вариант доставки заряда [{b['name']}](#{b['id']}): кто знает ступень формулы «{c['fam']}», варит и яд; первая варка — СЛ +2 (Ж-83). Токсичность получает только тот, кто яд выпил или съел (8.7)."]
     out += ["", f"[↑ к навигации](#nav) · [↑ уровень {ROM[l]}](#lvl-{l})", ""]
     return clean("\n".join(out))
 

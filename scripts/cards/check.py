@@ -33,7 +33,9 @@ for c in C:
         E(c, f"эссенция {c['ess']} не того уровня")
     # токсичность
     t = c["tox"].split(" ")[0].rstrip(";")
-    if k in ("fl", "oils", "oilw", "salve"):
+    if k == "psn":
+        pass  # токсичность только у выпившего — проверяется по базовому заряду
+    elif k in ("fl", "oils", "oilw", "salve"):
         if not t.startswith("0"):
             E(c, f"токсичность {t}, а склянки, масла и мази её не дают")
     elif t.isdigit() and int(t) not in (0, TOX[rar]):
@@ -42,7 +44,7 @@ for c in C:
         W(c, "токсичность 0 без пометки «мягкий»")
     # цена
     p = num(c["price"])
-    if k in ("chg", "rea", "fl", "oils"):
+    if k in ("chg", "psn", "rea", "fl", "oils"):
         sm = re.search(r"(\d) ур\.", c["src_raw"])
         if sm:
             exp = INK[int(sm.group(1))]
