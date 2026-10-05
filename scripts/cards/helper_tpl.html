@@ -460,7 +460,7 @@ function save(){
   clearTimeout(saveT);
   saveT=setTimeout(async()=>{try{await DOC.set({s:JSON.stringify(ST),u:ST.u});setSave('сохранено в аккаунте')}catch(e){setSave('в аккаунт не сохранилось, осталось в этом браузере')}},700);
 }
-(async()=>{
+setTimeout(async()=>{
   setSave('сохраняется в этом браузере');
   try{
     if(!window.claude||!window.claude.use)return;
@@ -473,11 +473,22 @@ function save(){
     else if(ST.u)save();
     setSave('сохраняется в аккаунте');renderBelt();
   }catch(e){setSave('сохраняется в этом браузере')}
-  finally{if(ST.seed===undefined)applySeed();else renderBelt()}
-})();
+  finally{if(ST.seed===undefined)applySeed();else if(ST.seed!==SEED.id)syncSeed();else renderBelt()}
+},0);
+const seedQ=()=>Object.fromEntries(SEED.items.map(it=>[it.n,it.q]));
 function applySeed(){mutate(()=>{
   SEED.items.forEach(it=>{const b=ST.bag.find(b=>b.n===it.n);if(b){b.q=it.q;b.note=it.note;if(it.card)b.card=it.card}else ST.bag.push({...it})});
-  ST.seed=SEED.id;logx('Сумка взята из листа персонажа')})}
+  ST.seed=SEED.id;ST.seedQ=seedQ();logx('Сумка взята из листа персонажа')})}
+// лист изменился: прибавить к сумке только разницу между старым и новым листом, отмеченное в трекере не трогать
+const LEGACY={"73c0a59648":{"Зелье лечения 2.2":2,"Зелье 3.3":3}};
+function syncSeed(){
+  const old=ST.seedQ||(LEGACY[ST.seed]?{...seedQ(),...LEGACY[ST.seed]}:null);
+  if(!old){renderBelt();return}
+  mutate(()=>{const nw=seedQ(),ch=[];
+    new Set([...Object.keys(old),...Object.keys(nw)]).forEach(n=>{const d=(nw[n]||0)-(old[n]||0);if(!d)return;
+      let b=ST.bag.find(b=>b.n===n);if(!b){const it=SEED.items.find(i=>i.n===n);if(!it)return;b={...it,q:0};ST.bag.push(b)}
+      b.q=Math.max(0,b.q+d);ch.push(`«${n}» ${d>0?'+':''}${d}`)});
+    ST.seed=SEED.id;ST.seedQ=nw;logx('Сумка обновлена по листу: '+(ch.join(', ')||'без изменений'))})}
 
 // время и отдых
 document.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>mutate(()=>{ST.T+=+b.dataset.adv}));
