@@ -303,12 +303,12 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
       <div style="flex:0 1 90px"><label class="f" for="jfCur">Уже есть</label><input id="jfCur" type="number" min="0" value="0"></div>
     </div>
     <div class="row" style="margin-top:8px;flex-wrap:wrap">
-      <div style="flex:1 1 200px"><label class="f" for="jfCost">Тратит материалы</label><select id="jfCost"><option value="">нет</option><option value="exp">проба эксперимента (формула, эликсир)</option><option value="smp">проба по образцу (зелье, яд)</option><option value="val">попытка: травы на сумму</option></select></div>
+      <div style="flex:1 1 200px"><label class="f" for="jfCost">Тратит материалы</label><select id="jfCost"><option value="">нет</option><option value="exp">проба эксперимента (формула, эликсир)</option><option value="smp">проба по образцу (зелье, яд)</option><option value="val">попытка: травы на сумму (чернила, масла, заряды и склянки)</option></select></div>
       <div style="flex:0 1 120px" class="jfc"><label class="f" for="jfK">Основа</label><select id="jfK"><option value="heal">лечебные</option><option value="poison">ядовитые</option><option value="any">любые</option></select></div>
       <div style="flex:0 1 80px" class="jfc jfl"><label class="f" for="jfL">Уровень цели</label><input id="jfL" type="number" min="1" max="10" value="1"></div>
       <div style="flex:1 1 130px" class="jfc jfe"><label class="f" for="jfE">Эссенция (тип)</label><input id="jfE" type="search" data-list="essList" placeholder="Тело, Разум…" autocomplete="off"></div>
       <div style="flex:1 1 130px" class="jfc jfe"><label class="f" for="jfE2">Вторая эссенция</label><input id="jfE2" type="search" data-list="essList" placeholder="если у цели две" autocomplete="off"></div>
-      <label class="tg jfc jfe" style="flex:1 1 220px;padding:18px 0 0"><input type="checkbox" id="jfHV"><span>Основа по ценности (заряд, склянка, масло кары): проба — ¼ матрицы</span></label>
+      <label class="tg jfc jfe" style="flex:1 1 220px;padding:18px 0 0"><input type="checkbox" id="jfHV"><span>Основа по ценности: проба — ¼ матрицы (старое правило; рецепты зарядов и склянок теперь — «попытка: травы на сумму», 30 зм, Ж-100)</span></label>
       <div style="flex:1 1 160px" class="jfc jfs"><label class="f" for="jfS">Образец из сумки</label><input id="jfS" type="search" data-list="bagList" placeholder="необязательно" autocomplete="off"></div>
       <div style="flex:0 1 90px" class="jfc jfv"><label class="f" for="jfV">Сумма, зм</label><input id="jfV" type="number" min="0" value="30"></div>
     </div>
