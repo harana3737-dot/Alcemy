@@ -98,6 +98,8 @@ body = render(lines)
 TITLE = html.escape(re.sub(r"^# ", "", lines[0]).replace("Алхимия Талиса: ", "").replace(" — для мастера", ""))
 TITLE = TITLE[:1].upper() + TITLE[1:]
 toc_html = "".join(f'<li class="t{lv}"><a href="#{hid}">{inline(t)}</a></li>' for lv, t, hid in toc if lv <= 4)
+# оглавление — только если есть хотя бы два раздела (короткие карточки без него)
+nav = f'<nav><b>Содержание</b><ul>{toc_html}</ul></nav>' if sum(1 for lv, _, _ in toc if lv >= 2) >= 2 else ""
 page = f"""<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{TITLE}</title>
@@ -118,7 +120,7 @@ th,td{{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;verti
 @media print{{:root:not(#print){{--bg:#fff;--fg:#111;--mut:#555;--card:#fff;--line:#bbb;--accbg:#eee;color-scheme:light}}nav{{display:none}}h4{{break-after:avoid}}}}
 </style></head><body><main>
 {body[0]}
-<nav><b>Содержание</b><ul>{toc_html}</ul></nav>
+{nav}
 {"".join(body[1:])}
 </main></body></html>"""
 OUT.write_text(page, encoding="utf-8")
