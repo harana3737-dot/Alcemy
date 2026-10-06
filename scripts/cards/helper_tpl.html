@@ -514,7 +514,9 @@ function toxLive(e){
   if(e.clean&&ST.r10.concat(ST.rests).some(r=>r>=end&&r>e.t0))return 0;
   return e.tox;
 }
-function trigCount(pid){const lr=lastLR();return ST.trig.filter(t=>t.who===pid&&t.T>lr&&!ST.rests.some(r=>r>t.T)).length}
+// триггер после последнего долгого отдыха: по номеру события (в одну минуту), у старых записей — по времени
+const afterLR=t=>t.n!=null?(ST.lrN==null||t.n>ST.lrN):t.T>lastLR();
+function trigCount(pid){return ST.trig.filter(t=>t.who===pid&&afterLR(t)&&!ST.rests.some(r=>r>t.T)).length}
 function toxOfP(pid){return ST.ent.filter(e=>e.who===pid).reduce((s,e)=>s+toxLive(e),0)+Math.floor(trigCount(pid)/2)}
 const P=id=>ST.people.find(p=>p.id===id);
 
@@ -526,7 +528,8 @@ function tidy(){
   ST.ent=ST.ent.filter(e=>isActive(e)||toxLive(e)>0);
   const keep=Math.min(...ST.ent.map(e=>e.t0),ST.T)-1440;
   ST.rests=ST.rests.filter(r=>r>=keep).slice(-40);ST.r10=ST.r10.filter(r=>r>=keep).slice(-40);ST.lrs=ST.lrs.slice(-3);
-  ST.trig=ST.trig.filter(t=>t.T>lastLR()).slice(-40);
+  ST.trig=ST.trig.filter(afterLR).slice(-40);
+  if(ST.mat)ST.mat.ess.forEach(e=>{if(essExpired(e)&&!e.expW){e.expW=1;logx(`Эссенция «${e.n}» просрочена (срок хранения 9.3) — использовать только с разрешения мастера`)}});
   ST.bag=ST.bag.filter(b=>ST.people.some(p=>p.id===b.who)&&(b.q>0||SEED.items.some(it=>it.who===b.who&&it.n===b.n)));
 }
 
@@ -585,7 +588,9 @@ function syncSeed(){
 document.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>mutate(()=>{ST.T+=+b.dataset.adv}));
 $('rest10').onclick=()=>mutate(()=>{ST.T+=10;ST.r10.push(ST.T);logx('Передышка 10 минут')});
 $('restS').onclick=()=>mutate(()=>{ST.T+=60;ST.rests.push(ST.T);logx('Короткий отдых')});
-$('restL').onclick=()=>mutate(()=>{ST.T+=480;ST.lrs.push(ST.T);ST.rests.push(ST.T);ST.people.forEach(p=>{p.intox=false;p.exh=Math.max(0,p.exh-1)});OD=null;logx('Долгий отдых: токсичность 0, истощение −1')});
+$('restL').onclick=()=>mutate(()=>{ST.T+=480;ST.lrs.push(ST.T);ST.rests.push(ST.T);ST.n=(ST.n||0)+1;ST.lrN=ST.n;ST.people.forEach(p=>{p.exh=Math.max(0,p.exh-1)});OD=null;
+  const left=ST.people.filter(p=>p.intox&&toxOfP(p.id)>p.limit).map(p=>p.name);
+  logx('Долгий отдых завершён: остаточная токсичность пересчитана (действующие эффекты держат свою), истощение −1'+(left.length?'. Интоксикация остаётся: '+left.join(', '):''))});
 $('undo').onclick=()=>{if(!UNDO.length)return;const jn=UNDOJ[UNDO.length-1];delete UNDOJ[UNDO.length-1];
   if(jn)jn.forEach(({id,d})=>{const t=TR.find(x=>x.id===id);if(t){const cur=Math.max(0,(+t.current||0)-d),log=(Array.isArray(t.log)?t.log:[]).concat([{t:Date.now(),d:-d,note:'отмена'}]).slice(-30);jUpdate(id,{current:cur,log,done:cur>=(+t.target||1)})}});
   ST=JSON.parse(UNDO.pop());ST.u=Date.now();OD=null;save();renderBelt()};
@@ -746,7 +751,7 @@ function renderPeople(){
         else ST.ent=ST.ent.filter(x=>x!==e)}));
       es.appendChild(r)});
     card.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>mutate(()=>{const a=b.dataset.a;
-      if(a==='trig'){ST.trig.push({who:p.id,T:ST.T});logx(`${p.name}: сработал триггер зелья`)}
+      if(a==='trig'){ST.n=(ST.n||0)+1;ST.trig.push({who:p.id,T:ST.T,n:ST.n});logx(`${p.name}: сработал триггер зелья`)}
       else if(a==='exh+')p.exh++;else if(a==='exh-')p.exh=Math.max(0,p.exh-1);
       else if(a==='del'){ST.people=ST.people.filter(x=>x!==p);ST.ent=ST.ent.filter(x=>x.who!==p.id)}}));
     const li=card.querySelector('input[type=number]');li.onchange=()=>mutate(()=>{p.limit=Math.max(0,+li.value||0)});
@@ -1065,7 +1070,7 @@ function resArea(box,n,lvl,c,k){
   else{const have=herbValue(P.kind,P.lvl);rows.push(`${KIND[P.kind]} травы ур. ${P.lvl}+ на <b>${fmtZ(P.value)} зм</b> из ${fmtZ(have)} (по ценности, ⅓ цены)${have<P.value?' <span class="bad">не хватает</span>':''}${P.saved?` <small>(экономия на ${P.saved} — половина)</small>`:''}`)}
   if(P.ess)P.ess.forEach((E,ei)=>{const opts=ST.mat.ess.filter(e=>e.q>0).sort((a,b)=>(essMatch(b,E.type)-essMatch(a,E.type))||(a.l-b.l));
     const fit=opts.filter(e=>essMatch(e,E.type)&&e.l>=E.l), def=fit.find(e=>e.q>=P.att)||fit[0];
-    rows.push(`Эссенция ${esc(E.type)} ${ROM[E.l]||''} ×${P.att}: <select class="res-e res-e${ei}" aria-label="Эссенция">${opts.map(e=>`<option value="${e.id}" ${def&&e.id===def.id?'selected':''}>${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${e.q})</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${!def?' <span class="bad">подходящей нет</span>':def.q<P.att?` <span class="bad">есть только ${def.q}</span>`:''}${def&&def.l>E.l?' <small>(эссенция выше уровня)</small>':''}${def&&def.st==='good'?' <small>(отличная: +1 к проверке)</small>':''}${def&&def.st==='bad'?' <span class="wr">нестабильная: +2 к СЛ</span>':''}`)})
+    rows.push(`Эссенция ${esc(E.type)} ${ROM[E.l]||''} ×${P.att}: <select class="res-e res-e${ei}" aria-label="Эссенция">${opts.map(e=>`<option value="${e.id}" ${def&&e.id===def.id?'selected':''}>${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${e.q})</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${!def?' <span class="bad">подходящей нет</span>':def.q<P.att?` <span class="bad">есть только ${def.q}</span>`:''}${def&&def.l>E.l?' <small>(эссенция выше уровня)</small>':''}${def&&def.st==='good'?' <small>(отличная: +1 к проверке)</small>':''}${def&&def.st==='bad'?' <span class="wr">нестабильная: +2 к СЛ</span>':''}${def&&essExpired(def)?' <span class="bad">просрочена — только с разрешения мастера</span>':''}`)})
   if(P.cat){const opts=ST.mat.cat.filter(x=>x.o===P.cat.o&&x.used<cmax(x));const def=opts[0];
     let w='';if(def){const from=def.used+1,to=def.used+P.att;if(to>cmax(def))w=' <span class="bad">не хватит применений</span>';else if(to>stab(def)){const f=Math.max(stab(def)+1,from);w=` <span class="wr">применения ${f}–${to}: проверки нестабильности, СЛ ${instDC(def,f)}${to>f?'–'+instDC(def,to):''} (5.2)</span>`}}
     rows.push(`Катализатор ${ROM[P.cat.o]} порядка ×${P.att}: <select class="res-c" aria-label="Катализатор">${opts.map(x=>`<option value="${x.id}">${ROM[x.o]} порядка — ${x.used}/${cmax(x)}</option>`).join('')}<option value="" ${def?'':'selected'}>не списывать</option></select>${def?w:' <span class="bad">нет катализатора</span>'}${def&&def.used+P.att>stab(def)?'<label class="tg" style="padding:4px 0 0"><input type="checkbox" class="res-crack"><span>Проверка нестабильности провалена — катализатор треснул (доза испорчена; дозы после неё не варились — убери их из счёта; на нат. 1 — ещё и осечка)</span></label>':''}`)}
@@ -1120,7 +1125,7 @@ function renderMat(){
       logx(`Материалы: ${KIND[k].toLowerCase()} травы ур. ${l} +${fmtZ(q)}${gp?` (на ${fmtZ(v)} зм)`:''}`)})};
   sec('Эссенции');
   if(!ST.mat.ess.length)box.insertAdjacentHTML('beforeend','<div class="note">Нет</div>');
-  ST.mat.ess.forEach(e=>row(e.n,`${e.types.join(' / ')} ${ROM[e.l]}${e.note?' · '+e.note:(e.st&&ESS_ST[e.st]?' · '+ESS_ST[e.st]:'')}`,fmtZ(e.q),()=>mutate(()=>{e.q--;ST.mat.ess=ST.mat.ess.filter(x=>x.q>0)}),()=>mutate(()=>{e.q++})));
+  ST.mat.ess.forEach(e=>row(e.n,`${e.types.join(' / ')} ${ROM[e.l]}${e.note?' · '+e.note:(e.st&&ESS_ST[e.st]?' · '+ESS_ST[e.st]:'')}${essExp(e)?' · '+essExp(e):''}`,fmtZ(e.q),()=>mutate(()=>{e.q--;ST.mat.ess=ST.mat.ess.filter(x=>x.q>0)}),()=>mutate(()=>{e.q++})));
   const fe=document.createElement('div');fe.className='row';fe.style.marginTop='6px';fe.style.flexWrap='wrap';
   fe.innerHTML=`<div style="flex:1 1 130px"><input id="men" type="search" placeholder="Что (чешуя, пыль…)" aria-label="Название"></div><div style="flex:1 1 120px"><input id="met" data-list="essList" type="search" placeholder="Тип" aria-label="Тип эссенции"></div><div style="flex:0 0 74px"><select id="mel" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${ROM[l]}</option>`).join('')}</select></div><div style="flex:none"><button type="button" class="btn" id="mea">+</button></div><label class="tg" style="flex:1 1 100%"><input type="checkbox" id="mef"><span>Влажный трофей, ещё не переработан (9.3)</span></label>`;
   box.appendChild(fe);
@@ -1420,22 +1425,29 @@ function catForm(box){
   });
 }
 const ESS_ST={fresh:'трофей, не переработан',stable:'',good:'отличная: +1 к проверке варки',bad:'нестабильная: +2 к СЛ варки, 24 часа'};
+// срок хранения (9.3, Ж-96): переработанная 30 дней, с нат. 20 — 60, нестабильная 24 часа; у старых записей срок не выдумывается
+const ESS_DAYS={n20:60,hi:30,ok:30,un:1};
+function essExp(e){if(e.exp==null)return e.st&&e.st!=='fresh'?'срок не указан':'';const left=e.exp-ST.T;
+  return left<=0?'ПРОСРОЧЕНА — только с разрешения мастера':`годна до ${fmtT(e.exp)}`+(left<3*1440?` (осталось ${fmtD(left)})`:'')}
+const essExpired=e=>e.exp!=null&&ST.T>=e.exp;
 function essForm(box){
-  box.innerHTML=`<div class="row"><div><label class="f">Трофей или эссенция</label><select class="er"></select></div><div style="flex:0 0 96px"><label class="f">Бонус</label><input class="eb" type="number" aria-label="Бонус проверки переработки"></div></div>
+  box.innerHTML=`<div class="row"><div><label class="f">Трофей или эссенция</label><select class="er"></select></div><div style="flex:0 0 110px"><label class="f">Инт + инстр.</label><input class="eb" type="number" aria-label="Интеллект + инструменты: бонус проверки переработки"></div></div>
    <div class="efacts note" style="margin:6px 0"></div>
    <div class="chips eout">${OUT6.map(([k,t])=>`<button type="button" class="chip" data-o="${k}">${t}</button>`).join('')}</div><span class="note emsg"></span>`;
   const er=box.querySelector('.er'), eb=box.querySelector('.eb');
-  // по умолчанию: бонус варки минус бонус мастерства и рабочее место (+1); у Талиса +2
-  const EB=()=>eb.value===''?((+$('b').value||0)-MB(Math.max(1,Math.min(10,+$('m').value||1)))-1):(+eb.value||0);
-  eb.placeholder=String(EB());eb.oninput=()=>upd();
+  // Интеллект + инструменты хранится отдельно (ST.essB); без него — оценка: бонус варки минус мастерство и рабочее место +1 (у Талиса +2)
+  const estB=()=>(+$('b').value||0)-MB(Math.max(1,Math.min(10,+$('m').value||1)))-1;
+  const EB=()=>eb.value===''?estB():(+eb.value||0);
+  eb.placeholder=String(estB());eb.oninput=()=>upd();eb.onchange=()=>mutate(()=>{ST.essB=eb.value===''?null:(+eb.value||0)});
   const upd=()=>{
+    if(document.activeElement!==eb)eb.value=ST.essB??'';eb.placeholder=String(estB());
     const keep=er.value, items=ST.mat?ST.mat.ess.filter(e=>e.q>0&&(e.st==='fresh'||e.st==='bad')):[];
     er.innerHTML=items.map(e=>`<option value="${e.id}">${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${fmtZ(e.q)})${e.st==='bad'?' · нестабильная':''}</option>`).join('')||'<option value="">нечего перерабатывать</option>';
     if(keep&&items.some(e=>e.id===keep))er.value=keep;
     const e=items.find(x=>x.id===er.value);
     if(!e){box.querySelector('.efacts').textContent='Все эссенции стабильны. Новый трофей добавь в «Материалах» с отметкой «трофей».';return}
     const dc=10+e.l, ch=chancesTxt(dc,EB());
-    box.querySelector('.efacts').innerHTML=`1 час на одну единицу · СЛ <b>${dc}</b> (10 + уровень) · Интеллект + инструменты, без мастерства и места. Шансы: стабильная ${pct(ch.ok)}, отличная ${pct(ch.hi+ch.n20)}, нестабильная ${pct(ch.un)}, испорчен ${pct(ch.fl)}.${e.note?`<br><small>${esc(e.note)}</small>`:''}`;
+    box.querySelector('.efacts').innerHTML=`1 час на одну единицу · СЛ <b>${dc}</b> (10 + уровень) · Интеллект + инструменты, без мастерства и места${eb.value===''?' (бонус — оценка для рабочего места +1; в лаборатории или с помощником введи Инт + инструменты вручную)':''}. Шансы: стабильная ${pct(ch.ok)}, отличная ${pct(ch.hi+ch.n20)}, нестабильная ${pct(ch.un)}, испорчен ${pct(ch.fl)}.${e.note?`<br><small>${esc(e.note)}</small>`:''}`;
   };
   er.onchange=upd;box._upd=upd;upd();
   box.querySelectorAll('.eout .chip').forEach(b=>b.onclick=()=>{
@@ -1443,8 +1455,9 @@ function essForm(box){
     mutate(()=>{
       const st=r==='ok'?'stable':(r==='hi'||r==='n20')?'good':r==='un'?'bad':null;
       const one={...e,id:uid(),q:1};e.q=+(e.q-1).toFixed(2);
-      if(st){one.st=st;one.note=[ESS_ST[st],'переработана'].filter(Boolean).join(' · ');
-        const same=ST.mat.ess.find(x=>x!==e&&x.n===one.n&&x.l===one.l&&x.st===st&&x.types.join()===one.types.join());if(same)same.q++;else ST.mat.ess.push(one);
+      if(st){one.st=st;one.exp=ST.T+ESS_DAYS[r]*1440;one.note=[ESS_ST[st],r==='n20'?'нат. 20: срок 60 дней':'','переработана'].filter(Boolean).join(' · ');
+        // одна запись — один срок: разные дни истечения не сливаются
+        const same=ST.mat.ess.find(x=>x!==e&&x.n===one.n&&x.l===one.l&&x.st===st&&x.types.join()===one.types.join()&&x.exp!=null&&dayOf(x.exp)===dayOf(one.exp));if(same){same.q++;same.exp=Math.min(same.exp,one.exp)}else ST.mat.ess.push(one);
         res=`«${e.n}» → ${st==='stable'?'стабильная эссенция':ESS_ST[st]}.`}
       else res=`«${e.n}» испорчен${r==='n1'?' и осечка (таблица раздела 2)':''}.`;
       ST.mat.ess=ST.mat.ess.filter(x=>x.q>1e-9);
