@@ -1,10 +1,12 @@
 """Собирает HTML-версию правил из md: оглавление, поиск, кликабельные ссылки на разделы,
-скрываемые альтернативы. Запуск: python3 scripts/rules_html.py"""
-import html, re, pathlib
+скрываемые альтернативы. Запуск: python3 scripts/rules_html.py — полная редакция;
+python3 scripts/rules_html.py table — «правила за столом» (сначала собрать их: scripts/table_rules.py)."""
+import html, re, pathlib, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-SRC = ROOT / "Алхимия Талиса — правила v0.3 (черновик на утверждение).md"
-OUT = ROOT / "Алхимия Талиса — правила v0.3.html"
+TABLE = "table" in sys.argv[1:]
+SRC = ROOT / ("Алхимия Талиса — правила за столом.md" if TABLE else "Алхимия Талиса — правила v0.3 (черновик на утверждение).md")
+OUT = ROOT / ("Алхимия Талиса — правила за столом.html" if TABLE else "Алхимия Талиса — правила v0.3.html")
 
 lines = SRC.read_text(encoding="utf-8").splitlines()
 JOURNAL = ROOT / "Журнал решений.md"
@@ -68,6 +70,8 @@ for ln in chg_lines:
         c = [x.strip() for x in ln.strip().strip("|").split("|")]
         for _, sid in sec_ids(c[0]):
             CHANGED.setdefault(sid, status_label(c[2]))
+if TABLE:
+    CHANGED = {}
 
 # ---------- инлайн ----------
 def link(target, label):
@@ -208,9 +212,12 @@ out = [wrap_cls(it[2] if isinstance(it, tuple) else it, flags[k]) for k, it in e
 title = lines[0].lstrip("# ").strip()
 toc_html = "".join(f'<li class="t{lv}{" chg" if hid in CHANGED else ""}"><a class="ref" href="#{hid}">{inline(txt, False)}</a></li>' for lv, txt, hid in toc)
 
+BTNS = "" if TABLE else ('<button id="alt" aria-pressed="true" title="Показать или скрыть альтернативы для мастера">Альтернативы</button>\n'
+        '<button id="chg" aria-pressed="false" title="Показать только разделы, изменённые относительно v0.2">Только изменения</button>')
+TITLE = "Алхимия: правила за столом" if TABLE else "Алхимия Талиса v0.3"
 page = f"""<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Алхимия Талиса v0.3</title>
+<title>{TITLE}</title>
 <style>
 :root{{--bg:#faf8f4;--fg:#22201c;--mut:#6b655b;--card:#fff;--line:#e4dfd5;--acc:#7a4b12;--accbg:#f3e9da;--hl:#fff3c4;--alt:#5b6b7a}}
 @media (prefers-color-scheme:dark){{:root:not([data-theme="light"]){{--bg:#17161a;--fg:#ebe7df;--mut:#a59f94;--card:#211f24;--line:#36333a;--acc:#e3b26b;--accbg:#2f2a22;--hl:#3d3420;--alt:#9fb3c6}}}}
@@ -246,8 +253,7 @@ body{{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(sa
 <h1 style="border:0;margin-top:.6em">{inline(title, False)}</h1>
 <div class="bar" id="bar">
 <input id="q" type="search" placeholder="Поиск по правилам">
-<button id="alt" aria-pressed="true" title="Показать или скрыть альтернативы для мастера">Альтернативы</button>
-<button id="chg" aria-pressed="false" title="Показать только разделы, изменённые относительно v0.2">Только изменения</button>
+{BTNS}
 <a class="ref" href="#toc-h" style="text-decoration:none;padding:6px 4px">Оглавление</a>
 <span class="cnt" id="cnt"></span>
 </div>
@@ -262,8 +268,8 @@ function flash(){{const id=decodeURIComponent(location.hash.slice(1));const el=i
 document.addEventListener('click',e=>{{const a=e.target.closest('a[href^="#"]');if(a)clearQ()}});
 addEventListener('hashchange',flash);
 addEventListener('load',()=>{{setBar();if(location.hash){{const el=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(el){{el.scrollIntoView();flash()}}}}}});
-const chgBtn=$('#chg');chgBtn.onclick=()=>{{const v=chgBtn.getAttribute('aria-pressed')!=='true';chgBtn.setAttribute('aria-pressed',v);document.body.classList.toggle('onlychg',v);setBar()}};
-const altBtn=$('#alt');let altOn=true;try{{altOn=localStorage.getItem('alc-alt')!=='0'}}catch(e){{}}
+const chgBtn=$('#chg');if(chgBtn)chgBtn.onclick=()=>{{const v=chgBtn.getAttribute('aria-pressed')!=='true';chgBtn.setAttribute('aria-pressed',v);document.body.classList.toggle('onlychg',v);setBar()}};
+const altBtn=$('#alt')||document.createElement('button');let altOn=true;try{{altOn=localStorage.getItem('alc-alt')!=='0'}}catch(e){{}}
 function setAlt(v){{altOn=v;document.body.classList.toggle('noalt',!v);altBtn.setAttribute('aria-pressed',v);try{{localStorage.setItem('alc-alt',v?'1':'0')}}catch(e){{}}}}
 altBtn.onclick=()=>setAlt(!altOn);setAlt(altOn);
 const blocks=$$('#doc > *');
@@ -278,3 +284,7 @@ $('#q').addEventListener('input',filter);
 </script></body></html>"""
 OUT.write_text(page, encoding="utf-8")
 print("ok", len(page), "заголовков", len(heads))
+if not TABLE:   # «правила за столом» собираются из полной редакции при каждой сборке
+    import subprocess
+    subprocess.run([sys.executable, str(ROOT / "scripts" / "table_rules.py")], check=True)
+    subprocess.run([sys.executable, __file__, "table"], check=True)
