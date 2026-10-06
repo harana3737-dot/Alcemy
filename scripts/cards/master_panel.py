@@ -52,21 +52,55 @@ cards = [dict(n=c["name"], l=c["lvl"], k=c["cls"], f=c["fam"] or "", e=c["ess"],
               d=c["dur"], c=conc(c), g=c["tasks"], es=c["ess_types"], tx=tox_n(c), s=c.get("src_raw") or c["src"], x=c["eff"], o=c["note"] or "")
          for c in sorted(C, key=lambda c: (c["lvl"], ORDER.index(c["cls"]), c["name"]))]
 
+# Применение и варка — готовые блоки из «Карточек эликсиров.html» (как видит мастер в каталоге)
+subprocess.run([sys.executable, str(HERE / "gen_html.py")], check=True, capture_output=True)
+cat = (ROOT / "Карточки эликсиров.html").read_text(encoding="utf-8")
+blocks = {}
+for m in re.finditer(r'<article class="card" id="(e\d+)".*?</article>', cat, re.S):
+    art = m.group(0)
+    q = re.search(r'<dl class="quick">.*?</dl>', art, re.S)
+    b = re.search(r'<details class="brew">.*?<dl>(.*?)</dl>', art, re.S)
+    clean = lambda h: re.sub(r'<button[^>]*>(.*?)</button>', r"\1", h)
+    blocks[m.group(1)] = (clean(q.group(0)) if q else "", "<dl>" + clean(b.group(1)) + "</dl>" if b else "")
+for c, cd in zip(sorted(C, key=lambda c: (c["lvl"], ORDER.index(c["cls"]), c["name"])), cards):
+    cd["q"], cd["b"] = blocks.get(c["id"], ("", ""))
+
+# Быстрые таблицы из «Правил за столом»: разделы целиком, свёрнутыми блоками
+TABLE_SECTIONS = [("2. Результат проверки и осечки", "## 2."), ("7.2 Лечение зелий по раундам", "### 7.2"), ("7.3 Триггеры зелий", "### 7.3"),
+                  ("7.5 Яды: урон и спасбросок", "### 7.5"), ("7.7 Бонусы зелий и ядов (5+ и 20)", "### 7.7"), ("7.8 Дефекты зелий и ядов", "### 7.8"),
+                  ("8.7 Интоксикация", "### 8.7"), ("8.9 Алхимическая концентрация", "### 8.9"), ("8.12 Бонусы эликсиров (5+ и 20)", "### 8.12"),
+                  ("8.13 Дефекты эликсиров", "### 8.13"), ("8.14 Взаимодействие с магией", "### 8.14")]
+table_lines = (ROOT / "Алхимия Талиса — правила за столом.md").read_text(encoding="utf-8").splitlines()
+def section(prefix):
+    i = next(k for k, l in enumerate(table_lines) if l.startswith(prefix))
+    lvl = len(prefix.split(" ")[0])
+    j = next((k for k in range(i + 1, len(table_lines)) if re.match(r"#{1,%d} " % lvl, table_lines[k])), len(table_lines))
+    return table_lines[i + 1:j]
+quick = []
+tmp = ROOT / "_пульт_раздел"
+for title, prefix in TABLE_SECTIONS:
+    tmp.with_suffix(".md").write_text("# " + title + "\n\n" + "\n".join(section(prefix)), encoding="utf-8")
+    subprocess.run([sys.executable, str(ROOT / "scripts/master_html.py"), tmp.name], check=True, capture_output=True)
+    h = tmp.with_suffix(".html").read_text(encoding="utf-8").split("<main>", 1)[1].split("</main>", 1)[0]
+    h = re.sub(r"<nav>.*?</nav>", "", h, flags=re.S)
+    h = re.sub(r"<h1[^>]*>.*?</h1>", "", h, count=1, flags=re.S)
+    quick.append(dict(t=title, h=h))
+for ext in (".md", ".html"):
+    tmp.with_suffix(ext).unlink(missing_ok=True)
+
 # Талис: только строки алхимии, которые можно мастеру
 sheet = (ROOT / "Талис — лист персонажа.md").read_text(encoding="utf-8")
 alch = sheet.split("## Алхимия", 1)[1].split("\n## ", 1)[0]
 keep = ("Мастерство", "Рост", "Открытый рецепт", "Исследование")
 talis = [re.sub(r"\*\*", "", l[2:]).strip() for l in alch.splitlines() if l.startswith("- ") and l[2:].startswith(keep)]
 root_ln = next((l for l in alch.splitlines() if "Корневая метка" in l), "")
-m = re.search(r"I\. Калибровка: ([^;]+)", root_ln)
-if m:
-    talis.append("Корневая метка (лаборатория Анариэль), этап I «Калибровка»: " + m.group(1).strip())
+root = re.sub(r"\*\*", "", root_ln[2:]).strip() if root_ln else ""
 sample = (ROOT / "Образец — кровь шахтёра.md").read_text(encoding="utf-8").splitlines()[1:]
 
 tpl = (HERE / "master_tpl.html").read_text(encoding="utf-8")
 dump = lambda o: json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
 out = (tpl.replace("__GROUPS__", dump(groups)).replace("__EXTRA__", dump(extra)).replace("__NQ__", str(nq))
           .replace("__CARDS__", dump(cards)).replace("__CLS__", dump(CLS)).replace("__ORDER__", dump(ORDER))
-          .replace("__TALIS__", dump(talis)).replace("__SAMPLE__", dump(sample)).replace("__CORE__", core))
+          .replace("__TALIS__", dump(talis)).replace("__ROOT__", dump(root)).replace("__QUICK__", dump(quick)).replace("__SAMPLE__", dump(sample)).replace("__CORE__", core))
 (ROOT / "Пульт мастера.html").write_text(out, encoding="utf-8")
 print("Пульт мастера.html", nq, "вопросов,", len(cards), "карточек,", len(out), "байт")

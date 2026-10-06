@@ -68,11 +68,19 @@ h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
 
 /* Справка */
 .ref{max-width:72ch}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}
+.toc a{font-size:13px;color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:3px 10px;text-decoration:none}
+.toc a:hover{border-color:var(--acc)}
+details.qt{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:6px 0;padding:0 14px}
+details.qt>summary{cursor:pointer;padding:10px 0;font-weight:600;list-style-position:inside}
+details.qt[open]>summary{border-bottom:1px solid var(--line);margin-bottom:6px}
+details.qt .ref{max-width:none;padding-bottom:10px}
+.el .d h4{font:600 12px var(--f-body);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:12px 0 2px}
 .ref h2{border-top:1px solid var(--line);padding-top:16px}
 .ref h3{font:600 16px var(--f-body);color:var(--acc);margin:18px 0 6px}
 .ref p{margin:.5em 0}.ref ul,.ref ol{padding-left:1.3em;margin:.4em 0}.ref li{margin:.2em 0}
 .ref .wrap,.tw{overflow-x:auto;margin:8px 0;max-width:none;padding:0}
-.ref table,.tw table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+.ref table,.tw table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
 .ref th,.ref td,.tw th,.tw td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
 .ref th,.tw th{color:var(--muted);font-weight:600}
 .ref i{color:var(--muted)}
@@ -81,6 +89,8 @@ h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .filters input{flex:1 1 220px;min-width:0;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
 .filters select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px}
+.fdet>summary{cursor:pointer;font-size:14px;color:var(--muted);padding:8px 0 2px}
+@media(min-width:521px){.fdet>summary{display:none}}
 .fgroups{display:grid;gap:6px;margin:10px 0 6px}
 .fgr{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:baseline}
 .fgr>span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
@@ -129,7 +139,7 @@ h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
 
 <section id="p-ok">
   <div class="sum">
-    <div><div class="big" id="sumN">0 из __NQ__</div><div class="bar"><i id="sumBar" style="width:0"></i></div></div>
+    <div><div class="note" style="margin:0">Отмечено</div><div class="big" id="sumN">0 из __NQ__</div><div class="bar"><i id="sumBar" style="width:0"></i></div></div>
     <div class="grow">Молчание — «да»: где ничего не отмечено, играем как в строке «Играем». Отмечай только «иначе» или «обсудим». <span id="saveSt"></span></div>
     <button type="button" class="btn pri" id="copy">Скопировать ответ</button>
   </div>
@@ -139,7 +149,11 @@ h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
 </section>
 
 <section id="p-ref" hidden>
-  <p class="note">Ядро правил v0.3 — всё, что нужно за столом. Номера в скобках — разделы полного текста.</p>
+  <div class="toc" id="toc"></div>
+  <h2 id="quick">Быстрые таблицы</h2>
+  <p class="note">Разделы «Правил за столом», на которые ссылается ядро: результаты, бонусы, дефекты, лечение, яды, концентрация. Нажми, чтобы раскрыть.</p>
+  <div id="qtabs"></div>
+  <h2 id="core">Ядро правил</h2>
   <div class="ref">__CORE__</div>
 </section>
 
@@ -148,8 +162,8 @@ h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
     <input id="fq" type="search" placeholder="Название, эссенция или слово из эффекта" aria-label="Поиск эликсира" autocomplete="off">
     <select id="fs" aria-label="Сортировка"><option value="l">по уровню</option><option value="n">по названию</option><option value="p">по цене</option></select>
   </div>
-  <div class="fgroups" id="fg"></div>
-  <div class="frow"><label class="tgl"><input type="checkbox" id="fnow"> Талис может варить сейчас (до II)</label>
+  <details class="fdet" id="fgd" open><summary id="fgs">Фильтры</summary><div class="fgroups" id="fg"></div></details>
+  <div class="frow"><label class="tgl"><input type="checkbox" id="fnow"> В пределах мастерства Талиса (до II; рецепты открыты не все)</label>
     <span class="note" id="fcount"></span><button type="button" class="btn" id="freset">Сбросить фильтры</button></div>
   <div id="els"></div>
 </section>
@@ -158,8 +172,10 @@ h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
   <div class="facts" id="facts"></div>
   <h2>Алхимия сейчас</h2>
   <ul class="list" id="talis"></ul>
+  <details class="qt" id="rootd"><summary>Корневая метка — памятка по проекту</summary><div class="ref" id="root"></div></details>
   <h2>Исследуемый образец</h2>
   <div class="card ref" id="sample"></div>
+  <p class="note">Журнал опытов с образцом и день консервации ведёт игрок; в пульт они попадают при его обновлении.</p>
 </section>
 </div>
 
@@ -170,6 +186,8 @@ h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
 <script id="d-order" type="application/json">__ORDER__</script>
 <script id="d-talis" type="application/json">__TALIS__</script>
 <script id="d-sample" type="application/json">__SAMPLE__</script>
+<script id="d-root" type="application/json">__ROOT__</script>
+<script id="d-quick" type="application/json">__QUICK__</script>
 <script>
 const $=id=>document.getElementById(id);
 const J=id=>JSON.parse($(id).textContent);
@@ -214,9 +232,12 @@ function save(n,a){a.t=Date.now();A['q'+n]=a;ls.set('manswers',JSON.stringify(A)
 function readOnly(){CANW=false;const b=$('ro');b.hidden=false;
   b.textContent='Ответы видишь только ты: у этой ссылки нет права записи. Отметь пункты и нажми «Скопировать ответ» — текст можно вставить в чат.'}
 function answerText(){const all=G.flatMap(g=>g.q),out=[],p=(A['q'+PRICE_Q]||{}).price;
-  all.forEach(q=>{const a=A['q'+q.n];if(a&&(a.c==='alt'||a.c==='talk'))out.push(`• ${q.n} (${q.q.replace(/\*\*/g,'')}) — ${a.c==='alt'?'иначе':'обсудим'}${a.note?': '+a.note:''}`)});
+  const plain=t=>t.replace(/\*\*/g,'').replace(/\*/g,'');
+  all.forEach(q=>{const a=A['q'+q.n];if(!a||(a.c!=='alt'&&a.c!=='talk'))return;
+    const what=a.c==='alt'?'иначе: '+(a.note||plain(q.a)):'обсудим'+(a.note?': '+a.note:'');
+    out.push(`• ${q.n} (${plain(q.q)}) — ${what}`)});
   let s='Алхимия Талиса — ответ мастера\n'+(out.length?'Всё ок, кроме:\n'+out.join('\n'):'Всё ок.');
-  if(p!=null&&p!=='')s+=`\nП. ${PRICE_Q}: рецепт зарядов и склянок — ${p} зм.`;return s}
+  s+=(p!=null&&p!=='')?`\nП. ${PRICE_Q}: рецепт зарядов и склянок — ${p} зм.`:`\nП. ${PRICE_Q}: цена рецепта зарядов и склянок не указана.`;return s}
 $('copy').onclick=async()=>{const s=answerText();try{await navigator.clipboard.writeText(s);$('copy').textContent='Скопировано'}catch(e){
   const ta=document.createElement('textarea');ta.value=s;ta.style.cssText='width:100%;min-height:120px;margin-top:10px';$('ro').hidden=false;$('ro').textContent='Скопировать не вышло — выдели текст ниже:';$('ro').appendChild(ta);ta.select()}
   setTimeout(()=>$('copy').textContent='Скопировать ответ',1600)};
@@ -259,18 +280,25 @@ function renderFG(){const box=$('fg');box.innerHTML='';
 function renderEls(){
   const list=CARDS.filter(c=>textOk(c)&&nowOk(c)&&passOthers(c,null));
   const s=$('fs').value;list.sort((a,b)=>s==='n'?a.n.localeCompare(b.n,'ru'):s==='p'?PR(a)-PR(b)||a.l-b.l:a.l-b.l||a.n.localeCompare(b.n,'ru'));
-  $('fcount').textContent=`Найдено ${list.length} из ${CARDS.length}`;renderFG();
+  $('fcount').textContent=`Найдено ${list.length} из ${CARDS.length}`;renderFG();{const n=FG.reduce((s,f)=>s+SEL[f.id].size,0);$('fgs').textContent='Фильтры'+(n?` · выбрано ${n}`:'')}
   const box=$('els');box.innerHTML='';
   list.forEach(c=>{const d=document.createElement('div');d.className='el';
     d.innerHTML=`<button type="button" aria-expanded="false"><span class="lv">${ROM[c.l]}</span><span>${esc(c.n)}</span><span class="k">${esc(CLS[c.k]||c.k)} · ${esc(c.p)} зм</span></button>
-      <div class="d" hidden><p>${md(c.x)}</p><dl>
-        <dt>Источник</dt><dd>${esc(c.s)}</dd><dt>Эссенция</dt><dd>${esc(c.e)}</dd>${c.f?`<dt>Формула</dt><dd>${esc(c.f)}</dd>`:''}
-        <dt>Задачи</dt><dd>${esc(c.g.join(', '))}</dd><dt>Цена</dt><dd>${esc(c.p)} зм</dd><dt>Токсичность</dt><dd>${esc(c.t)}</dd><dt>Длительность</dt><dd>${esc(c.d)}</dd><dt>Концентрация</dt><dd>${esc(c.c)}</dd></dl>
+      <div class="d" hidden><p>${md(c.x)}</p>
+        <h4>Применение</h4>${c.q||''}<dl><dt>Задачи</dt><dd>${esc(c.g.join(', '))}</dd></dl>
+        <h4>Изготовление</h4>${c.b||''}
         ${c.o?`<p class="note">${md(c.o)}</p>`:''}</div>`;
     const b=d.querySelector('button'),dd=d.querySelector('.d');b.onclick=()=>{dd.hidden=!dd.hidden;b.setAttribute('aria-expanded',!dd.hidden)};box.appendChild(d)})}
+if(matchMedia('(max-width:520px)').matches)$('fgd').open=false;
 $('fq').addEventListener('input',renderEls);$('fs').onchange=renderEls;$('fnow').onchange=renderEls;
 $('freset').onclick=()=>{FG.forEach(f=>SEL[f.id].clear());$('fq').value='';$('fnow').checked=false;renderEls()};
 renderEls();
+
+// ===== Справка: быстрые таблицы и оглавление =====
+$('qtabs').innerHTML=J('d-quick').map((q,i)=>`<details class="qt" id="qt${i}"><summary>${esc(q.t)}</summary><div class="ref">${q.h}</div></details>`).join('');
+{const items=[['#quick','Быстрые таблицы'],...[...document.querySelectorAll('#p-ref .ref > h2[id], #p-ref > .ref h2[id]')].map(h=>['#'+h.id,h.textContent.replace(/^\d+\.\s*/,'')])];
+  $('toc').innerHTML=items.map(([h,t])=>`<a href="${h}">${esc(t)}</a>`).join('');
+  $('toc').querySelectorAll('a').forEach(a=>a.onclick=e=>{e.preventDefault();const el=document.querySelector(a.getAttribute('href'));if(el)el.scrollIntoView({behavior:'smooth',block:'start'})})}
 
 // ===== Талис =====
 const T=J('d-talis');
@@ -278,5 +306,6 @@ const pick=(re)=>{for(const s of T){const m=s.match(re);if(m)return m[1]}return 
 $('facts').innerHTML=[[pick(/Мастерство (\d+)/),'мастерство алхимии'],[pick(/бонус проверки (\+\d+)/),'бонус варки'],[pick(/Предел токсичности (\d+)/),'предел токсичности'],[CARDS.length,'эликсиров в каталоге']]
   .map(([v,l])=>`<div class="fact"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('');
 $('talis').innerHTML=T.map(s=>`<li>${md(s)}</li>`).join('');
+{const r=J('d-root');if(r)$('root').innerHTML='<p>'+md(r)+'</p>';else $('rootd').hidden=true}
 $('sample').innerHTML=J('d-sample').filter(s=>s.trim()&&!s.startsWith('|')).map(s=>s.startsWith('- ')?`<li>${md(s.slice(2))}</li>`:`<p>${md(s)}</p>`).join('').replace(/(<li>.*?<\/li>)+/gs,m=>`<ul>${m}</ul>`);
 </script>
