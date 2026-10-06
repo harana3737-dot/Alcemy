@@ -18,7 +18,7 @@ def volume_run(bonus, sl, vol, helper):
     prog = marks = hitch = defects = n = 0
     while prog < vol:
         n += 1
-        d = random.randint(1, 20); t = d + bonus
+        d = random.randint(1, 20); t = d + bonus + (2 if helper else 0)   # помощник: +2 к каждой проверке подхода (Ж-96)
         if d == 20:
             prog += 2 * t; marks += 1
         elif d == 1:
@@ -31,8 +31,6 @@ def volume_run(bonus, sl, vol, helper):
                 hitch = 0; defects += 1
         else:
             defects += 1
-        if helper and d != 1:
-            prog += 2
         if n > 200:
             break
     mod = max(-2, min(2, marks - defects))

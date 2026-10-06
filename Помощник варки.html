@@ -1287,7 +1287,8 @@ inkForm($('jink'));
 // ===== Дефекты нестабильных доз (7.8 зелья и яды, 8.13 эликсиры) — выбираешь тот, что назначил мастер =====
 function defectList(n,lvl,c){
   if(c){
-    if(c.k==='fl')return ['Слабая: −2 к табличной СЛ','Малая: область на 5 фт меньше','Медленная: срабатывает в начале следующего хода бросающего','Светится: тусклый свет 5 фт на бросающем 1 минуту, помеха на Скрытность','Неровная: −1 на каждом кубе урона (не ниже 1)','Выдыхается: годно 3 дня'];
+    if(c.k==='psn')return ['Короткое: эффект до конца 2-го хода цели (без лимита ходов — вдвое короче)','Тяжёлое: выпитый — токсичность +1, через рану — Короткое','Медленное: эффект начинается в начале следующего хода цели','Светится: оружие с ядом светится, помеха на Скрытность','Слабая привязка: −2 к СЛ','Выдыхается: годно 3 дня'];
+    if(c.k==='fl')return ['Слабая: −2 к табличной СЛ','Малая: главный размер области на 5 фт меньше (не меньше 5 фт)','Медленная: срабатывает в начале следующего хода бросающего','Светится: тусклый свет 5 фт на бросающем 1 минуту, помеха на Скрытность','Неровная: −1 на каждом кубе урона (не ниже 1)','Выдыхается: годно 3 дня'];
     const ch=['chg','rea','psn'].includes(c.k), oil=['oilw','oils','salve'].includes(c.k);
     return [ch&&c.k!=='psn'?'Короткое: окно 10 минут':'Короткое: длительность вдвое меньше',oil?'Короткое (вместо «Тяжёлого»): длительность вдвое меньше':'Тяжёлое: токсичность +1',
       'Медленное: эффект начинается в начале следующего хода','Светится: тусклый свет 5 фт на время эффекта, помеха на Скрытность',
@@ -1473,7 +1474,7 @@ function volStart(box,c,ink){ // c — карточка эликсира, или
 const d20ok=x=>Number.isInteger(x)&&x>=1&&x<=20;
 function volApproach(v,face,total,help,minus){
   if(!d20ok(face)||(face===1&&!d20ok(minus))||(face!==1&&!Number.isInteger(total)))return null;
-  const dc=v.dc;let add=0,txt='';
+  const dc=v.dc;let add=0,txt='';if(help&&face!==1)total+=2; // помощник: +2 к проверке подхода (Ж-96)
   if(face===20){add=2*total;v.marks++;txt='нат. 20: прогресс ×2, +1 метка'}
   else if(face===1){add=-minus;v.def++;txt=`нат. 1: −${minus} прогресса, +1 дефект`}
   else if(total>=dc+10){add=total;v.marks+=2;txt='успех на 10+: +2 метки'}
@@ -1481,7 +1482,7 @@ function volApproach(v,face,total,help,minus){
   else if(total>=dc){add=total;txt='успех'}
   else if(total>=dc-4){add=Math.floor(total/2);v.hitch++;txt='провал на 1–4: половина, +1 заминка'}
   else{add=0;v.def++;txt='провал на 5+: +1 дефект'}
-  if(help&&add>0){add+=2;txt+=', помощник +2'}
+  if(help&&face!==1)txt+=', помощник +2 к проверке';
   if(v.hitch>=3){v.hitch-=3;v.def++;txt+='; три заминки → дефект'}
   const idl=volIdle(v);if(idl.def){v.def+=idl.def;txt+=`; простой — +${idl.def} дефект`}
   v.prog=Math.max(0,v.prog+add);v.last=ST.T;
@@ -1512,7 +1513,7 @@ function renderVol(){
         <div style="flex:0 0 84px"><label class="f">Итог</label><input class="vt" type="number" placeholder="итог"></div>
         <div style="flex:0 0 96px" class="vmw" hidden><label class="f">Вычесть к20</label><input class="vm" type="number" min="1" max="20"></div>
         <div style="flex:1 1 140px;align-self:end"><button type="button" class="btn soft vgo">Подход (2 часа)</button></div></div>
-        <label class="tg"><input type="checkbox" class="vh"><span>Помощник (+2 к прогрессу подхода, 6.4)</span></label>
+        <label class="tg"><input type="checkbox" class="vh"><span>Помощник (+2 к проверке подхода и к завершающей, 6.4)</span></label>
 <span class="note vmsg"></span>`;
       const vf=body.querySelector('.vf'), mw=body.querySelector('.vmw');vf.oninput=()=>{mw.hidden=+vf.value!==1};
       body.querySelector('.vgo').onclick=()=>{const vt=body.querySelector('.vt'), vm=body.querySelector('.vm'), msg=body.querySelector('.vmsg');
@@ -1523,7 +1524,7 @@ function renderVol(){
         const help=body.querySelector('.vh').checked;let txt='';
         mutate(()=>{const r=volApproach(v,f,t,help,m);if(r===null)return;addHours(2,`подход «${v.n}»`);txt=r;logx(`Долгая варка «${v.n}»: ${txt}`)})};
     }else if(done){
-      body.innerHTML=`<p class="note" style="margin:6px 0">Объём набран. Завершающая проверка — СЛ ${v.dc}, модификатор ${mod>=0?'+':''}${mod} (метки − дефекты, от −2 до +2). Бонусы 5+ и 20, дефекты и осечка — только по ней.</p><div class="vfin"></div>`;
+      body.innerHTML=`<p class="note" style="margin:6px 0">Объём набран. Завершающая проверка — СЛ ${v.dc}, модификатор ${mod>=0?'+':''}${mod} (метки − дефекты, от −2 до +2); с помощником — ещё +2. Бонусы 5+ и 20, дефекты и осечка — только по ней.</p><div class="vfin"></div>`;
       const fin=body.querySelector('.vfin');
       {const B=(+$('b').value||0)+mod, ch=chancesTxt(v.dc,B);body.querySelector('p').insertAdjacentHTML('beforeend',` Шансы при бонусе ${B>=0?'+':''}${B}: успех ${pct(ch.n20+ch.hi+ch.ok)} (5+ ${pct(ch.hi)}, нат. 20 5%), нестабильный ${pct(ch.un)}, провал ${pct(ch.fl)}.`)}
       if(v.kind==='elixir'){const card=byName(v.n);recForm(fin,{name:v.n,lvl:v.l,card,noUse:true,single:true,onDone:(msg)=>{VOLMSG=`«${v.n}»: ${msg}`;mutate(()=>{ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» завершена`)})}})}
