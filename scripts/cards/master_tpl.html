@@ -305,7 +305,8 @@ $('qtabs').innerHTML=J('d-quick').map((q,i)=>`<details class="qt" id="qt${i}"><s
 // ===== Талис =====
 const T=J('d-talis');
 const pick=(re)=>{for(const s of T){const m=s.match(re);if(m)return m[1]}return '—'};
-$('facts').innerHTML=[[pick(/Мастерство (\d+)/),'мастерство алхимии'],[pick(/бонус проверки (\+\d+)/),'бонус варки'],[pick(/Предел токсичности (\d+)/),'предел токсичности'],[CARDS.length,'эликсиров в каталоге']]
+const BW=pick(/бонус проверки ([+-]\d+)/), BA=BW==='—'?'—':((+BW+2)>=0?'+':'')+(+BW+2); // полная лаборатория +3 вместо рабочего места +1
+$('facts').innerHTML=[[pick(/Мастерство (\d+)/),'мастерство алхимии'],[BW,'бонус варки дома (рабочее место +1)'],[BA,'бонус у Анариэль (полная лаборатория +3)'],[pick(/Предел токсичности (\d+)/),'предел токсичности']]
   .map(([v,l])=>`<div class="fact"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('');
 $('talis').innerHTML=T.map(s=>`<li>${md(s)}</li>`).join('');
 {const r=J('d-root');if(!r)$('rootd').hidden=true;else if(typeof r==='string')$('root').innerHTML='<p>'+md(r)+'</p>';else{
