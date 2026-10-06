@@ -473,13 +473,14 @@ function bar(t,x,col){return `<div class="bar"><span>${t}</span><span class="tra
 // ===== Пояс: сумка, выпитое, токсичность (8.7), алхимическая концентрация (8.9), отдых =====
 const DRINK=c=>['eff','chg','rea'].includes(c.k);
 const isChg=c=>c.k==='chg'||c.k==='rea';
-const toxOf=c=>{const m=String(c.t).match(/^(\d+)/);return m?+m[1]:0};
+const toxVars=c=>{const s=String(c.t),r=[{v:'основной',t:+((s.match(/^(\d+)/)||[0,0])[1])}];for(const m of s.matchAll(/вариант «([^»]+)» — (\d+)/g))r.push({v:m[1],t:+m[2]});return r};
+const toxOf=c=>{const V=toxVars(c);return (V[DM.tv||0]||V[0]).t};
 function durMin(d){
   if(/^мгновенно/.test(d))return 0;
   if(/^до (конца|начала)/.test(d))return 1;
   if(/^сутки/.test(d))return 1440;
-  const m=d.match(/(\d+)(?:к\d+)?\s*(минут|час|сут)/);
-  if(m){const v=+m[1];return m[2]==='минут'?v:m[2]==='час'?v*60:v*1440}
+  const m=d.match(/(\d+)(?:к(\d+))?\s*(минут|час|сут|дн|ден)/);
+  if(m){const v=+m[1]*(+m[2]||1);return m[3]==='минут'?v:m[3]==='час'?v*60:v*1440}
   return 60;
 }
 const byName=n=>D.find(c=>c.n===n);
@@ -502,15 +503,15 @@ const lastLR=()=>ST.lrs.length?ST.lrs[ST.lrs.length-1]:-1;
 const endOf=e=>Math.min(e.stopped??Infinity,e.t0+(e.k==='chg'?e.win:e.dur));
 const isActive=e=>ST.T<endOf(e);
 function toxLive(e){
-  if(lastLR()>=e.t0)return 0;
+  if(lastLR()>e.t0)return 0;
   if(isActive(e))return e.tox;
   const end=endOf(e), ref=e.k==='chg'?end:e.t0;
   // эффект: пока действует или до короткого отдыха — что дольше; заряд: после применения или окна — до короткого отдыха
-  if(ST.rests.some(r=>r>=ref&&r>=e.t0))return 0;
-  if(e.clean&&ST.r10.concat(ST.rests).some(r=>r>=end))return 0;
+  if(ST.rests.some(r=>r>=ref&&r>e.t0))return 0;
+  if(e.clean&&ST.r10.concat(ST.rests).some(r=>r>=end&&r>e.t0))return 0;
   return e.tox;
 }
-function trigCount(pid){const lr=lastLR();return ST.trig.filter(t=>t.who===pid&&t.T>lr&&!ST.rests.some(r=>r>=t.T)).length}
+function trigCount(pid){const lr=lastLR();return ST.trig.filter(t=>t.who===pid&&t.T>lr&&!ST.rests.some(r=>r>t.T)).length}
 function toxOfP(pid){return ST.ent.filter(e=>e.who===pid).reduce((s,e)=>s+toxLive(e),0)+Math.floor(trigCount(pid)/2)}
 const P=id=>ST.people.find(p=>p.id===id);
 
@@ -551,7 +552,8 @@ setTimeout(async()=>{
     DOC.onSnapshot(sn=>{if(!sn.exists||saveT&&sn.metadata&&sn.metadata.hasPendingWrites)return;const d=sn.data();if(!d||!d.s||(d.u||0)<=(ST.u||0))return;try{const x=JSON.parse(d.s);if(x&&x.v===1){ST=x;ls.set('belt',d.s);UNDO=[];renderBelt();if(!$('tab-jour').hidden)renderJournal()}}catch(e){}},()=>{});
     setSave('сохраняется в аккаунте');renderBelt();
   }catch(e){setSave('сохраняется в этом браузере')}
-  finally{if(matInit()){ST.u=Date.now();save()}migrate();if(ST.seed===undefined)applySeed();else if(ST.seed!==SEED.id)syncSeed();else renderBelt()}
+  finally{if(!JDB){JDB=localDB();JDB.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется только в этом браузере (не на claude.ai).');renderJournal()})}
+    if(matInit()){ST.u=Date.now();save()}migrate();if(ST.seed===undefined)applySeed();else if(ST.seed!==SEED.id)syncSeed();else renderBelt()}
 },0);
 function migrate(){
   const need=!ST.allies||ST.bag.some(b=>!b.who);if(!need)return;
@@ -608,9 +610,10 @@ function fillDrink(){
     const l=document.createElement('label');l.className='tg';l.innerHTML=`<input type="checkbox"><span><span class="t"></span><small></small></span>`;
     l.querySelector('.t').textContent=t;l.querySelector('small').textContent=h;const i=l.querySelector('input');i.checked=!!DM[id];
     i.onchange=()=>{DM[id]=i.checked;if(id==='long'&&i.checked)DM.dbl=false;if(id==='dbl'&&i.checked)DM.long=false;fillDrink()};box.appendChild(l)});
+  const TV=toxVars(c);if(TV.length>1){const l=document.createElement('div');l.innerHTML=`<label class="f">Вариант</label><select aria-label="Вариант">${TV.map((x,i)=>`<option value="${i}" ${(DM.tv||0)===i?'selected':''}>${esc(x.v)} — токсичность ${x.t}</option>`).join('')}</select>`;l.querySelector('select').onchange=e=>{DM.tv=+e.target.value;fillDrink()};box.appendChild(l)}
   let tox=toxOf(c)+(DM.heavy?1:0), dur;
   if(k==='chg'){dur=DM.short?10:DM.lwin?240:60;$('ddurL').textContent='Окно, мин'}
-  else{const b=durMin(c.d);dur=b;if(DM.long)dur=Math.min(Math.round(b*1.5),b+60);if(DM.dbl)dur=Math.min(b*2,b+480);if(DM.short)dur=Math.round(dur/2);$('ddurL').textContent='Минут'}
+  else{const b=durMin(c.d);dur=b;if(DM.long)dur=Math.min(Math.round(b*1.5),b+60);if(DM.dbl)dur=Math.min(b*2,b+480);if(DM.short)dur=Math.round(dur/2);$('ddurL').textContent=/\dк\d/.test(c.d)?'Минут (бросок: '+c.d+'; стоит максимум — впиши выпавшее)':'Минут'}
   $('dtox').value=tox;$('ddur').value=dur;preview();
 }
 function preview(){
@@ -622,8 +625,8 @@ function preview(){
   if(c.a){const cur=ST.ent.find(e=>e.who===p.id&&e.a&&isActive(e));if(cur)h+=` <span class="wr">Алхимическая концентрация: «${esc(cur.n)}» прекратится.</span>`}
   const own=ST.bag.filter(b=>bagCard(b)===c&&b.q>0);
   if(own.length){
-    const def=BAGPICK!==null&&(BAGPICK===''||own.some(b=>b.who===BAGPICK))?BAGPICK:(own.find(b=>b.who===p.id)||own[0]).who;
-    h+=`<div style="margin-top:8px"><label class="f" for="fromBag">Списать из сумки</label><select id="fromBag">${own.map(b=>`<option value="${b.who}" ${b.who===def?'selected':''}>${esc(P(b.who).name)} (там ${b.q})</option>`).join('')}<option value="" ${def===''?'selected':''}>не списывать</option></select></div>`;
+    const bk=b=>b.who+'\u0001'+(b.note||''), def=BAGPICK!==null&&(BAGPICK===''||own.some(b=>bk(b)===BAGPICK||b.who===BAGPICK))?(own.find(b=>bk(b)===BAGPICK)?BAGPICK:BAGPICK===''?'':bk(own.find(b=>b.who===BAGPICK))):bk(own.find(b=>b.who===p.id)||own[0]);
+    h+=`<div style="margin-top:8px"><label class="f" for="fromBag">Списать из сумки</label><select id="fromBag">${own.map(b=>`<option value="${esc(bk(b))}" ${bk(b)===def?'selected':''}>${esc(P(b.who).name)}${b.note?' · '+esc(b.note):''} (там ${b.q})</option>`).join('')}<option value="" ${def===''?'selected':''}>не списывать</option></select></div>`;
   }
   $('dprev').innerHTML=h;
   const fb=$('fromBag');if(fb)fb.onchange=()=>{BAGPICK=fb.value};
@@ -639,7 +642,7 @@ $('drink').onclick=()=>{
     if(c.a){ST.ent.filter(e=>e.who===p.id&&e.a&&isActive(e)).forEach(e=>{e.stopped=ST.T;logx(`${p.name}: «${e.n}» прекратился (алхимическая концентрация)`)})}
     const before=toxOfP(p.id);
     ST.ent.push({id:uid(),who:p.id,n:c.n,k,t0:ST.T,tox,dur:k==='eff'?d:0,win:k==='chg'?d:0,uses:0,max:DM.twin?2:1,a:!!c.a,clean:!!DM.clean,stopped:null});
-    if(useBag){const b=ST.bag.find(b=>b.who===useBag&&bagCard(b)===c&&b.q>0);if(b)b.q--}
+    if(useBag){const [uw,un]=useBag.split('\u0001');const b=ST.bag.find(b=>b.who===uw&&(b.note||'')===(un||'')&&bagCard(b)===c&&b.q>0)||ST.bag.find(b=>b.who===uw&&bagCard(b)===c&&b.q>0);if(b)b.q--}
     const aft=before+tox, ex=tox>0?aft-p.limit:0;
     logx(`${p.name} выпивает «${c.n}» (+${tox}, всего ${aft} из ${p.limit})`);
     OD=ex>0?{who:p.id,ex,n:c.n}:null;
@@ -679,10 +682,10 @@ function renderBag(){
       r.querySelector('.nm').appendChild(sel)}
     const bs=r.querySelectorAll('button');
     bs[0].onclick=()=>mutate(()=>{b.q--});bs[1].onclick=()=>mutate(()=>{b.q++});
-    bs[2].onclick=drink?()=>{$('dq').value=c.n;$('dwho').value=b.who;DM={};const NM={'Долгое действие':'long','Двойной срок':'dbl','Чистый':'clean','Долгое окно':'lwin','Двойной заряд':'twin','дефект: Короткое':'short','дефект: Тяжёлое':'heavy'};String(b.note||'').split(' + ').forEach(x=>{if(NM[x])DM[NM[x]]=true});BAGPICK=b.who;fillDrink();$('dq').scrollIntoView({behavior:'smooth',block:'center'})}
+    bs[2].onclick=drink?()=>{$('dq').value=c.n;$('dwho').value=b.who;DM={};const NM={'Долгое действие':'long','Двойной срок':'dbl','Чистый':'clean','Долгое окно':'lwin','Двойной заряд':'twin','дефект: Короткое':'short','дефект: Тяжёлое':'heavy'};String(b.note||'').split(' + ').forEach(x=>{if(NM[x])DM[NM[x]]=true});BAGPICK=b.who+'\u0001'+(b.note||'');fillDrink();$('dq').scrollIntoView({behavior:'smooth',block:'center'})}
       :()=>mutate(()=>{b.q--;logx(`${P(b.who).name}: потрачено «${b.n}», осталось ${b.q}`)});
     const g=r.querySelector('.give');if(g)g.onchange=()=>{const to=g.value;if(!to)return;mutate(()=>{b.q--;
-      const t=ST.bag.find(x=>x.who===to&&x.n===b.n);if(t)t.q++;else ST.bag.push({n:b.n,q:1,who:to,...(b.card?{card:b.card}:{}),...(b.note?{note:b.note}:{})});
+      const t=ST.bag.find(x=>x.who===to&&x.n===b.n&&(x.note||'')===(b.note||'')&&(x.card||'')===(b.card||''));if(t)t.q++;else ST.bag.push({n:b.n,q:1,who:to,...(b.card?{card:b.card}:{}),...(b.note?{note:b.note}:{})});
       logx(`${P(b.who).name} → ${P(to).name}: «${b.n}»`)})};
     box.appendChild(r)});
   const f=document.createElement('div');f.className='row';f.style.marginTop='10px';
@@ -759,6 +762,12 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
 let JDB=null, TR=[], JBUSY=new Set(), JDEL=null;
+// запасной журнал, если страница открыта не на claude.ai: тот же интерфейс, хранение в localStorage
+function localDB(){const rd=()=>{try{return JSON.parse(ls.get('tracks')||'{}')}catch(e){return{}}};let cb=null;
+  const wr=o=>{ls.set('tracks',JSON.stringify(o));if(cb)cb()};
+  const col={doc:id=>({get:async()=>{const o=rd();return{exists:!!o[id],data:()=>o[id]}},set:async d=>{const o=rd();o[id]=d;wr(o)},update:async p=>{const o=rd();o[id]={...o[id],...p};wr(o)},delete:async()=>{const o=rd();delete o[id];wr(o)}}),
+    add:async d=>col.doc(uid()).set(d),onSnapshot:f=>{cb=()=>{const o=rd();f({docs:Object.entries(o).map(([id,v])=>({id,data:()=>v}))})};cb()}};
+  return {collection:()=>col}}
 const JG=[["mastery","Мастерство"],["recipe","Рецепты"],["research","Исследования"],["project","Сюжетные проекты"]];
 const JQ={marks:[[1,"успех +1"],[2,"на 5+ +2"],[3,"нат. 20 +3"]],count:[[1,"успех +1"],[2,"нат. 20 +2"]],roll:[]};
 const MGOAL=m=>m===1?10:m===2?15:m===3?20:25;
@@ -788,7 +797,7 @@ function renderJournal(){
   renderVol();renderHours();
   if($('jink')&&$('jink')._upd&&!$('tab-jour').hidden)setTimeout(()=>{$('jink')._upd();['janti','jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())},0);
   const root=$('jgroups');if(!root)return;root.innerHTML='';
-  if(!JDB){root.innerHTML='<p class="note">Журнал хранится на claude.ai: открой страницу там и войди в аккаунт.</p>';return}
+  if(!JDB){root.innerHTML='<p class="note">Журнал загружается…</p>';return}
   if(!TR.length){root.innerHTML='<p class="note">Записей пока нет — добавь первую внизу.</p>';return}
   JG.forEach(([g,label])=>{
     const items=TR.filter(t=>(t.group||'recipe')===g).sort((a,b)=>(!!a.done-!!b.done)||((a.order??99)-(b.order??99)));
@@ -924,7 +933,7 @@ function bonusArea(box,n,lvl,c,cnt,sale){
 function recForm(box,opts){
   box.innerHTML=`<div class="sect">Записать варку</div>
    ${opts.name?'':`<div class="row"><div><input class="rn" data-list="potList" type="search" placeholder="Зелье или эликсир, например «Зелье лечения 2.2»" aria-label="Что варила" autocomplete="off"></div><div style="flex:.4"><select class="rl" aria-label="Уровень">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${l}.${l}</option>`).join('')}</select></div></div>`}
-   <div class="recg">${[['n20','Нат. 20'],['hi','Успех 5+'],['ok','Успех'],['un','Нестаб.'],['fl','Провал']].map(([k,t])=>`<label><span>${t}</span><input type="number" min="0" max="10" value="0" data-k="${k}"></label>`).join('')}</div>
+   <div class="recg">${[['n20','Нат. 20'],['hi','Успех 5+'],['ok','Успех'],['un','Нестаб.'],['fl','Провал']].map(([k,t])=>`<label><span>${t}</span><input type="number" min="0" max="${opts.single?1:10}" value="0" data-k="${k}"></label>`).join('')}</div>${opts.single?'<p class="note" style="margin:2px 0">Завершающая проверка — один бросок: отметь ровно один исход.</p>':''}
    <div class="chips rmode" style="margin:6px 0"><button type="button" class="chip" data-s="0">для себя</button><button type="button" class="chip" data-s="1">на продажу</button></div>
    <div class="row" style="margin:2px 0 4px"><div style="flex:0 0 150px"><label class="f">из провалов — нат. 1</label><input type="number" min="0" max="10" value="0" class="rn1" aria-label="Из провалов — натуральных 1"></div></div>
    <div class="rwarn note" style="margin:4px 0"></div>
@@ -936,7 +945,8 @@ function recForm(box,opts){
   const rn=box.querySelector('.rn'), rl=box.querySelector('.rl');
   let sale=!!(opts.name&&S.t.sale);
   const cur=()=>{const n=opts.name||(rn.value.trim());const c=opts.card||byName(n)||null;const lvl=c?c.l:(opts.lvl||+rl.value);
-    const k={};box.querySelectorAll('[data-k]').forEach(i=>k[i.dataset.k]=Math.max(0,Math.min(10,+i.value||0)));return {n,c,lvl,k}};
+    const k={};box.querySelectorAll('[data-k]').forEach(i=>k[i.dataset.k]=Math.max(0,Math.min(10,+i.value||0)));
+    if(opts.single){let left=1;['n20','hi','ok','un','fl'].forEach(x=>{k[x]=Math.min(k[x],left);left-=k[x]})}return {n,c,lvl,k}};
   const upd=()=>{box.querySelectorAll('.rmode .chip').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.s==='1')===sale));const x=cur();bonusArea(box,x.n,x.lvl,x.c,x.k,sale);defArea(box,x.n,x.lvl,x.c,x.k);mishArea(x);warnArea(x);if(!opts.noUse)resArea(box,x.n,x.lvl,x.c,x.k)};
   const mishArea=x=>{const ar=box.querySelector('.rm');const n1=Math.min(x.k.fl,Math.max(0,+box.querySelector('.rn1').value||0));const keep=[...ar.querySelectorAll('select')].map(s=>s.value);
     ar.innerHTML=n1?'<div class="sect">Осечки (раздел 2)</div>':'';for(let i=0;i<n1;i++){const d=document.createElement('div');d.className='brow';d.innerHTML=`<span>нат. 1 №${i+1}</span><select class="mis" aria-label="Осечка"><option value="">— мастер ещё не назначил</option>${MISHAP.map(m=>`<option>${esc(m)}</option>`).join('')}</select>`;if(keep[i])d.querySelector('select').value=keep[i];ar.appendChild(d)}};
@@ -953,6 +963,9 @@ function recForm(box,opts){
     const {n,c,lvl,k}=cur();if(!n)return rn.focus();
     const good=k.n20+k.hi+k.ok, M=Math.max(1,Math.min(10,+$('m').value||1));
     if(!good&&!k.un&&!k.fl)return;
+    const short=!opts.noUse&&box.querySelector('.rres .bad');
+    if(short&&box.dataset.armed!=='1'){box.dataset.armed='1';box.querySelector('.rmsg').textContent='Материалов не хватает (отмечено красным): недостающее не спишется. Нажми «Записать» ещё раз, если варка всё же была.';return}
+    box.dataset.armed='';
     const doses=[]; // [{name, note}]
     for(let i=0;i<k.ok;i++)doses.push({n,note:''});
     box.querySelectorAll('.b5s').forEach(s=>doses.push({n,note:KEEP_OFF.has(s.value)?'':s.value}));
@@ -974,7 +987,7 @@ function recForm(box,opts){
     const notes=doses.filter(d=>d.note||d.n!==n).map(d=>d.n!==n?d.n:d.note);
     let msg=(spent?`Расход: ${spent}. `:'')+`В сумку Талиса: ${doses.length}${k.un?` + ${k.un} нестабильных`:''}${notes.length?` (${notes.join(', ')})`:''}.`;
     const grow=k.ok+k.hi+2*k.n20;
-    if(lvl===M&&grow){const t=await masteryTrack(M);if(t&&await jAdd(TR.find(x=>x.id===t.id)||t,grow,`${n}: ${good} успешных${k.n20?`, нат. 20 ×${k.n20}`:''}`))msg+=` В рост мастерства ${M} → ${M+1}: +${grow}.`;else if(!JDB)msg+=' Журнал недоступен вне claude.ai.'}
+    if(lvl===M&&grow){const t=await masteryTrack(M);if(t&&await jAdd(TR.find(x=>x.id===t.id)||t,grow,`${n}: ${good} успешных${k.n20?`, нат. 20 ×${k.n20}`:''}`))msg+=` В рост мастерства ${M} → ${M+1}: +${grow}.`;else if(!JDB)msg+=' Журнал ещё не загрузился.'}
     else if(grow)msg+=` В рост мастерства не идёт: уровень ${lvl}, мастерство ${M}.`;
     box.querySelector('.rmsg').textContent=msg;box.querySelectorAll('[data-k]').forEach(i=>i.value=0);box.querySelector('.rn1').value=0;upd();if(opts.onDone)opts.onDone(msg);
   };
@@ -1062,7 +1075,7 @@ function applyUse(box){ // вызывается внутри mutate
     else out.push(`травы ур. ${P.herbs.l} не списаны: нужно ${fmtZ(P.herbs.q)}, было ${fmtZ(had)}`)}
   if(P.value&&herbValue(P.kind,P.lvl)<P.value-1e-9)out.push(`травы ур. ${P.lvl}+ не списаны: нужно на ${fmtZ(P.value)} зм, было на ${fmtZ(herbValue(P.kind,P.lvl))}`);
   else if(P.value){out.push(`${KIND[P.kind].toLowerCase()} травы на ${fmtZ(P.value)} зм: ${takeValue(P.kind,P.value,P.lvl)}`)}
-  if(P.ess)P.ess.forEach((E,ei)=>{const es=box.querySelector('.res-e'+ei);if(es&&es.value){const e=ST.mat.ess.find(x=>x.id===es.value);if(e){const t=Math.min(e.q,P.att);e.q=+(e.q-t).toFixed(2);out.push(`эссенция «${e.n}» −${fmtZ(t)}`)}}});
+  if(P.ess)P.ess.forEach((E,ei)=>{const es=box.querySelector('.res-e'+ei);if(es&&es.value){const e=ST.mat.ess.find(x=>x.id===es.value);if(e){if(e.q<P.att-1e-9)out.push(`эссенция «${e.n}» не списана: нужно ${P.att}, есть ${fmtZ(e.q)}`);else{e.q=+(e.q-P.att).toFixed(2);out.push(`эссенция «${e.n}» −${fmtZ(P.att)}`)}}}});
   const cs=box.querySelector('.res-c');if(P.cat&&cs&&cs.value){const x=ST.mat.cat.find(y=>y.id===cs.value);if(x){x.used=Math.min(10,x.used+P.att);const cr=box.querySelector('.res-crack');if(cr&&cr.checked){ST.mat.cat=ST.mat.cat.filter(y=>y!==x);out.push(`катализатор ${ROM[x.o]} треснул (5.2)`)}else out.push(`катализатор ${ROM[x.o]} — ${x.used}/10`)}}
   const ms=box.querySelector('.res-m');if(P.cm&&P.cm.use&&ms&&ms.value){
     if(ms.value==='other'){const it=ST.mat.other.find(o=>o.q>0&&o.n.toLowerCase().includes(P.cm.k));if(it){const t=Math.min(it.q,P.cm.q);it.q-=t;out.push(`«${it.n}» −${t}`)}}
@@ -1470,7 +1483,7 @@ function renderVol(){
       body.innerHTML=`<p class="note" style="margin:6px 0">Объём набран. Завершающая проверка — СЛ ${v.dc}, модификатор ${mod>=0?'+':''}${mod} (метки − дефекты, от −2 до +2). Бонусы 5+ и 20, дефекты и осечка — только по ней.</p><div class="vfin"></div>`;
       const fin=body.querySelector('.vfin');
       {const B=(+$('b').value||0)+mod, ch=chancesTxt(v.dc,B);body.querySelector('p').insertAdjacentHTML('beforeend',` Шансы при бонусе ${B>=0?'+':''}${B}: успех ${pct(ch.n20+ch.hi+ch.ok)} (5+ ${pct(ch.hi)}, нат. 20 5%), нестабильный ${pct(ch.un)}, провал ${pct(ch.fl)}.`)}
-      if(v.kind==='elixir'){const card=byName(v.n);recForm(fin,{name:v.n,lvl:v.l,card,noUse:true,onDone:(msg)=>{VOLMSG=`«${v.n}»: ${msg}`;mutate(()=>{ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» завершена`)})}})}
+      if(v.kind==='elixir'){const card=byName(v.n);recForm(fin,{name:v.n,lvl:v.l,card,noUse:true,single:true,onDone:(msg)=>{VOLMSG=`«${v.n}»: ${msg}`;mutate(()=>{ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» завершена`)})}})}
       else{fin.innerHTML=`<div class="chips">${[['n20','нат. 20'],['hi','успех 5+'],['ok','успех'],['un','провал 1–4'],['fl','провал 5+'],['n1','нат. 1']].map(([k,t])=>`<button type="button" class="chip" data-o="${k}">${t}</button>`).join('')}</div>`;
         fin.querySelectorAll('.chip').forEach(b=>b.onclick=async()=>{const o=b.dataset.o,M=Math.max(1,Math.min(10,+$('m').value||1));
           mutate(()=>{if(INKQ[o]){const [q,md]=INKQ[o];const nm=`${inkName(v.l)} — ${q} (${md})`;const note=[v.ess?`эссенция: ${v.ess}`:'',v.spell?`для «${v.spell}»`:''].filter(Boolean).join(' · ');
