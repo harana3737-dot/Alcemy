@@ -82,9 +82,13 @@ function renderAvailability(){
 function snapshot(){
   return {format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(['m','b','anar','sel','tab','theme'].map(k=>[k,ls.get(k)]))};
 }
-function downloadSnapshot(data,prefix='alcemy-save'){
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download=prefix+'-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+let DL;  // в опубликованном помощнике — capability downloads; вне Claude — обычная ссылка
+async function downloadSnapshot(data,prefix='alcemy-save'){
+  const name=prefix+'-'+new Date().toISOString().slice(0,10)+'.json',text=JSON.stringify(data,null,2);
+  if(DL===undefined)DL=window.claude&&window.claude.use?await window.claude.use('downloads').catch(()=>null):null;
+  if(DL){try{await DL.save({filename:name,data:text});return true}catch(e){return false}}
+  const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),a=document.createElement('a');
+  a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);return true;
 }
 function validateSnapshot(data){
   const fail=()=>{throw Error('Неверный или повреждённый файл сохранения')};
@@ -119,7 +123,7 @@ function validateSnapshot(data){
   return data;
 }
 let PENDING_SAVE=null;
-$('backupExport').onclick=()=>{if(!JDB||JBUSY.size){$('backupStatus').textContent='Дождись загрузки и сохранения журнала.';return}downloadSnapshot(snapshot());$('backupStatus').textContent='Сохранение скачано: сумки, материалы, журнал и настройки.'};
+$('backupExport').onclick=async()=>{if(!JDB||JBUSY.size){$('backupStatus').textContent='Дождись загрузки и сохранения журнала.';return}$('backupStatus').textContent=await downloadSnapshot(snapshot())?'Сохранение скачано: сумки, материалы, журнал и настройки.':'Файл не сохранён.'};
 $('backupImport').onclick=()=>{$('backupFile').value='';$('backupFile').click()};
 $('backupFile').onchange=async e=>{
   try{const file=e.target.files[0];if(!file)return;if(file.size>5*1024*1024)throw Error('Файл больше 5 МБ');PENDING_SAVE=validateSnapshot(JSON.parse(await file.text()));
@@ -132,7 +136,7 @@ $('restoreApply').onclick=async()=>{
   if(!PENDING_SAVE||!JDB||JBUSY.size){$('restoreSummary').textContent='Дождись загрузки и сохранения журнала.';return}
   const next=PENDING_SAVE,old=snapshot(),col=JDB.collection('tracks');$('restoreApply').disabled=true;$('restoreCancel').disabled=true;
   clearTimeout(saveT);
-  downloadSnapshot(old,'alcemy-before-restore');
+  if(!await downloadSnapshot(old,'alcemy-before-restore')){$('restoreSummary').textContent='Копия текущего состояния не сохранена — восстановление отменено.';$('restoreApply').disabled=false;$('restoreCancel').disabled=false;return}
   try{
     for(const t of next.tracks){const {id,...data}=t;await col.doc(id).set(data)}
     for(const t of old.tracks)if(!next.tracks.some(n=>n.id===t.id))await col.doc(t.id).delete();
