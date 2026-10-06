@@ -1317,7 +1317,7 @@ function antiForm(box){
   const al=box.querySelector('.al');
   // 7.9 (предложение): бонусы и дефекты противоядий
   const A5=['Экономия трав','Долгая профилактика','Лёгкий глоток','Незаметное'], A20=['Ещё одно','Два бонуса'];
-  const ADEF=['Слабое: снимает остаток урона, но не триггеры','Медленное: действует с начала следующего хода','Горькое: выпить — действием','Мутит: помеха на следующую атаку или проверку','Выдыхается: годно 3 дня','Без профилактики: без яда в крови не действует'];
+  const ADEF=['Слабое: «Отравлен» спадает только в конце следующего хода','Медленное: действует с начала следующего хода','Горькое: выпить — действием','Мутит: помеха на следующую атаку или проверку','Выдыхается: годно 3 дня','Без профилактики: без яда в крови не действует'];
   const opt=(L)=>L.map(x=>`<option>${esc(x)}</option>`).join('');
   box.querySelector('.abox').innerHTML=`<div class="brow"><span>5+ / 20</span><select class="abon" aria-label="Бонус">${opt(A5)}<option disabled>— только на 20 —</option>${opt(A20)}</select><span class="atwo" hidden><select class="abon2" aria-label="Первый из двух бонусов">${opt(A5)}</select><select class="abon3" aria-label="Второй из двух бонусов">${opt(A5.slice(1))}</select></span></div><div class="brow"><span>провал 1–4</span><select class="adef" aria-label="Дефект"><option value="">— мастер ещё не назначил</option>${opt(ADEF)}</select></div><p class="note">Перед кнопкой результата выбери бонус (для 5+ и 20) или дефект (для провала 1–4). «Ещё одно» и «Два бонуса» — только на натуральной 20.</p>`;
   box.querySelector('.abon').onchange=e=>{box.querySelector('.atwo').hidden=e.target.value!=='Два бонуса'};
@@ -1384,7 +1384,7 @@ function catForm(box){
     const items=ST.mat.other.filter(o=>o.q>0), it=items[+cr.value];if(!it)return;const o=+co.value, r=b.dataset.o;let res='';
     mutate(()=>{it.q--;
       if(['n20','hi','ok'].includes(r)){const sb=r==='n20'?7:r==='hi'?6:5;ST.mat.cat.push({id:uid(),o,used:0,stable:sb,...(sb>5?{note:r==='n20'?'отличный (нат. 20)':'качественный (5+)'}:{})});res=`Готов катализатор ${ROM[o]} порядка: ${sb} стабильных применений, всего до ${sb+5}.`}
-      else if(r==='un'){ST.mat.cat.push({id:uid(),o,used:0,stable:3,note:'нестабильный (5.3)'});res=`Нестабильный катализатор ${ROM[o]}: 3 стабильных применения, затем до 5 рискованных (СЛ 10–18), всего до 8.`}
+      else if(r==='un'){ST.mat.cat.push({id:uid(),o,used:0,stable:4,note:'нестабильный (5.3)'});res=`Нестабильный катализатор ${ROM[o]}: 4 стабильных применения, затем до 5 рискованных (СЛ 10–18), всего до 9.`}
       else res=r==='n1'?'Сырьё потеряно и осечка (таблица раздела 2).':'Сырьё потеряно.';
       addHours(Math.max(0,+box.querySelector('.ch').value||0),`катализатор ${ROM[o]} из сырья`);
       logx(`Катализатор из «${it.n}»: ${b.textContent}. ${res}`)});
