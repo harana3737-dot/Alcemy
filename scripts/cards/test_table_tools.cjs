@@ -1,7 +1,7 @@
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 (async()=>{
- const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||['/usr/bin/chromium','/opt/pw-browsers/chromium'].find(f=>require('node:fs').existsSync(f)),headless:true,args:['--no-sandbox']});
  try {
  const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.route('https://**/*',r=>r.abort());
@@ -50,7 +50,7 @@ const assert=require('node:assert/strict');
  await page.waitForFunction(()=>document.getElementById('restoreSummary').textContent.includes('Предыдущее состояние возвращено'));assert.equal(await page.evaluate(()=>ST.mat.gold),77.25);await page.locator('#restoreCancel').click();await page.evaluate(()=>{JDB=oldJDB});
  const before=await page.evaluate(()=>JSON.stringify(ST));
  await page.locator('#backupFile').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"version":99}')});
- assert.match(await page.locator('#backupStatus').innerText(),/Не восстановлено/);assert.equal(await page.evaluate(()=>JSON.stringify(ST)),before);
+ await page.waitForFunction(()=>document.getElementById('backupStatus').textContent.includes('Не восстановлено'));assert.equal(await page.evaluate(()=>JSON.stringify(ST)),before);
  assert.deepEqual(errors,[]);console.log('PASS: availability, shortages, shared formulas, expired stock, purity, validation, 5.5 progress, export, restore, persistence');
  } finally {await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
