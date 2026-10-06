@@ -1447,19 +1447,20 @@ function essForm(box){
     const e=items.find(x=>x.id===er.value);
     if(!e){box.querySelector('.efacts').textContent='Все эссенции стабильны. Новый трофей добавь в «Материалах» с отметкой «трофей».';return}
     const dc=10+e.l, ch=chancesTxt(dc,EB());
-    box.querySelector('.efacts').innerHTML=`1 час на одну единицу · СЛ <b>${dc}</b> (10 + уровень) · Интеллект + инструменты, без мастерства и места${eb.value===''?' (бонус — оценка для рабочего места +1; в лаборатории или с помощником введи Инт + инструменты вручную)':''}. Шансы: стабильная ${pct(ch.ok)}, отличная ${pct(ch.hi+ch.n20)}, нестабильная ${pct(ch.un)}, испорчен ${pct(ch.fl)}.${e.note?`<br><small>${esc(e.note)}</small>`:''}`;
+    box.querySelector('.efacts').innerHTML=`1 час на одну единицу · СЛ <b>${dc}</b> (10 + уровень) · Интеллект + инструменты, без мастерства и места${eb.value===''?' (бонус — оценка для рабочего места +1; в лаборатории или с помощником введи Инт + инструменты вручную)':''}. Шансы: стабильная ${pct(ch.ok)}, отличная ${pct(ch.hi+ch.n20)}, ${e.st==='bad'?`испорчена ${pct(ch.un+ch.fl)} — повторная переработка, одна попытка: любой провал портит (Ж-99)`:`нестабильная ${pct(ch.un)}, испорчен ${pct(ch.fl)}`}.${e.note?`<br><small>${esc(e.note)}</small>`:''}`;
   };
   er.onchange=upd;box._upd=upd;upd();
   box.querySelectorAll('.eout .chip').forEach(b=>b.onclick=()=>{
     const e=ST.mat.ess.find(x=>x.id===er.value);if(!e)return;const r=b.dataset.o;let res='';
     mutate(()=>{
-      const st=r==='ok'?'stable':(r==='hi'||r==='n20')?'good':r==='un'?'bad':null;
+      // повторная переработка нестабильной — одна попытка, любой провал портит (9.3, Ж-99)
+      const re=e.st==='bad', st=r==='ok'?'stable':(r==='hi'||r==='n20')?'good':r==='un'&&!re?'bad':null;
       const one={...e,id:uid(),q:1};e.q=+(e.q-1).toFixed(2);
       if(st){one.st=st;one.exp=ST.T+ESS_DAYS[r]*1440;one.note=[ESS_ST[st],r==='n20'?'нат. 20: срок 60 дней':'','переработана'].filter(Boolean).join(' · ');
         // одна запись — один срок: разные дни истечения не сливаются
         const same=ST.mat.ess.find(x=>x!==e&&x.n===one.n&&x.l===one.l&&x.st===st&&x.types.join()===one.types.join()&&x.exp!=null&&dayOf(x.exp)===dayOf(one.exp));if(same){same.q++;same.exp=Math.min(same.exp,one.exp)}else ST.mat.ess.push(one);
         res=`«${e.n}» → ${st==='stable'?'стабильная эссенция':ESS_ST[st]}.`}
-      else res=`«${e.n}» испорчен${r==='n1'?' и осечка (таблица раздела 2)':''}.`;
+      else res=`«${e.n}» испорчен${re?'а при повторной переработке':''}${r==='n1'?' и осечка (таблица раздела 2)':''}.`;
       ST.mat.ess=ST.mat.ess.filter(x=>x.q>1e-9);
       addHours(1,`переработка «${e.n}»`);
       logx(`Переработка: ${b.textContent}. ${res}`)});
