@@ -506,7 +506,7 @@ const lastLR=()=>ST.lrs.length?ST.lrs[ST.lrs.length-1]:-1;
 const endOf=e=>Math.min(e.stopped??Infinity,e.t0+(e.k==='chg'?e.win:e.dur));
 const isActive=e=>ST.T<endOf(e);
 function toxLive(e){
-  if(lastLR()>e.t0)return 0;
+  if(lastLR()>e.t0&&endOf(e)<=lastLR())return 0; // долгий отдых снимает только закончившиеся (Ж-98)
   if(isActive(e))return e.tox;
   const end=endOf(e), ref=e.k==='chg'?end:e.t0;
   // эффект: пока действует или до короткого отдыха — что дольше; заряд: после применения или окна — до короткого отдыха
