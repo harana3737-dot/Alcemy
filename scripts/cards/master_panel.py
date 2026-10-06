@@ -84,6 +84,10 @@ for title, prefix in TABLE_SECTIONS:
     h = tmp.with_suffix(".html").read_text(encoding="utf-8").split("<main>", 1)[1].split("</main>", 1)[0]
     h = re.sub(r"<nav>.*?</nav>", "", h, flags=re.S)
     h = re.sub(r"<h1[^>]*>.*?</h1>", "", h, count=1, flags=re.S)
+    tabs = re.findall(r'<div class="wrap">\s*<table>.*?</table>\s*</div>', h, re.S)
+    rest = re.sub(r'<div class="wrap">\s*<table>.*?</table>\s*</div>', "", h, flags=re.S)
+    if tabs and re.sub(r"<[^>]+>|\s", "", rest):
+        h = "".join(tabs) + '<div class="qnote">' + rest + "</div>"
     quick.append(dict(t=title, h=h))
 for ext in (".md", ".html"):
     tmp.with_suffix(ext).unlink(missing_ok=True)
@@ -95,6 +99,22 @@ keep = ("Мастерство", "Рост", "Открытый рецепт", "И
 talis = [re.sub(r"\*\*", "", l[2:]).strip() for l in alch.splitlines() if l.startswith("- ") and l[2:].startswith(keep)]
 root_ln = next((l for l in alch.splitlines() if "Корневая метка" in l), "")
 root = re.sub(r"\*\*", "", root_ln[2:]).strip() if root_ln else ""
+def root_struct(t):
+    """Строку листа про Корневую метку → этапы таблицей и остальное по пунктам; если формат не узнан — None."""
+    st = re.findall(r"(I{1,3})\. ([^:]+): объём (\d+), СЛ (\d+), (\d+) зм([^;.]*)", t)
+    if len(st) != 3:
+        return None
+    tail = t[t.index(st[2][0] + ". " + st[2][1]):]
+    tail = tail.split(".", 1)[1] if "." in tail else ""
+    sent = [x.strip() for x in re.split(r"(?<=[.])\s+", tail.strip()) if x.strip()]
+    pick = lambda w: next((x.rstrip(".") for x in sent if x.startswith(w)), "")
+    итог = pick("Итог")
+    зачёт = ""
+    if ";" in итог:
+        итог, зачёт = [x.strip() for x in итог.split(";", 1)]
+    return dict(stages=[dict(n=a, t=b, v=int(c), dc=int(d), gp=int(e), x=f.strip(" ,—").strip()) for a, b, c, d, e, f in st],
+                total=sum(int(x[4]) for x in st), approach=pick("Подход"), mats=pick("Материалы"), result=итог.replace("Итог — ", ""), credit=зачёт)
+root = root_struct(root) or root
 sample = (ROOT / "Образец — кровь шахтёра.md").read_text(encoding="utf-8").splitlines()[1:]
 
 tpl = (HERE / "master_tpl.html").read_text(encoding="utf-8")
