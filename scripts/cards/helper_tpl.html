@@ -1470,10 +1470,12 @@ function volStart(box,c,ink){ // c — карточка эликсира, или
     logx(`Начата долгая варка «${c?c.n:ink.name}» (объём ${VOLUME(l)}). Расход: ${spent||'—'}`)});
   return spent;
 }
+const d20ok=x=>Number.isInteger(x)&&x>=1&&x<=20;
 function volApproach(v,face,total,help,minus){
+  if(!d20ok(face)||(face===1&&!d20ok(minus))||(face!==1&&!Number.isInteger(total)))return null;
   const dc=v.dc;let add=0,txt='';
   if(face===20){add=2*total;v.marks++;txt='нат. 20: прогресс ×2, +1 метка'}
-  else if(face===1){add=-Math.max(0,minus||0);v.def++;txt=`нат. 1: −${minus||0} прогресса, +1 дефект`}
+  else if(face===1){add=-minus;v.def++;txt=`нат. 1: −${minus} прогресса, +1 дефект`}
   else if(total>=dc+10){add=total;v.marks+=2;txt='успех на 10+: +2 метки'}
   else if(total>=dc+5){add=total;v.marks++;txt='успех на 5+: +1 метка'}
   else if(total>=dc){add=total;txt='успех'}
@@ -1504,7 +1506,8 @@ function renderVol(){
     c.querySelector('.vn').textContent=v.n+(v.kind==='ink'?'':` (${ROM[v.l]})`);
     c.querySelector('.vlog').innerHTML=v.log.slice(0,5).map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join('');
     const body=c.querySelector('.vbody');
-    if(!done&&!id.ruined){
+    if(id.ruined){body.innerHTML='<p class="note" style="margin:6px 0">Завершить нельзя: варка испорчена. Её можно только бросить; время и материалы не возвращаются.</p>'}
+    else if(!done){
       body.innerHTML=`<div class="row" style="flex-wrap:wrap;margin-top:6px"><div style="flex:0 0 74px"><label class="f">к20</label><input class="vf" type="number" min="1" max="20" placeholder="к20"></div>
         <div style="flex:0 0 84px"><label class="f">Итог</label><input class="vt" type="number" placeholder="итог"></div>
         <div style="flex:0 0 96px" class="vmw" hidden><label class="f">Вычесть к20</label><input class="vm" type="number" min="1" max="20"></div>
@@ -1512,9 +1515,13 @@ function renderVol(){
         <label class="tg"><input type="checkbox" class="vh"><span>Помощник (+2 к прогрессу подхода, 6.4)</span></label>
 <span class="note vmsg"></span>`;
       const vf=body.querySelector('.vf'), mw=body.querySelector('.vmw');vf.oninput=()=>{mw.hidden=+vf.value!==1};
-      body.querySelector('.vgo').onclick=()=>{const f=+vf.value, t=+body.querySelector('.vt').value;if(!f||f<1||f>20)return vf.focus();if(f!==1&&!body.querySelector('.vt').value)return body.querySelector('.vt').focus();
+      body.querySelector('.vgo').onclick=()=>{const vt=body.querySelector('.vt'), vm=body.querySelector('.vm'), msg=body.querySelector('.vmsg');
+        const f=vf.value===''?NaN:+vf.value, t=vt.value===''?NaN:+vt.value, m=vm.value===''?NaN:+vm.value;
+        if(!d20ok(f)){msg.textContent='к20 — целое от 1 до 20.';return vf.focus()}
+        if(f===1&&!d20ok(m)){msg.textContent='Натуральная 1: впиши второй к20 (целое от 1 до 20) — столько вычесть из прогресса.';return vm.focus()}
+        if(f!==1&&!Number.isInteger(t)){msg.textContent='Итог — целое число.';return vt.focus()}
         const help=body.querySelector('.vh').checked;let txt='';
-        mutate(()=>{addHours(2,`подход «${v.n}»`);txt=volApproach(v,f,t,help,+body.querySelector('.vm').value||0);logx(`Долгая варка «${v.n}»: ${txt}`)})};
+        mutate(()=>{const r=volApproach(v,f,t,help,m);if(r===null)return;addHours(2,`подход «${v.n}»`);txt=r;logx(`Долгая варка «${v.n}»: ${txt}`)})};
     }else if(done){
       body.innerHTML=`<p class="note" style="margin:6px 0">Объём набран. Завершающая проверка — СЛ ${v.dc}, модификатор ${mod>=0?'+':''}${mod} (метки − дефекты, от −2 до +2). Бонусы 5+ и 20, дефекты и осечка — только по ней.</p><div class="vfin"></div>`;
       const fin=body.querySelector('.vfin');
