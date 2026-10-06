@@ -187,7 +187,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
         <div><label class="f" for="m">Мастерство</label><input id="m" type="number" min="1" max="10" value="2"></div>
         <div><label class="f" for="b">Бонус проверки</label><input id="b" type="number" min="-5" max="30" value="4"></div>
       </div>
-      <p class="note">Бонус — с Интеллектом, инструментами, мастерством и рабочим местом (у Талиса +4). При смене мастерства бонус сдвигается сам.</p>
+      <label class="tg" style="margin-top:6px"><input type="checkbox" id="anar"><span><span class="t">Варю у Анариэль</span><small>полная лаборатория +3 вместо рабочего места +1: бонус +2, уровни до 8; на что пускает и сколько берёт — решает мастер</small></span></label>
+      <p class="note">Бонус — с Интеллектом, инструментами, мастерством и местом (у Талиса +4 на рабочем месте, +6 у Анариэль). При смене мастерства и места бонус сдвигается сам и действует на всех вкладках.</p>
       <div class="sect">Рецепт</div>
       <input id="q" type="search" placeholder="Название, эссенция, формула…" autocomplete="off">
       <div class="chips" id="cls"></div>
@@ -341,6 +342,10 @@ let lastM=+($('m').value);
 const sm=ls.get('m'),sb=ls.get('b');if(sm){$('m').value=sm;lastM=+sm}if(sb)$('b').value=sb;
 $('m').oninput=()=>{const m=Math.max(1,Math.min(10,+$('m').value||1));$('b').value=(+$('b').value||0)+MB(m)-MB(lastM);lastM=m;ls.set('m',m);ls.set('b',$('b').value);render()};
 $('b').oninput=()=>{ls.set('b',$('b').value);render()};
+// место: рабочее место (+1) или полная лаборатория Анариэль (+3) — разница +2 сразу в бонус, чтобы её видели все формы
+$('anar').checked=ls.get('anar')==='1';
+$('anar').onchange=()=>{const on=$('anar').checked;$('b').value=(+$('b').value||0)+(on?2:-2);ls.set('anar',on?'1':'0');ls.set('b',$('b').value);render();
+  ['jink','janti','jcat','jess'].forEach(i=>{const e=$(i);if(e&&e._upd)e._upd()})};
 
 // фильтр
 const cls=$('cls');
@@ -970,6 +975,20 @@ function renderJournal(){
     const sec=document.createElement('div');sec.innerHTML=`<div class="sect">${label} · ${items.length}</div>`;
     items.forEach(t=>sec.appendChild(jCard(t)));root.appendChild(sec)});
 }
+// ожидание по исследованию при нынешнем бонусе и месте (рабочее место +1 или Анариэль +3)
+function jExpect(t){
+  const c=t.cost;if(!c)return '';
+  const B=+$('b').value||0, an=$('anar').checked, place=an?'у Анариэль':'на рабочем месте', left=Math.max(0,(+t.target||1)-(+t.current||0));
+  if(!left)return '';const sg=x=>(x>=0?'+':'')+x, pl=(n,a,b,c)=>n%10===1&&n%100!==11?a:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?b:c;
+  if(c.type==='herbval'){const avg=10.5+B, n=Math.ceil(left/avg);
+    return `Сейчас бонус ${sg(B)} (${place}): в среднем +${fmtZ(avg)} за попытку, осталось ≈${n} ${pl(n,'попытка','попытки','попыток')} — ≈${2*n} ч и ≈${fmtZ(n*(c.value||0))} зм трав.`}
+  if(c.type==='stage'){const m=String(t.rule||'').match(/СЛ (\d+)/);if(!m)return '';const dc=+m[1], Bs=B-(an?3:1)+3;let E=0;
+    for(let r=1;r<=20;r++){const x=r+Bs;E+=(r===20?2*x:r===1?0:x>=dc+5?x+5:x>=dc?x:x>=dc-4?Math.floor(x/2):0)/20}
+    return `Бонус подхода ${sg(Bs)} (лаборатория Анариэль +3, без бонуса твоего места), СЛ ${dc}: в среднем +${fmtZ(+E.toFixed(1))} за подход, осталось ≈${Math.ceil(left/E)} ${pl(Math.ceil(left/E),'подход','подхода','подходов')}.`}
+  if(c.type==='probe'&&t.mode==='marks'&&c.l){const hints=Math.min(3,(c.ess?1:0)+(c.sample?1:0)), base=c.sample?DC[c.l-1]-2:DC[c.l-1], /* DC — СЛ эликсиров; зелья по образцу на 2 ниже */ dc=base+(hints?0:2), Bp=B+2*hints, ch=chancesTxt(dc,Bp);
+    const E=ch.ok+2*ch.hi+3*ch.n20;
+    return `Сейчас: СЛ ${dc}, бонус ${sg(Bp)} (${place}${hints?`, подсказок ${hints}`:', без подсказок СЛ +2'}): успех ${pct(ch.ok+ch.hi+ch.n20)}, в среднем ${fmtZ(+E.toFixed(2))} отметки за пробу — осталось ≈${Math.ceil(left/E)} ${pl(Math.ceil(left/E),'проба','пробы','проб')}.`}
+  return ''}
 function jCard(t){
   const c=document.createElement('div');c.className='card jc'+(t.done?' done':'');c.dataset.id=t.id;
   const cur=+t.current||0, tgt=Math.max(1,+t.target||1), dis=JBUSY.has(t.id);
@@ -997,6 +1016,7 @@ function jCard(t){
     c.appendChild(row);
     if(t.cost){const ct=document.createElement('p');ct.className='note';ct.style.margin='6px 0 0';const w=costShort(t);
       ct.innerHTML=esc(costText(t))+(w.length?` <span style="color:var(--bad)">${esc(w.join('; '))}</span>`:'');c.appendChild(ct)}
+    const ex=jExpect(t);if(ex){const p=document.createElement('p');p.className='note';p.style.margin='4px 0 0';p.textContent=ex;c.appendChild(p)}
     const sb=sampleBtn(t);if(sb){const r2=document.createElement('div');r2.className='btns';r2.appendChild(sb);c.appendChild(r2)}
   }
   if(t.cost&&t.cost.type==='stage'){const ex=+t.extra||0;
@@ -1589,7 +1609,7 @@ function essForm(box){
    <div class="chips eout">${OUT6.map(([k,t])=>`<button type="button" class="chip" data-o="${k}">${t}</button>`).join('')}</div><span class="note emsg"></span>`;
   const er=box.querySelector('.er'), eb=box.querySelector('.eb');
   // Интеллект + инструменты хранится отдельно (ST.essB); без него — оценка: бонус варки минус мастерство и рабочее место +1 (у Талиса +2)
-  const estB=()=>(+$('b').value||0)-MB(Math.max(1,Math.min(10,+$('m').value||1)))-1;
+  const estB=()=>(+$('b').value||0)-MB(Math.max(1,Math.min(10,+$('m').value||1)))-($('anar').checked?3:1);
   const EB=()=>eb.value===''?estB():(+eb.value||0);
   eb.placeholder=String(estB());eb.oninput=()=>upd();eb.onchange=()=>mutate(()=>{ST.essB=eb.value===''?null:(+eb.value||0)});
   const upd=()=>{
@@ -1602,7 +1622,7 @@ function essForm(box){
     const dc=10+e.l, ch=chancesTxt(dc,EB());
     // просроченное — только с отметкой «мастер разрешил»; дробный остаток даёт столько же эссенции
     const ok=box.querySelector('.eok'),okv=ok&&ok.dataset.id===e.id&&ok.checked;
-    box.querySelector('.efacts').innerHTML=(essExpired(e)?`<label style="display:block;color:var(--bad);margin-bottom:4px"><input type="checkbox" class="eok" data-id="${e.id}"${okv?' checked':''}> Срок хранения вышел — мастер разрешил переработать</label>`:'')+(e.q<1?`<b>Остаток ${fmtZ(e.q)}</b> — получится ${fmtZ(e.q)} эссенции. `:'')+`1 час на одну единицу · СЛ <b>${dc}</b> (10 + уровень) · Интеллект + инструменты, без мастерства и места${eb.value===''?' (бонус — оценка для рабочего места +1; в лаборатории или с помощником введи Инт + инструменты вручную)':''}. Шансы: стабильная ${pct(ch.ok)}, отличная ${pct(ch.hi+ch.n20)}, ${e.st==='bad'?`испорчена ${pct(ch.un+ch.fl)} — повторная переработка, одна попытка: любой провал портит (Ж-99)`:`нестабильная ${pct(ch.un)}, испорчен ${pct(ch.fl)}`}.${e.note?`<br><small>${esc(e.note)}</small>`:''}`;
+    box.querySelector('.efacts').innerHTML=(essExpired(e)?`<label style="display:block;color:var(--bad);margin-bottom:4px"><input type="checkbox" class="eok" data-id="${e.id}"${okv?' checked':''}> Срок хранения вышел — мастер разрешил переработать</label>`:'')+(e.q<1?`<b>Остаток ${fmtZ(e.q)}</b> — получится ${fmtZ(e.q)} эссенции. `:'')+`1 час на одну единицу · СЛ <b>${dc}</b> (10 + уровень) · Интеллект + инструменты, без мастерства и места${eb.value===''?' (бонус — оценка: бонус варки без мастерства и места; с помощником введи Инт + инструменты вручную)':''}. Шансы: стабильная ${pct(ch.ok)}, отличная ${pct(ch.hi+ch.n20)}, ${e.st==='bad'?`испорчена ${pct(ch.un+ch.fl)} — повторная переработка, одна попытка: любой провал портит (Ж-99)`:`нестабильная ${pct(ch.un)}, испорчен ${pct(ch.fl)}`}.${e.note?`<br><small>${esc(e.note)}</small>`:''}`;
   };
   er.onchange=upd;box._upd=upd;upd();
   box.querySelectorAll('.eout .chip').forEach(b=>b.onclick=()=>{
