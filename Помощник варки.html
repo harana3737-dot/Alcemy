@@ -716,7 +716,7 @@ function renderPeople(){
       ${p.exh?`<span class="badge bad">Истощение ${p.exh}</span>`:''}
       ${tc?`<span class="badge">Триггеры зелий: ${tc} → +${Math.floor(tc/2)}</span>`:''}</div>
       <div class="ents"></div>
-      <div class="btns"><button type="button" class="btn sm" data-a="trig">+ сработал триггер зелья</button>
+      <div class="btns"><button type="button" class="btn sm" data-a="trig" title="Дубль уже действующего эффекта не отмечай: он пустой, без токсичности (7.3)">+ сработал триггер зелья</button>
       <button type="button" class="btn sm" data-a="exh+">Истощение +1</button><button type="button" class="btn sm" data-a="exh-">−1</button>
       <label class="note" style="margin:0;display:flex;gap:6px;align-items:center">Предел <input type="number" min="0" max="20" value="${p.limit}" style="width:64px;padding:4px 6px"></label>
       ${ST.people.length>1?'<button type="button" class="btn sm ghost" data-a="del">Убрать</button>':''}</div>`;
