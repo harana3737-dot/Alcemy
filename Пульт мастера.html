@@ -211,7 +211,7 @@ $('copy').onclick=async()=>{const s=answerText();try{await navigator.clipboard.w
 $('extra').innerHTML=J('d-extra').map(x=>'Не обязательно: '+md(x)).join('<br>');
 renderQs();
 setTimeout(async()=>{try{
-  if(!window.claude||!window.claude.use){$('saveSt').textContent='Ответы сохраняются только в этом браузере.';return}
+  if(!window.claude||!window.claude.use){$('saveSt').textContent='';const b=$('ro');b.hidden=false;b.innerHTML='<b>Это файл, а не страница на claude.ai:</b> отметки сохраняются только у тебя. Когда закончишь — нажми «Скопировать ответ» и пришли текст игроку в чат.';return}
   const db=await window.claude.use('db'), user=await window.claude.use('user');
   if(!db){$('saveSt').textContent='Ответы сохраняются только в этом браузере — отправь их кнопкой «Скопировать ответ».';return}
   DB=db;const cw=user?await user.can('data.write'):null;if(cw===false)readOnly();
