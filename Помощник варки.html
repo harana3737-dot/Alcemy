@@ -968,6 +968,7 @@ function recForm(box,opts){
   if(rl)rl.onchange=upd;
   upd();
   box.querySelector('.rgo').onclick=async()=>{
+    if(opts.guard){const g=opts.guard();if(g){box.querySelector('.rmsg').textContent=g;return}}
     const {n,c,lvl,k}=cur();if(!n)return rn.focus();
     const good=k.n20+k.hi+k.ok, M=Math.max(1,Math.min(10,+$('m').value||1));
     if(!good&&!k.un&&!k.fl)return;
@@ -1474,6 +1475,7 @@ function volStart(box,c,ink){ // c — карточка эликсира, или
 const d20ok=x=>Number.isInteger(x)&&x>=1&&x<=20;
 function volApproach(v,face,total,help,minus){
   if(!d20ok(face)||(face===1&&!d20ok(minus))||(face!==1&&!Number.isInteger(total)))return null;
+  if(volIdle(v).ruined||v.prog>=v.volume)return null; // испорчена или объём уже набран
   const dc=v.dc;let add=0,txt='';if(help&&face!==1)total+=2; // помощник: +2 к проверке подхода (Ж-96)
   if(face===20){add=2*total;v.marks++;txt='нат. 20: прогресс ×2, +1 метка'}
   else if(face===1){add=-minus;v.def++;txt=`нат. 1: −${minus} прогресса, +1 дефект`}
@@ -1527,9 +1529,9 @@ function renderVol(){
       body.innerHTML=`<p class="note" style="margin:6px 0">Объём набран. Завершающая проверка — СЛ ${v.dc}, модификатор ${mod>=0?'+':''}${mod} (метки − дефекты, от −2 до +2); с помощником — ещё +2. Бонусы 5+ и 20, дефекты и осечка — только по ней.</p><div class="vfin"></div>`;
       const fin=body.querySelector('.vfin');
       {const B=(+$('b').value||0)+mod, ch=chancesTxt(v.dc,B);body.querySelector('p').insertAdjacentHTML('beforeend',` Шансы при бонусе ${B>=0?'+':''}${B}: успех ${pct(ch.n20+ch.hi+ch.ok)} (5+ ${pct(ch.hi)}, нат. 20 5%), нестабильный ${pct(ch.un)}, провал ${pct(ch.fl)}.`)}
-      if(v.kind==='elixir'){const card=byName(v.n);recForm(fin,{name:v.n,lvl:v.l,card,noUse:true,single:true,onDone:(msg)=>{VOLMSG=`«${v.n}»: ${msg}`;mutate(()=>{ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» завершена`)})}})}
+      if(v.kind==='elixir'){const card=byName(v.n);recForm(fin,{name:v.n,lvl:v.l,card,noUse:true,single:true,onDone:(msg)=>{VOLMSG=`«${v.n}»: ${msg}`;mutate(()=>{ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» завершена`)})},guard:()=>volIdle(v).ruined?'Варка испорчена (месяц простоя) — завершить нельзя.':''})}
       else{fin.innerHTML=`<div class="chips">${[['n20','нат. 20'],['hi','успех 5+'],['ok','успех'],['un','провал 1–4'],['fl','провал 5+'],['n1','нат. 1']].map(([k,t])=>`<button type="button" class="chip" data-o="${k}">${t}</button>`).join('')}</div>`;
-        fin.querySelectorAll('.chip').forEach(b=>b.onclick=async()=>{const o=b.dataset.o,M=Math.max(1,Math.min(10,+$('m').value||1));
+        fin.querySelectorAll('.chip').forEach(b=>b.onclick=async()=>{if(volIdle(v).ruined)return;const o=b.dataset.o,M=Math.max(1,Math.min(10,+$('m').value||1));
           mutate(()=>{if(INKQ[o]){const [q,md]=INKQ[o];const nm=`${inkName(v.l)} — ${q} (${md})`;const note=[v.ess?`эссенция: ${v.ess}`:'',v.spell?`для «${v.spell}»`:''].filter(Boolean).join(' · ');
               const bb=ST.bag.find(x=>x.who==='p1'&&x.n===nm&&(x.note||'')===note);if(bb)bb.q++;else ST.bag.push({n:nm,q:1,who:'p1',...(note?{note}:{})})}
             ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» завершена: ${b.textContent}`)});
