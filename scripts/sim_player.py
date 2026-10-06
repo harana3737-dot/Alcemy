@@ -31,7 +31,9 @@ CAT_ROWS = []
 for order, (sl, lvl, price) in {"I": (11, 3, 70), "II": (17, 6, 350), "III": (21, 8, 1750), "IV": (25, 10, 7500)}.items():
     b = NATIVE[lvl]
     ok, un, fa = probs(b, sl)
-    value = ok * price + un * price * 4 / 5
+    # 5.3: нат. 20 — 7 стабильных, 5+ — 6, успех — 5, провал 1–4 — 4; ценность ∝ стабильным применениям (5 = цена)
+    n20 = 0.05; hi = sum(1 for d in range(2, 20) if d + b >= sl + 5) / 20
+    value = price * ((ok - hi - n20) * 5 + hi * 6 + n20 * 7 + un * 4) / 5
     CAT_ROWS.append((order, price, sl, b, ok, un, fa, value, price / 2))
 
 # 4. чернила для себя против покупки у Анариэль (цена набора)
