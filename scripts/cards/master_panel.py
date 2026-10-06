@@ -88,6 +88,8 @@ for title, prefix in TABLE_SECTIONS:
     rest = re.sub(r'<div class="wrap">\s*<table>.*?</table>\s*</div>', "", h, flags=re.S)
     if tabs and re.sub(r"<[^>]+>|\s", "", rest) and not prefix.startswith("# "):  # цены — с подзаголовками, порядок как есть
         h = "".join(tabs) + '<div class="qnote">' + rest + "</div>"
+    k = len(quick)  # свои id у каждого блока: master_html нумерует заголовки заново в каждом файле
+    h = re.sub(r'(id|href)="(#?)(h\d+)"', lambda m: f'{m.group(1)}="{m.group(2)}q{k}-{m.group(3)}"', h)
     quick.append(dict(t=title, h=h))
 for ext in (".md", ".html"):
     tmp.with_suffix(ext).unlink(missing_ok=True)

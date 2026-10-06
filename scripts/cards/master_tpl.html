@@ -298,9 +298,9 @@ renderEls();
 
 // ===== Справка: быстрые таблицы и оглавление =====
 $('qtabs').innerHTML=J('d-quick').map((q,i)=>`<details class="qt" id="qt${i}"><summary>${esc(q.t)}</summary><div class="ref">${q.h}</div></details>`).join('');
-{const items=[['#qt0','Цены'],['#quick','Быстрые таблицы'],...[...document.querySelectorAll('#p-ref .ref > h2[id], #p-ref > .ref h2[id]')].map(h=>['#'+h.id,h.textContent.replace(/^\d+\.\s*/,'')])];
+{const items=[['#qt0','Цены'],['#quick','Быстрые таблицы'],...[...document.querySelectorAll('#p-ref > .ref > h2[id]')].map(h=>['#'+h.id,h.textContent.replace(/^\d+\.\s*/,'')])];
   $('toc').innerHTML=items.map(([h,t])=>`<a href="${h}">${esc(t)}</a>`).join('');
-  $('toc').querySelectorAll('a').forEach(a=>a.onclick=e=>{e.preventDefault();const el=document.querySelector(a.getAttribute('href'));if(el){if(el.tagName==='DETAILS')el.open=true;el.scrollIntoView({behavior:'smooth',block:'start'})}})}
+  $('toc').querySelectorAll('a').forEach(a=>a.onclick=e=>{e.preventDefault();const el=document.querySelector(a.getAttribute('href'));if(el){let d=el.tagName==='DETAILS'?el:el.closest('details');while(d){d.open=true;d=d.parentElement&&d.parentElement.closest('details')}el.scrollIntoView({behavior:'smooth',block:'start'})}})}
 
 // ===== Талис =====
 const T=J('d-talis');
