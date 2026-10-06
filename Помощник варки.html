@@ -170,12 +170,13 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 <header>
   <button class="tbtn" id="theme" type="button">тема</button>
   <h1>Помощник варки</h1>
-  <p>Выбери рецепт из 196 и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. «Пояс» — сумка, выпитое, токсичность, концентрация и отдых. «Журнал» — мастерство, рецепты, исследования; записанная варка сама идёт в сумку и в рост мастерства. Правила v0.3; материал игрока, не карточки мастера.</p>
+  <p>Выбери рецепт из 196 и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. «Пояс» — сумка, выпитое, токсичность, концентрация и отдых. «Журнал» — мастерство, рецепты, исследования; записанная варка сама идёт в сумку и в рост мастерства. «Вылазка» — что есть, что заказано и что хотим, цена, часы и кому. Правила v0.3; материал игрока, не карточки мастера.</p>
 </header>
 <nav class="tabs" role="tablist">
   <button type="button" role="tab" data-tab="brew" aria-selected="true">Варка</button>
   <button type="button" role="tab" data-tab="belt" aria-selected="false">Пояс <span id="beltBadge" class="tb"></span></button>
   <button type="button" role="tab" data-tab="jour" aria-selected="false">Журнал</button>
+  <button type="button" role="tab" data-tab="plan" aria-selected="false">Вылазка</button>
 </nav>
 <div class="grid" id="tab-brew">
   <div class="side">
@@ -246,6 +247,32 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <div class="card" style="margin-top:16px"><h2>Журнал</h2><div id="log" class="log"></div></div>
   </div>
 </div>
+</div>
+<div id="tab-plan" hidden>
+  <div class="card"><h2>Вылазка</h2>
+    <div class="row"><div><label class="f" for="plT">Куда и зачем</label><input id="plT" type="search" placeholder="Например, нижний уровень шахты"></div></div>
+    <label class="f" for="plE" style="margin-top:8px">Что ожидаем встретить</label><textarea id="plE" rows="2" style="width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;box-sizing:border-box" placeholder="Нежить, обвалы, яд…"></textarea>
+    <p class="note">Планировщик ничего не списывает и не пополняет сам: в бою — только то, что уже лежит в сумках. Выдать дозу другому — «отдать» в сумке на вкладке «Пояс».</p>
+  </div>
+  <div class="card" style="margin-top:16px"><h2>Есть сейчас</h2><div id="plHave"></div>
+    <p class="note">Токсичность — если выпить по одной дозе каждого вида; это не запрет: при превышении — спасбросок Телосложения (8.7). Зелья 1.1–5.5 токсичности не дают, триггеры 6.6+ — по 0,5 (первый бесплатно), в сумме не учтены. Алхимическая концентрация (8.9) держится одна за раз.</p></div>
+  <div class="card" style="margin-top:16px"><h2>Заказано, в работе, хотим</h2><div id="plWant"></div>
+    <div class="row" style="flex-wrap:wrap;margin-top:8px">
+      <div style="flex:2 1 200px"><label class="f" for="plN">Что</label><input id="plN" list="dlist" type="search" placeholder="Эликсир, зелье 2.2…" autocomplete="off"></div>
+      <div style="flex:0 0 70px"><label class="f" for="plQ">Доз</label><input id="plQ" type="number" min="1" value="1"></div>
+      <div style="flex:1 1 110px"><label class="f" for="plW">Кому</label><select id="plW"></select></div>
+      <div style="flex:1 1 130px"><label class="f" for="plS">Статус</label><select id="plS"><option value="want">хотим</option><option value="work">заказано / в работе</option></select></div>
+      <div style="flex:1 1 110px"><label class="f" for="plH">Как</label><select id="plH"><option value="brew">сварить</option><option value="buy">купить</option></select></div>
+    </div>
+    <div class="row" style="flex-wrap:wrap">
+      <div style="flex:0 0 120px"><label class="f" for="plP">Цена дозы, зм</label><input id="plP" type="number" min="0" step="0.01"></div>
+      <div style="flex:0 0 120px"><label class="f" for="plR">Часов всего</label><input id="plR" type="number" min="0" step="0.5"></div>
+      <div style="flex:1 1 160px;align-self:flex-end"><button type="button" class="btn" id="plAdd">Добавить</button></div>
+    </div>
+    <p class="note" id="plHint"></p>
+    <div id="plSum" style="margin-top:8px"></div>
+    <div class="btns"><button type="button" class="btn soft" id="plCopy">Скопировать список</button><button type="button" class="btn ghost" id="plClear">Убрать полученное и пустое</button></div>
+  </div>
 </div>
 <div id="tab-jour" hidden>
   <div class="card" style="margin-bottom:16px"><h2>Часы и дни кампании</h2><div id="jhrs"></div>
@@ -759,6 +786,7 @@ function renderPeople(){
 }
 function renderBelt(){
   if(typeof renderJournal==='function'&&!$('tab-jour').hidden)renderJournal();
+  if(typeof renderPlan==='function'&&!$('tab-plan').hidden)renderPlan();
   $('now').textContent=fmtT(ST.T);
   renderPeople();renderBag();renderMat();renderOD();preview();
   $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
@@ -766,9 +794,64 @@ function renderBelt(){
   const t=ST.people[0];if(t){const x=toxOfP(t.id);const b=$('beltBadge');b.textContent=x?`${x}/${t.limit}`:'';b.classList.toggle('hot',x>t.limit)}
 }
 
+// ===== Вылазка: что есть, что заказано и что хотим; цена, время, кому; без автосписаний =====
+const plan=()=>ST.plan||(ST.plan={title:'',expect:'',items:[]});
+const doseTox=c=>c&&DRINK(c)?(parseFloat(c.t)||0):0;
+// часы на q доз по 6.1–6.2 (batchInfo с вкладки «Варка»), если все попытки удачны; VI+ — долгая варка, часы вписываются вручную
+function planHours(n,q){const c=byName(n),m=n.match(/(\d+)\.\1\b/),lvl=c?c.l:m?+m[1]:0;if(!c&&!lvl)return null;
+  const b=batchInfo(n,lvl,c,Math.max(1,Math.min(10,+$('m').value||1)),S.t.lab);if(!b.t)return null;return {h:(b.batch?Math.ceil(q/b.size):q)*b.t,why:b.why,t:b.t}}
+function planHint(){const n=$('plN').value.trim(),c=byName(n),how=$('plH').value;let t='';
+  if(c){t=`${ROM[c.l]} · ${CLS[c.k]} · каталог ${c.p} зм · токсичность ${DRINK(c)?doseTox(c):'— (не пьют)'}${c.a?' · алхимическая концентрация':''}.`;
+    if(how==='buy'&&$('plP').value==='')$('plP').placeholder=String(parseFloat(String(c.p).replace(/\s/g,''))||'')}
+  const h=planHours(n,Math.max(1,+$('plQ').value||1));if(how==='brew'){$('plR').placeholder=h?String(h.h):'';t+=h?` Попытка ${h.t} ч, ${h.why}: на ${Math.max(1,+$('plQ').value||1)} доз — ${h.h} ч, если все попытки удачны.`:(c&&c.l>=6?' VI+ — долгая варка (6.3), часы впиши сам.':'');t+=' Материалы варки — посчитай на вкладке «Варка» и впиши в цену.'}
+  else $('plR').placeholder='0';
+  $('plHint').textContent=t}
+['plN','plH','plQ'].forEach(i=>$(i).addEventListener('input',planHint));$('plH').onchange=planHint;
+$('plT').onchange=()=>mutate(()=>{plan().title=$('plT').value.trim()});
+$('plE').onchange=()=>mutate(()=>{plan().expect=$('plE').value.trim()});
+$('plAdd').onclick=()=>{const n=$('plN').value.trim();if(!n)return;const how=$('plH').value,c=byName(n);
+  const pr=$('plP').value!==''?+$('plP').value:how==='buy'&&c?(parseFloat(String(c.p).replace(/\s/g,''))||0):null;
+  const q=Math.max(1,+$('plQ').value||1),ph=planHours(n,q),hr=$('plR').value!==''?+$('plR').value:how==='brew'?(ph?ph.h:null):0;
+  mutate(()=>{plan().items.push({id:uid(),n,q,who:$('plW').value,st:$('plS').value,how,price:pr,hours:hr,ha:how==='brew'&&$('plR').value===''&&hr!=null})});
+  ['plN','plP','plR'].forEach(i=>$(i).value='');$('plQ').value=1;planHint()};
+$('plClear').onclick=()=>mutate(()=>{plan().items=plan().items.filter(i=>i.st!=='got'&&i.q>0)});
+function planText(){const P0=plan(),L=[];L.push('Вылазка: '+(P0.title||'—'));if(P0.expect)L.push('Ожидаем: '+P0.expect);
+  ST.people.forEach(p=>{const it=myBag(p.id).filter(b=>b.q>0&&b.note!=='на разборку').sort(ABC);if(it.length)L.push(`${p.name}: `+it.map(b=>`${b.n}${b.note?' ('+b.note+')':''} ×${b.q}`).join(', '))});
+  const w=P0.items.filter(i=>i.st!=='got');if(w.length){L.push('Заказано / хотим:');w.forEach(i=>L.push(`- ${i.n} ×${i.q} → ${P(i.who)?P(i.who).name:'?'} · ${i.st==='work'?'в работе':'хотим'} · ${i.how==='buy'?'купить':'сварить'}${i.price!=null?` · ${fmtZ(i.price*i.q)} зм`:''}`))}
+  return L.join('\n')}
+$('plCopy').onclick=async()=>{const t=planText();try{await navigator.clipboard.writeText(t);$('plCopy').textContent='Скопировано'}catch(e){$('plCopy').textContent='Не скопировалось'}setTimeout(()=>$('plCopy').textContent='Скопировать список',1500)};
+function renderPlan(){
+  const P0=plan();if(document.activeElement!==$('plT'))$('plT').value=P0.title||'';if(document.activeElement!==$('plE'))$('plE').value=P0.expect||'';
+  const wsel=$('plW'),wk=wsel.value;wsel.innerHTML=ST.people.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');if(wk&&ST.people.some(p=>p.id===wk))wsel.value=wk;
+  // есть сейчас: по сумкам, без «на разборку»
+  const H=$('plHave');H.innerHTML='';
+  ST.people.forEach(p=>{const it=myBag(p.id).filter(b=>b.q>0&&b.note!=='на разборку').sort(ABC);
+    const tox=it.reduce((s,b)=>s+doseTox(bagCard(b)),0), now=toxOfP(p.id), ac=it.filter(b=>{const c=bagCard(b);return c&&c.a}).length;
+    const d=document.createElement('div');d.className='sect';d.textContent=p.name;H.appendChild(d);
+    if(!it.length)H.insertAdjacentHTML('beforeend','<div class="note">Пусто</div>');
+    it.forEach(b=>{const c=bagCard(b),r=document.createElement('div');r.className='bagi';
+      r.innerHTML=`<span class="nm"></span><span class="q">×${b.q}</span>`;
+      r.querySelector('.nm').innerHTML=`${esc(b.n)}<small>${esc([c?ROM[c.l]+' · '+CLS[c.k]:'',c&&DRINK(c)?'токс. '+doseTox(c):'',c&&c.a?'алх. концентрация':'',b.note||''].filter(Boolean).join(' · '))}</small>`;H.appendChild(r)});
+    if(it.length){const over=now+tox>p.limit;H.insertAdjacentHTML('beforeend',`<div class="note">По одной каждого вида: токсичность ${fmtZ(now)}${now?' (уже есть)':''} + ${fmtZ(tox)} = <b${over?' style="color:var(--bad)"':''}>${fmtZ(now+tox)}</b> из ${p.limit}${over?' — выше предела, будет спасбросок':''}${ac>1?` · алхимическая концентрация у ${ac} видов — держится одна`:''}</div>`)}});
+  // заказано / хотим
+  const W=$('plWant');W.innerHTML='';
+  const items=P0.items;if(!items.length)W.innerHTML='<div class="note">Пока ничего</div>';
+  items.forEach(i=>{const c=byName(i.n),r=document.createElement('div');r.className='bagi';
+    r.innerHTML=`<span class="nm"></span><button type="button" class="btn sm" aria-label="Меньше">−</button><span class="q">${i.q}</span><button type="button" class="btn sm" aria-label="Больше">+</button><select class="pst" aria-label="Статус" style="width:auto"><option value="want">хотим</option><option value="work">в работе</option><option value="got">получено</option></select><button type="button" class="btn sm ghost" aria-label="Убрать">×</button>`;
+    r.querySelector('.nm').innerHTML=`${esc(i.n)}<small>${esc([P(i.who)?P(i.who).name:'?',i.how==='buy'?'купить':'сварить',i.price!=null?fmtZ(i.price)+' зм за дозу':'цена не указана',i.how==='brew'?(i.hours!=null?i.hours+' ч':'часы не указаны'):'',c&&DRINK(c)?'токс. '+doseTox(c):''].filter(Boolean).join(' · '))}</small>`;
+    const b=r.querySelectorAll('button'),sel=r.querySelector('.pst');sel.value=i.st;
+    const rh=()=>{if(i.ha){const h=planHours(i.n,Math.max(1,i.q));if(h)i.hours=h.h}};b[0].onclick=()=>mutate(()=>{i.q=Math.max(0,i.q-1);rh()});b[1].onclick=()=>mutate(()=>{i.q++;rh()});b[2].onclick=()=>mutate(()=>{P0.items=P0.items.filter(x=>x!==i)});
+    sel.onchange=()=>mutate(()=>{i.st=sel.value;if(sel.value==='got')logx(`Вылазка: «${i.n}» ×${i.q} получено — положи в сумку ${P(i.who)?P(i.who).name:''} вручную`)});
+    if(i.st==='got')r.style.opacity='.55';W.appendChild(r)});
+  // итог: деньги и время только по тому, что ещё не получено
+  const open=items.filter(i=>i.st!=='got'&&i.q>0), money=open.reduce((s,i)=>s+(i.price||0)*i.q,0), noP=open.filter(i=>i.price==null).length;
+  const hrs=open.filter(i=>i.how==='brew').reduce((s,i)=>s+(i.hours||0),0), noH=open.filter(i=>i.how==='brew'&&i.hours==null).length, gold=ST.mat?ST.mat.gold||0:0;
+  $('plSum').innerHTML=open.length?`<div class="note">Не получено: ${open.length} поз. · деньги <b>${fmtZ(money)} зм</b>${noP?` (+${noP} без цены)`:''} из ${fmtZ(gold)} у Талиса${money>gold?' <span style="color:var(--bad)">— не хватает</span>':''} · варка <b>${fmtZ(hrs)} ч</b>${noH?` (+${noH} без часов)`:''} — часы по позиции считаются на все её дозы с партиями (6.2), если все попытки удачны.</div>`:'';
+}
+
 // вкладки
 function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';ls.set('tab',t);if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
+  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';ls.set('tab',t);if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
@@ -1601,7 +1684,7 @@ function mishapPicker(el,what){
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;
-list();render();renderBelt();tab(['belt','jour'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+list();render();renderBelt();tab(['belt','jour','plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
 </body>
 </html>
