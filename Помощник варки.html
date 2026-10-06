@@ -112,6 +112,8 @@ select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px 
 .now{font:400 24px Prata,serif}
 .savest{font-size:12px;color:var(--muted);text-align:right}
 .prev{font-size:14px;margin-top:10px;padding:10px;border-radius:10px;background:var(--bg)}
+.fnow{font-size:15px;margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--bg);border-left:3px solid var(--acc)}.fnow div{margin:3px 0}.fnow b{font-family:"JetBrains Mono",monospace}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px}@media(max-width:700px){.fgrid{grid-template-columns:1fr}}
 .prev:empty{display:none}
 .prev .bad{color:var(--bad);font-weight:600}
 .prev .wr{color:var(--warn)}
@@ -213,8 +215,9 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <button type="button" class="btn soft" id="restL">Долгий отдых</button>
     <button type="button" class="btn ghost" id="undo" title="Отменяет последнее действие: пояс, сумку, материалы, часы и рост в журнале, который дало это действие">Отменить</button>
   </div>
-  <p class="note">Короткий отдых — 1 час, снимает остаточную токсичность. Передышка 10 минут снимает её только у доз с бонусом «Чистый». Долгий отдых — 8 часов: токсичность обнуляется, интоксикация уходит, истощение −1. «Отменить» откатывает пояс, сумку, материалы и часы; отметки и рост мастерства в журнале — кнопкой «Отменить последнее» в самой записи.</p>
+  <p class="note">Короткий отдых — 1 час, снимает остаточную токсичность. Передышка 10 минут снимает её только у доз с бонусом «Чистый». Долгий отдых — 8 часов: обнуляет токсичность закончившихся эффектов (действующие держат свою, Ж-98); интоксикация уходит, только если токсичность не выше предела; истощение −1. «Отменить» откатывает пояс, сумку, материалы и часы; отметки и рост мастерства в журнале — кнопкой «Отменить последнее» в самой записи.</p>
 </div>
+<div class="card" id="fight" style="margin-top:16px"></div>
 <div class="bgrid">
   <div>
     <div class="card"><h2>Выпить</h2>
@@ -721,7 +724,7 @@ function renderBag(){
     const bs=r.querySelectorAll('button');
     bs[0].onclick=()=>mutate(()=>{b.q--});bs[1].onclick=()=>mutate(()=>{b.q++});
     bs[2].onclick=drink?()=>{$('dq').value=c.n;$('dwho').value=b.who;DM={};const NM={'Долгое действие':'long','Двойной срок':'dbl','Чистый':'clean','Долгое окно':'lwin','Двойной заряд':'twin','дефект: Короткое':'short','дефект: Тяжёлое':'heavy'};String(b.note||'').split(' + ').forEach(x=>{if(NM[x])DM[NM[x]]=true});BAGPICK=b.who+'\u0001'+(b.note||'');fillDrink();$('dq').scrollIntoView({behavior:'smooth',block:'center'})}
-      :()=>mutate(()=>{b.q--;logx(`${P(b.who).name}: потрачено «${b.n}», осталось ${b.q}`)});
+      :()=>mutate(()=>{b.q--;logx(`${P(b.who).name}: потрачено «${b.n}», осталось ${b.q}`);const lv=healLvl(b.n);if(lv&&ST.fight&&ST.fight.on)startHeal(b.who,b.n,lv,healMods(b.n+' '+(b.note||'')))});
     const g=r.querySelector('.give');if(g)g.onchange=()=>{const to=g.value;if(!to)return;mutate(()=>{b.q--;
       const t=ST.bag.find(x=>x.who===to&&x.n===b.n&&(x.note||'')===(b.note||'')&&(x.card||'')===(b.card||''));if(t)t.q++;else ST.bag.push({n:b.n,q:1,who:to,...(b.card?{card:b.card}:{}),...(b.note?{note:b.note}:{})});
       logx(`${P(b.who).name} → ${P(to).name}: «${b.n}»`)})};
@@ -788,10 +791,77 @@ function renderBelt(){
   if(typeof renderJournal==='function'&&!$('tab-jour').hidden)renderJournal();
   if(typeof renderPlan==='function'&&!$('tab-plan').hidden)renderPlan();
   $('now').textContent=fmtT(ST.T);
-  renderPeople();renderBag();renderMat();renderOD();preview();
+  renderPeople();renderBag();renderMat();renderOD();preview();renderFight();
   $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
   $('undo').disabled=!UNDO.length;
   const t=ST.people[0];if(t){const x=toxOfP(t.id);const b=$('beltBadge');b.textContent=x?`${x}/${t.limit}`:'';b.classList.toggle('hot',x>t.limit)}
+}
+
+// ===== Бой: «Мой ход» раз в раунд; лечение зелий по раундам (7.2, Ж-91), яд на оружии (7.5, 8.6). Чужие ходы и цели — у мастера =====
+const HEAL_R=[0,1,1,1,2,2,3,3,4,4,6], HEAL_F=[0,0,1,-1,0,1,2,1,0,0,0];
+// кубики в порядке потери: сначала меньший, затем основные (7.2)
+const HEAL_D=[[],[4],[4,4],[4,4,4,4],[4,6],[6,6],[6,6,6],[10,10,10],[4,12,12,12],[10,12,12,12],[12,12,12,12,12,12]];
+const healLvl=n=>{const m=String(n).match(/^Зелье(?: лечения)? (\d+)\.\1\b/);return m&&+m[1]<=10?+m[1]:0};
+const healMods=t=>({strong:/\+2 к лечению|Крепк/i.test(t),twin:/Сдвоен/i.test(t),weak:/Слаб/i.test(t),slow:/Медлен/i.test(t)});
+function healRound(lv,k,md){const d=HEAL_D[lv].slice(Math.min(k,HEAL_D[lv].length-1)),f=HEAL_F[lv]+(md.strong?2:0),cnt={};
+  d.forEach(x=>cnt[x]=(cnt[x]||0)+1);const dice=Object.keys(cnt).map(Number).sort((a,b)=>b-a).map(x=>`${cnt[x]}к${x}`).join('+');
+  return dice+(f>0?'+'+f:f<0?'−'+(-f):'')+(md.weak?' −2 (не ниже 1)':'')}
+const fight=()=>ST.fight||(ST.fight={on:false,round:0,sub:0,turned:false,heals:[],coats:[],ctl:false,now:[]});
+// раунды, которые сейчас приходят у последовательности: сдвоенная — первые два сразу
+function healTick(h,first){const out=[];const n=first&&h.md.twin?2:1;for(let j=0;j<n&&h.i<HEAL_R[h.lv];j++){out.push(healRound(h.lv,h.i,h.md));h.i++}
+  const who=P(h.who)?P(h.who).name:'';return `${esc(who)}: «${esc(h.n)}» — бросить <b>${out.join(' и ')}</b> (раунд ${h.i} из ${HEAL_R[h.lv]})`}
+function startHeal(who,n,lv,md){const F=fight(),h={id:uid(),who,n,lv,md,i:0};
+  if(md.slow){F.now=[`${P(who)?P(who).name:''}: «${esc(n)}» медленное — лечение с начала следующего хода`];h.wait=true}else F.now=[healTick(h,true)];
+  if(h.i<HEAL_R[lv]||h.wait)F.heals.push(h);logx(`Бой: ${P(who)?P(who).name+' — ':''}«${n}», лечение по раундам`)}
+function myTurn(pid){const F=fight(),out=[];
+  if(pid==='p1'){if(F.turned){F.round++;F.sub++;if(F.sub>=10){F.sub=0;ST.T+=1}}F.turned=true;F.ctl=false}
+  F.heals.filter(h=>h.who===pid).forEach(h=>{if(h.wait){h.wait=false;out.push(healTick(h,true))}else out.push(healTick(h,false))});
+  F.heals=F.heals.filter(h=>h.wait||h.i<HEAL_R[h.lv]);
+  if(pid==='p1'){ST.ent.filter(e=>e.who==='p1'&&isActive(e)).forEach(e=>{const r=Math.max(0,Math.round((endOf(e)-ST.T)*10-F.sub));if(r<=1)out.push(`«${esc(e.n)}» кончается${r?' в этом раунде':''} — проверь`)});
+    const tx=toxOfP('p1'),t=P('p1');if(tx)out.push(`Токсичность ${fmtZ(tx)} из ${t.limit}${tx>t.limit?' — выше предела':''}`);
+    F.coats.filter(c=>c.who==='p1').forEach(c=>out.push(`На оружии «${esc(c.n)}»: ${c.ctl?'контрольный, до попадания':'атак осталось '+c.left}`))}
+  F.now=out.length?out:['Ничего не срабатывает'];logx(`Бой: ${pid==='p1'?'раунд '+F.round+', ход Талиса':'ход '+(P(pid)?P(pid).name:'')}`)}
+function renderFight(){const box=$('fight');if(!box)return;const F=fight();
+  if(!F.on){box.innerHTML=`<div class="row" style="align-items:center"><h2 style="margin:0;flex:1">Бой</h2><button type="button" class="btn" id="fStart">Начать бой</button></div><p class="note">В бою: «Мой ход» в начале каждого хода Талиса — сдвигает время на раунд (10 раундов = 1 минута) и показывает, что сейчас бросить и проверить. Зелье лечения, потраченное из сумки, само идёт по раундам (7.2). Чужие ходы, спасброски врагов и сроки контроля на целях ведёт мастер.</p>`;
+    $('fStart').onclick=()=>mutate(()=>{Object.assign(F,{on:true,round:1,sub:0,turned:false,heals:[],ctl:false,now:['Бой начат. Нажми «Мой ход» в начале хода Талиса.']});logx('Бой начат')});return}
+  const others=ST.people.filter(p=>p.id!=='p1'&&F.heals.some(h=>h.who===p.id));
+  const bagPs=ST.bag.filter(b=>b.q>0&&(/^Яд \d+\.\d+/.test(b.n)||(bagCard(b)&&bagCard(b).k==='psn')));
+  box.innerHTML=`<div class="row" style="align-items:center;flex-wrap:wrap"><h2 style="margin:0;flex:1">Бой · раунд ${F.round}</h2>
+    <button type="button" class="btn" id="fTurn" style="background:var(--acc);color:var(--panel);border-color:var(--acc);font-weight:600">Мой ход</button>
+    ${others.map(p=>`<button type="button" class="btn soft" data-ot="${p.id}">Ход: ${esc(p.name)}</button>`).join('')}
+    <button type="button" class="btn ghost" id="fEnd">Конец боя</button></div>
+    <div class="fnow">${F.now.map(t=>`<div>${t}</div>`).join('')}</div>
+    <div class="fgrid"><div><div class="sect">Лечение по раундам</div><div id="fHeals"></div>
+      <div class="row" style="flex-wrap:wrap;margin-top:6px"><div style="flex:0 0 90px"><select id="fhL" aria-label="Уровень зелья">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${l}.${l}</option>`).join('')}</select></div>
+        <div style="flex:1 1 100px"><select id="fhW" aria-label="Кто выпил">${ST.people.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></div>
+        <div style="flex:1 1 130px"><select id="fhM" aria-label="Бонус или дефект"><option value="">обычное</option><option value="+2 к лечению">крепкое (+2)</option><option value="Сдвоенная">сдвоенное</option><option value="Слабое">слабое (−2)</option><option value="Медленное">медленное</option></select></div>
+        <div style="flex:0 0 auto"><button type="button" class="btn sm" id="fhAdd">Выпито не из сумки</button></div></div></div>
+    <div><div class="sect">Яд на оружии</div><div id="fCoats"></div>
+      <div class="row" style="flex-wrap:wrap;margin-top:6px"><div style="flex:1 1 160px"><select id="fcB" aria-label="Яд из сумки">${bagPs.map((b,i)=>`<option value="${i}">${esc(b.n)} — ${esc(P(b.who)?P(b.who).name:'')} (${b.q})</option>`).join('')||'<option value="">в сумках нет ядов</option>'}</select></div>
+        <div style="flex:0 0 auto"><button type="button" class="btn sm" id="fcAdd"${bagPs.length?'':' disabled'}>Нанести</button></div></div>
+      <p class="note">Обычный яд — 5 атак, попал или нет (7.5). Контрольный — до первого попадания; от одного отравителя одна попытка за раунд, лишнее попадание дозу не тратит, а если яд на цели уже действует — тратится (8.6, Ж-99).</p></div></div>`;
+  const HB=$('fHeals');if(!F.heals.length)HB.innerHTML='<div class="note">Нет</div>';
+  F.heals.forEach(h=>{const r=document.createElement('div');r.className='bagi';r.innerHTML=`<span class="nm"></span>`;
+    r.querySelector('.nm').innerHTML=`${esc(h.n)}<small>${esc(P(h.who)?P(h.who).name:'')} · ${h.wait?'начнётся со следующего хода':`дальше ${healRound(h.lv,h.i,h.md)} · осталось раундов ${HEAL_R[h.lv]-h.i}`}</small>`;HB.appendChild(r)});
+  const CB=$('fCoats');const mine=F.coats;if(!mine.length)CB.innerHTML='<div class="note">Нет</div>';
+  mine.forEach(c=>{const r=document.createElement('div');r.className='bagi';
+    r.innerHTML=`<span class="nm"></span><button type="button" class="btn sm" data-h="1">Попал</button><button type="button" class="btn sm soft" data-h="0">Мимо</button><button type="button" class="btn sm ghost" aria-label="Снять">×</button>`;
+    r.querySelector('.nm').innerHTML=`${esc(c.n)}<small>${esc(P(c.who)?P(c.who).name:'')} · ${c.ctl?(c.who==='p1'&&F.ctl?'попытка в этом раунде уже была':'контрольный, до первого попадания'):'атак осталось '+c.left}</small>`;
+    const b=r.querySelectorAll('button');
+    b[0].onclick=()=>mutate(()=>{if(!c.ctl){c.left--;F.now=[`«${esc(c.n)}»: попадание — яд действует (урон и спасбросок — у мастера). Атак осталось ${c.left}`]}
+      else if(c.who==='p1'&&F.ctl){F.now=[`«${esc(c.n)}»: попытка в этом раунде уже была — лишнее попадание дозу не тратит. Если яд на цели уже действует — доза тратится: сними её ×`]}
+      else{c.left=0;if(c.who==='p1')F.ctl=true;F.now=[`«${esc(c.n)}»: попадание — цель делает спасбросок (если он есть); доза потрачена`]}
+      logx(`Бой: «${c.n}» — попадание`);F.coats=F.coats.filter(x=>x.left>0)});
+    b[1].onclick=()=>mutate(()=>{if(!c.ctl)c.left--;F.now=[`«${esc(c.n)}»: промах${c.ctl?' — доза остаётся':` — атака потрачена, осталось ${c.left}`}`];F.coats=F.coats.filter(x=>x.left>0)});
+    b[2].onclick=()=>mutate(()=>{F.coats=F.coats.filter(x=>x!==c)});CB.appendChild(r)});
+  $('fTurn').onclick=()=>mutate(()=>myTurn('p1'));
+  box.querySelectorAll('[data-ot]').forEach(b=>b.onclick=()=>mutate(()=>myTurn(b.dataset.ot)));
+  $('fEnd').onclick=()=>mutate(()=>{const rest=F.heals.map(h=>{const o=[];while(h.i<HEAL_R[h.lv]){o.push(healRound(h.lv,h.i,h.md));h.i++}return o.length?`${P(h.who)?P(h.who).name:''}: «${h.n}» — ${o.join(', ')}`:''}).filter(Boolean);
+    if(F.sub>0)ST.T+=1;F.on=false;F.heals=[];logx('Бой окончен'+(rest.length?'. Лечение доходит в следующие раунды: '+rest.join('; '):''));
+    F.now=[];F.coats=F.coats.filter(c=>!c.ctl||c.left>0)});
+  $('fhAdd').onclick=()=>mutate(()=>{const lv=+$('fhL').value;startHeal($('fhW').value,`Зелье лечения ${lv}.${lv}`+($('fhM').value?` (${$('fhM').value})`:''),lv,healMods($('fhM').value))});
+  $('fcAdd').onclick=()=>{const b=bagPs[+$('fcB').value];if(!b)return;mutate(()=>{const c=bagCard(b),ctl=!!(c&&c.k==='psn'),t=(b.note||'')+' '+b.n;
+    b.q--;F.coats.push({id:uid(),who:b.who,n:b.n,ctl,left:ctl?1:/долг/i.test(t)?6:/Коротк/i.test(t)?3:5});logx(`Бой: ${P(b.who)?P(b.who).name:''} наносит «${b.n}»`);F.now=[`«${esc(b.n)}» нанесён (действие; с чертой «Отравитель» — бонусное)`]})};
 }
 
 // ===== Вылазка: что есть, что заказано и что хотим; цена, время, кому; без автосписаний =====
