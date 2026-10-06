@@ -14,9 +14,12 @@ DAYS = 12 / 8                                   # 1,5 рабочего дня
 # (≈7 квестов — раньше, чем мастерство 3); рабочее место +1 до мастерства 5,
 # дальше нужна полная лаборатория (+3; потолок зелий 8) и мастерская (+5) для 9–10.
 MB, NEED, BATCH, base_cost = _p["MB"], _p["NEED"], _p["BATCH"], _p["base_cost"]
+growth_probs = _p["growth_probs"]
 def prof(m): return 2 if m <= 2 else 3 if m <= 7 else 4
 def lab(m): return 1 if m <= 5 else 3 if m <= 8 else 5
 TALIS = {m: prof(m) + MB[m] + lab(m) for m in range(1, 11)}
+# Личный проект по памятке v0.2: полная лаборатория, без активной помощи Анариэль.
+ROOT_BONUS = prof(2) + MB[2] + 3
 
 def ok_rate(b, sl, guidance=False):
     ok, un, fa = probs(b, sl)
@@ -24,10 +27,10 @@ def ok_rate(b, sl, guidance=False):
 
 def growth_row(m, extra=0, guidance=False):
     b = TALIS[m] + extra
-    per = ok_rate(b, P_SL[m], guidance) + 0.05      # натуральная 20 — второй успех
+    ok, p5, p20 = growth_probs(b, P_SL[m], guidance)
+    per = ok + p20                               # натуральная 20 — второй успех
     doses = NEED[m] / per
     hours = doses / BATCH.get(m, 1) * 2
-    p5, _ = p_bonus(b, P_SL[m])
     return b, doses, hours, doses * (base_cost(m) - p5 * m * HERB[m])   # на 5+ — экономия трав (7.7)
 
 def ink_hour(m):
@@ -71,17 +74,42 @@ def mc_marks(need, b, sl, start=0, guidance=False, N=40000):
         tot += a
     return tot / N
 
-def mc_silver(need, b, guidance=False, N=40000):
-    tot = 0
-    for _ in range(N):
-        p = a = 0
-        while p < need:
-            a += 1; d = random.randint(1, 20)
-            if guidance and d != 20 and (d == 1 or d + b < 14): d = random.randint(1, 20)
-            if d == 1: continue
-            if d + b >= 14: p += 2 * (d + b) if d == 20 else d + b
-        tot += a
-    return tot / N
+def silver_progress(d, b):
+    """Прогресс этапа I по памятке мастера v0.2; половины не округляются."""
+    total = d + b
+    if d == 1:
+        return 0
+    if d == 20:
+        return 2 * total
+    if total >= 19:
+        return total + 5
+    if total >= 14:
+        return total
+    if total >= 10:
+        return total / 2
+    return 0
+
+
+def silver_attempts(need, b, guidance=False):
+    """Точное ожидание подходов до цели с учётом превышения прогресса.
+
+    Только двухчасовые подходы: очистка, реагенты и дни восстановления
+    не включены. Переброс одного провала, без ограничения пула очков.
+    """
+    weights = {}
+    for first in range(1, 21):
+        retry = guidance and first != 20 and (first == 1 or first + b < 14)
+        outcomes = range(1, 21) if retry else (first,)
+        for d in outcomes:
+            progress = int(2 * silver_progress(d, b))
+            weights[progress] = weights.get(progress, 0) + 1 / (20 * len(outcomes))
+    # Состояния в половинах единицы: E(r) = 1 + p(0)E(r) + Σ p(k)E(max(0,r-k)).
+    remaining = int(2 * need)
+    expected = [0.0] * (remaining + 1)
+    for r in range(1, remaining + 1):
+        expected[r] = (1 + sum(p * expected[max(0, r - k)]
+                              for k, p in weights.items() if k)) / (1 - weights.get(0, 0))
+    return expected[remaining]
 
 QUEUE = []
 for name, fn, h_per in [
@@ -90,13 +118,14 @@ for name, fn, h_per in [
     ("рост мастерства 2 → 3: 15 успешных зелий 2.2", None, None),
     ("рецепт масел и мазей: 100 прогресса", lambda b, g: mc_ink(100, b), 2),
     ("обычная ступень формулы (СЛ 12, эссенция — подсказка +2) и первая варка", None, None),
-    ("Корневая метка, этап I: осталось 16 из 30 (подход — 2 часа)", lambda b, g: mc_silver(16, b, g), 2),
+    ("Корневая метка, этап I: осталось 16 из 30 (полная лаборатория, +6; подход — 2 часа)", lambda b, g: silver_attempts(16, ROOT_BONUS, g), 2),
 ]:
     row = []
     for extra, g in [(0, False), (0, True), (2, False)]:
         b = 4 + extra
         if name.startswith("рост"):
-            per = ok_rate(b, 10, g) + 0.05
+            ok, _, p20 = growth_probs(b, 10, g)
+            per = ok + p20
             h = 15 / per / 2 * 2
         elif name.startswith("обычная"):
             h = mc_marks(3, b + 2, 12, 0, g) * 2 + 2 / ok_rate(b, 14, g)

@@ -54,18 +54,27 @@ for l, n in [(6, "VI"), (7, "VII"), (8, "VIII")]:
     INK_SELF.append((n, NATIVE[l], _v["SL_E"][l], 1 - ok_u, cost, price))
 
 # 5. прокачка мастерства 1 → 10 (только зелья своего уровня)
+def growth_probs(b, sl, guidance=False):
+    """Успех, экономия трав на 5+ и нат. 20 после не более одного переброса провала.
+
+    Пул очков не ограничен. Нат. 20 даёт вторую единицу роста, поэтому
+    её вероятность возвращается отдельно от вероятности успеха.
+    """
+    ok, _, _ = probs(b, sl)
+    p5, p20 = p_bonus(b, sl)
+    factor = 1 + (1 - ok) if guidance else 1
+    return ok * factor, p5 * factor, p20 * factor
+
+
 def growth(extra=0, guidance=False):
     rows = []
     for m in range(1, 10):
         b = NATIVE[m] + extra
-        ok, un, fa = probs(b, P_SL[m])
-        if guidance:                     # переброс любого провала; пул не ограничен — нижняя граница
-            ok = ok + (1 - ok) * ok
-        per_dose = ok + 0.05             # натуральная 20 — второй успех
+        ok, p5, p20 = growth_probs(b, P_SL[m], guidance)
+        per_dose = ok + p20              # натуральная 20 — второй успех
         doses = NEED[m] / per_dose
         batch = BATCH.get(m, 1)
         hours = doses / batch * 2
-        p5, _ = p_bonus(b, P_SL[m])
         gold = doses * (base_cost(m) - p5 * m * HERB[m])   # на 5+ — экономия трав (7.7)
         rows.append((m, NEED[m], ok, doses, batch, hours, gold))
     return rows
