@@ -153,7 +153,7 @@ dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:10p
 <section id="p-ref" hidden>
   <div class="toc" id="toc"></div>
   <h2 id="quick">Быстрые таблицы</h2>
-  <p class="note">Разделы «Правил за столом», на которые ссылается ядро: результаты, бонусы, дефекты, лечение, яды, концентрация. Нажми, чтобы раскрыть.</p>
+  <p class="note">Рыночные цены и разделы «Правил за столом», на которые ссылается ядро: результаты, бонусы, дефекты, лечение, яды, концентрация. Нажми, чтобы раскрыть.</p>
   <div id="qtabs"></div>
   <h2 id="core">Ядро правил</h2>
   <div class="ref">__CORE__</div>
@@ -298,9 +298,9 @@ renderEls();
 
 // ===== Справка: быстрые таблицы и оглавление =====
 $('qtabs').innerHTML=J('d-quick').map((q,i)=>`<details class="qt" id="qt${i}"><summary>${esc(q.t)}</summary><div class="ref">${q.h}</div></details>`).join('');
-{const items=[['#quick','Быстрые таблицы'],...[...document.querySelectorAll('#p-ref .ref > h2[id], #p-ref > .ref h2[id]')].map(h=>['#'+h.id,h.textContent.replace(/^\d+\.\s*/,'')])];
+{const items=[['#qt0','Цены'],['#quick','Быстрые таблицы'],...[...document.querySelectorAll('#p-ref .ref > h2[id], #p-ref > .ref h2[id]')].map(h=>['#'+h.id,h.textContent.replace(/^\d+\.\s*/,'')])];
   $('toc').innerHTML=items.map(([h,t])=>`<a href="${h}">${esc(t)}</a>`).join('');
-  $('toc').querySelectorAll('a').forEach(a=>a.onclick=e=>{e.preventDefault();const el=document.querySelector(a.getAttribute('href'));if(el)el.scrollIntoView({behavior:'smooth',block:'start'})})}
+  $('toc').querySelectorAll('a').forEach(a=>a.onclick=e=>{e.preventDefault();const el=document.querySelector(a.getAttribute('href'));if(el){if(el.tagName==='DETAILS')el.open=true;el.scrollIntoView({behavior:'smooth',block:'start'})}})}
 
 // ===== Талис =====
 const T=J('d-talis');
