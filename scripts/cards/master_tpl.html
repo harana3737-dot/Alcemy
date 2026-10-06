@@ -1,0 +1,244 @@
+<title>Пульт мастера</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prata&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Пульт мастера: та же лаборатория, что у «Помощника варки» — зелёный реактив, латунь, бумага; одна колонка, вкладки */
+:root{
+  --bg:#f4f1ea; --panel:#fffdf8; --ink:#1f2421; --muted:#6a6f69; --line:#ddd6c8;
+  --acc:#2f7d6d; --acc-soft:#e1efe9; --gold:#a7781d; --gold-soft:#f5ead2;
+  --warn:#b4632a; --warn-soft:#f6e6d8; --bad:#a83f3f; --chip:#efeadf;
+  --shadow:0 1px 2px rgba(40,30,10,.06),0 4px 16px rgba(40,30,10,.05);
+  --f-display:Prata,Georgia,serif; --f-body:"Golos Text",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151917; --panel:#1d2320; --ink:#e7e6df; --muted:#9aa29c; --line:#323a36;
+    --acc:#5fb8a3; --acc-soft:#203430; --gold:#d6a94a; --gold-soft:#342b19;
+    --warn:#dc8c55; --warn-soft:#3a2a1d; --bad:#d97373; --chip:#262d29; --shadow:none; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151917; --panel:#1d2320; --ink:#e7e6df; --muted:#9aa29c; --line:#323a36;
+  --acc:#5fb8a3; --acc-soft:#203430; --gold:#d6a94a; --gold-soft:#342b19;
+  --warn:#dc8c55; --warn-soft:#3a2a1d; --bad:#d97373; --chip:#262d29; --shadow:none; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);-webkit-text-size-adjust:100%}
+.wrap{max-width:920px;margin:0 auto;padding-inline:16px;padding-block:20px 56px}
+header h1{font:400 30px/1.15 var(--f-display);margin:0 0 4px;text-wrap:balance}
+header p{margin:0;color:var(--muted);font-size:14px;max-width:62ch}
+.tabs{display:flex;gap:2px;margin:18px 0 16px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{font:inherit;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:8px 12px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--acc);font-weight:600}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
+.muted{color:var(--muted)}
+.note{font-size:13px;color:var(--muted)}
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:10px;padding:7px 12px;cursor:pointer}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--panel);font-weight:600}
+
+/* Утвердить */
+.sum{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;position:sticky;top:env(safe-area-inset-top,0px);z-index:2;margin:0 -4px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.sum .big{font:400 22px/1 var(--f-display)}
+.sum .grow{flex:1;min-width:180px;font-size:13px;color:var(--muted)}
+.bar{height:6px;border-radius:99px;background:var(--chip);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--acc)}
+.banner{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--gold-soft);font-size:14px}
+.q{display:grid;grid-template-columns:34px 1fr;gap:4px 10px;padding:12px 0;border-top:1px solid var(--line)}
+.q:first-child{border-top:0}
+.q .n{font:500 13px var(--f-mono);color:var(--acc);padding-top:2px}
+.q .t{font-weight:600}
+.q .opt{grid-column:2;display:grid;grid-template-columns:76px 1fr;gap:2px 8px;font-size:14px}
+.q .opt>b{font-weight:500;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding-top:2px}
+.q .ctl{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;background:var(--panel);color:var(--ink);border:0;border-left:1px solid var(--line);padding:5px 11px;cursor:pointer}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed=true][data-c=ok]{background:var(--acc);color:var(--panel)}
+.seg button[aria-pressed=true][data-c=alt]{background:var(--warn);color:var(--panel)}
+.seg button[aria-pressed=true][data-c=talk]{background:var(--gold);color:var(--panel)}
+.q textarea,.q input{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 9px}
+.q textarea{grid-column:2;width:100%;min-height:38px;resize:vertical;margin-top:6px}
+.q input{width:110px}
+.q.alt{background:linear-gradient(90deg,var(--warn-soft),transparent 60%)}
+.q.talk{background:linear-gradient(90deg,var(--gold-soft),transparent 60%)}
+.state{font-size:12px;color:var(--muted)}
+
+/* Справка */
+.ref{max-width:72ch}
+.ref h2{border-top:1px solid var(--line);padding-top:16px}
+.ref h3{font:600 16px var(--f-body);color:var(--acc);margin:18px 0 6px}
+.ref p{margin:.5em 0}.ref ul,.ref ol{padding-left:1.3em;margin:.4em 0}.ref li{margin:.2em 0}
+.ref .wrap,.tw{overflow-x:auto;margin:8px 0;max-width:none;padding:0}
+.ref table,.tw table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+.ref th,.ref td,.tw th,.tw td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+.ref th,.tw th{color:var(--muted);font-weight:600}
+.ref i{color:var(--muted)}
+
+/* Эликсиры */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.filters input{flex:1 1 220px;min-width:0;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.filters select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px}
+.el{border-top:1px solid var(--line)}
+.el>button{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;padding:9px 4px;cursor:pointer}
+.el>button:hover{background:var(--chip)}
+.el .lv{font:500 13px var(--f-mono);color:var(--acc)}
+.el .k{font-size:12px;color:var(--muted);white-space:nowrap}
+.el .d{padding:2px 4px 12px 56px;font-size:14px}
+.el .d dl{display:grid;grid-template-columns:max-content 1fr;gap:3px 12px;margin:6px 0}
+.el .d dt{color:var(--muted);font-size:13px}.el .d dd{margin:0}
+@media(max-width:520px){.el .d{padding-left:4px}.q .opt{grid-template-columns:1fr}.q .opt>b{padding-top:6px}}
+
+/* Талис */
+.facts{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:6px 0 4px}
+.fact{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.fact b{display:block;font:400 22px/1.1 var(--f-display)}
+.fact span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.list{margin:0;padding-left:1.2em}.list li{margin:.3em 0}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Пульт мастера</h1>
+  <p>Алхимия Талиса для мастера: вопросы на утверждение, справка по правилам, каталог эликсиров и где сейчас Талис.</p>
+</header>
+<nav class="tabs" role="tablist">
+  <button type="button" role="tab" id="t-ok" data-t="ok" aria-selected="true">Утвердить</button>
+  <button type="button" role="tab" id="t-ref" data-t="ref" aria-selected="false">Справка</button>
+  <button type="button" role="tab" id="t-el" data-t="el" aria-selected="false">Эликсиры</button>
+  <button type="button" role="tab" id="t-ta" data-t="ta" aria-selected="false">Талис</button>
+</nav>
+
+<section id="p-ok">
+  <div class="sum">
+    <div><div class="big" id="sumN">0 из __NQ__</div><div class="bar"><i id="sumBar" style="width:0"></i></div></div>
+    <div class="grow">Молчание — «да»: где ничего не отмечено, играем как в строке «Играем». Отмечай только «иначе» или «обсудим». <span id="saveSt"></span></div>
+    <button type="button" class="btn pri" id="copy">Скопировать ответ</button>
+  </div>
+  <div class="banner" id="ro" hidden></div>
+  <div id="qs"></div>
+  <p class="note" id="extra"></p>
+</section>
+
+<section id="p-ref" hidden>
+  <p class="note">Ядро правил v0.3 — всё, что нужно за столом. Номера в скобках — разделы полного текста.</p>
+  <div class="ref">__CORE__</div>
+</section>
+
+<section id="p-el" hidden>
+  <div class="filters">
+    <input id="fq" type="search" placeholder="Название, эссенция или слово из эффекта" aria-label="Поиск эликсира" autocomplete="off">
+    <select id="fk" aria-label="Класс"></select>
+    <select id="fl" aria-label="Уровень"><option value="">все уровни</option></select>
+  </div>
+  <p class="note" id="fcount"></p>
+  <div id="els"></div>
+</section>
+
+<section id="p-ta" hidden>
+  <div class="facts" id="facts"></div>
+  <h2>Алхимия сейчас</h2>
+  <ul class="list" id="talis"></ul>
+  <h2>Исследуемый образец</h2>
+  <div class="card ref" id="sample"></div>
+</section>
+</div>
+
+<script id="d-groups" type="application/json">__GROUPS__</script>
+<script id="d-extra" type="application/json">__EXTRA__</script>
+<script id="d-cards" type="application/json">__CARDS__</script>
+<script id="d-cls" type="application/json">__CLS__</script>
+<script id="d-order" type="application/json">__ORDER__</script>
+<script id="d-talis" type="application/json">__TALIS__</script>
+<script id="d-sample" type="application/json">__SAMPLE__</script>
+<script>
+const $=id=>document.getElementById(id);
+const J=id=>JSON.parse($(id).textContent);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const md=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*\s][^*]*?)\*(?!\*)/g,'$1<i>$2</i>');
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const G=J('d-groups'), NQ=G.reduce((s,g)=>s+g.q.length,0), PRICE_Q=19;
+
+// вкладки
+function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===t));
+  ['ok','ref','el','ta'].forEach(k=>$('p-'+k).hidden=k!==t);ls.set('mtab',t)}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
+{const h=location.hash.slice(1),s=ls.get('mtab');tab(['ok','ref','el','ta'].includes(h)?h:['ok','ref','el','ta'].includes(s)?s:'ok')}
+
+// ===== Утвердить: ответы — в общей базе (answers/qN), иначе — только в этом браузере =====
+let A={}, DB=null, CANW=true;
+try{A=JSON.parse(ls.get('manswers')||'{}')||{}}catch(e){A={}}
+const answered=()=>Object.values(A).filter(a=>a&&(a.c==='alt'||a.c==='talk'||a.c==='ok'||a.price)).length;
+function renderSum(){const n=answered();$('sumN').textContent=`${n} из ${NQ}`;$('sumBar').style.width=Math.round(100*n/NQ)+'%'}
+function renderQs(){
+  const box=$('qs');box.innerHTML='';
+  G.forEach(g=>{const h=document.createElement('h2');h.textContent=g.t;box.appendChild(h);
+    const c=document.createElement('div');c.className='card';box.appendChild(c);
+    g.q.forEach(q=>{const a=A['q'+q.n]||{},el=document.createElement('div');el.className='q'+(a.c==='alt'?' alt':a.c==='talk'?' talk':'');el.id='q'+q.n;
+      el.innerHTML=`<div class="n">${q.n}</div><div class="t">${md(q.q)}</div>
+        <div class="opt"><b>Играем</b><span>${md(q.y)}</span>${q.a&&q.a!=='—'?`<b>Иначе</b><span>${md(q.a)}</span>`:''}</div>
+        <div class="ctl"><span class="seg" role="group" aria-label="Ответ на пункт ${q.n}">
+          <button type="button" data-c="ok" aria-pressed="${a.c==='ok'}">Да</button>${q.a&&q.a!=='—'?`<button type="button" data-c="alt" aria-pressed="${a.c==='alt'}">Иначе</button>`:''}<button type="button" data-c="talk" aria-pressed="${a.c==='talk'}">Обсудим</button></span>
+          ${q.n===PRICE_Q?`<label class="note" for="price">Цена рецепта, зм</label><input id="price" type="number" min="0" step="10" placeholder="500" value="${a.price??''}">`:''}
+          <span class="state">${a.c?'':'не отмечено — значит да'}</span></div>
+        ${a.c==='alt'||a.c==='talk'||a.note?`<textarea id="note${q.n}" placeholder="Как иначе или что обсудить" aria-label="Комментарий к пункту ${q.n}">${esc(a.note||'')}</textarea>`:''}`;
+      el.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{const cur=A['q'+q.n]||{};save(q.n,{...cur,c:cur.c===b.dataset.c?null:b.dataset.c});renderQs();
+        if(b.dataset.c!=='ok'){const t=$('note'+q.n);if(t)t.focus()}});
+      const t=el.querySelector('textarea');if(t){t.onchange=()=>save(q.n,{...(A['q'+q.n]||{}),note:t.value.trim()})}
+      const p=el.querySelector('#price');if(p)p.onchange=()=>save(q.n,{...(A['q'+q.n]||{}),price:p.value===''?null:+p.value});
+      c.appendChild(el)})});
+  renderSum()}
+function save(n,a){a.t=Date.now();A['q'+n]=a;ls.set('manswers',JSON.stringify(A));renderSum();
+  if(!DB||!CANW)return;const st=$('saveSt');st.textContent='Сохраняется…';
+  DB.collection('answers').doc('q'+n).set(a).then(()=>{st.textContent='Сохранено — игрок видит ответ.'},e=>{
+    st.textContent='Не сохранилось в общий список — нажми «Скопировать ответ» и отправь текстом.';if(e&&(e.code==='not_granted'||e.code==='permission_denied'))readOnly()})}
+function readOnly(){CANW=false;const b=$('ro');b.hidden=false;
+  b.textContent='Ответы видишь только ты: у этой ссылки нет права записи. Отметь пункты и нажми «Скопировать ответ» — текст можно вставить в чат.'}
+function answerText(){const all=G.flatMap(g=>g.q),out=[],p=(A['q'+PRICE_Q]||{}).price;
+  all.forEach(q=>{const a=A['q'+q.n];if(a&&(a.c==='alt'||a.c==='talk'))out.push(`• ${q.n} (${q.q.replace(/\*\*/g,'')}) — ${a.c==='alt'?'иначе':'обсудим'}${a.note?': '+a.note:''}`)});
+  let s='Алхимия Талиса — ответ мастера\n'+(out.length?'Всё ок, кроме:\n'+out.join('\n'):'Всё ок.');
+  if(p!=null&&p!=='')s+=`\nП. ${PRICE_Q}: рецепт зарядов и склянок — ${p} зм.`;return s}
+$('copy').onclick=async()=>{const s=answerText();try{await navigator.clipboard.writeText(s);$('copy').textContent='Скопировано'}catch(e){
+  const ta=document.createElement('textarea');ta.value=s;ta.style.cssText='width:100%;min-height:120px;margin-top:10px';$('ro').hidden=false;$('ro').textContent='Скопировать не вышло — выдели текст ниже:';$('ro').appendChild(ta);ta.select()}
+  setTimeout(()=>$('copy').textContent='Скопировать ответ',1600)};
+$('extra').innerHTML=J('d-extra').map(x=>'Не обязательно: '+md(x)).join('<br>');
+renderQs();
+setTimeout(async()=>{try{
+  if(!window.claude||!window.claude.use){$('saveSt').textContent='Ответы сохраняются только в этом браузере.';return}
+  const db=await window.claude.use('db'), user=await window.claude.use('user');
+  if(!db){$('saveSt').textContent='Ответы сохраняются только в этом браузере — отправь их кнопкой «Скопировать ответ».';return}
+  DB=db;const cw=user?await user.can('data.write'):null;if(cw===false)readOnly();
+  db.collection('answers').onSnapshot(sn=>{const got={};sn.docs.forEach(d=>{got[d.id]=d.data()});
+    Object.keys(got).forEach(k=>{if(!A[k]||(got[k].t||0)>=(A[k].t||0))A[k]=got[k]});ls.set('manswers',JSON.stringify(A));
+    if(!document.activeElement||!document.activeElement.closest||!document.activeElement.closest('#qs'))renderQs();else renderSum();
+    if(CANW)$('saveSt').textContent='Ответы видит игрок.'},()=>{$('saveSt').textContent='Связь со списком ответов потеряна — обнови страницу.'});
+}catch(e){$('saveSt').textContent='Ответы сохраняются только в этом браузере.'}},0);
+
+// ===== Эликсиры =====
+const CARDS=J('d-cards'), CLS=J('d-cls'), ORDER=J('d-order'), ROM=['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
+$('fk').innerHTML='<option value="">все классы</option>'+ORDER.filter(k=>CARDS.some(c=>c.k===k)).map(k=>`<option value="${k}">${esc(CLS[k])}</option>`).join('');
+$('fl').innerHTML+=[...new Set(CARDS.map(c=>c.l))].sort((a,b)=>a-b).map(l=>`<option value="${l}">${ROM[l]}</option>`).join('');
+function renderEls(){const q=$('fq').value.trim().toLowerCase(),k=$('fk').value,l=$('fl').value;
+  const list=CARDS.filter(c=>(!k||c.k===k)&&(!l||c.l===+l)&&(!q||[c.n,c.e,c.f,c.x,c.s].join(' ').toLowerCase().includes(q)));
+  $('fcount').textContent=`Найдено ${list.length} из ${CARDS.length}`;
+  const box=$('els');box.innerHTML='';
+  list.slice(0,200).forEach(c=>{const d=document.createElement('div');d.className='el';
+    d.innerHTML=`<button type="button" aria-expanded="false"><span class="lv">${ROM[c.l]}</span><span>${esc(c.n)}</span><span class="k">${esc(CLS[c.k]||c.k)}</span></button>
+      <div class="d" hidden><p>${md(c.x)}</p><dl>
+        <dt>Источник</dt><dd>${esc(c.s)}</dd><dt>Эссенция</dt><dd>${esc(c.e)}</dd>${c.f?`<dt>Формула</dt><dd>${esc(c.f)}</dd>`:''}
+        <dt>Цена</dt><dd>${esc(c.p)} зм</dd><dt>Токсичность</dt><dd>${esc(c.t)}</dd><dt>Длительность</dt><dd>${esc(c.d)}</dd><dt>Концентрация</dt><dd>${esc(c.c)}</dd></dl>
+        ${c.o?`<p class="note">${md(c.o)}</p>`:''}</div>`;
+    const b=d.querySelector('button'),dd=d.querySelector('.d');b.onclick=()=>{dd.hidden=!dd.hidden;b.setAttribute('aria-expanded',!dd.hidden)};box.appendChild(d)})}
+['fq','fk','fl'].forEach(i=>$(i).addEventListener('input',renderEls));renderEls();
+
+// ===== Талис =====
+const T=J('d-talis');
+const pick=(re)=>{for(const s of T){const m=s.match(re);if(m)return m[1]}return '—'};
+$('facts').innerHTML=[[pick(/Мастерство (\d+)/),'мастерство алхимии'],[pick(/бонус проверки (\+\d+)/),'бонус варки'],[pick(/Предел токсичности (\d+)/),'предел токсичности'],[CARDS.length,'эликсиров в каталоге']]
+  .map(([v,l])=>`<div class="fact"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('');
+$('talis').innerHTML=T.map(s=>`<li>${md(s)}</li>`).join('');
+$('sample').innerHTML=J('d-sample').filter(s=>s.trim()&&!s.startsWith('|')).map(s=>s.startsWith('- ')?`<li>${md(s.slice(2))}</li>`:`<p>${md(s)}</p>`).join('').replace(/(<li>.*?<\/li>)+/gs,m=>`<ul>${m}</ul>`);
+</script>

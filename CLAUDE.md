@@ -44,6 +44,7 @@
 | `Карточки эликсиров.md/.html`, `Бонусы качества по карточкам.md` | каталог 196 эликсиров; генерируются |
 | `Экономика алхимии — для мастера.md`, `Симуляция экономики зелий.md` | **генерируются** `scripts/report.py` — правки вносить в скрипт |
 | `Помощник варки.html` | пояс (с панелью «Бой»), сумки, журнал, варка, вылазка; генерируется из `scripts/cards/helper_tpl.html` |
+| `Пульт мастера.html` | страница мастеру: вопросы с ответами (общая база, коллекция `answers`, документы `q1…q42`), справка (ядро), эликсиры, Талис; генерируется `scripts/cards/master_panel.py` из `master_tpl.html` |
 | `Источники/` | логи сессий 1–13, предыстория, материалы мастера, оригиналы, арты, карты |
 
 ## Сборка
@@ -53,6 +54,7 @@
 - Карточки: `python3 scripts/cards/gen.py && python3 scripts/cards/gen_html.py && python3 scripts/cards/check.py` (должно быть 0 ошибок); бонусы: `python3 scripts/cards/quality.py`
 - Экономика: `python3 scripts/report.py` (долго, Монте-Карло), затем html через master_html.py
 - Помощник: `python3 scripts/cards/helper.py`, затем опубликовать: Artifact, `file_path` = «Помощник варки.html», `url` = https://claude.ai/artifact/9ahrBRLCbGqR7y5myPKor2 (общая база: коллекции `tracks` и `belt/state`)
+- Пульт мастера: `python3 scripts/cards/master_panel.py` (берёт «коротко на утверждение», ядро, карточки, лист, образец), затем Artifact, `file_path` = «Пульт мастера.html», `url` = https://claude.ai/artifact/F5chdTVmCghTWf2wuYSzu4. Ответы мастера читать: ArtifactData list `answers`.
 - Проверка помощника — Playwright с `executablePath: '/opt/pw-browsers/chromium'`.
 
 ## Состояние на 06.10.2026
