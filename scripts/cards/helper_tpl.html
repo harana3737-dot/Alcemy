@@ -173,6 +173,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
   <button class="tbtn" id="theme" type="button">тема</button>
   <h1>Помощник варки</h1>
   <p>Выбери рецепт из __N__ и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. «Пояс» — сумка, выпитое, токсичность, концентрация и отдых. «Журнал» — мастерство, рецепты, исследования; записанная варка сама идёт в сумку и в рост мастерства. «Вылазка» — что есть, что заказано и что хотим, цена, часы и кому. Правила v0.3; материал игрока, не карточки мастера.</p>
+<div class="btns"><button type="button" class="btn soft" id="backupExport">Скачать сохранение</button><button type="button" class="btn ghost" id="backupImport">Восстановить из файла</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p class="note" id="backupStatus" aria-live="polite"></p>
+<dialog id="restoreDialog"><h2>Восстановление сохранения</h2><p id="restoreSummary"></p><p class="note">Заменит сумки, материалы, деньги, журнал и настройки. Перед заменой скачивается копия текущего состояния.</p><div class="btns"><button type="button" class="btn" id="restoreApply">Восстановить</button><button type="button" class="btn ghost" id="restoreCancel">Отмена</button></div></dialog>
 </header>
 <nav class="tabs" role="tablist">
   <button type="button" role="tab" data-tab="brew" aria-selected="true">Варка</button>
@@ -181,6 +183,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
   <button type="button" role="tab" data-tab="plan" aria-selected="false">Вылазка</button>
 </nav>
 <div class="grid" id="tab-brew">
+  <div class="card" id="availability" style="grid-column:1/-1"></div>
   <div class="side">
     <div class="card">
       <div class="row">
@@ -461,6 +464,7 @@ function pickBonuses(c,t){
 
 const pct=x=>Math.round(x*100)+'%';
 function render(keepSit){
+  renderAvailability();
   if(S.sel===null){sitList(null);return}
   const c=D[S.sel], M=Math.max(1,Math.min(10,+$('m').value||1)), B=+$('b').value||0;
   if(!keepSit)sitList(c);
@@ -796,7 +800,7 @@ function renderBelt(){
   if(typeof renderJournal==='function'&&!$('tab-jour').hidden)renderJournal();
   if(typeof renderPlan==='function'&&!$('tab-plan').hidden)renderPlan();
   $('now').textContent=fmtT(ST.T);
-  renderPeople();renderBag();renderMat();renderOD();preview();renderFight();
+  renderPeople();renderBag();renderMat();renderOD();preview();renderFight();renderAvailability();
   $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
   $('undo').disabled=!UNDO.length;
   const t=ST.people[0];if(t){const x=toxOfP(t.id);const b=$('beltBadge');b.textContent=x?`${x}/${t.limit}`:'';b.classList.toggle('hot',x>t.limit)}
@@ -962,6 +966,7 @@ async function masteryTrack(M){
   await JDB.collection('tracks').doc(id).set(data);return {id,...data};
 }
 function renderJournal(){
+  renderAvailability();
   const keepJ={};document.querySelectorAll('#jgroups .jc[data-id]').forEach(c=>{keepJ[c.dataset.id]=[...c.querySelectorAll('input,select')].map(x=>x.type==='checkbox'?x.checked:x.value)});
   setTimeout(()=>document.querySelectorAll('#jgroups .jc[data-id]').forEach(c=>{const k=keepJ[c.dataset.id];if(!k)return;[...c.querySelectorAll('input,select')].forEach((x,i)=>{if(k[i]===undefined)return;if(x.type==='checkbox')x.checked=k[i];else if(k[i]!=='')x.value=k[i]})}),0);
   renderVol();renderHours();
@@ -983,7 +988,7 @@ function jExpect(t){
   if(c.type==='herbval'){const avg=10.5+B, n=Math.ceil(left/avg);
     return `Сейчас бонус ${sg(B)} (${place}): в среднем +${fmtZ(avg)} за попытку, осталось ≈${n} ${pl(n,'попытка','попытки','попыток')} — ≈${2*n} ч и ≈${fmtZ(n*(c.value||0))} зм трав.`}
   if(c.type==='stage'){const m=String(t.rule||'').match(/СЛ (\d+)/);if(!m)return '';const dc=+m[1], Bs=B-(an?3:1)+3;let E=0;
-    for(let r=1;r<=20;r++){const x=r+Bs;E+=(r===20?2*x:r===1?0:x>=dc+5?x+5:x>=dc?x:x>=dc-4?Math.floor(x/2):0)/20}
+    for(let r=1;r<=20;r++){const x=r+Bs;E+=(r===20?2*x:r===1?0:x>=dc+5?x+5:x>=dc?x:x>=dc-4?x/2:0)/20}
     return `Бонус подхода ${sg(Bs)} (лаборатория Анариэль +3, без бонуса твоего места), СЛ ${dc}: в среднем +${fmtZ(+E.toFixed(1))} за подход, осталось ≈${Math.ceil(left/E)} ${pl(Math.ceil(left/E),'подход','подхода','подходов')}.`}
   if(c.type==='probe'&&t.mode==='marks'&&c.l){const hints=Math.min(3,(c.ess?1:0)+(c.sample?1:0)), base=c.sample?DC[c.l-1]-2:DC[c.l-1], /* DC — СЛ эликсиров; зелья по образцу на 2 ниже */ dc=base+(hints?0:2), Bp=B+2*hints, ch=chancesTxt(dc,Bp);
     const E=ch.ok+2*ch.hi+3*ch.n20;
@@ -1007,7 +1012,7 @@ function jCard(t){
     go.onclick=()=>{const v=+n.value;if(!n.value||!isFinite(v))return n.focus();
       if(hv){const mult=+ms.value;let spent='';mutate(()=>{spent=spendProbe(t,mult);addHours(2,`попытка «${t.name}»`);logx(`Попытка «${t.name}»: +${v}${spent?'. Расход: '+spent:''}`)});
         jAdd(t,v,[m.value.trim(),mult===0?'нат. 20, травы не тратились':'',spent].filter(Boolean).join(' · '))}
-      else if(stg){const o=ms.value,L=t.cost.loss||[0,0,0];const add=o==='ok'?v:o==='hi'?v+5:o==='un'?Math.floor(v/2):o==='n20'?2*v:0;const loss=o==='un'?L[0]:o==='fl'?L[1]:o==='n1'?L[2]:0;
+      else if(stg){const o=ms.value,L=t.cost.loss||[0,0,0];const add=o==='ok'?v:o==='hi'?v+5:o==='un'?v/2:o==='n20'?2*v:0;const loss=o==='un'?L[0]:o==='fl'?L[1]:o==='n1'?L[2]:0;
         let txt=`итог ${v}: ${ms.options[ms.selectedIndex].text}`;if(loss)txt+=`, +${loss} зм к стоимости этапа`;mutate(()=>{addHours(2,`подход «${t.name}»`);logx(`${t.name}: ${txt}`)});
         const note=[m.value.trim(),txt,o==='hi'&&t.cost.mark?t.cost.mark:'',['fl','n1'].includes(o)&&t.cost.harm?t.cost.harm[o]:''].filter(Boolean).join(' · ');
         const cur=(+t.current||0)+add, lg=(Array.isArray(t.log)?t.log:[]).concat([{t:Date.now(),d:add,note}]).slice(-30);
@@ -1774,6 +1779,8 @@ function mishapPicker(el,what){
   const d=document.createElement('div');d.className='brow';d.innerHTML=`<span>осечка</span><select aria-label="Осечка"><option value="">— мастер ещё не назначил</option>${MISHAP.map(m=>`<option>${esc(m)}</option>`).join('')}</select>`;
   d.querySelector('select').onchange=e=>{if(e.target.value)mutate(()=>logx(`Осечка (${what}): ${e.target.value}`))};el.appendChild(d);
 }
+
+__TABLE_TOOLS__
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;

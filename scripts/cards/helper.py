@@ -75,6 +75,7 @@ for d in data:
 
 js = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
 html = (HERE / "helper_tpl.html").read_text(encoding="utf-8")
+html = html.replace("__TABLE_TOOLS__", (HERE / "table_tools.js").read_text(encoding="utf-8"))
 html = html.replace("__DATA__", js).replace("__CLS__", json.dumps(CLS, ensure_ascii=False)).replace("__N__", str(len(data)))
 html = html.replace("__SEED__", json.dumps(dict(id=seed_id, items=seed, mat=MAT, mid=hashlib.sha1(json.dumps(MAT, ensure_ascii=False).encode()).hexdigest()[:10]), ensure_ascii=False).replace("</", "<\\/"))
 out = pathlib.Path(ROOT) / "Помощник варки.html"
