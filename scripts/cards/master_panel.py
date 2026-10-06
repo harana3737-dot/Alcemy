@@ -39,8 +39,17 @@ core = re.sub(r"<h1[^>]*>.*?</h1>", "", core, count=1, flags=re.S)
 _g = {"__file__": str(HERE / "quality.py")}
 exec(open(HERE / "quality.py", encoding="utf-8").read().split("\n\ncards = sorted")[0], _g)
 C, CLS, ORDER = _g["C"], _g["CLS"], _g["CLS_ORDER"]
+def conc(c):  # как в каталоге (gen.py, conc_short): эффект — алхимическая по a89, заряды и склянки — обычная по полю conc
+    if c["cls"] == "eff":
+        return "алхимическая концентрация" if c["a89"].startswith("да") else "нет"
+    if c["cls"] in ("chg", "rea", "fl", "oils") and c["conc"] and not c["conc"].startswith("нет"):
+        return "обычная концентрация того, кто применил"
+    return "нет"
+def tox_n(c):  # токсичность выпитой дозы числом; склянки, масла, мази и яд через рану — 0
+    m = re.match(r"\s*(\d+)", c["tox"])
+    return 0 if c["cls"] == "psn" or not m else int(m.group(1))
 cards = [dict(n=c["name"], l=c["lvl"], k=c["cls"], f=c["fam"] or "", e=c["ess"], p=c["price"], t=c["tox"],
-              d=c["dur"], c=c["conc"], s=c.get("src_raw") or c["src"], x=c["eff"], o=c["note"] or "")
+              d=c["dur"], c=conc(c), g=c["tasks"], es=c["ess_types"], tx=tox_n(c), s=c.get("src_raw") or c["src"], x=c["eff"], o=c["note"] or "")
          for c in sorted(C, key=lambda c: (c["lvl"], ORDER.index(c["cls"]), c["name"]))]
 
 # Талис: только строки алхимии, которые можно мастеру

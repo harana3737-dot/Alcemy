@@ -81,11 +81,26 @@ h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .filters input{flex:1 1 220px;min-width:0;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
 .filters select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px}
+.fgroups{display:grid;gap:6px;margin:10px 0 6px}
+.fgr{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:baseline}
+.fgr>span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.fgr .chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer}
+.chip small{color:var(--muted);font-size:11px;margin-left:4px}
+.chip[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:var(--panel)}
+.chip[aria-pressed=true] small{color:var(--panel)}
+.chip:disabled{opacity:.4;cursor:default}
+.frow{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:4px 0 8px}
+.frow .note{flex:1;min-width:120px}
+.tgl{display:flex;gap:6px;align-items:center;font-size:14px;cursor:pointer}.tgl input{accent-color:var(--acc)}
+@media(max-width:520px){.fgr{grid-template-columns:1fr}}
 .el{border-top:1px solid var(--line)}
 .el>button{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;padding:9px 4px;cursor:pointer}
 .el>button:hover{background:var(--chip)}
 .el .lv{font:500 13px var(--f-mono);color:var(--acc)}
-.el .k{font-size:12px;color:var(--muted);white-space:nowrap}
+.el>button>span{min-width:0}
+.el .k{font-size:12px;color:var(--muted);text-align:right}
+@media(min-width:521px){.el .k{white-space:nowrap}}
 .el .d{padding:2px 4px 12px 56px;font-size:14px}
 .el .d dl{display:grid;grid-template-columns:max-content 1fr;gap:3px 12px;margin:6px 0}
 .el .d dt{color:var(--muted);font-size:13px}.el .d dd{margin:0}
@@ -131,10 +146,11 @@ h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
 <section id="p-el" hidden>
   <div class="filters">
     <input id="fq" type="search" placeholder="Название, эссенция или слово из эффекта" aria-label="Поиск эликсира" autocomplete="off">
-    <select id="fk" aria-label="Класс"></select>
-    <select id="fl" aria-label="Уровень"><option value="">все уровни</option></select>
+    <select id="fs" aria-label="Сортировка"><option value="l">по уровню</option><option value="n">по названию</option><option value="p">по цене</option></select>
   </div>
-  <p class="note" id="fcount"></p>
+  <div class="fgroups" id="fg"></div>
+  <div class="frow"><label class="tgl"><input type="checkbox" id="fnow"> Талис может варить сейчас (до II)</label>
+    <span class="note" id="fcount"></span><button type="button" class="btn" id="freset">Сбросить фильтры</button></div>
   <div id="els"></div>
 </section>
 
@@ -217,22 +233,44 @@ setTimeout(async()=>{try{
     if(CANW)$('saveSt').textContent='Ответы видит игрок.'},()=>{$('saveSt').textContent='Связь со списком ответов потеряна — обнови страницу.'});
 }catch(e){$('saveSt').textContent='Ответы сохраняются только в этом браузере.'}},0);
 
-// ===== Эликсиры =====
+// ===== Эликсиры: группы фильтров — внутри группы «или», между группами «и» =====
 const CARDS=J('d-cards'), CLS=J('d-cls'), ORDER=J('d-order'), ROM=['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
-$('fk').innerHTML='<option value="">все классы</option>'+ORDER.filter(k=>CARDS.some(c=>c.k===k)).map(k=>`<option value="${k}">${esc(CLS[k])}</option>`).join('');
-$('fl').innerHTML+=[...new Set(CARDS.map(c=>c.l))].sort((a,b)=>a-b).map(l=>`<option value="${l}">${ROM[l]}</option>`).join('');
-function renderEls(){const q=$('fq').value.trim().toLowerCase(),k=$('fk').value,l=$('fl').value;
-  const list=CARDS.filter(c=>(!k||c.k===k)&&(!l||c.l===+l)&&(!q||[c.n,c.e,c.f,c.x,c.s].join(' ').toLowerCase().includes(q)));
-  $('fcount').textContent=`Найдено ${list.length} из ${CARDS.length}`;
+const TIER=l=>l<=2?'обычный (I–II)':l<=5?'необычный (III–V)':l<=7?'редкий (VI–VII)':l<=9?'очень редкий (VIII–IX)':'легендарный (X)';
+const TX=t=>t>=3?'3 и больше':String(t);
+const PR=c=>+String(c.p).replace(/[^\d]/g,'')||0;
+const FG=[
+  {id:'g',t:'Задача',vals:c=>c.g,order:['Урон','Контроль','Защита','Усиление','Восстановление','Передвижение','Разведка','Общение','Утилита','Контрольный яд']},
+  {id:'k',t:'Класс',vals:c=>[CLS[c.k]||c.k],order:ORDER.map(k=>CLS[k])},
+  {id:'r',t:'Редкость',vals:c=>[TIER(c.l)],order:['обычный (I–II)','необычный (III–V)','редкий (VI–VII)','очень редкий (VIII–IX)','легендарный (X)']},
+  {id:'e',t:'Эссенция',vals:c=>c.es.filter(e=>!/^по |^особая/.test(e)),order:['Тело','Разум','Чувства','Движение','Стихия','Покров','Вода/дыхание','Смерть/душа','Эфир']},
+  {id:'c',t:'Концентрация',vals:c=>[c.c==='нет'?'нет':c.c.startsWith('алхим')?'алхимическая':'обычная'],order:['нет','обычная','алхимическая']},
+  {id:'x',t:'Токсичность',vals:c=>[TX(c.tx)],order:['0','1','2','3 и больше']}];
+const SEL={};FG.forEach(f=>SEL[f.id]=new Set());
+const passOthers=(c,skip)=>FG.every(f=>f.id===skip||!SEL[f.id].size||f.vals(c).some(v=>SEL[f.id].has(v)));
+const textOk=c=>{const q=$('fq').value.trim().toLowerCase();return !q||[c.n,c.e,c.f,c.x,c.s].join(' ').toLowerCase().includes(q)};
+const nowOk=c=>!$('fnow').checked||c.l<=2;
+function renderFG(){const box=$('fg');box.innerHTML='';
+  FG.forEach(f=>{const base=CARDS.filter(c=>textOk(c)&&nowOk(c)&&passOthers(c,f.id));
+    const row=document.createElement('div');row.className='fgr';row.innerHTML=`<span>${f.t}</span><div class="chips"></div>`;
+    f.order.forEach(v=>{const n=base.filter(c=>f.vals(c).includes(v)).length,on=SEL[f.id].has(v);if(!n&&!on&&!CARDS.some(c=>f.vals(c).includes(v)))return;
+      const b=document.createElement('button');b.type='button';b.className='chip';b.setAttribute('aria-pressed',on);b.disabled=!n&&!on;
+      b.innerHTML=`${esc(v)}<small>${n}</small>`;b.onclick=()=>{on?SEL[f.id].delete(v):SEL[f.id].add(v);renderEls()};row.querySelector('.chips').appendChild(b)});
+    box.appendChild(row)})}
+function renderEls(){
+  const list=CARDS.filter(c=>textOk(c)&&nowOk(c)&&passOthers(c,null));
+  const s=$('fs').value;list.sort((a,b)=>s==='n'?a.n.localeCompare(b.n,'ru'):s==='p'?PR(a)-PR(b)||a.l-b.l:a.l-b.l||a.n.localeCompare(b.n,'ru'));
+  $('fcount').textContent=`Найдено ${list.length} из ${CARDS.length}`;renderFG();
   const box=$('els');box.innerHTML='';
-  list.slice(0,200).forEach(c=>{const d=document.createElement('div');d.className='el';
-    d.innerHTML=`<button type="button" aria-expanded="false"><span class="lv">${ROM[c.l]}</span><span>${esc(c.n)}</span><span class="k">${esc(CLS[c.k]||c.k)}</span></button>
+  list.forEach(c=>{const d=document.createElement('div');d.className='el';
+    d.innerHTML=`<button type="button" aria-expanded="false"><span class="lv">${ROM[c.l]}</span><span>${esc(c.n)}</span><span class="k">${esc(CLS[c.k]||c.k)} · ${esc(c.p)} зм</span></button>
       <div class="d" hidden><p>${md(c.x)}</p><dl>
         <dt>Источник</dt><dd>${esc(c.s)}</dd><dt>Эссенция</dt><dd>${esc(c.e)}</dd>${c.f?`<dt>Формула</dt><dd>${esc(c.f)}</dd>`:''}
-        <dt>Цена</dt><dd>${esc(c.p)} зм</dd><dt>Токсичность</dt><dd>${esc(c.t)}</dd><dt>Длительность</dt><dd>${esc(c.d)}</dd><dt>Концентрация</dt><dd>${esc(c.c)}</dd></dl>
+        <dt>Задачи</dt><dd>${esc(c.g.join(', '))}</dd><dt>Цена</dt><dd>${esc(c.p)} зм</dd><dt>Токсичность</dt><dd>${esc(c.t)}</dd><dt>Длительность</dt><dd>${esc(c.d)}</dd><dt>Концентрация</dt><dd>${esc(c.c)}</dd></dl>
         ${c.o?`<p class="note">${md(c.o)}</p>`:''}</div>`;
     const b=d.querySelector('button'),dd=d.querySelector('.d');b.onclick=()=>{dd.hidden=!dd.hidden;b.setAttribute('aria-expanded',!dd.hidden)};box.appendChild(d)})}
-['fq','fk','fl'].forEach(i=>$(i).addEventListener('input',renderEls));renderEls();
+$('fq').addEventListener('input',renderEls);$('fs').onchange=renderEls;$('fnow').onchange=renderEls;
+$('freset').onclick=()=>{FG.forEach(f=>SEL[f.id].clear());$('fq').value='';$('fnow').checked=false;renderEls()};
+renderEls();
 
 // ===== Талис =====
 const T=J('d-talis');
