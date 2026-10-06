@@ -1213,6 +1213,10 @@ const INK={dc:[10,12,12,13,15,17,19,21,23,25],price:[15,30,120,300,1200,2500,750
   place:['инструменты','инструменты','инструменты','инструменты','рабочее место','рабочее место','полная лаборатория','полная лаборатория','полная лаборатория','мастерская лаборатория']};
 const inkName=l=>l?`Чернила ${ROM[l]}`:'Чернила заговора';
 const INKQ={n20:['отличные','+4'],hi:['качественные','+2'],ok:['стандартные','±0'],un:['нестабильные','−2']};
+// катализатор в формах чернил и противоядий: проверка по выбранному, галочка «треснул»
+function wireCat(box,sel){const s=box.querySelector(sel);if(!s)return;const f=()=>{const w=box.querySelector('.cw');if(!w)return;const x=ST.mat.cat.find(y=>y.id===s.value);
+  w.innerHTML=x&&x.used>=stab(x)?` <span class="wr">проверка нестабильности, СЛ ${instDC(x,x.used+1)} (5.2)</span><label class="tg" style="padding:4px 0 0"><input type="checkbox" class="cat-crack"><span>Проверка провалена — катализатор треснул (предмет испорчен: отметь провал)</span></label>`:''};s.onchange=f;f()}
+function crackCat(box,x,out){const cr=box.querySelector('.cat-crack');if(cr&&cr.checked){ST.mat.cat=ST.mat.cat.filter(y=>y!==x);out.push(`катализатор ${ROM[x.o]} треснул (5.2)`);return true}return false}
 function inkForm(box){
   box.innerHTML=`<div class="row" style="flex-wrap:wrap">
      <div style="flex:0 0 120px"><label class="f">Уровень</label><select class="il">${INK.dc.map((_,l)=>`<option value="${l}">${l?ROM[l]:'заговор'}</option>`).join('')}</select></div>
@@ -1238,9 +1242,11 @@ function inkForm(box){
     const cat=ord?ST.mat.cat.filter(x=>x.o===ord&&x.used<cmax(x)):[];
     const rows=[['heal','Лечебные'],['poison','Ядовитые']].map(([k,t])=>{const have=herbValue(k,minL);return `${t} травы ур. ${minL}+ на <b>${fmtZ(half)} зм</b> из ${fmtZ(have)}${have<half-1e-9?' <span class="bad">не хватает</span>':''}`});
     rows.push(`Эссенция ур. ${l?ROM[l]:'I'}+ ×${l?1:'½'} (тип — резонанс): <select class="ie" aria-label="Эссенция">${fit.map(e=>`<option value="${e.id}">${esc(e.n)} — ${e.types.map(esc).join(' / ')} ${ROM[e.l]} (${fmtZ(e.q)})</option>`).join('')}<option value="">не списывать</option></select>${fit.length?'':' <span class="bad">подходящей нет</span>'}${fit.length&&fit[0].l>Math.max(1,l)?' <small>(выше уровнем — избыток теряется)</small>':''}`);
-    if(ord)rows.push(`Катализатор ${ROM[ord]} порядка: <select class="ic" aria-label="Катализатор">${cat.map(x=>`<option value="${x.id}">${x.used}/${cmax(x)}</option>`).join('')}<option value="">не списывать</option></select>${cat.length?(cat[0].used>=stab(cat[0])?` <span class="wr">проверка нестабильности, СЛ ${instDC(cat[0],cat[0].used+1)} (5.2)</span>`:''):' <span class="bad">нет катализатора</span>'}`);
+    if(ord)rows.push(`Катализатор ${ROM[ord]} порядка: <select class="ic" aria-label="Катализатор">${cat.map(x=>`<option value="${x.id}">${x.used}/${cmax(x)}</option>`).join('')}<option value="">не списывать</option></select>${cat.length?'<span class="cw"></span>':' <span class="bad">нет катализатора</span>'}`);
+    const keepC=box.querySelector('.ic')?.value;
     box.querySelector('.ires').innerHTML=`<div class="sect">Расход на набор</div><div class="resb">${rows.map(r=>`<div>${r}</div>`).join('')}</div>`;
     const ie=box.querySelector('.ie');if(keep!==undefined&&[...ie.options].some(o=>o.value===keep))ie.value=keep;
+    const ic=box.querySelector('.ic');if(ic&&keepC!==undefined&&[...ic.options].some(o=>o.value===keepC))ic.value=keepC;wireCat(box,'.ic');
   };
   il.onchange=upd;lael.onchange=upd;box._upd=upd;upd();
   const vb=document.createElement('button');vb.type='button';vb.className='btn soft ivol';vb.textContent='Начать долгую варку';vb.hidden=true;box.querySelector('.iout').after(vb);
@@ -1249,7 +1255,7 @@ function inkForm(box){
     const s2=volStart(null,null,{l,name:inkName(l),spell:sp,get essT(){return essT},spend:()=>{const out=[];
       ['heal','poison'].forEach(k=>{if(herbValue(k,minL)>=half-1e-9)out.push(`${KIND[k].toLowerCase()} ${takeValue(k,half,minL)}`);else out.push(`${KIND[k].toLowerCase()} не списаны: нужно на ${fmtZ(half)} зм`)});
       if(ieV){const e=ST.mat.ess.find(x=>x.id===ieV);if(e){e.q=+(e.q-1).toFixed(2);essT=e.types[0];out.push(`эссенция «${e.n}» −1`)}}
-      if(icV){const x=ST.mat.cat.find(y=>y.id===icV);if(x){x.used=Math.min(cmax(x),x.used+1);out.push(`катализатор ${ROM[x.o]} — ${x.used}/${cmax(x)}`)}}
+      if(icV){const x=ST.mat.cat.find(y=>y.id===icV);if(x){x.used=Math.min(cmax(x),x.used+1);if(!crackCat(box,x,out))out.push(`катализатор ${ROM[x.o]} — ${x.used}/${cmax(x)}`)}}
       ST.mat.ess=ST.mat.ess.filter(e=>e.q>1e-9);return out.join(', ')}});
     const v=vols()[vols().length-1];if(v)v.ess=essT;box.querySelector('.imsg').textContent=`Начата долгая варка: подходы — ниже, в «Долгой варке». Расход: ${s2}.`;upd()};
   box.querySelectorAll('.iout .chip').forEach(b=>b.onclick=async()=>{
@@ -1259,7 +1265,7 @@ function inkForm(box){
     mutate(()=>{const out=[];
       ['heal','poison'].forEach(k=>{if(herbValue(k,minL)>=half-1e-9)out.push(`${KIND[k].toLowerCase()} ${takeValue(k,half,minL)}`);else out.push(`${KIND[k].toLowerCase()} не списаны: нужно на ${fmtZ(half)} зм`)});
       let essT='';if(ieV){const e=ST.mat.ess.find(x=>x.id===ieV);if(e){const t=Math.min(e.q,l?1:0.5);e.q=+(e.q-t).toFixed(2);essT=e.types[0];out.push(`эссенция «${e.n}» −${fmtZ(t)}`)}}
-      if(icV){const x=ST.mat.cat.find(y=>y.id===icV);if(x){x.used=Math.min(cmax(x),x.used+1);out.push(`катализатор ${ROM[x.o]} — ${x.used}/${cmax(x)}`)}}
+      if(icV){const x=ST.mat.cat.find(y=>y.id===icV);if(x){x.used=Math.min(cmax(x),x.used+1);if(!crackCat(box,x,out))out.push(`катализатор ${ROM[x.o]} — ${x.used}/${cmax(x)}`)}}
       ST.mat.ess=ST.mat.ess.filter(e=>e.q>1e-9);
       spent=out.join(', ');
       if(INKQ[o]){const [q,mod]=INKQ[o];const nm=`${inkName(l)} — ${q} (${mod})`;const note=[essT?`эссенция: ${essT}`:'',sp?`для «${sp}»`:''].filter(Boolean).join(' · ');
@@ -1347,9 +1353,9 @@ function antiForm(box){
     if(!ST.mat){box.querySelector('.ares').innerHTML='';return}
     const half=a.p/6, cat=ST.mat.cat.filter(x=>x.o===a.o&&x.used<cmax(x)), keep=box.querySelector('.ac')?.value;
     const rows=[['heal','Лечебные'],['poison','Ядовитые']].map(([k,t])=>{const h=herbValue(k,a.m);return `${t} травы ур. ${a.m}+ на <b>${fmtZ(half)} зм</b> из ${fmtZ(h)}${h<half-1e-9?' <span class="bad">не хватает</span>':''}`});
-    rows.push(`Катализатор ${ROM[a.o]} порядка: <select class="ac" aria-label="Катализатор">${cat.map(x=>`<option value="${x.id}">${x.used}/${cmax(x)}</option>`).join('')}<option value="">не списывать</option></select>${cat.length?(cat[0].used>=stab(cat[0])?` <span class="wr">проверка нестабильности, СЛ ${instDC(cat[0],cat[0].used+1)} (5.2)</span>`:''):' <span class="bad">нет катализатора</span>'}`);
+    rows.push(`Катализатор ${ROM[a.o]} порядка: <select class="ac" aria-label="Катализатор">${cat.map(x=>`<option value="${x.id}">${x.used}/${cmax(x)}</option>`).join('')}<option value="">не списывать</option></select>${cat.length?'<span class="cw"></span>':' <span class="bad">нет катализатора</span>'}`);
     box.querySelector('.ares').innerHTML=`<div class="sect">Расход</div><div class="resb">${rows.map(r=>`<div>${r}</div>`).join('')}</div>`;
-    const ac=box.querySelector('.ac');if(keep!==undefined&&[...ac.options].some(o=>o.value===keep))ac.value=keep;
+    const ac=box.querySelector('.ac');if(keep!==undefined&&[...ac.options].some(o=>o.value===keep))ac.value=keep;wireCat(box,'.ac');
   };
   al.onchange=upd;box._upd=upd;upd();
   box.querySelectorAll('.aout .chip').forEach(b=>b.onclick=async()=>{
@@ -1358,7 +1364,7 @@ function antiForm(box){
     mutate(()=>{const out=[];
       const B0=box.querySelector('.abon')?.value, save=(o==='hi'&&B0==='Экономия трав')||(o==='n20'&&(B0==='Экономия трав'||(B0==='Два бонуса'&&[box.querySelector('.abon2').value,box.querySelector('.abon3').value].includes('Экономия трав'))));
       ['heal','poison'].forEach(k=>{if(save){out.push(`${KIND[k].toLowerCase()}: экономия — тратится половина`)}if(herbValue(k,a.m)>=(save?half/2:half)-1e-9)out.push(`${KIND[k].toLowerCase()} ${takeValue(k,save?half/2:half,a.m)}`);else out.push(`${KIND[k].toLowerCase()} ур. ${a.m}+ не списаны: нужно на ${fmtZ(save?half/2:half)} зм`)});
-      if(acV){const x=ST.mat.cat.find(y=>y.id===acV);if(x){x.used=Math.min(cmax(x),x.used+1);out.push(`катализатор ${ROM[x.o]} — ${x.used}/${cmax(x)}`)}}
+      if(acV){const x=ST.mat.cat.find(y=>y.id===acV);if(x){x.used=Math.min(cmax(x),x.used+1);if(!crackCat(box,x,out))out.push(`катализатор ${ROM[x.o]} — ${x.used}/${cmax(x)}`)}}
       spent=out.join(', ');
       const put=(nm,note)=>{const bb=ST.bag.find(x=>x.who==='p1'&&x.n===nm&&(x.note||'')===(note||''));if(bb)bb.q++;else ST.bag.push({n:nm,q:1,who:'p1',...(note?{note}:{})})};
       const bon0=box.querySelector('.abon')?.value||'', bon=o==='hi'&&['Ещё одно','Два бонуса'].includes(bon0)?'':bon0, two=bon==='Два бонуса'?[box.querySelector('.abon2').value,box.querySelector('.abon3').value]:[bon], def=box.querySelector('.adef')?.value||'';
