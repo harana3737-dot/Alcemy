@@ -48,6 +48,10 @@
 | `Экономика алхимии — для мастера.md`, `Симуляция экономики зелий.md` | **генерируются** `scripts/report.py` — правки вносить в скрипт |
 | `Помощник варки.html` | пояс (с панелью «Бой»), сумки, журнал, варка, вылазка; генерируется из `scripts/cards/helper_tpl.html` + `table_tools.js` (тест — `test_table_tools.cjs`, см. `TABLE_TOOLS.md`) |
 | `Пульт мастера.html` | страница мастеру: вопросы с ответами (общая база, коллекция `answers`, документы `q1…q42`), справка (ядро), эликсиры, Талис; генерируется `scripts/cards/master_panel.py` из `master_tpl.html` |
+| `Для игрока — книга алхимии.md/.html`, `Для игрока — начни отсюда.md`, `Материалы игрока — … .zip` | книга игрока: объяснения и 22 источника внутри (в т. ч. лист, заметки, журнал). **Только игроку, мастеру не отдавать** — там сведения игрока (Аэлиус и др.). Html и оба zip собираются `scripts/player_book.py`; после правки любого источника книги — пересобрать |
+| `Группа — баффы и расходники.md` | расчёт баффов и расходников группы; таблицы — вывод `scripts/party_kit_report.py` (и `--progress`), тест `scripts/test_party_kit.py` |
+| `Группа — обзор каталога эликсиров.md` | рекомендации игроку по каталогу; блок генерирует `scripts/elixir_catalog_review.py --write` |
+| `Проверка материалов — 2026-10-07.md`, `Аудит документов — 2026-10-06.md` | отчёты проверок Codex (исторические срезы) |
 | `Источники/` | логи сессий 1–13, предыстория, материалы мастера, оригиналы, арты, карты |
 
 ## Сборка
@@ -58,6 +62,8 @@
 - Экономика: `python3 scripts/report.py` (долго, Монте-Карло), затем html через master_html.py
 - Помощник: `python3 scripts/cards/helper.py`, затем опубликовать: Artifact, `file_path` = «Помощник варки.html», `url` = https://claude.ai/artifact/9ahrBRLCbGqR7y5myPKor2 (общая база: коллекции `tracks` и `belt/state`)
 - Пульт мастера: `python3 scripts/cards/master_panel.py` (берёт «коротко на утверждение», ядро, карточки, лист, образец), затем Artifact, `file_path` = «Пульт мастера.html», `url` = https://claude.ai/artifact/F5chdTVmCghTWf2wuYSzu4. Ответы мастера читать: ArtifactData list `answers`.
+- Обзор каталога: `python3 scripts/elixir_catalog_review.py --write`; книга игрока и архивы: `python3 scripts/player_book.py` (во временной копии), проверка — `node scripts/test_player_book.cjs`. Книга включает журнал решений, правила, лист и др. — пересобирать после их правки.
+- Тесты расчётов: `python3 -B scripts/test_economy.py`, `python3 -B scripts/test_party_kit.py`.
 - Проверка помощника — Playwright с `executablePath: '/opt/pw-browsers/chromium'`.
 
 ## Состояние на 06.10.2026
