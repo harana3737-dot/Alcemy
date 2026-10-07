@@ -1,13 +1,20 @@
 """Книга игрока, комплект для чтения и отдельный архив её исходников.
 
 Запускать python3 -B scripts/player_book.py в свежей копии без .git.
+Архивы собираются по запросу и в Git не хранятся.
+python3 -B scripts/player_book.py --check проверяет актуальность HTML:
+сборка идёт во временной папке, исходники и результаты в проекте не меняются.
+Архивы проверяются на целостность, но не сравниваются с репозиторием.
 Объяснения редактируются в MD, оформление — в player_book_tpl.html.
 Игровые сохранения, правила и цены не изменяются.
 """
 from dataclasses import dataclass
 from pathlib import Path
+import argparse
 import html
 import re
+import shutil
+import tempfile
 from urllib.parse import unquote
 import zipfile
 
@@ -33,8 +40,8 @@ DOCUMENTS = [
     Document('glossary', 'Глоссарий.md', 'Правила', 'Определения терминов. Короткие ответы простыми словами — в главе 22 книги.'),
     Document('catalog-review', 'Группа — обзор каталога эликсиров.md', 'Группа и развитие', 'Актуальные уточнения заклинаний, очередь исследований, 103 оценки и растущие пределы токсичности.'),
     Document('party', 'Группа — баффы и расходники.md', 'Группа и развитие', 'Расчёты сценариев по мастерству и уровню. Старые примеры с пределами L4 не ограничивают будущую группу; уточнения книги заклинаний и очереди — в обзоре каталога.'),
-    Document('sheet', 'Талис — лист персонажа.md', 'Группа и развитие', 'Выдержка: основные числа, алхимия, запасы и союзники. Снимок, не синхронизация с журналом; полный исходник в архиве.', ('Основное', 'Алхимия', 'Снаряжение', 'Союзники')),
-    Document('future', 'Заметки на будущее.md', 'Группа и развитие', 'Выдержка планов развития и отыгрыша. Библиотека — план проявления драконьих инстинктов. Выборы заклинаний и покупки ещё не получены; полный исходник в архиве.', ('Алхимия и кузнечное дело', 'Катализатор IV', 'Библиотека', 'Ледяной шкаф', 'Своя мастерская', 'Контрольная точка', 'План заклинаний')),
+    Document('sheet', 'Талис — лист персонажа.md', 'Группа и развитие', 'Выдержка: основные числа, алхимия, запасы и союзники. Снимок, не синхронизация с журналом; полный исходник в проекте и в архиве исходников, собираемом по запросу.', ('Основное', 'Алхимия', 'Снаряжение', 'Союзники')),
+    Document('future', 'Заметки на будущее.md', 'Группа и развитие', 'Выдержка планов развития и отыгрыша. Библиотека — план проявления драконьих инстинктов. Выборы заклинаний и покупки ещё не получены; полный исходник в проекте и в архиве исходников, собираемом по запросу.', ('Алхимия и кузнечное дело', 'Катализатор IV', 'Библиотека', 'Ледяной шкаф', 'Своя мастерская', 'Контрольная точка', 'План заклинаний')),
     Document('bonuses', 'Бонусы за 5+ и 20 — что выгоднее брать.md', 'Практика', 'Рекомендации под цель. Указанные пределы 7/6 — текущие L4. Чистый снимает остаток своей дозы, не токсичность действующего эффекта.'),
     Document('quality', 'Бонусы качества по карточкам.md', 'Практика', 'Подсказки для выбора, не обязательная награда. Длительность и ограничения сверяй с 8.12.'),
     Document('cards', 'Карточки эликсиров.md', 'Практика', 'Полный каталог 196 карточек со статусом черновиков. Включение в каталог не означает известную формулу. Альтернативы в карточках отделяй от основной версии.'),
@@ -279,5 +286,38 @@ def build(root=ROOT):
     print(f'Готово: глав {len(chapters)}, справок {len(PRIMARY_KEYS)} + {len(DOCUMENTS)-len(PRIMARY_KEYS)}; файлов для чтения {len(entries)}, исходников {len(source_entries)}; HTML {len(page.encode()) // 1024} КБ')
 
 
+def check(root=ROOT):
+    """Пересобрать без записи в root и сверить только опубликованный HTML."""
+    with tempfile.TemporaryDirectory(prefix='alcemy-book-check-') as directory:
+        temporary = Path(directory)
+        inputs = {BOOK + '.md', 'Для игрока — начни отсюда.md',
+                  *(doc.filename for doc in DOCUMENTS),
+                  'scripts/player_book.py', 'scripts/player_book_tpl.html',
+                  'scripts/test_player_book.cjs'}
+        for name in inputs:
+            destination = temporary / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(root / name, destination)
+        build(temporary)
+        for name in (ARCHIVE, SOURCE_ARCHIVE):
+            with zipfile.ZipFile(temporary / name) as archive:
+                damaged = archive.testzip()
+                if damaged is not None:
+                    raise SystemExit(f'Повреждён архив {name}: {damaged}')
+        published = root / (BOOK + '.html')
+        if not published.is_file():
+            raise SystemExit(f'Отсутствует {published.name}; пересоберите книгу.')
+        if published.read_bytes() != (temporary / published.name).read_bytes():
+            raise SystemExit(f'Устарела {published.name}; пересоберите книгу из текущих исходников.')
+    print('PASS: HTML актуален; оба архива собираются и проходят проверку целостности')
+
+
 if __name__ == '__main__':
-    build()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--check', action='store_true',
+                        help='проверить HTML временной сборкой без изменения проекта')
+    args = parser.parse_args()
+    if args.check:
+        check()
+    else:
+        build()
