@@ -112,6 +112,15 @@ def hit_probability(attack, ac):
     return sum(d == 20 or d != 1 and d + attack >= ac for d in range(1,21))/20
 
 
+def proficiency(level):
+    return 2+(level-1)//4
+
+
+def toxicity_limit(level, constitution_modifier):
+    """Бонус мастерства персонажа; не уровень/бонус мастерства алхимии."""
+    return 2+constitution_modifier+proficiency(level)
+
+
 def incoming(ac, dex, attacks=8, enemy_attack=6, mirror=False, disadvantage=False):
     """Точная цепь числа живых образов; фиксированный урон10 за попадание.
 
@@ -139,7 +148,7 @@ def incoming(ac, dex, attacks=8, enemy_attack=6, mirror=False, disadvantage=Fals
 
 def weapon_damage(level, tenser=False, haste=False, strength=18, ac=18):
     """Двуручный меч2d6; без бонуса магического оружия/стиля/расходуемых кар."""
-    pb=2+(level-1)//4
+    pb=proficiency(level)
     mod=(strength-10)//2
     p=hit_probability(pb+mod,ac)
     crit=.05
@@ -157,6 +166,15 @@ def main():
     extra=REVIEWS.keys()-{c['name'] for c in cards}
     if missing or extra:
         raise ValueError(f'Не оценены: {missing}; лишние: {extra}')
+    print('### Рост предела токсичности\n')
+    print('Предел = 2 + модификатор Телосложения + бонус мастерства персонажа. Ниже Телосложение сохраняется текущим: Талис +3, Лаэль и Фаэнон +2. Рост Телосложения/постоянные предметы потребуют пересчёта; временные эликсиры предел не повышают. Уровень персонажа независим от мастерства алхимии.\n')
+    print('| Уровень персонажа | Бонус мастерства | Талис | Лаэль | Фаэнон | Тензер 4 + Неуязвимость 3 Фаэнону |')
+    print('| --- | ---: | ---: | ---: | ---: | --- |')
+    for level in (4,5,9,13,17):
+        limit=toxicity_limit(level,2)
+        compatible='нет' if limit<7 else f'да; остаток {limit-7}'
+        print(f'| {level} | +{proficiency(level)} | {toxicity_limit(level,3)} | {limit} | {limit} | {compatible} |')
+    print('\nПоследняя колонка проверяет только токсичность, не доступность рецептов: нужны M9 для Тензера и M7 для Неуязвимости. Остаток указан без других доз/активных эффектов. Алхимическая концентрация этих двух эффектов совместима.\n')
     print('### Восемь входящих атак: сравнение защиты\n')
     print('Атака врага+6, фиксированные10урона за попадание, только обычные видящие атаки; нет Щита реакцией, критического удвоения, площади и спасбросков. Это сравнение, не прогноз конкретного босса.\n')
     print('| Персонаж / КД | Без баффа | Щит веры | Образы | Щит + Образы | Помеха атакам | Сопротивление этому урону |')
