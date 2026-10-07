@@ -108,7 +108,7 @@ page = f"""<!doctype html>
 @media (prefers-color-scheme:dark){{:root:not([data-theme="light"]){{--bg:#17161a;--fg:#ebe7df;--mut:#a59f94;--card:#211f24;--line:#36333a;--acc:#e3b26b;--accbg:#2f2a22;color-scheme:dark}}}}
 :root[data-theme="dark"]{{--bg:#17161a;--fg:#ebe7df;--mut:#a59f94;--card:#211f24;--line:#36333a;--acc:#e3b26b;--accbg:#2f2a22;color-scheme:dark}}
 *{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}}
-main{{max-width:820px;margin:0 auto;padding:16px 16px 60px}}
+main{{max-width:820px;margin:0 auto;padding:16px 16px 60px;overflow-wrap:anywhere}}
 h1{{font-size:1.55rem;line-height:1.25;text-wrap:balance}}h2{{font-size:1.3rem;margin:2em 0 .6em;padding-top:.6em;border-top:2px solid var(--line)}}
 h3{{font-size:1.1rem;color:var(--acc);margin:1.6em 0 .4em}}h4{{font-size:1.02rem;margin:1.6em 0 .4em;padding:8px 12px;background:var(--accbg);border-radius:8px}}
 p{{margin:.55em 0}}ul{{margin:.4em 0;padding-left:1.3em}}li{{margin:.2em 0}}
