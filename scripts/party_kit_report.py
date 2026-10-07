@@ -20,6 +20,7 @@ CARDS = {c['name']: c for c in C}
 HERB = {1: .1, 2: .5, 3: 1, 4: 2, 5: 4, 6: 8, 7: 16, 8: 32}
 MB = {2: 1, 3: 1, 4: 2, 5: 2, 6: 3, 7: 3, 8: 4, 9: 4, 10: 5}
 DC = {1: 12, 2: 12, 3: 13, 4: 15, 5: 17, 6: 19, 7: 21, 8: 23}
+PLACE_LIMIT = {0: 3, 1: 5, 3: 8, 5: 10}
 
 
 def proficiency(level):
@@ -28,9 +29,21 @@ def proficiency(level):
     return 2 + (level - 1) // 4
 
 
+def workplace(m, lab=None):
+    """Бонус места и его предел независимы от мастерства алхимика."""
+    place = (1 if m <= 5 else 3 if m <= 8 else 5) if lab is None else lab
+    if place not in PLACE_LIMIT:
+        raise ValueError('Неизвестное рабочее место')
+    return place
+
+
 def bonus(m, level=4, int_mod=0, lab=None):
-    lab = (1 if m <= 5 else 3 if m <= 8 else 5) if lab is None else lab
-    return proficiency(level) + MB[m] + lab + int_mod
+    return proficiency(level) + MB[m] + workplace(m, lab) + int_mod
+
+
+def check_place(c, m, lab=None):
+    if c['lvl'] > PLACE_LIMIT[workplace(m, lab)]:
+        raise ValueError('Рабочее место не допускает уровень этого предмета')
 
 
 def probability(b, dc):
@@ -60,9 +73,11 @@ def small(c, m, q, level=4, int_mod=0, lab=None):
     Дефектные предметы не выдаются в надёжный походный запас.
     """
     from math import comb
+    check_place(c, m, lab)
     l = c['lvl']
     p = probability(bonus(m, level, int_mod, lab), DC[l])
-    cap = (4 if m >= 9 else 3) if l <= 2 else (3 if m >= 9 else 2)
+    workshop = workplace(m, lab) == 5
+    cap = (4 if workshop else 3) if l <= 2 else (3 if workshop else 2)
     batch = 1 if c['cls'] in ('fl', 'chg', 'rea', 'oils') else min(m - l + 2, cap)
     duration = 2 if l <= 2 else 4
 
@@ -83,6 +98,7 @@ def volume(c, m, runs=30000, level=4, int_mod=0, lab=None):
     Независимый фиксированный seed; финальный успех усреднён точно по d20.
     Материалы платятся один раз за длинную попытку, не за каждый подход.
     """
+    check_place(c, m, lab)
     l, b = c['lvl'], bonus(m, level, int_mod, lab)
     hours, p = volume_progress(l, b, runs)
     return materials(c) / p, hours / p, p
@@ -124,6 +140,8 @@ def volume_progress(l, b, runs):
 def row(c, m, q=1, level=4, int_mod=0, lab=None):
     assert c['lvl'] <= m
     kwargs = dict(level=level, int_mod=int_mod, lab=lab)
+    if c['lvl'] > PLACE_LIMIT[workplace(m, lab)]:
+        return f"| {m} / +{bonus(m, **kwargs)} | {c['name']} ×{q} | {price(c) * q:.2f} | — | — | недоступно: уровень рабочего места |"
     cost, hours, p = small(c, m, q, **kwargs) if c['lvl'] <= 5 else volume(c, m, **kwargs)
     return f"| {m} / +{bonus(m, **kwargs)} | {c['name']} ×{q} | {price(c) * q:.2f} | {cost * (q if c['lvl'] > 5 else 1):.2f} | {hours * (q if c['lvl'] > 5 else 1):.1f} | {p:.1%} |"
 
