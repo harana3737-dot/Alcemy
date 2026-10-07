@@ -1,4 +1,5 @@
 import sys
+from reading_guides import add_reading_guide
 sys.argv=["sim.py","10"]
 src=open(__file__.replace("report.py","sim.py"),encoding="utf-8").read().split("# проверка точного расчёта")[0]
 exec(src)
@@ -258,7 +259,7 @@ L.append("""## Выводы
 
 **Чего не хватает для точного расчёта:** реального бонуса Талиса по уровням (цена нестабильного предмета — половина, по правилам v0.3, раздел 2). Лимита сбыта и трав нет (решение мастера), поэтому прибыль за день — это потолок при постоянной работе, а не реальный доход.
 """)
-open(__file__.replace("scripts/report.py","Симуляция экономики зелий.md"),"w",encoding="utf-8").write("\n".join(L))
+open(__file__.replace("scripts/report.py","Симуляция экономики зелий.md"),"w",encoding="utf-8").write(add_reading_guide("\n".join(L), "Симуляция экономики зелий.md"))
 print("\n".join(L))
 
 # Версия для мастера: только то, что нужно для решений, без планов Талиса и статусов.
@@ -315,4 +316,4 @@ _m = "\n".join(M)
 _m = "\n".join("- **Неделя** — три варианта, как у Талиса по логам сессий: 12 часов алхимии (неделя с вылазками), 22 (среднее), 30 (неделя в городе); столбцы «за неделю» — 12 часов, 1,5 рабочих дня; для среднего ×1,8, для города ×2,5." if l.startswith("- **Неделя Талиса**") else l for l in _m.splitlines()) + "\n"
 for w in ("решение игрока", "решение мастера", "вердикт мастера", "вопрос мастеру", "утверждено"):
     assert w not in _m.lower(), w
-open(__file__.replace("scripts/report.py", "Экономика алхимии — для мастера.md"), "w", encoding="utf-8").write(_m)
+open(__file__.replace("scripts/report.py", "Экономика алхимии — для мастера.md"), "w", encoding="utf-8").write(add_reading_guide(_m, "Экономика алхимии — для мастера.md"))

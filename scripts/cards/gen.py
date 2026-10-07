@@ -1,6 +1,9 @@
 import pathlib
 HERE = pathlib.Path(__file__).resolve().parent if "__file__" in globals() else pathlib.Path("scripts/cards").resolve()
 ROOT = HERE.parent.parent
+import sys
+sys.path.insert(0, str(ROOT / "scripts"))
+from reading_guides import add_reading_guide
 exec(open(HERE / "clean.py", encoding="utf-8").read())
 import re
 exec(open(HERE / "cards_data.py", encoding="utf-8").read())
@@ -413,7 +416,7 @@ md.append("""- **Масло стихии (IV).** В PHB 2014 «Стихийно�
 - **СЛ и бонус атаки эликсиров-эффектов** (Святилище, Маскировка, Пылающий клинок) — по правилу 8.8: у заклинателя свои, у остальных табличные (решение игрока).
 - **Неопределённые эссенции реестра** (Божественное благоволение, Преимущество, Возможность, Максимальная сила, Рассеивание, Контрзаклинание) — «Эфир» по 9.1 v0.3. Сопротивление некротике — «Смерть/душа», излучению и силовому полю — «Эфир», психическому — «Разум», физическому — «Тело» (9.1). Величие дракона — только чешуйка (решения игрока).
 """)
-open(ROOT / "Карточки эликсиров.md", "w", encoding="utf-8").write("\n".join(md))
+open(ROOT / "Карточки эликсиров.md", "w", encoding="utf-8").write(add_reading_guide("\n".join(md), "Карточки эликсиров.md"))
 
 import csv
 with open(ROOT / "Реестр эликсиров.csv", "w", encoding="utf-8-sig", newline="") as fh:

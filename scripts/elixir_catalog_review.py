@@ -218,7 +218,10 @@ if __name__=='__main__':
             main()
         head, tail = source.split(start)
         _, footer = tail.split(end)
-        report.write_text(head + start + '\n\n' + output.getvalue() + '\n' + end + footer, encoding='utf-8')
+        from reading_guides import add_reading_guide
+        report.write_text(add_reading_guide(
+            head + start + '\n\n' + output.getvalue() + '\n' + end + footer,
+            report.name), encoding='utf-8')
         print('Обзор обновлён: 103 эликсира-эффекта')
     else:
         main()

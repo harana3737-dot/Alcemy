@@ -122,6 +122,7 @@ body{{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(sa
 </style></head><body><main>
 <h1>Карточки эликсиров — Алхимия Талиса</h1>
 <p class="sub">Черновик, 05.10.2026 · {len(C)} карточек · реестр эликсиров + правила v0.3 · эффекты по PHB 2014 и DMG 2014</p>
+<p>Найди предмет по задаче, классу или формуле. Перед варкой проверь состав и доступную ступень формулы; перед применением — ограничения карточки. Предмет в каталоге ещё не означает известный Талису рецепт.</p>
 <details><summary>Как читать карточку</summary>{md_list(HOW)}</details>
 <div class="bar" id="top">
 <input id="q" type="search" placeholder="Поиск по названию или тексту">

@@ -2,6 +2,7 @@
 Источник один — «Алхимия Талиса — правила v0.3 (черновик на утверждение).md»; этот файл собирается из него.
 Запуск: python3 scripts/table_rules.py [--diff]  (--diff печатает всё вырезанное для проверки)"""
 import re, pathlib, sys
+from reading_guides import add_reading_guide
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "Алхимия Талиса — правила v0.3 (черновик на утверждение).md"
@@ -97,6 +98,7 @@ body = out[1:]
 k = next(j for j, l in enumerate(body) if l.startswith("## Быстрый старт"))
 text = "\n".join(head + body[k:])
 text = re.sub(r"\n{3,}", "\n\n", text).replace(" .", ".").replace(" ,", ",")
+text = add_reading_guide(text, OUT.name)
 OUT.write_text(text.rstrip() + "\n", encoding="utf-8")
 print("ok", OUT.name, len(text), "вырезано", len(CUT))
 if "--diff" in sys.argv:

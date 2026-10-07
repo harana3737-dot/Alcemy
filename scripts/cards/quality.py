@@ -78,5 +78,5 @@ for k in CLS_ORDER:
         b5, b20 = quality(c)
         L.append(f"| {c['name']} | {ROM[c['lvl']]} | {b5} | {b20} |")
     L.append("")
-(ROOT / "Бонусы качества по карточкам.md").write_text("\n".join(L), encoding="utf-8")
+(ROOT / "Бонусы качества по карточкам.md").write_text(_g["add_reading_guide"]("\n".join(L), "Бонусы качества по карточкам.md"), encoding="utf-8")
 print("ok", len(cards))
