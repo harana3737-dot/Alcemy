@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Книга игрока — алхимия Талиса</title>
+<style>
+:root{--bg:#f5f3ed;--paper:#fffefb;--ink:#252d31;--muted:#526267;--line:#d7dedb;--accent:#1c6264;--soft:#e9f1ed;--focus:#b56b19;--text:18px;color-scheme:light}
+:root[data-theme=dark]{--bg:#151d22;--paper:#202a30;--ink:#e9eeed;--muted:#afc0c4;--line:#3b4b52;--accent:#88d3c3;--soft:#263c3d;--focus:#ffca7f;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:30px}body{margin:0;background:var(--bg);color:var(--ink);font:var(--text)/1.72 system-ui,-apple-system,"Segoe UI",sans-serif;overflow-wrap:break-word}button,input{font:inherit}button{cursor:pointer}a{color:var(--accent);text-underline-offset:3px}button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible,.table-wrap:focus-visible{outline:3px solid var(--focus);outline-offset:3px}button{background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px 12px;min-height:44px}button:hover{background:var(--soft)}[hidden]{display:none!important}.skip{position:absolute;left:10px;top:-100px;background:var(--paper);padding:8px;z-index:5}.skip:focus{top:10px}
+header{max-width:1320px;margin:auto;padding:32px 28px 12px}.eyebrow{font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:700}.header-title{font-size:clamp(1.8rem,4vw,3rem);font-weight:760;line-height:1.16;margin:8px 0}.subtitle{max-width:800px;color:var(--muted);margin:10px 0}.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0}.search-box{flex:1 1 340px;min-width:0}.search-box label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}#search{width:100%;background:var(--paper);color:var(--ink);border:1px solid var(--line);padding:11px 14px;border-radius:10px}#search-status{color:var(--muted);font-size:.88rem;min-height:1.7em}#search-results{padding:0;list-style:none;max-height:420px;overflow:auto;border-radius:10px}#search-results button{display:block;text-align:left;width:100%;margin:5px 0}#search-results small{display:block;font-size:.85rem;color:var(--muted);line-height:1.5}
+.layout{max-width:1320px;margin:auto;padding:12px 28px 64px;display:grid;grid-template-columns:280px minmax(0,1fr);gap:32px}.contents{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:15px;font-size:15px;align-self:start}.contents summary{font-weight:700;font-size:1rem}.contents a{display:block;padding:7px 5px;text-decoration:none;border-radius:6px;line-height:1.4}.contents a:hover{background:var(--soft)}.contents .library-link{border-top:1px solid var(--line);margin-top:10px;padding-top:12px;font-weight:700}.reading{min-width:0}.reading>article{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:clamp(18px,3vw,36px)}article h1{font-size:1.6rem;line-height:1.3;margin-top:0}.chapter{padding-top:24px;margin-top:28px;border-top:1px solid var(--line)}h2{font-size:1.45rem;line-height:1.35;margin:0 0 18px;letter-spacing:-.015em}h3{font-size:1.13rem;line-height:1.4;margin:1.6em 0 .55em;color:var(--accent)}h4,h5,h6{font-size:1rem}p{margin:.7em 0}li{margin:.35em 0}li>p:first-child{margin-top:0}li>p:last-child{margin-bottom:0}ul,ol{padding-left:1.45em}.muted,.asset-note{color:var(--muted)}blockquote{margin:1em 0;border-left:4px solid var(--accent);padding:6px 16px;background:var(--soft)}code{background:var(--soft);padding:1px 4px;border-radius:4px;font-size:.92em}pre{overflow:auto;white-space:pre-wrap;background:var(--soft);padding:16px;border-radius:10px;font-size:.85em}pre code{padding:0}hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+.table-wrap{overflow-x:auto;margin:18px 0;border:1px solid var(--line);border-radius:10px;max-width:100%}table{border-collapse:collapse;width:100%;font-size:.9em;line-height:1.6;font-variant-numeric:tabular-nums}th,td{padding:12px 14px;text-align:left;vertical-align:top;min-width:135px;border-bottom:1px solid var(--line)}th{background:var(--soft);font-size:.9em}tr:last-child td{border-bottom:0}details.example,details.explanation{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:9px;margin:18px 0;background:var(--soft)}summary{cursor:pointer;padding:13px 15px;line-height:1.4}details.example>summary,details.explanation>summary{font-weight:650}.detail-content{padding:0 18px 12px;background:var(--paper);border-radius:0 0 8px 8px}.detail-content>p:first-child{padding-top:12px}.chapter:target,.source-document:target{outline:2px solid var(--focus);outline-offset:5px}.library{margin-top:32px;border-top:2px solid var(--line);padding-top:30px}.library>h2{margin-bottom:10px}.source-document{margin:10px 0;background:var(--paper);border:1px solid var(--line);border-radius:10px}.source-document>summary{font-weight:600}.source-note{margin:0 16px 15px;padding:12px 14px;background:var(--soft);font-size:.92em;border-radius:8px}.source-content{padding:0 20px 24px;border-top:1px solid var(--line)}.source-content h3{font-size:1.17rem}.back-top{display:block;text-align:right;margin:22px 0;font-size:.9rem}.footer{color:var(--muted);font-size:.87rem;margin-top:20px}.noscript{background:var(--soft);padding:12px;border-radius:8px}
+@media(max-width:850px){header{padding:22px 16px 6px}.layout{display:block;padding:8px 16px 40px}.contents{position:static;max-height:none;margin-bottom:18px}.contents[open]>div{max-height:330px;overflow:auto}.reading>article{padding:20px 16px}h2{font-size:1.28rem}.tools{gap:6px}.tools button{font-size:.88rem}th,td{padding:10px;min-width:140px}.source-content{padding:0 12px 18px}.header-title{font-size:2rem}}
+@media(max-width:650px){.chapter .table-wrap{overflow:visible;border:0}.chapter table,.chapter tbody{display:block}.chapter thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.chapter tbody tr{display:block;border:1px solid var(--line);border-radius:10px;padding:5px 0;margin:12px 0;background:var(--paper)}.chapter td{display:grid;grid-template-columns:minmax(80px,32%) minmax(0,1fr);gap:12px;min-width:0;border:0;padding:8px 12px}.chapter td:before{content:attr(data-label);font-size:.85em;font-weight:650;color:var(--muted)}.chapter td span{min-width:0;overflow-wrap:anywhere}.source-content .table-wrap{position:relative}.source-content .table-wrap:before{content:'↔ Таблицу можно прокручивать вправо';display:block;padding:8px 10px;color:var(--muted);font-size:.8rem}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{:root,:root[data-theme=dark]{--bg:#fff;--paper:#fff;--ink:#000;--muted:#333;--line:#bbb;--accent:#000;--soft:#f3f3f3;--text:11pt;color-scheme:light}header,.contents,.library,.back-top,.footer,.skip{display:none}.layout{display:block;padding:0}.reading>article{border:0;padding:0}.chapter{break-before:auto}h2,h3,summary{break-after:avoid}.table-wrap{overflow:visible}table{font-size:9pt}th,td{min-width:0;padding:6px}details{break-inside:auto}a{color:#000;text-decoration:none}}
+@media print{body{font-size:11pt}.chapter table{display:table}.chapter tbody{display:table-row-group}.chapter thead{position:static;width:auto;height:auto;clip-path:none;display:table-header-group}.chapter tbody tr{display:table-row}.chapter td{display:table-cell}.chapter td:before{display:none}}
+</style>
+</head>
+<body id="top">
+<a class="skip" href="#book">Перейти к книге</a>
+<header>
+<div class="eyebrow">Талис · материалы игрока · 07.10.2026</div>
+<div class="header-title">Алхимия без путаницы</div>
+<p class="subtitle">Сначала понятное объяснение, затем пример и варианты выбора. Правила, исследования, экономика и ваша группа — в одной книге.</p>
+<div class="tools">
+<div class="search-box"><label for="search">Найти ответ в книге и @@DOCUMENT_COUNT@@ документах</label><input id="search" type="search" placeholder="Например: Щит веры, корень, токсичность…" autocomplete="off" aria-controls="search-results"></div>
+<button id="font-smaller" aria-label="Уменьшить шрифт">А−</button><button id="font-larger" aria-label="Увеличить шрифт">А+</button>
+<button id="theme" aria-pressed="false">Тёмная тема</button><button id="examples" aria-pressed="false">Развернуть примеры</button><button id="print">Печать книги</button>
+</div>
+<div id="search-status" role="status" aria-live="polite">Поиск включает закрытые примеры и документы библиотеки.</div>
+<ul id="search-results" hidden></ul>
+<noscript><p class="noscript">JavaScript отключён: книга и примеры читаются, оглавление работает. Для поиска используй поиск браузера; открывай нужные документы вручную.</p></noscript>
+</header>
+<div class="layout">
+<details class="contents" open><summary>Содержание</summary><div>@@NAV@@<a class="library-link" href="#library">Библиотека исходных материалов</a></div></details>
+<main class="reading" id="book"><article>@@GUIDE@@</article>
+<a class="back-top" href="#top">↑ К поиску и содержанию</a>
+<section class="library" id="library"><h2>Библиотека исходных материалов</h2><p>@@DOCUMENT_COUNT@@ документов, сгруппированных по задаче. Здесь точные таблицы и обоснования; у каждого документа есть пояснение, как его читать. Всё встроено в этот файл.</p>@@LIBRARY@@</section>
+<p class="footer">Самостоятельный файл для чтения без интернета. Не меняет журнал, деньги или запасы. Числа после новых сессий проверяй в Помощнике варки.</p>
+</main></div>
+<script>
+(()=>{
+'use strict';
+const root=document.documentElement;
+const settings={theme:'light',font:18};
+try{const saved=JSON.parse(localStorage.getItem('talis-player-book-reading')||'null');if(saved&&['light','dark'].includes(saved.theme))settings.theme=saved.theme;if(saved&&Number.isFinite(saved.font))settings.font=Math.min(24,Math.max(16,saved.font));}catch(_){}
+function persist(){try{localStorage.setItem('talis-player-book-reading',JSON.stringify(settings));}catch(_){}}
+function apply(){root.dataset.theme=settings.theme;root.style.setProperty('--text',settings.font+'px');const button=document.getElementById('theme');button.textContent=settings.theme==='dark'?'Светлая тема':'Тёмная тема';button.setAttribute('aria-pressed',String(settings.theme==='dark'));document.getElementById('font-smaller').disabled=settings.font<=16;document.getElementById('font-larger').disabled=settings.font>=24;}
+apply();
+document.getElementById('theme').addEventListener('click',()=>{settings.theme=settings.theme==='dark'?'light':'dark';apply();persist();});
+document.getElementById('font-smaller').addEventListener('click',()=>{settings.font=Math.max(16,settings.font-2);apply();persist();});
+document.getElementById('font-larger').addEventListener('click',()=>{settings.font=Math.min(24,settings.font+2);apply();persist();});
+const exampleButton=document.getElementById('examples');
+exampleButton.addEventListener('click',()=>{const open=exampleButton.getAttribute('aria-pressed')!=='true';document.querySelectorAll('article details').forEach(d=>{d.open=open;});exampleButton.setAttribute('aria-pressed',String(open));exampleButton.textContent=open?'Свернуть примеры':'Развернуть примеры';});
+function reveal(target){if(!target)return;let parent=target;while(parent){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}}
+function revealHash(){let id;try{id=decodeURIComponent(location.hash.slice(1));}catch(_){return;}reveal(document.getElementById(id));}
+addEventListener('hashchange',revealHash);revealHash();
+document.addEventListener('click',event=>{const link=event.target.closest('a[href^="#"]');if(link){const target=document.getElementById(link.getAttribute('href').slice(1));reveal(target);}});
+const input=document.getElementById('search'),results=document.getElementById('search-results'),status=document.getElementById('search-status');
+const normalize=t=>t.toLocaleLowerCase('ru').replaceAll('ё','е');
+// textContent включает закрытые details; innerText на некоторых браузерах их исключает.
+const index=[...document.querySelectorAll('[data-search-title]')].map(element=>({element,title:element.dataset.searchTitle,text:element.textContent.replace(/\s+/g,' ').trim()}));
+let matches=[];
+function search(){
+ const query=normalize(input.value.trim());results.replaceChildren();matches=[];
+ if(query.length<2){results.hidden=true;status.textContent=query?'Введи хотя бы две буквы.':'Поиск включает закрытые примеры и документы библиотеки.';return;}
+ const words=query.split(/\s+/);matches=index.filter(item=>words.every(word=>normalize(item.text).includes(word)));
+ results.hidden=false;status.textContent=matches.length?`Найдено разделов и документов: ${matches.length}. Выбери результат, чтобы открыть его.`:'Совпадений нет. Попробуй название эффекта или более короткое слово.';
+ for(const item of matches){const li=document.createElement('li'),button=document.createElement('button'),title=document.createElement('strong'),snippet=document.createElement('small');title.textContent=item.title;const position=normalize(item.text).indexOf(words[0]);const from=Math.max(0,position-55);snippet.textContent=(from?'…':'')+item.text.slice(from,from+230)+'…';button.append(title,snippet);button.addEventListener('click',()=>{const hit=[...item.element.querySelectorAll('p,li,td,th,h3,summary')].find(node=>words.every(word=>normalize(node.textContent).includes(word)))||item.element;reveal(hit);const destination=hit.closest('details')||item.element;location.hash=destination.id;hit.scrollIntoView({block:'start'});hit.setAttribute('tabindex','-1');hit.focus({preventScroll:true});});li.append(button);results.append(li);}
+}
+input.addEventListener('input',search);
+input.addEventListener('keydown',event=>{if(event.key==='Enter'&&matches.length){event.preventDefault();results.querySelector('button').click();}if(event.key==='Escape'){input.value='';search();}});
+// При печати раскрываем только учебные примеры и восстанавливаем состояние после.
+let beforePrint=[];
+addEventListener('beforeprint',()=>{beforePrint=[...document.querySelectorAll('article details')].map(d=>[d,d.open]);beforePrint.forEach(([d])=>{d.open=true;});});
+addEventListener('afterprint',()=>{beforePrint.forEach(([d,open])=>{d.open=open;});beforePrint=[];});
+document.getElementById('print').addEventListener('click',()=>window.print());
+})();
+</script>
+</body></html>
