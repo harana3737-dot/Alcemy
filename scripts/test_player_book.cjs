@@ -19,6 +19,9 @@ if (!candidate) throw Error('Chromium не найден');
     await page.setContent(source);
     assert.equal(await page.locator('.chapter').count(), 25);
     assert.equal(await page.locator('.source-document').count(), 22);
+    assert.equal(await page.locator('#library > .source-document').count(), 8);
+    assert.equal(await page.locator('#library-extra .source-document').count(), 14);
+    assert.equal(await page.locator('#library-extra').evaluate(el => el.open), false);
     const links = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].every(a => document.getElementById(a.getAttribute('href').slice(1))));
     assert.ok(links, 'Все внутренние ссылки должны вести к существующему якорю');
 
@@ -32,6 +35,15 @@ if (!candidate) throw Error('Chromium не найден');
     await page.locator('#search').fill('Щит веры');
     await page.locator('#search-results button').filter({ has: page.locator('strong', { hasText: 'Группа — обзор каталога эликсиров' }) }).click();
     assert.equal(await page.locator('#doc-catalog-review').evaluate(el => el.open), true);
+
+    // Прямая ссылка и поиск раскрывают оба уровня дополнительной библиотеки.
+    await page.evaluate(() => { location.hash = 'doc-economy'; });
+    await page.waitForFunction(() => document.getElementById('doc-economy').open && document.getElementById('library-extra').open);
+    await page.locator('#library-extra').evaluate(el => { el.open = false; });
+    await page.locator('#search').fill('бестиарии');
+    await page.locator('#search-results button').filter({ has: page.locator('strong', { hasText: 'Заклинания Талиса — проверка на бестиарии' }) }).click();
+    assert.equal(await page.locator('#doc-bestiary').evaluate(el => el.open), true);
+    assert.equal(await page.locator('#library-extra').evaluate(el => el.open), true);
 
     await page.locator('#search').fill('несуществующийтермин123');
     assert.match(await page.locator('#search-status').textContent(), /Совпадений нет/);
@@ -61,10 +73,12 @@ if (!candidate) throw Error('Chromium не найден');
     await plain.setContent(source);
     assert.equal(await plain.locator('.chapter').count(), 25);
     assert.ok(await plain.locator('#book').textContent());
+    await plain.locator('#library-extra > summary').click();
+    assert.equal(await plain.locator('#library-extra').evaluate(el => el.open), true);
     await nojs.close();
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, [], 'Книга не должна загружать внешние зависимости');
-    console.log('PASS: 25 глав, 22 документа, ссылки, поиск закрытых примеров, темы, шрифт, телефон, печать, чтение без JS и сети');
+    console.log('PASS: 25 глав, 8+14 документов, вложенные ссылки и поиск, темы, шрифт, телефон, печать, чтение без JS и сети');
   } finally {
     await browser.close();
   }

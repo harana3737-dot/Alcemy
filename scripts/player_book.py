@@ -1,4 +1,4 @@
-"""Книга игрока и архив: стандартная библиотека Python, без внешних сервисов.
+"""Книга игрока, комплект для чтения и отдельный архив её исходников.
 
 Запускать python3 -B scripts/player_book.py в свежей копии без .git.
 Объяснения редактируются в MD, оформление — в player_book_tpl.html.
@@ -14,6 +14,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parent.parent
 BOOK = 'Для игрока — книга алхимии'
 ARCHIVE = 'Материалы игрока — читаемый комплект.zip'
+SOURCE_ARCHIVE = 'Материалы игрока — исходники книги.zip'
 
 
 @dataclass(frozen=True)
@@ -49,6 +50,11 @@ DOCUMENTS = [
     Document('scenarios', 'Игровые сценарии.md', 'Альтернативы и проверки', 'Гипотетические персонажи и бюджеты для тестирования. Ваши запасы и состав отличаются; для выбора баффов используй обзор группы.'),
     Document('bestiary', 'Заклинания Талиса — проверка на бестиарии.md', 'Альтернативы и проверки', 'Условные сравнения против заданных целей. Статистика не обещает такой же результат в каждом бою.'),
 ]
+
+# Ежедневные справки. Остальные источники доступны по ссылкам и поиску,
+# но собраны под одним закрытым блоком, чтобы не загромождать библиотеку.
+PRIMARY_KEYS = {'rules', 'catalog-review', 'sheet', 'future',
+                'bonuses', 'quality', 'cards', 'sample'}
 
 LINKS = {doc.filename: '#doc-' + doc.key for doc in DOCUMENTS}
 
@@ -203,6 +209,15 @@ def namespace_anchors(text, prefix):
     return re.sub(r'\]\(#([\w-]+)\)', lambda m: '](#' + aliases.get(m[1], m[1]) + ')', text)
 
 
+def write_archive(path, entries):
+    with zipfile.ZipFile(path, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+        for name, data in entries.items():
+            info = zipfile.ZipInfo(name, date_time=(2026, 10, 7, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o100644 << 16
+            archive.writestr(info, data)
+
+
 def build(root=ROOT):
     source = (root / (BOOK + '.md')).read_text(encoding='utf-8')
     chunks = re.split(r'^## (.+)$', source, flags=re.M)
@@ -219,16 +234,24 @@ def build(root=ROOT):
         content = Renderer(key).render(chunks[index+1].splitlines(), examples=True)
         guide += f'<section class="chapter" id="{key}" data-search-title="{html.escape(title, quote=True)}"><h2>{html.escape(title)}</h2>{content}</section>'
         chapters.append(key)
+    if not PRIMARY_KEYS <= {doc.key for doc in DOCUMENTS}:
+        raise ValueError('Неизвестная основная справка')
     library = []
-    for category in dict.fromkeys(doc.category for doc in DOCUMENTS):
-        library.append('<h3>' + html.escape(category) + '</h3>')
-        for doc in (doc for doc in DOCUMENTS if doc.category == category):
-            original = (root / doc.filename).read_text(encoding='utf-8')
-            text = namespace_anchors(select_sections(original, doc.sections), 'doc-' + doc.key)
-            content = Renderer('doc-' + doc.key).render(text.splitlines())
-            library.append(f'<details class="source-document" id="doc-{doc.key}" data-search-title="{html.escape(doc.filename[:-3], quote=True)}"><summary>{html.escape(doc.filename[:-3])}</summary><p class="source-note">{html.escape(doc.note)}</p><div class="source-content">{content}</div></details>')
+    for primary in (True, False):
+        documents = [doc for doc in DOCUMENTS if (doc.key in PRIMARY_KEYS) == primary]
+        if not primary:
+            library.append(f'<details class="library-extra" id="library-extra"><summary>Дополнительные документы — {len(documents)}</summary><div class="extra-content"><p>Подробные расчёты, полная редакция правил, решения и проверки. Открывай по задаче; ссылки из книги и поиск находят эти документы.</p>')
+        for category in dict.fromkeys(doc.category for doc in documents):
+            library.append('<h3>' + html.escape(category) + '</h3>')
+            for doc in (doc for doc in documents if doc.category == category):
+                original = (root / doc.filename).read_text(encoding='utf-8')
+                text = namespace_anchors(select_sections(original, doc.sections), 'doc-' + doc.key)
+                content = Renderer('doc-' + doc.key).render(text.splitlines())
+                library.append(f'<details class="source-document" id="doc-{doc.key}" data-search-title="{html.escape(doc.filename[:-3], quote=True)}"><summary>{html.escape(doc.filename[:-3])}</summary><p class="source-note">{html.escape(doc.note)}</p><div class="source-content">{content}</div></details>')
+        if not primary:
+            library.append('</div></details>')
     template = (root / 'scripts/player_book_tpl.html').read_text(encoding='utf-8')
-    page = template.replace('@@GUIDE@@', guide).replace('@@NAV@@', ''.join(nav)).replace('@@LIBRARY@@', ''.join(library)).replace('@@DOCUMENT_COUNT@@', str(len(DOCUMENTS)))
+    page = template.replace('@@GUIDE@@', guide).replace('@@NAV@@', ''.join(nav)).replace('@@LIBRARY@@', ''.join(library)).replace('@@DOCUMENT_COUNT@@', str(len(DOCUMENTS))).replace('@@PRIMARY_COUNT@@', str(len(PRIMARY_KEYS)))
     if re.search(r'@@[A-Z_]+@@', page):
         raise ValueError('Не заменены поля шаблона')
     ids = re.findall(r'\bid="([^"]+)"', page)
@@ -241,18 +264,19 @@ def build(root=ROOT):
     out.write_text(page, encoding='utf-8')
     entries = {
         BOOK + '.html': out.read_bytes(),
-        BOOK + '.md': (root / (BOOK + '.md')).read_bytes(),
         'Для игрока — начни отсюда.md': (root / 'Для игрока — начни отсюда.md').read_bytes(),
     }
+    source_entries = {
+        BOOK + '.md': (root / (BOOK + '.md')).read_bytes(),
+        'Для игрока — начни отсюда.md': entries['Для игрока — начни отсюда.md'],
+    }
     for doc in DOCUMENTS:
-        entries['Исходники/' + doc.filename] = (root / doc.filename).read_bytes()
-    with zipfile.ZipFile(root / ARCHIVE, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
-        for name, data in entries.items():
-            info = zipfile.ZipInfo(name, date_time=(2026, 10, 7, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            info.external_attr = 0o100644 << 16
-            archive.writestr(info, data)
-    print(f'Готово: глав {len(chapters)}, документов {len(DOCUMENTS)}, файлов в архиве {len(entries)}; HTML {len(page.encode()) // 1024} КБ')
+        source_entries[doc.filename] = (root / doc.filename).read_bytes()
+    for name in ('scripts/player_book.py', 'scripts/player_book_tpl.html', 'scripts/test_player_book.cjs'):
+        source_entries[name] = (root / name).read_bytes()
+    write_archive(root / ARCHIVE, entries)
+    write_archive(root / SOURCE_ARCHIVE, source_entries)
+    print(f'Готово: глав {len(chapters)}, справок {len(PRIMARY_KEYS)} + {len(DOCUMENTS)-len(PRIMARY_KEYS)}; файлов для чтения {len(entries)}, исходников {len(source_entries)}; HTML {len(page.encode()) // 1024} КБ')
 
 
 if __name__ == '__main__':
