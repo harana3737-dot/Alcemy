@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Spells",
+    "url": "https://raw.githubusercontent.com/5e-bits/5e-database/a6212beb4b278917c2cff41c2b04c4ef4f3e0d6f/src/2014/en/5e-SRD-Spells.json",
+    "sha256": "abebe7d860ec32985b804e087ecd3986145b1b772fa0c2e43cce9964b382f2ae",
+    "entries": 319,
+    "accessed": "2026-10-07",
+    "file": "spells.json"
+  },
+  {
+    "name": "Features",
+    "url": "https://raw.githubusercontent.com/5e-bits/5e-database/a6212beb4b278917c2cff41c2b04c4ef4f3e0d6f/src/2014/en/5e-SRD-Features.json",
+    "sha256": "fd20a2a5c27996eb66c023053b1629d93dac2d1d108e5d81dfc53ddf0d6ad93c",
+    "entries": 407,
+    "accessed": "2026-10-07",
+    "file": "features.json"
+  },
+  {
+    "name": "Rule-Sections",
+    "url": "https://raw.githubusercontent.com/5e-bits/5e-database/a6212beb4b278917c2cff41c2b04c4ef4f3e0d6f/src/2014/en/5e-SRD-Rule-Sections.json",
+    "sha256": "b4505c615573cb2b3e962e1f501dde239c58a08a3f23e5c735c6151eb26e3d78",
+    "entries": 33,
+    "accessed": "2026-10-07",
+    "file": "rule-sections.json"
+  }
+]

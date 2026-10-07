@@ -225,8 +225,8 @@ def pain_eligible_fraction(m, level):
     return value / hit if hit else 0
 
 
-def control_metrics(m, p, level, quality=0, spend_lr=False, strict_limited=False):
-    hit = 1 - attack_outcomes(m, b.pb(level) + 3)['miss']
+def control_metrics(m, p, level, quality=0, spend_lr=False, strict_limited=False, attack_bonus=None):
+    hit = 1 - attack_outcomes(m, b.pb(level) + 3 if attack_bonus is None else attack_bonus)['miss']
     eligible = control_eligible(m, p)
     # Для контрольных ядов чувствительность к защите ракшаса вынесена отдельно:
     # основная модель — магический эффект, а не накладывание заклинания.
@@ -272,7 +272,7 @@ def poison_sequence(item_level):
     return tuple(result)
 
 
-def ordinary_poison(m, item_level, level, attacks_per_turn=2, turns=3, spend_lr=False):
+def ordinary_poison(m, item_level, level, attacks_per_turn=2, turns=3, spend_lr=False, attack_bonus=None):
     """Одна нанесённая заранее доза, пять атак; первые три хода носителя и цели.
 
     Порядок: носитель атакует, затем начинается ход цели. Состояние хранит,
@@ -282,7 +282,7 @@ def ordinary_poison(m, item_level, level, attacks_per_turn=2, turns=3, spend_lr=
     seq = poison_sequence(item_level)
     mult = b.multiplier(m, 'poison')
     wave = [sum(int(raw * mult) * p for raw, p in dist) for dist in seq]
-    hit = 1 - attack_outcomes(m, b.pb(level) + 3)['miss']
+    hit = 1 - attack_outcomes(m, b.pb(level) + 3 if attack_bonus is None else attack_bonus)['miss']
     q = b.fail_probability(table_dc(item_level), b.save_bonus(m, 'con'), int(poison_advantage(m)))
     if mult == 0:
         q = 0
@@ -327,7 +327,8 @@ def con_debuff_cone(m, item_level, level, role, spend_lr=False):
     Только вклад конкретного триггера Телосложения в урон заклинания.
     Остальной урон и остальные одиннадцать триггеров не прибавляются.
     """
-    attempt = ordinary_poison(m, item_level, level, 1 if role == 'чародей' or level < 6 else 2, 1, spend_lr)
+    attempt = ordinary_poison(m, item_level, level, 1 if role == 'чародей' or level < 6 else 2, 1, spend_lr,
+                              attack_bonus=b.pb(level) + (2 if role == 'чародей' else 3))
     chance = attempt['con_trigger']
     baseline = damage(m, CONE, level, role, spend_lr=spend_lr)
     order = 2 if item_level <= 7 else 3 if item_level <= 9 else 4
@@ -353,7 +354,8 @@ def poison_paralysis_spell(m, level, role, p, spend_lr=False):
     До следующего хода мага цель уже повторила спасбросок в конце своего хода.
     Для лучей/Шара нападение с 5 фт по парализованному, других врагов рядом нет.
     """
-    poison = control_metrics(m, p, level, spend_lr=spend_lr)
+    poison = control_metrics(m, p, level, spend_lr=spend_lr,
+                             attack_bonus=b.pb(level) + (2 if role == 'чародей' else 3))
     ready = poison['survives_first_turn']
     spec, beams = (ORB, 1) if role == 'чародей' else (RAY, 3)
     base = beams * damage(m, spec, level, role)
@@ -429,10 +431,11 @@ def validate_sources():
         raise ValueError('Изменилось число контрольных ядов')
 
 
-def mental_telekinesis(m, level, spend_lr=False):
+def mental_telekinesis(m, level, spend_lr=False, role=None):
     """Следующий ход: проверка характеристики, не спасбросок и без БМ."""
     p = CONTROL_BY_NAME['Яд: ментальная тюрьма']
-    ready = control_metrics(m, p, level, spend_lr=spend_lr)['delivered']
+    ready = control_metrics(m, p, level, spend_lr=spend_lr,
+                            attack_bonus=b.pb(level) + (2 if role == 'чародей' else 3))['delivered']
     if m['size'] not in ('Tiny', 'Small', 'Medium', 'Large', 'Huge') or b.immune_spell(m, 5):
         win = 0.0
     else:

@@ -91,7 +91,7 @@ def calculate():
                     spec, beams = (a.ORB, 1) if role == 'чародей' else (a.RAY, 3)
                     row(level, m, role, 'Удержание чудовища + атака заклинанием', 5, 'damage_next_cast', combo, combo_lr,
                         beams * a.damage(m, spec, level, role), a.price(p.name), 0,
-                        'Свой яд в ход 1, заклинание в ход 2 после повторного спасброска цели; атака с 5 фт; урон доставки исключён')
+                        'Свой яд: у чародея кинжал +БМ+2, у волшебника рапира +БМ+3; заклинание в ход 2 после повторного спасброска цели; атака с 5 фт; урон доставки исключён')
                     for all_rolls in (False, True):
                         first = a.damage(m, a.RAZORS, level, role, maximize=True)
                         later = a.damage(m, replace(a.RAZORS, affinity=False), level, role, maximize=all_rolls)
@@ -104,8 +104,8 @@ def calculate():
                         dlr, _ = a.con_debuff_cone(m, item, level, role, True)
                         row(level, m, role, f'Яд {item}: триггер ТЕЛ + Конус холода', item, 'damage_next_cast', d, dlr,
                             a.damage(m, a.CONE, level, role), note='Только вклад триггера ТЕЛ; без прочего урона и остальных 11 триггеров')
-                    tele = a.mental_telekinesis(m, level)
-                    tele_lr = a.mental_telekinesis(m, level, True)
+                    tele = a.mental_telekinesis(m, level, role=role)
+                    tele_lr = a.mental_telekinesis(m, level, True, role=role)
                     row(level, m, role, 'Ментальная тюрьма + Телекинез', 6, 'additional_damage', tele['additional_damage'], tele_lr['additional_damage'], 0,
                         a.price('Яд: ментальная тюрьма'), 0, 'Ход 1: доставка яда; ход 2: проверка без БМ; цель не разрушила иллюзию раньше, размер не больше Huge')
                 if role == 'волшебник':
@@ -206,6 +206,8 @@ def render(monsters, rows):
              '- Склянка силовой клетки + Болезненное сияние не требует двух настоящих концентраций. Но расчёт десяти контактов условен: цель должна помещаться и не уходить телепортацией; концентрацию могут сорвать. Смерть от истощения в CSV не равна вероятности выиграть бой.', '',
              '## Рекомендации Codex', '',
              'На текущем IV уровне при мастерстве II сначала сравнивать малую склянку, обычный яд II и доступные контрольные яды по конкретному противнику. Против иммунитета к яду переключаться на стихии и заклинания. На высоких уровнях проверять масло и Корону отдельно от контроля: фиксированная Сл ядов не растёт с уровнем мага. Дорогую клетку использовать только после проверки размеров и способов выхода цели. Рецепты, цены и очередь исследований этим отчётом не изменены.', '',
+             '## Дополнение: Метамагия и классовые способности', '',
+             'Следующий разбор — «Алхимия — заклинания и метамагия»: Ускоренное заклинание сразу после ядовитого попадания, склянка вместе с Ускоренным заклинанием, Преобразованное и Усиленное, помощь Искусной остротой и способности Песни клинка. В этом срезе исправлен бонус доставки собственного яда чародея: кинжал с Ловкостью +2 вместо общего носителя рапиры с +3.', '',
              '## Воспроизведение', '',
              'Источники: `scripts/bestiary/srd2014-monsters.json`, лицензия `scripts/bestiary/UPSTREAM_LICENSE.md`, карточки `scripts/cards/cards_data.py`, разделы 7.2–7.6 и 8.6–8.11 правил. Старый `sim_poison.py` не используется: его модель сопротивления яду расходится с текущими правилами.', '',
              'Команды: `python3 -B scripts/alchemy_bestiary_report.py --write`, затем `python3 -B scripts/alchemy_bestiary_report.py --check` и `python3 -B -m unittest discover -s scripts -p "test_alchemy_bestiary.py"`. Все построчные результаты: `scripts/alchemy_bestiary/results.csv`.', '',
