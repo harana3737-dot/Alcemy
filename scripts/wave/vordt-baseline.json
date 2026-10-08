@@ -1,0 +1,36 @@
+{
+  "matches": true,
+  "runs_per_tactic": 10000,
+  "seed": 1,
+  "results": {
+    "урон": {
+      "runs": 10000,
+      "wins": 6783,
+      "defeats": 3217,
+      "timeouts": 0,
+      "win_rate": 0.6783,
+      "win_ci95": [
+        0.6690774831439281,
+        0.6873855830370885
+      ],
+      "mean_win_rounds": 4.984962406015038,
+      "mean_win_falls": 1.1931298835323603,
+      "mean_win_deaths": 0.5065605189444199
+    },
+    "паутина": {
+      "runs": 10000,
+      "wins": 7807,
+      "defeats": 2193,
+      "timeouts": 0,
+      "win_rate": 0.7807,
+      "win_ci95": [
+        0.7724832645484837,
+        0.7887011587662184
+      ],
+      "mean_win_rounds": 5.354809786089407,
+      "mean_win_falls": 1.0996541565261944,
+      "mean_win_deaths": 0.5805046752914051
+    }
+  },
+  "engine_sha256": "6c206cf9864b1b83a5fc05a17c5c83f5472d2f937bcf25fa24fef1da77ef543a"
+}
