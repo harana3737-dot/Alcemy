@@ -2,12 +2,10 @@
 Запуск: python3 scripts/cards/quality.py → «Бонусы качества по карточкам.md»."""
 import pathlib, re
 HERE = pathlib.Path(__file__).resolve().parent
-_g = {"__file__": str(HERE / "gen.py")}
-exec(open(HERE / "gen.py", encoding="utf-8").read().split("TR = dict(zip(")[0], _g)
-globals().update({k: _g[k] for k in ("C", "ROM", "CLS", "CLS_ORDER", "saves", "area", "ROOT")})
+from cards_model import prepare_cards, ROM, CLS, CLS_ORDER, saves, area, ROOT
+from upcast import UPCAST
+C = prepare_cards()
 
-
-exec(open(HERE / "upcast.py", encoding="utf-8").read())
 POURED = {"Эликсир правды", "Любовный напиток"}
 NO_SAVE = {"Лабиринт"}                                   # выход — проверка Инт против СЛ 20, привязка её не меняет
 CHECK_ALL = {"Контрзаклинание", "Рассеивание магии"}     # привязка +1/+2 к проверке у всех, и у заклинателя (8.8)

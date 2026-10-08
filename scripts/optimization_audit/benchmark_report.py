@@ -9,11 +9,12 @@ import time
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
 import alchemy_bestiary_report as report
-from benchmark_python import weighted
+from benchmark_python import weighted, attack_outcomes as reference_attack
 
 
 def main():
-    original = report.a.attack_outcomes
+    production = report.a.attack_outcomes
+    original = reference_attack
     @lru_cache(None)
     def scalar(attack, advantage, auto_crit, ac):
         return tuple(original({'armor_class': [{'value': ac}]}, attack, advantage, auto_crit, ac).items())
@@ -41,7 +42,7 @@ def main():
                                 report_identical=text == published, csv_identical=csv == published_csv,
                                 cache=scalar.cache_info()._asdict() if label == 'cached' else None))
     finally:
-        report.a.attack_outcomes = original
+        report.a.attack_outcomes = production
     output = Path('/tmp/alcemy-optimization-report.json')
     output.write_text(json.dumps(results, indent=2) + '\n')
     print(output.read_text())

@@ -75,9 +75,9 @@ def validate_loadout(names, level, con=2, spell_concentrations=0, casting=False,
     return max((CARDS[n]['lvl'] for n in names), default=0)
 
 
-def attack_outcomes(m, attack, advantage=0, auto_crit=False, ac=None):
+@lru_cache(maxsize=4096)
+def _attack_outcomes(attack, advantage, auto_crit, ac):
     """Вероятности промаха, обычного попадания и крита; полное перечисление к20."""
-    ac = max(a['value'] for a in m['armor_class']) if ac is None else ac
     outcomes = defaultdict(float)
     rolls = [(d, 1 / 20) for d in range(1, 21)] if not advantage else [
         ((max if advantage > 0 else min)(a, c), 1 / 400)
@@ -85,7 +85,13 @@ def attack_outcomes(m, attack, advantage=0, auto_crit=False, ac=None):
     for die, p in rolls:
         key = 'miss' if die == 1 or die != 20 and die + attack < ac else 'crit' if die == 20 or auto_crit else 'hit'
         outcomes[key] += p
-    return dict(outcomes)
+    return tuple(outcomes.items())
+
+
+def attack_outcomes(m, attack, advantage=0, auto_crit=False, ac=None):
+    """Cached probabilities; callers receive a fresh dictionary."""
+    ac = max(a['value'] for a in m['armor_class']) if ac is None else ac
+    return dict(_attack_outcomes(attack, advantage, auto_crit, ac))
 
 
 def precise_throw(level, role, trained=False):

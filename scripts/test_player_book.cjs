@@ -45,6 +45,12 @@ if (!candidate) throw Error('Chromium не найден');
     assert.equal(await page.locator('#doc-bestiary').evaluate(el => el.open), true);
     assert.equal(await page.locator('#library-extra').evaluate(el => el.open), true);
 
+    // Подготовленный индекс сохраняет ё/е, регистр и порядок результатов.
+    await page.locator('#search').fill('полёт');
+    const foldedResults = await page.locator('#search-results strong').allTextContents();
+    assert.ok(foldedResults.length > 0);
+    await page.locator('#search').fill('ПОЛЕТ');
+    assert.deepEqual(await page.locator('#search-results strong').allTextContents(), foldedResults);
     await page.locator('#search').fill('несуществующийтермин123');
     assert.match(await page.locator('#search-status').textContent(), /Совпадений нет/);
     await page.locator('#search').press('Escape');

@@ -6,7 +6,8 @@
 import argparse
 from pathlib import Path
 import re
-import runpy
+import random
+import sim_plan as p
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / 'Недельная варка — план и бюджет.md'
@@ -32,24 +33,21 @@ def replace_table(text, heading, replacement):
 
 
 def build():
-    p = runpy.run_path(str(ROOT / 'scripts/sim_plan.py'))
-    p['random'].seed(20261008)
-    rates = {m: p['per_hour'](m) for m in range(2, 11)}
-    # Одинаковая оценка дохода для всех недель одного мастерства.
-    p['week'].__globals__['per_hour'] = lambda m: rates[m]
+    rng = random.Random(20261008)
+    rates = {m: p.per_hour(m, rng=rng) for m in range(2, 11)}
     text = SOURCE.read_text(encoding='utf-8')
     text = re.sub(r'^\d{2}\.\d{2}\.\d{4}\.(?: Пересчёт Codex\.)?',
                   '08.10.2026. Пересчёт Codex.', text, count=1, flags=re.M)
     for heading, fn, headers, last in (
-        ('### Набор чернил для Лаэля:', p['ink_set'], ['Мастерство Талиса', 'I', 'II', 'III', 'IV', 'V'], 5),
-        ('### Эликсир-эффект для себя:', p['elixir'], ['Мастерство', 'I', 'II', 'III', 'IV', 'V'], 5),
-        ('### Зелье лечения для себя:', p['potion'], ['Мастерство', '1.1', '2.2', '3.3', '4.4', '5.5', '6.6', '7.7', '8.8'], 8),
+        ('### Набор чернил для Лаэля:', p.ink_set, ['Мастерство Талиса', 'I', 'II', 'III', 'IV', 'V'], 5),
+        ('### Эликсир-эффект для себя:', p.elixir, ['Мастерство', 'I', 'II', 'III', 'IV', 'V'], 5),
+        ('### Зелье лечения для себя:', p.potion, ['Мастерство', '1.1', '2.2', '3.3', '4.4', '5.5', '6.6', '7.7', '8.8'], 8),
     ):
         rows = []
         for m in range(2, 11):
             row = [str(m) + (' (сейчас)' if m == 2 else '')]
             for level in range(1, last + 1):
-                if level > m and fn is not p['ink_set']:
+                if level > m and fn is not p.ink_set:
                     row.append('—'); continue
                 result = fn(m, level)
                 row.append(number(result[0]) + ' ч / ' + number(result[1], 2) + (' *' if level > m else ''))
@@ -58,7 +56,7 @@ def build():
     income = []
     for m, r in rates.items():
         vol = r['vol']
-        income.append([str(m), f"+{p['TALIS'][m]}", number(r['pot']) + ' зм/ч',
+        income.append([str(m), f"+{p.TALIS[m]}", number(r['pot']) + ' зм/ч',
                        number(r['ink'][0]) + ' (' + r['ink'][1] + ')',
                        number(vol[0]) + f' ({vol[1]}, ≈{number(vol[2])} ч)' if vol else '—'])
     text = replace_table(text, '## Что выгодно варить на продажу', table(
@@ -66,7 +64,7 @@ def build():
     rows = []
     configurations = [(2,2,2,2), (3,3,2,3), (4,4,2,4), (5,4,3,5), (6,5,3,5), (7,5,3,5), (8,5,4,5), (9,5,4,5)]
     for m, ink, kit, heal in configurations:
-        choices = [p['week'](m, ink, kit, heal, h) for h in (12,22,30)]
+        choices = [p.week(m, ink, kit, heal, h, income=rates[m]) for h in (12,22,30)]
         r = choices[0]
         gold = sum(r[k][1] for k in ('ink', 'kit', 'heal'))
         result = []
@@ -75,7 +73,7 @@ def build():
                 result.append('не хватает ' + number(w['shortfall_hours']) + ' ч')
             else:
                 result.append('+' + number(w['free']) + ' ч продажи: +' + number(w['sale'], 0) + ' зм')
-        rows.append([f'Мастерство {m}', f"чернила {p['ROM'][ink]} ×2,5 + 3 эликсира {p['ROM'][kit]} + 4 зелья {heal}.{heal}",
+        rows.append([f'Мастерство {m}', f"чернила {p.ROM[ink]} ×2,5 + 3 эликсира {p.ROM[kit]} + 4 зелья {heal}.{heal}",
                      number(r['fixed']), number(gold, 0), *result])
     text = replace_table(text, '## Примеры недели', table(
         ['Ступень', 'Что', 'Часов', 'Золото', '12 ч', '22 ч', '30 ч'], rows))

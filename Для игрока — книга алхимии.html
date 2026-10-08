@@ -135,14 +135,14 @@ document.addEventListener('click',event=>{const link=event.target.closest('a[hre
 const input=document.getElementById('search'),results=document.getElementById('search-results'),status=document.getElementById('search-status');
 const normalize=t=>t.toLocaleLowerCase('ru').replaceAll('ё','е');
 // textContent включает закрытые details; innerText на некоторых браузерах их исключает.
-const index=[...document.querySelectorAll('[data-search-title]')].map(element=>({element,title:element.dataset.searchTitle,text:element.textContent.replace(/\s+/g,' ').trim()}));
+const index=[...document.querySelectorAll('[data-search-title]')].map(element=>{const text=element.textContent.replace(/\s+/g,' ').trim();return {element,title:element.dataset.searchTitle,text,normalized:normalize(text)};});
 let matches=[];
 function search(){
  const query=normalize(input.value.trim());results.replaceChildren();matches=[];
  if(query.length<2){results.hidden=true;status.textContent=query?'Введи хотя бы две буквы.':'Поиск включает закрытые примеры и документы библиотеки.';return;}
- const words=query.split(/\s+/);matches=index.filter(item=>words.every(word=>normalize(item.text).includes(word)));
+ const words=query.split(/\s+/);matches=index.filter(item=>words.every(word=>item.normalized.includes(word)));
  results.hidden=false;status.textContent=matches.length?`Найдено разделов и документов: ${matches.length}. Выбери результат, чтобы открыть его.`:'Совпадений нет. Попробуй название эффекта или более короткое слово.';
- for(const item of matches){const li=document.createElement('li'),button=document.createElement('button'),title=document.createElement('strong'),snippet=document.createElement('small');title.textContent=item.title;const position=normalize(item.text).indexOf(words[0]);const from=Math.max(0,position-55);snippet.textContent=(from?'…':'')+item.text.slice(from,from+230)+'…';button.append(title,snippet);button.addEventListener('click',()=>{const hit=[...item.element.querySelectorAll('p,li,td,th,h3,summary')].find(node=>words.every(word=>normalize(node.textContent).includes(word)))||item.element;reveal(hit);const destination=hit.closest('details')||item.element;location.hash=destination.id;hit.scrollIntoView({block:'start'});hit.setAttribute('tabindex','-1');hit.focus({preventScroll:true});});li.append(button);results.append(li);}
+ for(const item of matches){const li=document.createElement('li'),button=document.createElement('button'),title=document.createElement('strong'),snippet=document.createElement('small');title.textContent=item.title;const position=item.normalized.indexOf(words[0]);const from=Math.max(0,position-55);snippet.textContent=(from?'…':'')+item.text.slice(from,from+230)+'…';button.append(title,snippet);button.addEventListener('click',()=>{const hit=[...item.element.querySelectorAll('p,li,td,th,h3,summary')].find(node=>words.every(word=>normalize(node.textContent).includes(word)))||item.element;reveal(hit);const destination=hit.closest('details')||item.element;location.hash=destination.id;hit.scrollIntoView({block:'start'});hit.setAttribute('tabindex','-1');hit.focus({preventScroll:true});});li.append(button);results.append(li);}
 }
 input.addEventListener('input',search);
 input.addEventListener('keydown',event=>{if(event.key==='Enter'&&matches.length){event.preventDefault();results.querySelector('button').click();}if(event.key==='Escape'){input.value='';search();}});

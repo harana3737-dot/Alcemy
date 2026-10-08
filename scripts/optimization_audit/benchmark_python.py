@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from test_economy_audit import model
-from alchemy_bestiary import attack_outcomes
+import alchemy_bestiary as alchemy
 from collections import defaultdict
 
 def weighted(m, attack, advantage=0, auto_crit=False, ac=None):
@@ -16,6 +16,11 @@ def weighted(m, attack, advantage=0, auto_crit=False, ac=None):
         key = 'miss' if d == 1 or (d != 20 and d + attack < ac) else 'crit' if d == 20 or auto_crit else 'hit'
         out[key] += p
     return dict(out)
+
+def attack_outcomes(m, attack, advantage=0, auto_crit=False, ac=None):
+    # Measure the original enumeration, even after the production cache is enabled.
+    ac = max(a['value'] for a in m['armor_class']) if ac is None else ac
+    return dict(alchemy._attack_outcomes.__wrapped__(attack, advantage, auto_crit, ac))
 
 def main():
     count = 0
@@ -45,13 +50,16 @@ def main():
         return statistics.median(times)
     attack = dict(cases=count, max_abs_difference=maxdiff, before_s=bench(attack_outcomes), after_s=bench(weighted), calls_per_sample=5000)
     ns = model('sim_guidance.py')
-    original = ns['sim']
-    source = (ROOT / 'scripts/sim_guidance.py').read_text()
-    node = next((n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef) and n.name == 'sim'))
-    text = ast.get_source_segment(source, node)
-    text = text.replace('    profit = 0.0; tries = 0; use = 0', '    b5, b20 = potion_bonus(mat, price)\n    profit = 0.0; tries = 0; use = 0').replace('                b5, b20 = potion_bonus(mat, price)\n', '')
-    exec(compile(text, '<hoist-prototype>', 'exec'), ns)
     optimized = ns['sim']
+    source = (ROOT / 'scripts/sim_guidance.py').read_text()
+    node = next(n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef) and n.name == 'sim')
+    text = ast.get_source_segment(source, node)
+    # Reconstruct the audited baseline; preserve all RNG calls and their order.
+    text = text.replace('    b5, b20 = potion_bonus(mat, price)\n', '')
+    text = text.replace('                profit += b20 if',
+                        '                b5, b20 = potion_bonus(mat, price)\n                profit += b20 if')
+    exec(compile(text, '<pre-hoist-baseline>', 'exec'), ns)
+    original = ns['sim']
     cases = []
     for args in [(5, 11, 3, 15.64, 70, 4, 5, 10), (12, 17, 48, 114.92, 350, 4, 2, 10), (5, 12, 40.5, 102, 0, 4, 5, 5)]:
         oldtime = []
