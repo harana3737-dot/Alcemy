@@ -102,6 +102,9 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
 .btn:hover{border-color:var(--acc)}
 .btn.soft{background:var(--acc-soft);border-color:transparent}
 .btn.ghost{color:var(--muted)}
+.btn[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:var(--panel);font-weight:600}
+/* «Только бой» на поясе: прячет подготовку и пояснения, остаётся то, что нужно за столом */
+#tab-belt.combat .prep,#tab-belt.combat .hint{display:none}
 .btn.big{width:100%;background:var(--acc);color:var(--panel);border-color:var(--acc);font-weight:600;padding:10px;margin-top:10px}
 .btn.sm{font-size:12px;padding:3px 9px;border-radius:8px}
 .btn.warn{border-color:var(--bad);color:var(--bad)}
@@ -206,7 +209,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 </div>
 <div id="tab-belt" hidden><div class="card clock">
   <div class="ctop"><div><div class="k">Время в игре</div><div class="now" id="now"></div></div>
-    <div class="savest" id="savest"></div></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="savest" id="savest"></div>
+    <button type="button" class="btn" id="beltView" aria-pressed="false" title="Прячет материалы, добавление пьющих и пояснения. Включается само, когда начат бой">Только бой</button></div></div>
   <div class="btns">
     <button type="button" class="btn" data-adv="1">+1 мин</button>
     <button type="button" class="btn" data-adv="10">+10 мин</button>
@@ -219,7 +223,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <button type="button" class="btn soft" id="restL">Долгий отдых</button>
     <button type="button" class="btn ghost" id="undo" title="Отменяет последнее действие: пояс, сумку, материалы, часы и рост в журнале, который дало это действие">Отменить</button>
   </div>
-  <p class="note">Короткий отдых — 1 час, снимает остаточную токсичность. Передышка 10 минут снимает её только у доз с бонусом «Чистый». Долгий отдых — 8 часов: обнуляет токсичность закончившихся эффектов (действующие держат свою, Ж-98); интоксикация уходит, только если токсичность не выше предела; истощение −1. «Отменить» откатывает пояс, сумку, материалы и часы; отметки и рост мастерства в журнале — кнопкой «Отменить последнее» в самой записи.</p>
+  <p class="note hint">Короткий отдых — 1 час, снимает остаточную токсичность. Передышка 10 минут снимает её только у доз с бонусом «Чистый». Долгий отдых — 8 часов: обнуляет токсичность закончившихся эффектов (действующие держат свою, Ж-98); интоксикация уходит, только если токсичность не выше предела; истощение −1. «Отменить» откатывает пояс, сумку, материалы и часы; отметки и рост мастерства в журнале — кнопкой «Отменить последнее» в самой записи.</p>
 </div>
 <div class="card" id="fight" style="margin-top:16px"></div>
 <div class="bgrid">
@@ -240,16 +244,18 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
       <div id="odpanel"></div>
     </div>
     <div class="card" style="margin-top:16px"><h2>Сумка</h2><div id="bag"></div>
-      <p class="note">У каждого своя сумка. Сваренное кнопкой «В сумку» на вкладке «Варка» попадает к Талису; «отдать» передаёт один флакон. Выпитое отсюда списывается само. Зелья 1.1–10.10 токсичности не дают — их просто тратишь.</p></div>
-    <div class="card" style="margin-top:16px"><h2>Материалы Талиса</h2><div id="mat"></div>
+      <p class="note hint">У каждого своя сумка. Сваренное кнопкой «В сумку» на вкладке «Варка» попадает к Талису; «отдать» передаёт один флакон. Выпитое отсюда списывается само. Зелья 1.1–10.10 токсичности не дают — их просто тратишь.</p></div>
+    <div class="card prep" style="margin-top:16px"><h2>Материалы Талиса</h2><div id="mat"></div>
       <p class="note">«Записать варку» тратит травы, эссенцию и применения катализатора на каждую попытку, включая провалы; «Экономия трав» возвращает травы своей дозы (у зарядов, склянок и масел кары — половину).</p></div>
   </div>
   <div>
     <div id="people"></div>
-    <div class="card" style="margin-top:16px"><h2>Кто ещё пьёт</h2>
-      <div class="row"><div><label class="f" for="pn">Имя</label><input id="pn" type="search" placeholder="Например, Фаэнон"></div>
-      <div style="flex:.5"><label class="f" for="pl">Предел</label><input id="pl" type="number" min="0" max="20" value="6"></div></div>
-      <p class="note">Предел — модификатор Телосложения + бонус мастерства + 2 (8.7).</p>
+    <div class="card prep" style="margin-top:16px"><h2>Кто ещё пьёт</h2>
+      <div class="row"><div><label class="f" for="pn">Имя</label><input id="pn" type="search" placeholder="Например, Фаэнон"></div></div>
+      <div class="row" style="margin-top:8px"><div><label class="f" for="pcon">Мод. Тел</label><input id="pcon" type="number" min="-5" max="10" value="2"></div>
+      <div><label class="f" for="ppb">Бонус мастерства</label><input id="ppb" type="number" min="2" max="9" value="2"></div>
+      <div><label class="f" for="pl">Предел</label><input id="pl" type="number" min="0" max="20" value="6"></div></div>
+      <p class="note">Предел считается сам: модификатор Телосложения + бонус мастерства + 2 (8.7). Можно поправить вручную.</p>
       <button type="button" class="btn" id="addp">Добавить</button></div>
     <div class="card" style="margin-top:16px"><h2>Журнал</h2><div id="log" class="log"></div></div>
   </div>
@@ -830,7 +836,13 @@ function myTurn(pid){const F=fight(),out=[];
     const tx=toxOfP('p1'),t=P('p1');if(tx)out.push(`Токсичность ${fmtZ(tx)} из ${t.limit}${tx>t.limit?' — выше предела':''}`);
     F.coats.filter(c=>c.who==='p1').forEach(c=>out.push(`На оружии «${esc(c.n)}»: ${c.ctl?'контрольный, до попадания':'атак осталось '+c.left}`))}
   F.now=out.length?out:['Ничего не срабатывает'];logx(`Бой: ${pid==='p1'?'раунд '+F.round+', ход Талиса':'ход '+(P(pid)?P(pid).name:'')}`)}
+// вид пояса: auto — «Только бой», пока идёт бой; ручной выбор держится до начала или конца боя
+let BV=['auto','all','combat'].includes(ls.get('beltView'))?ls.get('beltView'):'auto', lastOn=null;
+function applyBV(on){const c=BV==='combat'||(BV==='auto'&&on),t=$('tab-belt'),b=$('beltView');if(t)t.classList.toggle('combat',c);if(b)b.setAttribute('aria-pressed',c)}
+$('beltView').onclick=()=>{BV=$('beltView').getAttribute('aria-pressed')==='true'?'all':'combat';ls.set('beltView',BV);applyBV(fight().on)};
+{const lim=()=>{$('pl').value=Math.max(0,(+$('pcon').value||0)+(+$('ppb').value||0)+2)};$('pcon').oninput=lim;$('ppb').oninput=lim}
 function renderFight(){const box=$('fight');if(!box)return;const F=fight();
+  if(lastOn!==null&&lastOn!==!!F.on){BV='auto';ls.set('beltView',BV)}lastOn=!!F.on;applyBV(F.on);
   if(!F.on){box.innerHTML=`<div class="row" style="align-items:center"><h2 style="margin:0;flex:1">Бой</h2><button type="button" class="btn" id="fStart">Начать бой</button></div><p class="note">В бою: «Мой ход» в начале каждого хода Талиса — сдвигает время на раунд (10 раундов = 1 минута) и показывает, что сейчас бросить и проверить. Зелье лечения, потраченное из сумки, само идёт по раундам (7.2). Чужие ходы, спасброски врагов и сроки контроля на целях ведёт мастер.</p>`;
     $('fStart').onclick=()=>mutate(()=>{Object.assign(F,{on:true,round:1,sub:0,turned:false,heals:[],ctl:false,now:['Бой начат. Нажми «Мой ход» в начале хода Талиса.']});logx('Бой начат')});return}
   const others=ST.people.filter(p=>p.id!=='p1'&&F.heals.some(h=>h.who===p.id));

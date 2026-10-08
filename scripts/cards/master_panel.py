@@ -62,8 +62,29 @@ for m in re.finditer(r'<article class="card" id="(e\d+)".*?</article>', cat, re.
     b = re.search(r'<details class="brew">.*?<dl>(.*?)</dl>', art, re.S)
     clean = lambda h: re.sub(r'<button[^>]*>(.*?)</button>', r"\1", h)
     blocks[m.group(1)] = (clean(q.group(0)) if q else "", "<dl>" + clean(b.group(1)) + "</dl>" if b else "")
+def dl_dict(h):  # <dt>…</dt><dd>…</dd> → {dt: текст dd}
+    return {dt: re.sub(r"<[^>]+>", "", dd).strip() for dt, dd in re.findall(r"<dt>(.*?)</dt><dd>(.*?)</dd>", h, re.S)}
+def act_short(t):  # «выпить — бонусное действие; применить — действие (окно 1 час)» → «действие»: что тратится за столом
+    if "применить — " in t:
+        t = t.split("применить — ", 1)[1]
+    elif "реакция" in t:
+        return "реакция"
+    t = re.split(r" \(|;|:|,| —", t)[0].strip()
+    return t
+def brew_time(t):  # «объём работы 90 (≈5 …» → «долгая, объём 90»
+    m = re.match(r"объём работы (\d+)", t)
+    return f"долгая, объём {m.group(1)}" if m else t
 for c, cd in zip(sorted(C, key=lambda c: (c["lvl"], ORDER.index(c["cls"]), c["name"])), cards):
     cd["q"], cd["b"] = blocks.get(c["id"], ("", ""))
+    # метки карточки: за столом — действие, СЛ, спасбросок; на подготовке — СЛ варки, время, катализатор (всё из готовых блоков каталога)
+    q, b = dl_dict(cd["q"]), dl_dict(cd["b"])
+    cd["ac"] = act_short(q.get("Применение") or q.get("Нанесение") or "")
+    dc = re.match(r"\s*(\d+)", q.get("СЛ / атака") or q.get("СЛ") or "")
+    cd["dc"] = int(dc.group(1)) if dc else None
+    cd["sv"] = (q.get("Спасбросок / атака") or q.get("Спасбросок") or "").split(" (")[0]
+    cd["bdc"] = b.get("Сложность варки", "")
+    cd["bt"] = brew_time(b.get("Время варки", ""))
+    cd["cat"] = b.get("Катализатор", "")
 
 # Быстрые таблицы из «Правил за столом»: разделы целиком, свёрнутыми блоками
 TABLE_SECTIONS = [("Рыночные цены", "# Справочник цен"), ("Цены эссенций (9.4)", "### 9.4"), ("2. Результат проверки и осечки", "## 2."), ("7.2 Лечение зелий по раундам", "### 7.2"), ("7.3 Триггеры зелий", "### 7.3"),

@@ -125,6 +125,45 @@ dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:10p
 .fact b{display:block;font:400 22px/1.1 var(--f-display)}
 .fact span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .list{margin:0;padding-left:1.2em}.list li{margin:.3em 0}
+/* Режимы, метки, цвет по назначению */
+:root{--help:#2f7d4f;--help-soft:#e2f0e6;--harm:#a83f3f;--harm-soft:#f6e1df;--misc:#6b4fa0;--misc-soft:#ece6f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--help:#6cc48f;--help-soft:#1e3326;--harm:#e08080;--harm-soft:#3a2222;--misc:#b49be0;--misc-soft:#2c2540}}
+:root[data-theme="dark"]{--help:#6cc48f;--help-soft:#1e3326;--harm:#e08080;--harm-soft:#3a2222;--misc:#b49be0;--misc-soft:#2c2540}
+.modebar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:0 0 12px}
+.modebar .note{flex:1;min-width:200px;margin:0}
+.seg.mode button[aria-pressed=true]{background:var(--acc);color:var(--panel);font-weight:600}
+.bdg{display:inline-block;font-size:12px;line-height:1.3;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:6px;padding:1px 6px;white-space:nowrap}
+.bdg.help{background:var(--help-soft);border-color:transparent;color:var(--help)}
+.bdg.harm{background:var(--harm-soft);border-color:transparent;color:var(--harm)}
+.bdg.misc{background:var(--misc-soft);border-color:transparent;color:var(--misc)}
+.bdg.tox{font-family:var(--f-mono)}
+.bdgs{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.el{border-left:3px solid transparent}
+.el.help{border-left-color:var(--help)}.el.harm{border-left-color:var(--harm)}.el.misc{border-left-color:var(--misc)}
+.el>button>span.nm{display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--muted);margin:2px 0 8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px}
+.chip.pre{font-weight:500}
+details.sub{margin:8px 0 0}
+details.sub>summary{cursor:pointer;font:600 12px var(--f-body);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:4px 0}
+.stack{display:flex;height:6px;border-radius:99px;background:var(--chip);overflow:hidden;margin-top:6px}
+.stack i{display:block;height:100%}
+.counts{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;margin-top:4px}
+.counts b{font-weight:600}
+.q.hide{display:none}
+/* Калькулятор */
+.calc .in{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px 12px;margin:6px 0 10px}
+.calc label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.calc input,.calc select{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 9px;width:100%}
+.calc .tgl{font-size:14px;color:var(--ink);flex-direction:row;align-items:center;grid-column:span 2}.calc .tgl input{width:auto}
+@media(max-width:520px){.calc .tgl{grid-column:auto}}
+.calc .res{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin:4px 0 8px}
+.calc .res div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.calc .res b{display:block;font:400 22px/1.1 var(--f-display)}
+.calc .res span{font-size:12px;color:var(--muted)}
+.calc .res small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.callout{border-left:3px solid var(--warn);background:var(--warn-soft);border-radius:8px;padding:8px 10px;font-size:14px;margin:8px 0}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 
@@ -142,10 +181,13 @@ dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:10p
 
 <section id="p-ok">
   <div class="sum">
-    <div><div class="note" style="margin:0">Отмечено</div><div class="big" id="sumN">0 из __NQ__</div><div class="bar"><i id="sumBar" style="width:0"></i></div></div>
-    <div class="grow">Молчание — «да»: где ничего не отмечено, играем как в строке «Играем». Отмечай только «иначе» или «обсудим». <span id="saveSt"></span></div>
-    <button type="button" class="btn pri" id="copy">Скопировать ответ</button>
+    <div><div class="note" style="margin:0">Согласовано</div><div class="big" id="sumN">0 из __NQ__</div><div class="stack" id="sumBar" aria-hidden="true"></div></div>
+    <div class="grow"><div class="counts" id="sumC"></div>Молчание — «принято»: где ничего не отмечено, играем как в строке «Играем». <span id="saveSt"></span></div>
+    <button type="button" class="btn pri" id="copy">Скопировать отчёт для Claude</button>
   </div>
+  <div class="modebar" style="margin-top:12px"><span class="seg mode" role="group" aria-label="Какие пункты показывать" id="qshow">
+    <button type="button" data-v="all">Все</button><button type="button" data-v="open">Без принятых</button><button type="button" data-v="hot">Только спорные</button></span>
+    <span class="note" id="qhid"></span></div>
   <div class="banner" id="ro" hidden></div>
   <div id="qs"></div>
   <p class="note" id="extra"></p>
@@ -153,6 +195,10 @@ dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:10p
 
 <section id="p-ref" hidden>
   <div class="toc" id="toc"></div>
+  <details class="qt calc" id="calc" open><summary>Калькулятор: предел токсичности, бонус варки, СЛ</summary>
+    <p class="note" style="margin:6px 0 0">Введи числа персонажа — всё считается по правилам v0.3 сразу. Заполнено за Талиса; меняй для Лаэля, Фаэнона или фамильяра.</p>
+    <div class="in" id="cin"></div><div class="res" id="cout"></div><div id="cchance"></div>
+  </details>
   <h2 id="quick">Быстрые таблицы</h2>
   <p class="note">Рыночные цены и разделы «Правил за столом», на которые ссылается ядро: результаты, бонусы, дефекты, лечение, яды, концентрация. Нажми, чтобы раскрыть.</p>
   <div id="qtabs"></div>
@@ -161,13 +207,17 @@ dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:10p
 </section>
 
 <section id="p-el" hidden>
+  <div class="modebar"><span class="seg mode" role="group" aria-label="Режим" id="emode">
+    <button type="button" data-v="table">За столом</button><button type="button" data-v="prep">Подготовка</button></span>
+    <span class="note" id="emodeN"></span></div>
   <div class="filters">
     <input id="fq" type="search" placeholder="Название, эссенция или слово из эффекта" aria-label="Поиск эликсира" autocomplete="off">
     <select id="fs" aria-label="Сортировка"><option value="l">по уровню</option><option value="n">по названию</option><option value="p">по цене</option></select>
   </div>
-  <details class="fdet" id="fgd" open><summary id="fgs">Фильтры</summary><div class="fgroups" id="fg"></div></details>
-  <div class="frow"><label class="tgl"><input type="checkbox" id="fnow"> В пределах мастерства Талиса (до II; рецепты открыты не все)</label>
-    <span class="note" id="fcount"></span><button type="button" class="btn" id="freset">Сбросить фильтры</button></div>
+  <div class="presets" id="pre" role="group" aria-label="Быстрые фильтры"></div>
+  <details class="fdet" id="fgd"><summary id="fgs">Все фильтры</summary><div class="fgroups" id="fg"></div></details>
+  <div class="frow"><span class="note" id="fcount"></span><button type="button" class="btn" id="freset">Сбросить фильтры</button></div>
+  <div class="legend"><span><i style="background:var(--help)"></i>помощь: лечение, защита, усиление</span><span><i style="background:var(--harm)"></i>вред: урон, контроль, яды</span><span><i style="background:var(--misc)"></i>разведка, передвижение, общение, утилита</span></div>
   <div id="els"></div>
 </section>
 
@@ -208,46 +258,63 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset
 // ===== Утвердить: ответы — в общей базе (answers/qN), иначе — только в этом браузере =====
 let A={}, DB=null, CANW=true;
 try{A=JSON.parse(ls.get('manswers')||'{}')||{}}catch(e){A={}}
-const answered=()=>Object.values(A).filter(a=>a&&(a.c==='alt'||a.c==='talk'||a.c==='ok'||a.price)).length;
-function renderSum(){const n=answered();$('sumN').textContent=`${n} из ${NQ}`;$('sumBar').style.width=Math.round(100*n/NQ)+'%'}
+// три положения: принято (ok) · с изменением (alt) · обсудить (talk); коды в базе прежние
+const LBL={ok:'Принято',alt:'С изменением',talk:'Обсудить'};
+const ALLQ=G.flatMap(g=>g.q);
+function tally(){const t={ok:0,alt:0,talk:0,none:0};ALLQ.forEach(q=>{const c=(A['q'+q.n]||{}).c;t[c in LBL?c:'none']++});return t}
+function renderSum(){const t=tally(),agreed=NQ-t.talk;
+  $('sumN').textContent=`${agreed} из ${NQ}`;
+  $('sumBar').innerHTML=[['ok','var(--acc)'],['alt','var(--warn)'],['talk','var(--gold)']].map(([k,c])=>`<i style="width:${100*t[k]/NQ}%;background:${c}"></i>`).join('');
+  $('sumC').innerHTML=`<span><b>${t.ok}</b> принято</span><span><b>${t.alt}</b> с изменением</span><span><b>${t.talk}</b> обсудить</span><span class="muted">${t.none} не отмечено</span>`}
+let SHOW=['all','open','hot'].includes(ls.get('mshow'))?ls.get('mshow'):'all';
+const shown=a=>SHOW==='all'||(SHOW==='open'?a.c!=='ok':a.c==='alt'||a.c==='talk');
+function renderShow(){$('qshow').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===SHOW));
+  const hid=ALLQ.filter(q=>!shown(A['q'+q.n]||{})).length;
+  $('qhid').textContent=hid?`Скрыто пунктов: ${hid}.`:SHOW==='hot'?'Спорных пунктов нет.':''}
+$('qshow').querySelectorAll('button').forEach(b=>b.onclick=()=>{SHOW=b.dataset.v;ls.set('mshow',SHOW);renderQs()});
 function renderQs(){
   const box=$('qs');box.innerHTML='';
-  G.forEach(g=>{const h=document.createElement('h2');h.textContent=g.t;box.appendChild(h);
+  G.forEach(g=>{if(!g.q.some(q=>shown(A['q'+q.n]||{})))return;const h=document.createElement('h2');h.textContent=g.t;box.appendChild(h);
     const c=document.createElement('div');c.className='card';box.appendChild(c);
-    g.q.forEach(q=>{const a=A['q'+q.n]||{},el=document.createElement('div');el.className='q'+(a.c==='alt'?' alt':a.c==='talk'?' talk':'');el.id='q'+q.n;
+    g.q.forEach(q=>{const a=A['q'+q.n]||{};if(!shown(a))return;const el=document.createElement('div');el.className='q'+(a.c==='alt'?' alt':a.c==='talk'?' talk':'');el.id='q'+q.n;
       el.innerHTML=`<div class="n">${q.n}</div><div class="t">${md(q.q)}</div>
         <div class="opt"><b>Играем</b><span>${md(q.y)}</span>${q.a&&q.a!=='—'?`<b>Иначе</b><span>${md(q.a)}</span>`:''}</div>
         <div class="ctl"><span class="seg" role="group" aria-label="Ответ на пункт ${q.n}">
-          <button type="button" data-c="ok" aria-pressed="${a.c==='ok'}">Да</button>${q.a&&q.a!=='—'?`<button type="button" data-c="alt" aria-pressed="${a.c==='alt'}">Иначе</button>`:''}<button type="button" data-c="talk" aria-pressed="${a.c==='talk'}">Обсудим</button></span>
+          <button type="button" data-c="ok" aria-pressed="${a.c==='ok'}">${LBL.ok}</button><button type="button" data-c="alt" aria-pressed="${a.c==='alt'}">${LBL.alt}</button><button type="button" data-c="talk" aria-pressed="${a.c==='talk'}">${LBL.talk}</button></span>
           ${q.n===PRICE_Q?`<label class="note" for="price">Цена рецепта, зм</label><input id="price" type="number" min="0" step="10" placeholder="500" value="${a.price??''}">`:''}
-          <span class="state">${a.c?'':'не отмечено — значит да'}</span></div>
-        ${a.c==='alt'||a.c==='talk'||a.note?`<textarea id="note${q.n}" placeholder="Как иначе или что обсудить" aria-label="Комментарий к пункту ${q.n}">${esc(a.note||'')}</textarea>`:''}`;
+          <span class="state">${a.c?'':'не отмечено — значит принято'}</span></div>
+        ${a.c==='alt'||a.c==='talk'||a.note?`<textarea id="note${q.n}" placeholder="${a.c==='alt'?(q.a&&q.a!=='—'?'Как играем (пусто — как в строке «Иначе»)':'Как играем'):'Что обсудить'}" aria-label="Комментарий к пункту ${q.n}">${esc(a.note||'')}</textarea>`:''}`;
       el.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{const cur=A['q'+q.n]||{};save(q.n,{...cur,c:cur.c===b.dataset.c?null:b.dataset.c});renderQs();
         if(b.dataset.c!=='ok'){const t=$('note'+q.n);if(t)t.focus()}});
       const t=el.querySelector('textarea');if(t){t.onchange=()=>save(q.n,{...(A['q'+q.n]||{}),note:t.value.trim()})}
       const p=el.querySelector('#price');if(p)p.onchange=()=>save(q.n,{...(A['q'+q.n]||{}),price:p.value===''?null:+p.value});
       c.appendChild(el)})});
-  renderSum()}
+  renderSum();renderShow()}
 function save(n,a){a.t=Date.now();A['q'+n]=a;ls.set('manswers',JSON.stringify(A));renderSum();
   if(!DB||!CANW)return;const st=$('saveSt');st.textContent='Сохраняется…';
   DB.collection('answers').doc('q'+n).set(a).then(()=>{st.textContent='Сохранено — игрок видит ответ.'},e=>{
-    st.textContent='Не сохранилось в общий список — нажми «Скопировать ответ» и отправь текстом.';if(e&&(e.code==='not_granted'||e.code==='permission_denied'))readOnly()})}
+    st.textContent='Не сохранилось в общий список — нажми «Скопировать отчёт» и отправь текстом.';if(e&&(e.code==='not_granted'||e.code==='permission_denied'))readOnly()})}
 function readOnly(){CANW=false;const b=$('ro');b.hidden=false;
-  b.textContent='Ответы видишь только ты: у этой ссылки нет права записи. Отметь пункты и нажми «Скопировать ответ» — текст можно вставить в чат.'}
-function answerText(){const all=G.flatMap(g=>g.q),out=[],p=(A['q'+PRICE_Q]||{}).price;
-  const plain=t=>t.replace(/\*\*/g,'').replace(/\*/g,'');
-  all.forEach(q=>{const a=A['q'+q.n];if(!a||(a.c!=='alt'&&a.c!=='talk'))return;
-    const what=a.c==='alt'?'иначе: '+(a.note||plain(q.a)):'обсудим'+(a.note?': '+a.note:'');
-    out.push(`• ${q.n} (${plain(q.q)}) — ${what}`)});
-  let s='Алхимия Талиса — ответ мастера\n'+(out.length?'Всё ок, кроме:\n'+out.join('\n'):'Всё ок.');
-  s+=(p!=null&&p!=='')?`\nП. ${PRICE_Q}: рецепт зарядов и склянок — ${p} зм.`:`\nП. ${PRICE_Q}: цена рецепта зарядов и склянок не указана.`;return s}
+  b.textContent='Ответы видишь только ты: у этой ссылки нет права записи. Отметь пункты и нажми «Скопировать отчёт для Claude» — текст можно вставить в чат.'}
+// отчёт — чистый Markdown для чата проекта: только текст, без HTML
+function answerText(){const plain=t=>String(t).replace(/\*\*/g,'').replace(/\*/g,'').replace(/<[^>]+>/g,''),cell=t=>plain(t).replace(/\|/g,'/').replace(/\s*\n\s*/g,' ').trim();
+  const t=tally(),p=(A['q'+PRICE_Q]||{}).price,d=new Date(),dd=`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+  const alt=ALLQ.filter(q=>(A['q'+q.n]||{}).c==='alt'),talk=ALLQ.filter(q=>(A['q'+q.n]||{}).c==='talk'),ok=ALLQ.filter(q=>(A['q'+q.n]||{}).c==='ok');
+  const L=['# Алхимия Талиса — ответ мастера','',`${dd} · согласовано ${NQ-t.talk} из ${NQ}: принято явно ${t.ok}, с изменением ${t.alt}, обсудить ${t.talk}, не отмечено ${t.none} (молчание — принято).`];
+  if(alt.length){L.push('','## С изменением','','| № | Вопрос | Как играем |','| --- | --- | --- |');
+    alt.forEach(q=>{const a=A['q'+q.n];L.push(`| ${q.n} | ${cell(q.q)} | ${cell(a.note||(q.a&&q.a!=='—'?q.a:'(не указано)'))} |`)})}
+  if(talk.length){L.push('','## Обсудить','');talk.forEach(q=>{const a=A['q'+q.n];L.push(`- **${q.n}.** ${cell(q.q)}${a.note?' — '+cell(a.note):''}`)})}
+  L.push('',`## Цена рецепта зарядов и склянок (п. ${PRICE_Q})`,'',(p!=null&&p!=='')?`${p} зм`:'не указана');
+  const rest=NQ-alt.length-talk.length;
+  L.push('',`Остальные ${rest} пунктов — принято, играем как в строке «Играем».`+(ok.length?` Явно отмечены: ${ok.map(q=>q.n).join(', ')}.`:''));
+  return L.join('\n')}
 $('copy').onclick=async()=>{const s=answerText();try{await navigator.clipboard.writeText(s);$('copy').textContent='Скопировано'}catch(e){
   const ta=document.createElement('textarea');ta.value=s;ta.style.cssText='width:100%;min-height:120px;margin-top:10px';$('ro').hidden=false;$('ro').textContent='Скопировать не вышло — выдели текст ниже:';$('ro').appendChild(ta);ta.select()}
-  setTimeout(()=>$('copy').textContent='Скопировать ответ',1600)};
+  setTimeout(()=>$('copy').textContent='Скопировать отчёт для Claude',1600)};
 $('extra').innerHTML=J('d-extra').map(x=>'Не обязательно: '+md(x)).join('<br>');
 renderQs();
 setTimeout(async()=>{try{
-  if(!window.claude||!window.claude.use){$('saveSt').textContent='';const b=$('ro');b.hidden=false;b.innerHTML='<b>Это файл, а не страница на claude.ai:</b> отметки сохраняются только у тебя. Когда закончишь — нажми «Скопировать ответ» и пришли текст игроку в чат.';return}
+  if(!window.claude||!window.claude.use){$('saveSt').textContent='';const b=$('ro');b.hidden=false;b.innerHTML='<b>Это файл, а не страница на claude.ai:</b> отметки сохраняются только у тебя. Когда закончишь — нажми «Скопировать отчёт для Claude» и пришли текст игроку в чат.';return}
   const db=await window.claude.use('db'), user=await window.claude.use('user');
   if(!db){$('saveSt').textContent='';readOnly();return}
   DB=db;const cw=user?await user.can('data.write'):null;if(cw===false)readOnly();
@@ -272,7 +339,33 @@ const FG=[
 const SEL={};FG.forEach(f=>SEL[f.id]=new Set());
 const passOthers=(c,skip)=>FG.every(f=>f.id===skip||!SEL[f.id].size||f.vals(c).some(v=>SEL[f.id].has(v)));
 const textOk=c=>{const q=$('fq').value.trim().toLowerCase();return !q||[c.n,c.e,c.f,c.x,c.s].join(' ').toLowerCase().includes(q)};
-const nowOk=c=>!$('fnow').checked||c.l<=2;
+// быстрые фильтры: уровень и «доступно Талису» — свои флаги, «Яды» и «Масла» — выбор в группе «Класс»
+let NOW=false, LV3=false;
+const nowOk=c=>(!NOW||c.l<=2)&&(!LV3||c.l<=3);
+const PSN=[CLS.psn],OILS=[CLS.oilw,CLS.oils];
+const setIs=(set,arr)=>set.size===arr.length&&arr.every(v=>set.has(v));
+const PRE=[
+  {t:'Все',on:()=>!NOW&&!LV3&&!$('fq').value.trim()&&FG.every(f=>!SEL[f.id].size),go:()=>resetF()},
+  {t:'I–III ур.',on:()=>LV3,go:()=>{LV3=!LV3}},
+  {t:'Доступно Талису',hint:'до II; рецепты открыты не все',on:()=>NOW,go:()=>{NOW=!NOW}},
+  {t:'Яды',on:()=>setIs(SEL.k,PSN),go:()=>{const on=setIs(SEL.k,PSN);SEL.k.clear();if(!on)PSN.forEach(v=>SEL.k.add(v))}},
+  {t:'Масла',on:()=>setIs(SEL.k,OILS),go:()=>{const on=setIs(SEL.k,OILS);SEL.k.clear();if(!on)OILS.forEach(v=>SEL.k.add(v))}}];
+function renderPre(){$('pre').innerHTML='';PRE.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='chip pre';b.setAttribute('aria-pressed',x.on());
+  b.textContent=x.t;if(x.hint)b.title=x.hint;b.onclick=()=>{x.go();renderEls()};$('pre').appendChild(b)})}
+// режим: за столом — что бросать и тратить; подготовка — варка
+let EMODE=ls.get('emode')==='prep'?'prep':'table';
+$('emode').querySelectorAll('button').forEach(b=>b.onclick=()=>{EMODE=b.dataset.v;ls.set('emode',EMODE);renderEls()});
+const HARM=['Урон','Контроль','Контрольный яд'],HELP=['Восстановление','Защита','Усиление'];
+const tone=c=>c.g.some(g=>HARM.includes(g))?'harm':c.g.some(g=>HELP.includes(g))?'help':'misc';
+const SAB={'Силы':'Сил','Ловкости':'Лов','Телосложения':'Тел','Интеллекта':'Инт','Мудрости':'Мдр','Харизмы':'Хар','атака заклинанием':'атака'};
+const svShort=v=>!v||v.startsWith('нет')?'':v.split(', ').map(x=>SAB[x]||x).join('/');
+function badges(c){const B=[[CLS[c.k]||c.k,tone(c)]];
+  if(EMODE==='table'){if(c.ac)B.push([c.ac]);
+    if(c.dc)B.push([`СЛ ${c.dc}`+(svShort(c.sv)?' · '+svShort(c.sv):'')]);else if(svShort(c.sv)==='атака')B.push(['атака']);
+    if(c.c!=='нет')B.push([c.c.startsWith('алхим')?'алх. концентрация':'концентрация']);
+    B.push([`токс. ${c.tx}`,'tox']);B.push([c.d.replace(/\s*\(концентрация\)/,'')])}
+  else{B.push([c.bdc?'варка '+c.bdc:''],[c.bt],[c.cat==='не нужен'?'без катализатора':'катализатор '+c.cat.replace(' порядка','')],[c.e],[c.p+' зм'])}
+  return B.filter(b=>b[0]).map(([t,k])=>`<span class="bdg${k?' '+k:''}">${esc(t)}</span>`).join('')}
 function renderFG(){const box=$('fg');box.innerHTML='';
   FG.forEach(f=>{const base=CARDS.filter(c=>textOk(c)&&nowOk(c)&&passOthers(c,f.id));
     const row=document.createElement('div');row.className='fgr';row.innerHTML=`<span>${f.t}</span><div class="chips"></div>`;
@@ -283,18 +376,21 @@ function renderFG(){const box=$('fg');box.innerHTML='';
 function renderEls(){
   const list=CARDS.filter(c=>textOk(c)&&nowOk(c)&&passOthers(c,null));
   const s=$('fs').value;list.sort((a,b)=>s==='n'?a.n.localeCompare(b.n,'ru'):s==='p'?PR(a)-PR(b)||a.l-b.l:a.l-b.l||a.n.localeCompare(b.n,'ru'));
-  $('fcount').textContent=`Найдено ${list.length} из ${CARDS.length}`;renderFG();{const n=FG.reduce((s,f)=>s+SEL[f.id].size,0);$('fgs').textContent='Фильтры'+(n?` · выбрано ${n}`:'')}
+  $('fcount').textContent=`Найдено ${list.length} из ${CARDS.length}`;renderFG();renderPre();
+  $('emode').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===EMODE));
+  $('emodeN').textContent=EMODE==='table'?'Метки: действие, СЛ и спасбросок, концентрация, токсичность, длительность. Варка — в раскрытой карточке, свёрнута.':'Метки: СЛ варки, время, катализатор, эссенция, цена. Применение — в раскрытой карточке, свёрнуто.';{const n=FG.reduce((s,f)=>s+SEL[f.id].size,0);$('fgs').textContent='Все фильтры'+(n?` · выбрано ${n}`:'')}
   const box=$('els');box.innerHTML='';
-  list.forEach(c=>{const d=document.createElement('div');d.className='el';
-    d.innerHTML=`<button type="button" aria-expanded="false"><span class="lv">${ROM[c.l]}</span><span>${esc(c.n)}</span><span class="k">${esc(CLS[c.k]||c.k)} · ${esc(c.p)} зм</span></button>
-      <div class="d" hidden><p>${md(c.x)}</p>
-        <h4>Применение</h4>${c.q||''}<dl><dt>Задачи</dt><dd>${esc(c.g.join(', '))}</dd></dl>
-        <h4>Изготовление</h4>${c.b||''}
-        ${c.o?`<p class="note">${md(c.o)}</p>`:''}</div>`;
+  list.forEach(c=>{const d=document.createElement('div');d.className='el '+tone(c);
+    const use=`${c.q||''}<dl><dt>Задачи</dt><dd>${esc(c.g.join(', '))}</dd></dl>`,brew=c.b||'';
+    d.innerHTML=`<button type="button" aria-expanded="false"><span class="lv">${ROM[c.l]}</span><span><span class="nm">${esc(c.n)}</span><span class="bdgs">${badges(c)}</span></span><span class="k">${esc(c.p)} зм</span></button>
+      <div class="d" hidden>${EMODE==='table'
+        ?`<p>${md(c.x)}</p><h4>Применение</h4>${use}<details class="sub"><summary>Изготовление</summary>${brew}</details>`
+        :`<h4>Изготовление</h4>${brew}<p>${md(c.x)}</p><details class="sub"><summary>Применение</summary>${use}</details>`}
+        ${c.o?`<details class="sub"><summary>Примечание и редкие случаи</summary><p class="note">${md(c.o)}</p></details>`:''}</div>`;
     const b=d.querySelector('button'),dd=d.querySelector('.d');b.onclick=()=>{dd.hidden=!dd.hidden;b.setAttribute('aria-expanded',!dd.hidden)};box.appendChild(d)})}
-if(matchMedia('(max-width:520px)').matches)$('fgd').open=false;
-$('fq').addEventListener('input',renderEls);$('fs').onchange=renderEls;$('fnow').onchange=renderEls;
-$('freset').onclick=()=>{FG.forEach(f=>SEL[f.id].clear());$('fq').value='';$('fnow').checked=false;renderEls()};
+function resetF(){FG.forEach(f=>SEL[f.id].clear());$('fq').value='';NOW=false;LV3=false}
+$('fq').addEventListener('input',renderEls);$('fs').onchange=renderEls;
+$('freset').onclick=()=>{resetF();renderEls()};
 renderEls();
 
 // ===== Справка: быстрые таблицы и оглавление =====
@@ -302,6 +398,39 @@ $('qtabs').innerHTML=J('d-quick').map((q,i)=>`<details class="qt" id="qt${i}"><s
 {const items=[['#qt0','Цены'],['#quick','Быстрые таблицы'],...[...document.querySelectorAll('#p-ref > .ref > h2[id]')].map(h=>['#'+h.id,h.textContent.replace(/^\d+\.\s*/,'')])];
   $('toc').innerHTML=items.map(([h,t])=>`<a href="${h}">${esc(t)}</a>`).join('');
   $('toc').querySelectorAll('a').forEach(a=>a.onclick=e=>{e.preventDefault();const el=document.querySelector(a.getAttribute('href'));if(el){let d=el.tagName==='DETAILS'?el:el.closest('details');while(d){d.open=true;d=d.parentElement&&d.parentElement.closest('details')}el.scrollIntoView({behavior:'smooth',block:'start'})}})}
+
+// ===== Калькулятор: формулы ядра правил (разделы 1, 4, 5) =====
+{const DCP=[10,10,11,13,15,17,19,21,23,25],TDC=[13,13,15,15,17,17,18,18,19,19],TAT=[5,5,7,7,9,9,10,10,11,11];
+  const PLACE=[['tools','инструменты: до III, +0',3,0],['bench','рабочее место: до V, +1',5,1],['lab','лаборатория: до VIII, +3',8,3],['shop','мастерская: до X, +5',10,5]];
+  const DEF={con:3,pb:2,int:0,str:-1,cast:4,m:2,place:'bench',help:false,spell:true}; // Талис: лист персонажа
+  let V={...DEF};try{V={...DEF,...JSON.parse(ls.get('mcalc')||'{}')}}catch(e){}
+  const sg=n=>(n>=0?'+':'')+n;
+  const num=(k,t,min,max)=>`<label>${t}<input type="number" data-k="${k}" min="${min}" max="${max}" value="${V[k]}"></label>`;
+  $('cin').innerHTML=num('con','Мод. Телосложения',-5,10)+num('pb','Бонус мастерства',2,9)+num('int','Мод. Интеллекта',-5,10)+num('str','Мод. Силы',-5,10)
+    +num('cast','Мод. заклинательной хар.',-5,10)+num('m','Мастерство алхимии',0,10)
+    +`<label>Место варки<select data-k="place">${PLACE.map(([k,t])=>`<option value="${k}"${V.place===k?' selected':''}>${t}</option>`).join('')}</select></label>`
+    +`<label class="tgl"><input type="checkbox" data-k="spell"${V.spell?' checked':''}> есть «Использование заклинаний» или «Магия договора»</label>`
+    +`<label class="tgl"><input type="checkbox" data-k="help"${V.help?' checked':''}> помощник с инструментами (+2)</label>`;
+  const chance=(b,dc)=>{let n=1;for(let r=2;r<=19;r++)if(r+b>=dc)n++;return Math.round(100*n/20)}; // натуральная 1 — всегда провал, 20 — всегда успех
+  function calc(){const pl=PLACE.find(x=>x[0]===V.place)||PLACE[1],mb=Math.floor(Math.min(10,Math.max(0,V.m))/2);
+    const lim=V.con+V.pb+2,bon=V.int+V.pb+mb+pl[3]+(V.help?2:0),own=8+V.pb+V.cast;
+    $('cout').innerHTML=[
+      [lim,'предел токсичности',`Тел ${sg(V.con)} + БМ ${sg(V.pb)} + 2 (8.7)`],
+      [sg(bon),'бонус проверки варки',`Инт ${sg(V.int)} + БМ ${sg(V.pb)} + мастерство ${sg(mb)} + место ${sg(pl[3])}${V.help?' + помощник +2':''}`],
+      [V.spell?`${own} / ${sg(own-8)}`:'по таблице','СЛ и атака зарядов, склянок',V.spell?`8 + БМ ${sg(V.pb)} + хар. ${sg(V.cast)}; без заклинаний — табличные`:'I–II 13/+5, III–IV 15/+7, V–VI 17/+9, VII–VIII 18/+10, IX–X 19/+11'],
+      [8+V.pb+V.str,'СЛ вливания врагу',`8 + БМ ${sg(V.pb)} + Сила ${sg(V.str)}; спасбросок Телосложения`],
+      [`${12} / ${14} / ${16}`,'передозировка на 1 / 2 / 3',`спасбросок Тел СЛ 10 + 2 × превышение; от 3 — ещё истощение`]]
+      .map(([v,t,f])=>`<div><b>${esc(v)}</b><span>${esc(t)}</span><small>${esc(f)}</small></div>`).join('');
+    const max=Math.min(10,pl[2]);let rows='';
+    if(V.m<1)rows='<p class="callout">На мастерстве 0 самому варить нельзя.</p>';
+    else{for(let l=1;l<=10;l++){const over=l>V.m?5+(l-V.m):0,dcP=DCP[l-1]+over,dcE=DCP[l-1]+2+over;
+      rows+=`<tr${l>max?' class="muted"':''}><td>${ROM[l]}</td><td>${dcP} · ${chance(bon,dcP)}%</td><td>${dcE} · ${chance(bon,dcE)}%</td><td>${l<3?'—':ROM[l<=5?1:l<=7?2:l<=9?3:4]}</td><td>${TDC[l-1]} / +${TAT[l-1]}</td><td>${l>max?'место не позволяет':over?`выше мастерства: СЛ +${over}, одной дозой`:''}</td></tr>`}
+      rows=`<div class="tw"><table><thead><tr><th>Ур.</th><th>Зелье, яд: СЛ · успех</th><th>Эликсир: СЛ · успех</th><th>Катализатор</th><th>Табличная СЛ / атака</th><th>Примечание</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="note">Успех — бросок не ниже СЛ (натуральная 1 — всегда провал, 20 — всегда успех). Первая варка нового варианта — СЛ +2, в таблице не учтено.</p>`}
+    $('cchance').innerHTML=rows}
+  $('cin').querySelectorAll('[data-k]').forEach(el=>el.oninput=el.onchange=()=>{const k=el.dataset.k;
+    V[k]=el.type==='checkbox'?el.checked:el.tagName==='SELECT'?el.value:(el.value===''?DEF[k]:+el.value);ls.set('mcalc',JSON.stringify(V));calc()});
+  calc()}
 
 // ===== Талис =====
 const T=J('d-talis');
