@@ -295,8 +295,8 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
   job.value=8;
   let st={rolls:[],sample:false,mods:{str:4,dex:3,int:2,wis:1}};
   const F=['job','vol','dc','abk','ab','pb','ml','ws'];
-  function load(){try{const s=JSON.parse(localStorage.getItem('smith-log-5')||'null');if(s){F.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});st.rolls=s.rolls||[];if(s.mods)st.mods=s.mods;}}catch(e){}}
-  function save(){try{const s={rolls:st.rolls,mods:st.mods};F.forEach(k=>s[k]=$(k).value);localStorage.setItem('smith-log-5',JSON.stringify(s));}catch(e){}}
+  function load(){try{const s=JSON.parse(localStorage.getItem('smith-log-5')||'null');if(s){F.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});st.rolls=s.rolls||[];st.sample=s.sample===true;if(s.mods)st.mods=s.mods;}}catch(e){}}
+  function save(){try{const s={rolls:st.rolls,sample:st.sample,mods:st.mods};F.forEach(k=>s[k]=$(k).value);localStorage.setItem('smith-log-5',JSON.stringify(s));}catch(e){}}
   const mlb=l=>l<=1?0:l<=3?1:l<=5?2:l<=7?3:l<=9?4:5;
   const bonus=()=>(+$('ab').value||0)+(+$('pb').value||0)+mlb(+$('ml').value||0)+(+$('ws').value||0);
   const fmt=x=>(Math.round(x*10)/10).toLocaleString('ru-RU');
@@ -317,9 +317,14 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
   function render(){
     const b=bonus(),dc=+$('dc').value||10,vol=+$('vol').value||1;
     let prog=0,mk=0,sn=0,df=0;const rows=[];
-    st.rolls.forEach((r,i)=>{const s=step(r.d,b,dc,r.sub);prog=Math.max(0,prog+s.p-s.minus);mk+=s.mk;sn+=s.sn;df+=s.df;
+    st.rolls.forEach((r,i)=>{
+      // Старые сохранения не содержали условий подхода: фиксируем их при первом чтении.
+      // Пример можно пересчитывать; выполненная работа сохраняет свой бонус и СЛ.
+      if(!st.sample){r.b??=b;r.dc??=dc;}
+      const rb=st.sample?b:r.b,rdc=st.sample?dc:r.dc;
+      const s=step(r.d,rb,rdc,r.sub);prog=Math.max(0,prog+s.p-s.minus);mk+=s.mk;sn+=s.sn;df+=s.df;
       const add=s.minus?`−${s.minus}`:'+'+fmt(s.p);
-      rows.push(`<tr><td class="n">${i+1}</td><td class="n">${r.d}</td><td class="n">${r.d+b}</td><td><span class="dot ${s.c}"></span>${s.txt}${s.mk?`, +${s.mk} метк.`:''}${s.sn?', заминка':''}${s.df?', дефект':''}</td><td class="n">${add}</td><td class="n">${fmt(Math.min(prog,vol))}</td></tr>`);});
+      rows.push(`<tr><td class="n">${i+1}</td><td class="n">${r.d}</td><td class="n">${r.d+rb}</td><td><span class="dot ${s.c}"></span>${s.txt}${s.mk?`, +${s.mk} метк.`:''}${s.sn?', заминка':''}${s.df?', дефект':''}</td><td class="n">${add}</td><td class="n">${fmt(Math.min(prog,vol))}</td></tr>`);});
     const dfTot=df+Math.floor(sn/3), snLeft=sn%3;
     $('log').caption&&$('log').deleteCaption();if(st.sample){const c=$('log').createCaption();c.className='muted';c.style.textAlign='left';c.textContent='Пример: четыре подхода для показа. «Новая работа» очищает журнал.';}
     $('log').tBodies[0].innerHTML=rows.join('')||'<tr><td colspan="6" class="muted">Подходов пока нет. Введите d20 и нажмите «Записать подход».</td></tr>';
@@ -341,10 +346,10 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
   $('abk').addEventListener('input',()=>{$('ab').value=st.mods[$('abk').value]??0;render();});
   $('d20').addEventListener('input',()=>{$('sub-l').hidden=+$('d20').value!==1;});
   $('add').addEventListener('click',()=>{const d=Math.round(+$('d20').value);if(!(d>=1&&d<=20)){$('d20').focus();return;}
-    const r={d};if(d===1){const s=Math.round(+$('sub').value);if(!(s>=1&&s<=20)){$('sub').focus();return;}r.sub=s;}
+    const r={d,b:bonus(),dc:+$('dc').value||10};if(d===1){const s=Math.round(+$('sub').value);if(!(s>=1&&s<=20)){$('sub').focus();return;}r.sub=s;}
     if(st.sample){st.rolls=[];st.sample=false;}st.rolls.push(r);$('d20').value='';$('sub').value='';$('sub-l').hidden=true;render();});
   $('d20').addEventListener('keydown',e=>{if(e.key==='Enter')$('add').click();});
-  $('undo').addEventListener('click',()=>{st.sample=false;st.rolls.pop();render();});
+  $('undo').addEventListener('click',()=>{st.rolls.pop();render();});
   $('reset').addEventListener('click',()=>{st.sample=false;st.rolls=[];render();});
   load();
   if(!st.rolls.length&&!localStorage_has()){st.rolls=[{d:11},{d:16},{d:8},{d:20}];st.sample=true;}

@@ -175,7 +175,7 @@ function lssBlocks(){
   const rec=tr.filter(t=>t.done&&/^(Рецепт|Формула)/.test(t.name)).map(t=>'Рецепт открыт: '+t.name.replace(/^Рецепт:\s*/,''));
   out.push({t:'Открытые рецепты («Рецепт открыт…») — заменить целиком',x:rec.join('\n')||'Открытых рецептов нет.'});
   const unit=n=>(SEED.items.find(i=>i.n===n)||{}).u,qty=(n,q)=>unit(n)?` (${q} ${unit(n)})`:q!==1?` ×${fmtZ(q)}`:'';
-  const mine=ST.bag.filter(i=>i.who==='p1'&&i.q>0),line=i=>i.n+qty(i.n,i.q);
+  const mine=ST.bag.filter(i=>i.who==='p1'&&i.q>0),line=i=>i.n+qty(i.n,i.q)+(i.note&&i.note!=='на разборку'?` (${i.note})`:'');
   const bag=['Зелья и расходники',...mine.filter(i=>i.note!=='на разборку').map(line),'','На разборку',...mine.filter(i=>i.note==='на разборку').map(line)];
   out.push({t:'Снаряжение: подразделы «Зелья и расходники» и «На разборку» — заменить',x:bag.join('\n')});
   const M=ST.mat||{herbs:[],ess:[],cat:[],other:[]};
