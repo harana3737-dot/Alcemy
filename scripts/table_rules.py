@@ -97,6 +97,8 @@ body = out[1:]
 k = next(j for j, l in enumerate(body) if l.startswith("## Быстрый старт"))
 text = "\n".join(head + body[k:])
 text = re.sub(r"\n{3,}", "\n\n", text).replace(" .", ".").replace(" ,", ",")
+left = re.findall(r"\*Альтернатива|\bЖ-\d+", text)
+assert not left, f"table_rules.py: в правилах за столом остались альтернативы или номера решений: {sorted(set(left))}"
 OUT.write_text(text.rstrip() + "\n", encoding="utf-8")
 print("ok", OUT.name, len(text), "вырезано", len(CUT))
 if "--diff" in sys.argv:

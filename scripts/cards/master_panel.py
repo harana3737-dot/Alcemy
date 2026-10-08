@@ -36,8 +36,8 @@ core = re.sub(r"<nav>.*?</nav>", "", core, flags=re.S)
 core = re.sub(r"<h1[^>]*>.*?</h1>", "", core, count=1, flags=re.S)
 
 # Карточки эликсиров
-_g = {"__file__": str(HERE / "quality.py")}
-exec(open(HERE / "quality.py", encoding="utf-8").read().split("\n\ncards = sorted")[0], _g)
+import quality
+_g = vars(quality)
 C, CLS, ORDER = _g["C"], _g["CLS"], _g["CLS_ORDER"]
 def conc(c):  # как в каталоге (gen.py, conc_short): эффект — алхимическая по a89, заряды и склянки — обычная по полю conc
     if c["cls"] == "eff":

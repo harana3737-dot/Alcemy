@@ -3,10 +3,8 @@
 Не для карточек мастера. Запуск: python3 scripts/cards/helper.py → «Помощник варки.html»."""
 import hashlib, json, pathlib, re
 HERE = pathlib.Path(__file__).resolve().parent
-_g = {"__file__": str(HERE / "quality.py")}
-_q = open(HERE / "quality.py", encoding="utf-8").read()
-assert "\n\ncards = sorted" in _q, "quality.py: не найдена строка «cards = sorted» — граница общей части сместилась"
-exec(_q.split("\n\ncards = sorted")[0], _g)
+import quality
+_g = vars(quality)
 C, CLS, CLS_ORDER, ROOT = _g["C"], _g["CLS"], _g["CLS_ORDER"], _g["ROOT"]
 
 data = []

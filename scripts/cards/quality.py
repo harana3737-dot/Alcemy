@@ -63,20 +63,25 @@ def quality(c):
     return "Долгое действие (×1,5, не больше +1 часа)", "Ещё одна доза"
 
 
-cards = sorted(C, key=lambda c: (c["lvl"], CLS_ORDER.index(c["cls"]), c["name"]))
-L = ["# Бонусы качества по карточкам\n",
-     "Документ игрока: какой бонус брать на успехе 5+ и натуральной 20 для каждого рецепта из каталога, если варишь для себя. "
-     "На продажу — всегда экономия трав на 5+ и ещё одна доза на 20. Логика выбора — в «Бонусы за 5+ и 20 — что выгоднее брать». "
-     "У контрольных ядов — свой список в 8.12 (Ж-92).\n"]
-for k in CLS_ORDER:
-    items = [c for c in cards if c["cls"] == k]
-    if not items:
-        continue
-    L.append(f"## {CLS[k].capitalize()} ({len(items)})\n")
-    L.append("| Рецепт | Ур. | На 5+ | На 20 |\n| --- | --- | --- | --- |")
-    for c in items:
-        b5, b20 = quality(c)
-        L.append(f"| {c['name']} | {ROM[c['lvl']]} | {b5} | {b20} |")
-    L.append("")
-(ROOT / "Бонусы качества по карточкам.md").write_text("\n".join(L), encoding="utf-8")
-print("ok", len(cards))
+def main():
+    cards = sorted(C, key=lambda c: (c["lvl"], CLS_ORDER.index(c["cls"]), c["name"]))
+    L = ["# Бонусы качества по карточкам\n",
+         "Документ игрока: какой бонус брать на успехе 5+ и натуральной 20 для каждого рецепта из каталога, если варишь для себя. "
+         "На продажу — всегда экономия трав на 5+ и ещё одна доза на 20. Логика выбора — в «Бонусы за 5+ и 20 — что выгоднее брать». "
+         "У контрольных ядов — свой список в 8.12 (Ж-92).\n"]
+    for k in CLS_ORDER:
+        items = [c for c in cards if c["cls"] == k]
+        if not items:
+            continue
+        L.append(f"## {CLS[k].capitalize()} ({len(items)})\n")
+        L.append("| Рецепт | Ур. | На 5+ | На 20 |\n| --- | --- | --- | --- |")
+        for c in items:
+            b5, b20 = quality(c)
+            L.append(f"| {c['name']} | {ROM[c['lvl']]} | {b5} | {b20} |")
+        L.append("")
+    (ROOT / "Бонусы качества по карточкам.md").write_text("\n".join(L), encoding="utf-8")
+    print("ok", len(cards))
+
+
+if __name__ == "__main__":
+    main()
