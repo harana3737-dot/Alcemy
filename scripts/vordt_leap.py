@@ -1,4 +1,9 @@
-"""Монте-Карло: Талис, Лаэль, Фаэнон (4 ур., полные ресурсы, без алхимии) против одного монстра опасности 6."""
+"""Исходная модель Claude: группа 4 уровня против предполагаемого Вордта.
+
+POTIONS включает лечение и свиток. Известные ошибки логики разобраны
+в «Проверка боя с Вордтом — 2026-10-08.md»; проценты не подтверждают
+вероятность настоящего боя. main() сохраняет исходный порядок бросков.
+"""
 import os
 import random, sys
 from statistics import mean
@@ -274,17 +279,23 @@ def fight(name, tactic):
         if not any(p.up() for p in pcs): return 0, rnd, 3
     return 0, 20, sum(not p.up() for p in pcs)
 
-N = int(sys.argv[1]) if len(sys.argv) > 1 else 20000
-POLICY = sys.argv[2] if len(sys.argv) > 2 else 'фронт'
-print('| Монстр | Урон: победа | Паутина: победа | Раундов до победы | Падений союзников за победный бой |')
-print('| --- | ---: | ---: | ---: | ---: |')
-tot = {'урон': [], 'паутина': []}
-for name in M:
-    res = {}
-    for tac in ('урон', 'паутина'):
-        rs = [fight(name, tac) for _ in range(N)]
-        w = mean(r[0] for r in rs); tot[tac].append(w)
-        wins = [r for r in rs if r[0]] or [(0, 0, 0)]
-        res[tac] = (w, mean(r[1] for r in wins), mean(r[2] for r in wins))
-    print(f"| {name} | {res['урон'][0]*100:.0f}% | {res['паутина'][0]*100:.0f}% | {res['урон'][1]:.1f} | {res['урон'][2]:.1f} |")
-print(f"| **Среднее** | {mean(tot['урон'])*100:.0f}% | {mean(tot['паутина'])*100:.0f}% | | |")
+def main():
+    global POLICY
+    N = int(sys.argv[1]) if len(sys.argv) > 1 else 20000
+    POLICY = sys.argv[2] if len(sys.argv) > 2 else 'фронт'
+    print('| Монстр | Урон: победа | Паутина: победа | Раундов до победы | Падений союзников за победный бой |')
+    print('| --- | ---: | ---: | ---: | ---: |')
+    tot = {'урон': [], 'паутина': []}
+    for name in M:
+        res = {}
+        for tac in ('урон', 'паутина'):
+            rs = [fight(name, tac) for _ in range(N)]
+            w = mean(r[0] for r in rs); tot[tac].append(w)
+            wins = [r for r in rs if r[0]] or [(0, 0, 0)]
+            res[tac] = (w, mean(r[1] for r in wins), mean(r[2] for r in wins))
+        print(f"| {name} | {res['урон'][0]*100:.0f}% | {res['паутина'][0]*100:.0f}% | {res['урон'][1]:.1f} | {res['урон'][2]:.1f} |")
+    print(f"| **Среднее** | {mean(tot['урон'])*100:.0f}% | {mean(tot['паутина'])*100:.0f}% | | |")
+
+
+if __name__ == '__main__':
+    main()
