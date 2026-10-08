@@ -99,9 +99,9 @@ select,input[type=number]{font:inherit;color:var(--ink);background:var(--bg);bor
     </div>
     <div class="checks">
       <label><input type="checkbox" id="c-guild" data-b="2"> Мастерская Гильдии, архив Бренны, лаборатория +2</label>
-      <label><input type="checkbox" id="c-desk" data-b="1"> Хорошее место: стол, свет, сухо, тихо +1</label>
+      <label><input type="checkbox" id="c-desk" data-b="1" checked> Хорошее место: стол, свет, сухо, тихо +1</label>
       <label><input type="checkbox" id="c-book" data-b="1" checked> Книга, формула или образец свитка +1</label>
-      <label><input type="checkbox" id="c-calli" data-b="1"> Каллиграф сверх Магии +1</label>
+      <label><input type="checkbox" id="c-calli" data-b="1" checked> Каллиграф сверх Магии +1</label>
       <label><input type="checkbox" id="c-help" data-b="1"> Помощник с Магией или каллиграфией +1</label>
       <label><input type="checkbox" id="c-more" data-b="1"> Материалов на 25% больше +1</label>
       <label><input type="checkbox" id="c-time" data-b="2"> Времени вдвое больше +2</label>
@@ -120,6 +120,7 @@ select,input[type=number]{font:inherit;color:var(--ink);background:var(--bg);bor
     <div class="bar" id="o-bar" role="img" aria-label="Распределение исходов"></div>
     <div class="legend" id="o-leg"></div>
     <p class="muted" id="o-note"></p>
+    <p class="muted">По умолчанию отмечено то, что есть у Лаэля: хорошее место дома (+1), Магия и набор каллиграфа (+1), книга заклинаний (+1). Свой бонус Инт (Магия) впиши в поле выше.</p>
   </section>
 
   <section class="step" id="s1">
@@ -287,10 +288,10 @@ select,input[type=number]{font:inherit;color:var(--ink);background:var(--bg);bor
   const MAT={0:15,1:30,2:120,3:300,4:1200,5:2500};
   const $=id=>R.getElementById(id);
   const ids=['lvl','when','nth','base','ink','place'];
-  function load(){try{const s=JSON.parse(localStorage.getItem('scroll-calc')||'{}');
+  function load(){try{const s=JSON.parse(localStorage.getItem('scroll-calc-2')||'{}');
     for(const k in s){const el=$(k);if(!el)continue;if(el.type==='checkbox')el.checked=s[k];else el.value=s[k];}}catch(e){}}
   function save(){try{const s={};R.querySelectorAll('.calc select,.calc input').forEach(el=>{s[el.id]=el.type==='checkbox'?el.checked:el.value});
-    localStorage.setItem('scroll-calc',JSON.stringify(s));}catch(e){}}
+    localStorage.setItem('scroll-calc-2',JSON.stringify(s));}catch(e){}}
   function pFace(k,dis){return dis?((21-k)**2-(20-k)**2)/400:1/20}
   function calc(){
     const lvl=+$('lvl').value, when=$('when').value;
