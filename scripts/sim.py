@@ -18,12 +18,17 @@ INK = {
 }
 
 
+def check_success(d, bonus, sl):
+    """Натуральные 1/20 имеют приоритет над итогом (раздел 2, Ж-94)."""
+    return d == 20 or d != 1 and d + bonus >= sl
+
+
 def roll(bonus, sl, with_d=False):
     """→ 'ok' (успех, в т.ч. 5+ и нат. 20), 'unst' (провал 1–4), 'fail' (провал 5+ / нат. 1); with_d — ещё и бросок"""
     d = random.randint(1, 20)
     if d == 1:
         r = "fail"
-    elif d == 20 or d + bonus >= sl:
+    elif check_success(d, bonus, sl):
         r = "ok"
     else:
         r = "unst" if sl - (d + bonus) <= 4 else "fail"
@@ -53,7 +58,7 @@ def run_catalyst(bonus, sl, mat_cost, price, cat_price, stop_after, unst_value):
     profit, tries, oks = -cat_price, 0, 0
     for use in range(1, stop_after + 1):
         if use > 5 and cat_price:
-            if random.randint(1, 20) + bonus < INSTAB[use - 6]:   # катализатор испорчен вместе с предметом
+            if not check_success(random.randint(1, 20), bonus, INSTAB[use - 6]):
                 profit -= mat_cost
                 tries += 1
                 break
@@ -88,7 +93,7 @@ def exact(bonus, sl, mat, price, cat, stop, unst_value):
     reach, E, T = 1.0, -cat, 0.0
     for use in range(1, stop + 1):
         if use > 5 and cat:
-            s = min(1, max(0, (21 + bonus - INSTAB[use - 6]) / 20))
+            s = probs(bonus, INSTAB[use - 6])[0]
             E += reach * (s * v - (1 - s) * mat); T += reach
             reach *= s
         else:

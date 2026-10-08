@@ -11,11 +11,15 @@ exec(open(_v["__file__"], encoding="utf-8").read(), _v)
 TALIS = _w["TALIS"]
 ROM = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"]
 # Доз в партии зелья (6.2): мастерство → (1.1, 2.2, 3.3, 4.4, 5.5); 6.6+ — по одной
-BATCH_T = {1: (2,), 2: (4, 2), 3: (6, 5, 4), 4: (8, 6, 5, 4), 5: (10, 8, 6, 5, 4), 6: (10, 10, 8, 6, 5)}
+BATCH_T = {1: (2,), 2: (4, 2), 3: (6, 5, 4), 4: (8, 6, 5, 4), 5: (10, 8, 6, 5, 4),
+           6: (10, 10, 8, 6, 5), 7: (10, 10, 10, 8, 6), 8: (10, 10, 10, 10, 8),
+           9: (10, 10, 10, 10, 10), 10: (10, 10, 10, 10, 10)}
 
 
 def batch_p(m, l):
-    row = BATCH_T[min(m, 6)]
+    if m not in BATCH_T or not 1 <= l <= 10:
+        raise ValueError('Мастерство и уровень должны быть от 1 до 10')
+    row = BATCH_T[m]
     return row[l - 1] if l <= len(row) else 1
 
 
@@ -69,10 +73,15 @@ if __name__ == "__main__":
 
 
 def week(m, ink_k, kit_l, heal_l, hours, sets=2.5, kit_n=3, heal_n=4):
+    """Ожидаемые затраты заказа; fits_expected_budget не гарантирует срок."""
+    if min(hours, sets, kit_n, heal_n) < 0:
+        raise ValueError('Часы и количества не могут быть отрицательными')
     ih, ig, ist = ink_set(m, ink_k); eh, eg = elixir(m, kit_l); ph, pg = potion(m, heal_l)
     fixed = sets * ih + kit_n * eh + heal_n * ph
     ph_best = per_hour(m)
     best = max(ph_best["pot"], ph_best["ink"][0], ph_best["vol"][0] if ph_best["vol"] else 0)
     free = max(0, hours - fixed)
     return dict(ink=(sets * ih, sets * ig, ist), kit=(kit_n * eh, kit_n * eg), heal=(heal_n * ph, heal_n * pg),
-                fixed=fixed, free=free, sale=free * best, best=best)
+                fixed=fixed, free=free, sale=free * best, best=best,
+                budget_hours=hours, fits_expected_budget=fixed <= hours + 1e-9,
+                shortfall_hours=max(0, fixed - hours), estimate_only=True)

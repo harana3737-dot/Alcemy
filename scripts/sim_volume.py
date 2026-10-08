@@ -14,7 +14,10 @@ ESS = {6: HERB[6], 7: 2.5 * HERB[7], 8: 2.5 * HERB[8]}   # VII–VIII — 2–3 
 CAT_E = {6: 350, 7: 350, 8: 1750}
 
 
-def volume_run(bonus, sl, vol, helper):
+def volume_run(bonus, sl, vol, helper, max_approaches=200):
+    """Возвращает завершённую варку; лимит без прогресса — явный тайм-аут."""
+    if vol <= 0 or max_approaches <= 0:
+        raise ValueError('Объём и лимит подходов должны быть положительными')
     prog = marks = hitch = defects = n = 0
     while prog < vol:
         n += 1
@@ -31,8 +34,8 @@ def volume_run(bonus, sl, vol, helper):
                 hitch = 0; defects += 1
         else:
             defects += 1
-        if n > 200:
-            break
+        if n >= max_approaches and prog < vol:
+            raise TimeoutError(f'Варка не завершена: {prog} из {vol}, подходов {n}')
     mod = max(-2, min(2, marks - defects))
     return n, roll(bonus + mod + (2 if helper else 0), sl)
 

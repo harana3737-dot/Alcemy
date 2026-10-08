@@ -1,0 +1,259 @@
+{
+  "profiled": [
+    {
+      "target": "economy",
+      "seconds": 54.306,
+      "exit": 0
+    },
+    {
+      "target": "weekly",
+      "seconds": 14.37,
+      "exit": 0
+    },
+    {
+      "target": "bestiary",
+      "seconds": 5.761,
+      "exit": 0
+    },
+    {
+      "target": "book",
+      "seconds": 0.778,
+      "exit": 0
+    },
+    {
+      "target": "cards",
+      "seconds": 0.097,
+      "exit": 0
+    }
+  ],
+  "unprofiled": [
+    {
+      "target": "economy",
+      "seconds": 12.667,
+      "exit": 0
+    },
+    {
+      "target": "weekly",
+      "seconds": 3.008,
+      "exit": 0
+    },
+    {
+      "target": "bestiary",
+      "seconds": 2.53,
+      "exit": 0
+    },
+    {
+      "target": "book",
+      "seconds": 0.478,
+      "exit": 0
+    },
+    {
+      "target": "cards",
+      "seconds": 0.036,
+      "exit": 0
+    }
+  ],
+  "search": {
+    "documents": 47,
+    "characters": 845379,
+    "queries_per_sample": 600,
+    "before_ms": 3896.7999999970198,
+    "after_ms": 177.80000000447035,
+    "same_results": true
+  },
+  "pure_prototypes": {
+    "attack": {
+      "cases": 6760,
+      "max_abs_difference": 1.0325074129013956e-14,
+      "before_s": 0.34396188499522395,
+      "after_s": 0.013802221001242287,
+      "calls_per_sample": 5000
+    },
+    "guidance_hoist": [
+      {
+        "args": [
+          5,
+          11,
+          3,
+          15.64,
+          70,
+          4,
+          5,
+          10
+        ],
+        "before_s": 0.08127484199940227,
+        "after_s": 0.06434142099169549,
+        "identical_profit_and_rng": true
+      },
+      {
+        "args": [
+          12,
+          17,
+          48,
+          114.92,
+          350,
+          4,
+          2,
+          10
+        ],
+        "before_s": 0.08131588400283363,
+        "after_s": 0.06016009399900213,
+        "identical_profit_and_rng": true
+      },
+      {
+        "args": [
+          5,
+          12,
+          40.5,
+          102,
+          0,
+          4,
+          5,
+          5
+        ],
+        "before_s": 0.0548598680034047,
+        "after_s": 0.04861860899836756,
+        "identical_profit_and_rng": true
+      }
+    ]
+  },
+  "weighted_full_report": {
+    "current_median_s": 2.5371163040108513,
+    "current_runs": 3,
+    "weighted_s": 2.1569771359936567,
+    "weighted_runs": 1,
+    "report_identical": false,
+    "csv_identical": false,
+    "changed_csv_rows": 53,
+    "examples": [
+      [
+        "8,archmage,12,чародей,Удержание чудовища + атака заклинанием,5,damage_next_cast,14.15764062,14.15764062,13.625,2500.0,0,\"Свой яд: у чародея кинжал +БМ+2, у волшебника рапира +БМ+3; заклинание в ход 2 после повторного спасброска цели; атака с 5 фт; урон доставки исключён\"",
+        "8,archmage,12,чародей,Удержание чудовища + атака заклинанием,5,damage_next_cast,14.15764063,14.15764063,13.625,2500.0,0,\"Свой яд: у чародея кинжал +БМ+2, у волшебника рапира +БМ+3; заклинание в ход 2 после повторного спасброска цели; атака с 5 фт; урон доставки исключён\""
+      ],
+      [
+        "8,cloaker,8,волшебник,Удержание чудовища + атака заклинанием,5,damage_next_cast,25.05398437,25.05398437,16.8,2500.0,0,\"Свой яд: у чародея кинжал +БМ+2, у волшебника рапира +БМ+3; заклинание в ход 2 после повторного спасброска цели; атака с 5 фт; урон доставки исключён\"",
+        "8,cloaker,8,волшебник,Удержание чудовища + атака заклинанием,5,damage_next_cast,25.05398438,25.05398438,16.8,2500.0,0,\"Свой яд: у чародея кинжал +БМ+2, у волшебника рапира +БМ+3; заклинание в ход 2 после повторного спасброска цели; атака с 5 фт; урон доставки исключён\""
+      ],
+      [
+        "8,cloud-giant,9,волшебник,Удержание чудовища + атака заклинанием,5,damage_next_cast,19.77143437,19.77143437,16.8,2500.0,0,\"Свой яд: у чародея кинжал +БМ+2, у волшебника рапира +БМ+3; заклинание в ход 2 после повторного спасброска цели; атака с 5 фт; урон доставки исключён\"",
+        "8,cloud-giant,9,волшебник,Удержание чудовища + атака заклинанием,5,damage_next_cast,19.77143438,19.77143438,16.8,2500.0,0,\"Свой яд: у чародея кинжал +БМ+2, у волшебника рапира +БМ+3; заклинание в ход 2 после повторного спасброска цели; атака с 5 фт; урон доставки исключён\""
+      ],
+      [
+        "8,deva,10,волшебник,Своё Ускорение → Тензер + священное масло,9,damage_weapon_turn,46.34507812,,9.7,2750.0,4,\"Ускорение наложено до питья; одна настоящая и одна алхимическая концентрация; 2+1 атаки, не 4\"",
+        "8,deva,10,волшебник,Своё Ускорение → Тензер + священное масло,9,damage_weapon_turn,46.34507813,,9.7,2750.0,4,\"Ускорение наложено до питья; одна настоящая и одна алхимическая концентрация; 2+1 атаки, не 4\""
+      ]
+    ]
+  },
+  "cached_full_report": {
+    "median_s": 1.995480077996035,
+    "runs": 3,
+    "cache": {
+      "hits": 105021,
+      "misses": 217,
+      "maxsize": null,
+      "currsize": 217
+    },
+    "report_and_csv_identical": true
+  },
+  "baseline": "05031fa08013c67ff7de6db175a70726f8a9e484",
+  "python": "3.12.14",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "status": "audit_only_production_code_unchanged",
+  "repeat_validation": {
+    "pure_prototypes": {
+      "attack": {
+        "cases": 6760,
+        "max_abs_difference": 1.0325074129013956e-14,
+        "before_s": 0.36860584998794366,
+        "after_s": 0.014414830002351664,
+        "calls_per_sample": 5000
+      },
+      "guidance_hoist": [
+        {
+          "args": [
+            5,
+            11,
+            3,
+            15.64,
+            70,
+            4,
+            5,
+            10
+          ],
+          "before_s": 0.0839091300003929,
+          "after_s": 0.06492405899916776,
+          "identical_profit_and_rng": true
+        },
+        {
+          "args": [
+            12,
+            17,
+            48,
+            114.92,
+            350,
+            4,
+            2,
+            10
+          ],
+          "before_s": 0.08097061200533062,
+          "after_s": 0.06464288401184604,
+          "identical_profit_and_rng": true
+        },
+        {
+          "args": [
+            5,
+            12,
+            40.5,
+            102,
+            0,
+            4,
+            5,
+            5
+          ],
+          "before_s": 0.05513794900616631,
+          "after_s": 0.04922079401148949,
+          "identical_profit_and_rng": true
+        }
+      ]
+    },
+    "full_report": [
+      {
+        "variant": "current",
+        "median_s": 2.4436954359989613,
+        "runs": 3,
+        "report_identical": true,
+        "csv_identical": true,
+        "cache": null
+      },
+      {
+        "variant": "weighted",
+        "median_s": 2.2302256819966715,
+        "runs": 3,
+        "report_identical": false,
+        "csv_identical": false,
+        "cache": null
+      },
+      {
+        "variant": "cached",
+        "median_s": 1.9965330800041556,
+        "runs": 3,
+        "report_identical": true,
+        "csv_identical": true,
+        "cache": {
+          "hits": 105021,
+          "misses": 217,
+          "maxsize": null,
+          "currsize": 217
+        }
+      }
+    ],
+    "search": {
+      "documents": 47,
+      "characters": 845379,
+      "queries_per_sample": 600,
+      "before_ms": 3638.5,
+      "after_ms": 188.10000000149012,
+      "same_results": true
+    }
+  }
+}

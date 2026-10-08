@@ -23,7 +23,7 @@ heal_rows = [(l, HEAL[l][0], HEAL[l][1], base_cost(l)) for l in range(1, 11)]
 
 # 2. риск нестабильности по применениям при родном бонусе
 def instab(b, use):
-    return max(0.05, min(1, (INSTAB[use - 6] - b - 1) / 20))
+    return 1 - probs(b, INSTAB[use - 6])[0]
 instab_rows = [(l, NATIVE[l], [instab(NATIVE[l], u) for u in range(6, 11)]) for l in (3, 4, 6, 8, 9, 10)]
 
 # 3. самодельный катализатор (5.3): СЛ I 11, II 17, III 21, IV 25; провал 1–4 — 4 стабильных применения (всего 9)
