@@ -24,9 +24,9 @@ def sim(bonus, sl, mat, price, cat, per_day, points, stop, days=100000, u=.5):
             use += 1
             profit -= mat; tries += 1
             if use > 5 and cat:                 # проверка нестабильности — тоже проверка характеристики
-                ok = random.randint(1, 20) + bonus >= INSTAB[use - 6]
+                ok = check_success(random.randint(1, 20), bonus, INSTAB[use - 6])
                 if not ok and pts:
-                    pts -= 1; ok = random.randint(1, 20) + bonus >= INSTAB[use - 6]
+                    pts -= 1; ok = check_success(random.randint(1, 20), bonus, INSTAB[use - 6])
                 if not ok:
                     use = 0; continue
             d = random.randint(1, 20); r = outcome(d, bonus, sl)

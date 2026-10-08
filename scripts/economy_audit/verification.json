@@ -1,0 +1,161 @@
+{
+  "baseline": "faf9ec0873057878b0a674cf7e830b21379f016d",
+  "model_status": "corrected",
+  "warning": "Цены и прочие допущения сохранены; осечки не включены в прибыль.",
+  "differences": [
+    {
+      "level": 3,
+      "bonus": 4,
+      "dc": 11,
+      "materials": 3,
+      "sale_price": 15.639999999999999,
+      "catalyst_price": 70,
+      "unstable_fraction": 0.5,
+      "current": {
+        "stop": 10,
+        "per_try": 0.49494028011686564,
+        "ok_rate": 0.7,
+        "per_day": 1.9797611204674626
+      },
+      "canonical_nat1": {
+        "stop": 10,
+        "per_try": 0.49494028011686564,
+        "per_day": 1.9797611204674626
+      }
+    },
+    {
+      "level": 3,
+      "bonus": 12,
+      "dc": 11,
+      "materials": 3,
+      "sale_price": 15.639999999999999,
+      "catalyst_price": 70,
+      "unstable_fraction": 0.5,
+      "current": {
+        "stop": 10,
+        "per_try": 6.7570558733610415,
+        "ok_rate": 0.95,
+        "per_day": 27.028223493444166
+      },
+      "canonical_nat1": {
+        "stop": 10,
+        "per_try": 6.7570558733610415,
+        "per_day": 27.028223493444166
+      }
+    },
+    {
+      "level": 6,
+      "bonus": 12,
+      "dc": 17,
+      "materials": 48,
+      "sale_price": 114.91999999999999,
+      "catalyst_price": 350,
+      "unstable_fraction": 0.5,
+      "current": {
+        "stop": 10,
+        "per_try": 38.9598655992353,
+        "ok_rate": 0.8,
+        "per_day": 155.8394623969412
+      },
+      "canonical_nat1": {
+        "stop": 10,
+        "per_try": 38.9598655992353,
+        "per_day": 155.8394623969412
+      }
+    },
+    {
+      "level": 8,
+      "bonus": 14,
+      "dc": 21,
+      "materials": 256,
+      "sale_price": 611.66,
+      "catalyst_price": 1750,
+      "unstable_fraction": 0.5,
+      "current": {
+        "stop": 10,
+        "per_try": 162.46928262882554,
+        "ok_rate": 0.7,
+        "per_day": 649.8771305153022
+      },
+      "canonical_nat1": {
+        "stop": 10,
+        "per_try": 162.46928262882554,
+        "per_day": 649.8771305153022
+      }
+    },
+    {
+      "level": 9,
+      "bonus": 16,
+      "dc": 23,
+      "materials": 576,
+      "sale_price": 1029.1375,
+      "catalyst_price": 1750,
+      "unstable_fraction": 0.5,
+      "current": {
+        "stop": 10,
+        "per_try": 361.2291309240028,
+        "ok_rate": 0.7,
+        "per_day": 1444.9165236960112
+      },
+      "canonical_nat1": {
+        "stop": 10,
+        "per_try": 361.2291309240028,
+        "per_day": 1444.9165236960112
+      }
+    }
+  ],
+  "mc_controls": [
+    {
+      "level": 4,
+      "bonus": 6,
+      "stop": 9,
+      "seed": 20261008,
+      "catalysts": 40000,
+      "exact_profit": 3.2389461441113645,
+      "mc_profit": 3.195901810651111,
+      "mc_ci95": [
+        3.1519647411717995,
+        3.239838880130422
+      ]
+    },
+    {
+      "level": 6,
+      "bonus": 8,
+      "stop": 10,
+      "seed": 20261008,
+      "catalysts": 40000,
+      "exact_profit": 3.6209607429242174,
+      "mc_profit": 3.489425524085529,
+      "mc_ci95": [
+        3.256167627384716,
+        3.7226834207863417
+      ]
+    },
+    {
+      "level": 8,
+      "bonus": 10,
+      "stop": 10,
+      "seed": 20261008,
+      "catalysts": 40000,
+      "exact_profit": -28.096962704298228,
+      "mc_profit": -29.053551286546426,
+      "mc_ci95": [
+        -30.29068762132798,
+        -27.816414951764873
+      ]
+    },
+    {
+      "level": 6,
+      "bonus": 12,
+      "stop": 10,
+      "seed": 20261008,
+      "catalysts": 40000,
+      "exact_profit": 38.9598655992353,
+      "mc_profit": 38.92272501806495,
+      "mc_ci95": [
+        38.730744551712085,
+        39.11470548441782
+      ]
+    }
+  ]
+}
