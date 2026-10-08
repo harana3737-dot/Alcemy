@@ -1,7 +1,7 @@
-"""Независимая проверка риска катализатора и сверка исходной математики с MC.
+"""Проверка исправленного риска катализатора и сверка математики с MC.
 
-Не исправляет рабочие модели и не меняет цены/правила. Разницу прибыли
-считает только от обязательного провала на натуральной 1 (Ж-94).
+Сверяет рабочую модель с независимым перечислением кубиков (Ж-94).
+Не меняет цены и не запускает генераторы игровых документов.
 """
 import argparse
 import json
@@ -43,7 +43,7 @@ def main():
         corrected = max((canonical_exact(n, bonus, dc, mat, price, cat, stop, .5)
                          for stop in range(5, 11)), key=lambda s: s['per_try'])
         row = dict(level=level, bonus=bonus, dc=dc, materials=mat, sale_price=price,
-                   catalyst_price=cat, unstable_fraction=.5, old=old, canonical_nat1=corrected)
+                   catalyst_price=cat, unstable_fraction=.5, current=old, canonical_nat1=corrected)
         differences.append(row)
         print(f"Зелье {level}.{level}, +{bonus}: {old['per_try']:.4f} → {corrected['per_try']:.4f} зм/попытку")
     controls = []
@@ -67,7 +67,8 @@ def main():
     if args.output:
         args.output.write_text(json.dumps(dict(
             baseline='faf9ec0873057878b0a674cf7e830b21379f016d',
-            warning='Проверка не исправляет модели; цены и прочие допущения сохранены.',
+            model_status='corrected',
+            warning='Цены и прочие допущения сохранены; осечки не включены в прибыль.',
             differences=differences, mc_controls=controls), ensure_ascii=False, indent=2) + '\n')
 
 
