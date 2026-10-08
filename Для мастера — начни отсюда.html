@@ -2,22 +2,25 @@
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Для мастера</title>
 <style>
-:root{--bg:#faf8f4;--fg:#1f1d1a;--mut:#6b655c;--card:#ffffff;--line:#e2ddd3;--acc:#8a5a14;--accbg:#f5ead7}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17161a;--fg:#ebe7df;--mut:#a59f94;--card:#211f24;--line:#36333a;--acc:#e3b26b;--accbg:#2f2a22;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#17161a;--fg:#ebe7df;--mut:#a59f94;--card:#211f24;--line:#36333a;--acc:#e3b26b;--accbg:#2f2a22;color-scheme:dark}
+:root{--bg:#faf8f4;--fg:#1f1d1a;--mut:#6b655c;--card:#ffffff;--line:#e2ddd3;--acc:#8a5a14;--accbg:#f5ead7;--warn:#a1260d;--warnbg:#fbe3dc}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17161a;--fg:#ebe7df;--mut:#a59f94;--card:#211f24;--line:#36333a;--acc:#e3b26b;--accbg:#2f2a22;--warn:#ff9a80;--warnbg:#3a201b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17161a;--fg:#ebe7df;--mut:#a59f94;--card:#211f24;--line:#36333a;--acc:#e3b26b;--accbg:#2f2a22;--warn:#ff9a80;--warnbg:#3a201b;color-scheme:dark}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
-main{max-width:820px;margin:0 auto;padding:16px 16px 60px}
+main{max-width:820px;margin:0 auto;padding:16px 16px 60px;overflow-wrap:anywhere}
 h1{font-size:1.55rem;line-height:1.25;text-wrap:balance}h2{font-size:1.3rem;margin:2em 0 .6em;padding-top:.6em;border-top:2px solid var(--line)}
 h3{font-size:1.1rem;color:var(--acc);margin:1.6em 0 .4em}h4{font-size:1.02rem;margin:1.6em 0 .4em;padding:8px 12px;background:var(--accbg);border-radius:8px}
-p{margin:.55em 0}ul{margin:.4em 0;padding-left:1.3em}li{margin:.2em 0}
+p{margin:.55em 0}ul{margin:.4em 0;padding-left:1.3em}li{margin:.2em 0;line-height:1.4}h2,h3,h4{scroll-margin-top:56px}
 a{color:var(--acc)}i{color:var(--mut)}blockquote{margin:.8em 0;padding:.4em 14px;border-left:3px solid var(--acc);background:var(--card);border-radius:0 8px 8px 0}blockquote p{margin:.45em 0}img{max-width:100%;height:auto;border-radius:8px;display:block}hr{border:0;border-top:1px solid var(--line);margin:1.2em 0}
 nav{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin:12px 0}
 nav ul{list-style:none;padding:0;margin:0}nav .t2{font-weight:700;margin-top:6px}nav .t3{padding-left:12px;color:var(--mut);font-size:.92rem;margin-top:4px}nav .t4{padding-left:24px;font-size:.92rem}
 .wrap{overflow-x:auto;margin:8px 0}table{border-collapse:collapse;width:100%;font-size:.92rem;font-variant-numeric:tabular-nums}
+tr.hl td{background:var(--accbg)}.badge{display:inline-block;padding:0 7px;border-radius:6px;background:var(--warnbg);color:var(--warn);font-weight:600}
+.bar{position:sticky;top:0;z-index:5;display:flex;gap:6px;overflow-x:auto;padding:8px 0;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:none}
+.bar a{flex:none;padding:3px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);text-decoration:none;font-size:.88rem;white-space:nowrap}
 th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}th{color:var(--mut);font-weight:600}
-@media print{:root:not(#print){--bg:#fff;--fg:#111;--mut:#555;--card:#fff;--line:#bbb;--accbg:#eee;color-scheme:light}nav{display:none}h4{break-after:avoid}}
+@media print{:root:not(#print){--bg:#fff;--fg:#111;--mut:#555;--card:#fff;--line:#bbb;--accbg:#eee;color-scheme:light}nav,.bar{display:none}h4{break-after:avoid}}
 </style></head><body><main>
 <h1>Алхимия Талиса: для мастера</h1>
-<nav><b>Содержание</b><ul><li class="t2"><a href="#h1">Что нужно от тебя</a></li><li class="t2"><a href="#h2">Файлы</a></li><li class="t2"><a href="#h3">Как читать номера</a></li></ul></nav>
+<div class="bar"><a href="#h1">Что нужно от тебя</a><a href="#h2">Файлы</a><a href="#h3">Как читать номера</a></div><nav><b>Содержание</b><ul><li class="t2"><a href="#h1">Что нужно от тебя</a></li><li class="t2"><a href="#h2">Файлы</a></li><li class="t2"><a href="#h3">Как читать номера</a></li></ul></nav>
 <p>06.10.2026. Всё по алхимии Талиса для мастера — в этой папке. Файлы пронумерованы в порядке чтения.</p><h2 id="h1">Что нужно от тебя</h2><p><b>Только файл 1.</b> Там 42 вопроса, по строке на каждый. Если по пункту молчишь — играем как в столбце «Играем». Достаточно ответить: «всё ок, кроме …». Единственное число, которое нужно назвать, — цена в пункте 19.</p><p>Остальные файлы — справочные: открывать, когда хочется проверить, как что работает.</p><h2 id="h2">Файлы</h2><div class="wrap"><table><thead><tr><th>№</th><th>Файл</th><th>Что внутри</th><th>Читать</th></tr></thead><tbody><tr><td>1</td><td><b>Коротко на утверждение</b></td><td>все открытые вопросы, по строке; ответ «всё ок, кроме …»</td><td><b>обязательно</b>, 5–10 минут</td></tr><tr><td>2</td><td>Сводка варки</td><td>как варится любой предмет, что даёт, какие бонусы бывают — на нескольких экранах</td><td>по желанию, 5 минут</td></tr><tr><td>3</td><td>Ядро правил</td><td>все правила коротко, без альтернатив</td><td>если нужно правило под рукой</td></tr><tr><td>4</td><td>Правила за столом</td><td>полный текст правил для игры, без истории решений</td><td>для споров за столом</td></tr><tr><td>5</td><td>Карточки эликсиров</td><td>каталог 196 эликсиров: уровень, эссенция, цена, токсичность, эффект</td><td>когда Талис что-то варит</td></tr><tr><td>6</td><td>Вопросы и изменения — подробно</td><td>каждый вопрос из файла 1 с объяснением и альтернативами; что изменилось против твоего v0.1</td><td>если пункт из файла 1 непонятен</td></tr><tr><td>7</td><td>Образец — кровь шахтёра</td><td>исследуемый образец: что известно, что проверено, что открыто</td><td>перед сценой исследования</td></tr><tr><td>8</td><td>Экономика алхимии</td><td>цены, доход, время Талиса</td><td>если интересно, сколько он зарабатывает</td></tr></tbody></table></div><h2 id="h3">Как читать номера</h2><ul><li><b>В-01, В-46</b> — номер вопроса в очереди; в файле 6 по нему подробности.</li><li><b>7.5, 8.6</b> — раздел правил; искать в файлах 3 и 4.</li><li><b>Ж-100</b> — номер решения в журнале решений (журнал у игрока).</li><li><b>«Решение игрока»</b> — так играем, пока ты не скажешь иначе. <b>«Утверждено мастером»</b> — твоё.</li></ul>
 </main></body></html>
