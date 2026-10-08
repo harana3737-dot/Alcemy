@@ -142,6 +142,7 @@ select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px 
 .bagi{display:flex;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line);font-size:14px}
 .bagi .nm{flex:1;min-width:0}
 .bagi .nm small{display:block;color:var(--muted);font-size:12px}
+@media(max-width:480px){.bagi{flex-wrap:wrap;row-gap:4px}.bagi .nm{flex:1 1 100%}}
 .bagi .q{font:500 14px "JetBrains Mono",monospace;min-width:22px;text-align:center}
 .log{font-size:13px;max-height:260px;overflow:auto}
 .log div{padding:3px 0;border-top:1px solid var(--line)}
