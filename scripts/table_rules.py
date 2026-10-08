@@ -41,7 +41,7 @@ while i < len(lines):
         lv, txt = len(m.group(1)), m.group(2)
         if skip_lv is not None and lv <= skip_lv:
             skip_lv = None
-        if skip_lv is None and any(txt.startswith(d) for d in DROP_SECTIONS) and not txt.startswith("Приложение А") :
+        if skip_lv is None and any(txt.startswith(d) for d in DROP_SECTIONS) and not txt.startswith("Приложение А"):
             skip_lv = lv; CUT.append("§ " + txt); i += 1; continue
         if txt.startswith("Приложение А"):
             ln = "# Приложение А. Формулы"

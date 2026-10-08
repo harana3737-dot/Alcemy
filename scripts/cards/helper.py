@@ -4,7 +4,9 @@
 import hashlib, json, pathlib, re
 HERE = pathlib.Path(__file__).resolve().parent
 _g = {"__file__": str(HERE / "quality.py")}
-exec(open(HERE / "quality.py", encoding="utf-8").read().split("\n\ncards = sorted")[0], _g)
+_q = open(HERE / "quality.py", encoding="utf-8").read()
+assert "\n\ncards = sorted" in _q, "quality.py: не найдена строка «cards = sorted» — граница общей части сместилась"
+exec(_q.split("\n\ncards = sorted")[0], _g)
 C, CLS, CLS_ORDER, ROOT = _g["C"], _g["CLS"], _g["CLS_ORDER"], _g["ROOT"]
 
 data = []
@@ -18,6 +20,7 @@ for c in sorted(C, key=lambda c: (c["lvl"], CLS_ORDER.index(c["cls"]), c["name"]
 CARD_OF = {"Зелье сопротивления (некротика)": "Сопротивление", "Зелье подводного дыхания": "Водное дыхание"}
 sheet = (pathlib.Path(ROOT) / "Талис — лист персонажа.md").read_text(encoding="utf-8")
 seed, block = [], None
+assert "## Снаряжение" in sheet, "Талис — лист персонажа.md: нет раздела «## Снаряжение»"
 for line in sheet.split("## Снаряжение", 1)[1].split("\n"):
     t = line.strip()
     if t in ("Зелья и расходники", "На разборку"):
