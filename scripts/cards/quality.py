@@ -1,5 +1,9 @@
 """Рекомендуемые бонусы качества (7.7, 8.12) по каждой карточке — документ игрока, не для карточек мастера.
 Запуск: python3 scripts/cards/quality.py → «Бонусы качества по карточкам.md»."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from reading_guides import add_guide
 import pathlib, re
 HERE = pathlib.Path(__file__).resolve().parent
 from cards_model import prepare_cards, ROM, CLS, CLS_ORDER, saves, area, ROOT
@@ -77,7 +81,7 @@ def main():
             b5, b20 = quality(c)
             L.append(f"| {c['name']} | {ROM[c['lvl']]} | {b5} | {b20} |")
         L.append("")
-    (ROOT / "Бонусы качества по карточкам.md").write_text("\n".join(L), encoding="utf-8")
+    (ROOT / "Бонусы качества по карточкам.md").write_text(add_guide("\n".join(L), "Бонусы качества по карточкам"), encoding="utf-8")
     print("ok", len(cards))
 
 

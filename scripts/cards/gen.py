@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from reading_guides import add_guide
 import re
 from cards_model import (
     CAT,
@@ -135,7 +139,7 @@ def build_materials(C=None):
 
 def write_materials(data):
     md, cards = data["md"], data["cards"]
-    open(ROOT / "Карточки эликсиров.md", "w", encoding="utf-8").write("\n".join(md))
+    open(ROOT / "Карточки эликсиров.md", "w", encoding="utf-8").write(add_guide("\n".join(md), "Карточки эликсиров"))
 
     import csv
     with open(ROOT / "Реестр эликсиров.csv", "w", encoding="utf-8-sig", newline="") as fh:

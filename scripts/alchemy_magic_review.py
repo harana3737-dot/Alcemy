@@ -1,4 +1,5 @@
 """Дополнительные сценарии по интернет-снимку SRD2014 и домашним правилам."""
+from reading_guides import add_guide
 import argparse
 from collections import defaultdict
 from dataclasses import replace
@@ -234,7 +235,7 @@ def render(rows,csv_text):
            '## Как пересобрать','',
            '`python3 -B scripts/alchemy_magic_review.py --write`, `python3 -B scripts/alchemy_magic_review.py --check`, `python3 -B scripts/master_html.py "Алхимия — заклинания и метамагия"`. Сборка — в временной копии без `.git`. Данные: `scripts/alchemy_bestiary/magic-results.csv`. Интернет-снимки и адреса: `scripts/alchemy_bestiary/web-review/sources.json`.','',
            f'SHA256 дополнительного CSV: `{hashlib.sha256(csv_text.encode()).hexdigest()}`.','']
-    return '\n'.join(text)
+    return add_guide('\n'.join(text), 'Алхимия — заклинания и метамагия')
 
 
 def main():

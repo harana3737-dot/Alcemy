@@ -19,7 +19,8 @@ def inline(t):
     return t
 
 
-lines = SRC.read_text(encoding="utf-8").splitlines()
+lines = [line for line in SRC.read_text(encoding="utf-8").splitlines()
+         if line not in ("<!-- reading-guide:start -->", "<!-- reading-guide:end -->")]
 toc, n = [], 0
 
 
