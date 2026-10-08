@@ -177,6 +177,7 @@ class VordtAudit(unittest.TestCase):
         self.assertEqual((b.T.sorcery, b.T.metamagic_only), (1, 2))
         self.assertEqual(b.L.slots[1], 3)
         self.assertEqual(b.L.armor, 16)
+        self.assertEqual(b.F.slots, {1: 3, 2: 0})  # паладин 4
         b.current_actor = LAEL
         b.pc_turn(b.L)
         self.assertEqual(b.L.armor, 20)

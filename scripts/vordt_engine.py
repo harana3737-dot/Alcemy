@@ -182,7 +182,7 @@ class Battle:
         self.pcs = [
             PC(TALIS, 34, 15, 2, dict(dex=2, con=5, wis=1, str=-1, int=0, cha=6), (0, -15), resistance={'cold'}),
             PC(LAEL, 27, 16, 3, dict(dex=3, con=2, wis=2, str=-1, int=6, cha=0), (0, 15)),
-            PC(FAENON, 41, 16, 3, dict(dex=3, con=2, wis=3, str=6, int=2, cha=5), (0, 0), slots={1: 4, 2: 0}),
+            PC(FAENON, 41, 16, 3, dict(dex=3, con=2, wis=3, str=6, int=2, cha=5), (0, 0), slots={1: 3, 2: 0}),  # паладин 4: три ячейки I
         ]
         self.T, self.L, self.F = self.pcs
         self.T.sorcery, self.T.metamagic_only = 4, 2
