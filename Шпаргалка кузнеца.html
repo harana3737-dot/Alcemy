@@ -82,7 +82,7 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
       <label for="pb">Владение инструментами<input id="pb" type="number" value="2"></label>
       <label for="ml">Мастерство кузнеца (0–10)<input id="ml" type="number" min="0" max="10" value="1"></label>
       <label for="ws">Рабочее место
-        <select id="ws"><option value="0">Инструменты +0</option><option value="1" selected>Обычная кузница +1</option><option value="3">Хорошая кузница +3</option><option value="5">Мастерская кузница +5</option></select></label>
+        <select id="ws"><option value="0">Инструменты +0</option><option value="1">Обычная кузница +1</option><option value="3" selected>Хорошая кузница +3 (кузнец Фаэнона)</option><option value="5">Мастерская кузница +5</option></select></label>
     </div>
     <div class="out" aria-live="polite">
       <div class="tile"><span>Бонус проверки</span><b id="o-b">+6</b></div>
@@ -100,6 +100,7 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
     </div>
     <div class="tw"><table id="log"><thead><tr><th class="n">№</th><th class="n">d20</th><th class="n">Итог</th><th>Исход</th><th class="n">+Прогресс</th><th class="n">Всего</th></tr></thead><tbody></tbody></table></div>
     <p id="final" class="ex"></p>
+    <p class="muted">Кузница, куда ходит Фаэнон, — уровня лаборатории Анариэль. У Анариэль полная лаборатория (+3), ей в кузнечном деле соответствует хорошая кузница +3; аренды нет.</p>
     <p class="muted">Записи хранятся только в этом браузере. Бонус = характеристика + владение + бонус мастерства кузнеца + место <span class="mark">спорно</span>. Половина итога — без округления. Оценка «ещё подходов» — среднее по d20 с текущим бонусом.</p>
   </section>
 
@@ -118,7 +119,7 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
         <tr><th>Место</th><th class="n">Бонус</th><th>Аренда</th></tr>
         <tr><td>Инструменты кузнеца</td><td class="n">+0</td><td>—</td></tr>
         <tr><td>Обычная кузница</td><td class="n">+1</td><td>2–5 зм за вечер или день</td></tr>
-        <tr><td>Хорошая кузница</td><td class="n">+3</td><td>10–25 зм</td></tr>
+        <tr><td>Хорошая кузница</td><td class="n">+3</td><td>10–25 зм; <b>Фаэнону у его кузнеца — бесплатно</b></td></tr>
         <tr><td>Мастерская кузница</td><td class="n">+5</td><td>договор, квест, доверие</td></tr>
       </table></div>
     </div>
