@@ -442,7 +442,7 @@ $('qtabs').innerHTML=J('d-quick').map((q,i)=>`<details class="qt" id="qt${i}"><s
     else{for(let l=1;l<=10;l++){const over=l>V.m?5+(l-V.m):0,dcP=DCP[l-1]+over,dcE=DCP[l-1]+2+over;
       rows+=`<tr${l>max?' class="muted"':''}><td>${ROM[l]}</td><td>${dcP} · ${chance(bon,dcP)}%</td><td>${dcE} · ${chance(bon,dcE)}%</td><td>${l<3?'—':ROM[l<=5?1:l<=7?2:l<=9?3:4]}</td><td>${TDC[l-1]} / +${TAT[l-1]}</td><td>${l>max?'место не позволяет':over?`выше мастерства: СЛ +${over}, одной дозой`:''}</td></tr>`}
       rows=`<div class="tw"><table><thead><tr><th>Ур.</th><th>Зелье, яд: СЛ · успех</th><th>Эликсир: СЛ · успех</th><th>Катализатор</th><th>Табличная СЛ / атака</th><th>Примечание</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="note">Успех — бросок не ниже СЛ (натуральная 1 — всегда провал, 20 — всегда успех). Первая варка нового варианта — СЛ +2, в таблице не учтено.</p>`}
+      <p class="note">Успех — бросок не ниже СЛ (натуральная 1 — всегда провал, 20 — всегда успех). Пока вариант не освоен (нет удачной варки) — СЛ +2 на каждую попытку, в таблице не учтено.</p>`}
     $('cchance').innerHTML=rows}
   $('cin').querySelectorAll('[data-k]').forEach(el=>el.oninput=el.onchange=()=>{const k=el.dataset.k;
     V[k]=el.type==='checkbox'?el.checked:el.tagName==='SELECT'?el.value:(el.value===''?DEF[k]:+el.value);ls.set('mcalc',JSON.stringify(V));calc()});
