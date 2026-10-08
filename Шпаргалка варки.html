@@ -38,6 +38,27 @@ td.n,th.n{font-family:var(--mono);text-align:right;padding-right:14px}
 .two>div{min-width:0}
 .ex{border-left:3px solid var(--accent);padding-left:10px}
 footer{color:var(--muted);font-size:.88rem}
+/* Схема варки: цепочка шагов сверху вниз, внизу — развилка исходов */
+.flow{display:grid;gap:0;justify-items:center}
+.flow *{box-sizing:border-box}
+.node{width:100%;max-width:560px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px;display:grid;gap:2px}
+.node b{font:500 .95rem var(--display);letter-spacing:.03em}
+.node span{font-size:.92rem;color:var(--muted)}
+.node a{color:var(--accent);font:500 .78rem var(--mono);text-decoration:none;justify-self:start}
+.node.key{border-color:var(--accent);background:var(--accent-soft)}
+.arr{color:var(--accent);font:500 1.1rem/1 var(--mono);padding:4px 0}
+.side{width:100%;max-width:560px;border-left:3px solid var(--bad);margin:6px 0 0;padding:2px 0 2px 10px;font-size:.9rem;color:var(--muted)}
+.outs{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media(max-width:620px){.outs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:400px){.outs{grid-template-columns:1fr}}
+.out{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:10px;padding:8px 10px;display:grid;gap:2px;min-width:0}
+.out b{font-size:.95rem}
+.out span{font-size:.88rem;color:var(--muted)}
+.out i{font:500 .8rem var(--mono);font-style:normal;color:var(--c)}
+.out.g{--c:var(--good)} .out.m{--c:var(--mid)} .out.b{--c:var(--bad)}
+.out.g,.out.m,.out.b{background:var(--panel)}
+.out a{color:var(--accent)}
+@media print{.flow{break-inside:avoid}}
 @media print{:root:not(#print){--bg:#fff;--panel:#fff;--ink:#111;--muted:#555;--line:#bbb;--accent-soft:#eee;color-scheme:light}.step{break-inside:avoid}}
 </style>
 
@@ -47,7 +68,33 @@ footer{color:var(--muted);font-size:.88rem}
     <p class="lead">Алхимия Талиса, правила v0.3. Шаги идут в том порядке, в каком их разыгрывают за столом.</p>
   </header>
 
-  <section class="step">
+  <section class="step" aria-labelledby="flow-h">
+    <h2 id="flow-h"><b>→</b>Схема одной варки</h2>
+    <div class="flow">
+      <div class="node"><b>Можно ли варить</b><span>Рецепт известен, место выдерживает уровень, материалы есть, партия объявлена</span><a href="#s1">шаг 1</a></div>
+      <div class="arr" aria-hidden="true">↓</div>
+      <div class="node"><b>Бонус проверки</b><span>Инт + владение + мастерство алхимика + место + помощник. Талис сейчас +4</span><a href="#s2">шаг 2</a></div>
+      <div class="arr" aria-hidden="true">↓</div>
+      <div class="node"><b>СЛ по уровню предмета</b><span>Зелья и яды от 10, эликсиры и чернила от 12; новый вариант формулы +2</span><a href="#s3">шаг 3</a></div>
+      <div class="arr" aria-hidden="true">↓</div>
+      <div class="node"><b>Катализатор (с 3 уровня)</b><span>Первые 5 применений стабильны (у самодельного 4–7), дальше перед каждой дозой проверка нестабильности, СЛ 10–18</span><a href="#s5">шаг 5</a>
+        <div class="side">Провал: катализатор треснул, эта доза испорчена, остальные дозы не варятся</div></div>
+      <div class="arr" aria-hidden="true">↓</div>
+      <div class="node key"><b>d20 + бонус на каждую дозу</b><span>Сравни итог с СЛ</span><a href="#s6">шаг 6</a></div>
+      <div class="arr" aria-hidden="true">↓</div>
+      <div class="outs">
+        <div class="out g"><b>Натуральная 20</b><span>Успех и бонус натуральной 20</span><i>рост +2</i></div>
+        <div class="out g"><b>СЛ + 5 и выше</b><span>Успех и бонус 5+</span><i>рост +1</i></div>
+        <div class="out g"><b>СЛ и выше</b><span>Успех</span><i>рост +1</i></div>
+        <div class="out m"><b>На 1–4 ниже</b><span>Нестабилен: один дефект</span><i>рост 0</i></div>
+        <div class="out b"><b>На 5+ ниже</b><span>Не создан</span><i>рост 0</i></div>
+        <div class="out b"><b>Натуральная 1</b><span>Не создан и осечка к6 (<a href="#s8">шаг 8</a>)</span><i>рост 0</i></div>
+      </div>
+    </div>
+    <p class="muted">При любом исходе травы, эссенция и применение катализатора потрачены.</p>
+  </section>
+
+  <section class="step" id="s1">
     <h2><b>1</b>Перед варкой</h2>
     <ul>
       <li>Рецепт известен, и его уровень не выше мастерства. Выше — запрет или СЛ +5 + разница уровней.</li>
@@ -57,7 +104,7 @@ footer{color:var(--muted);font-size:.88rem}
     </ul>
   </section>
 
-  <section class="step">
+  <section class="step" id="s2">
     <h2><b>2</b>Бонус проверки</h2>
     <div class="formula">d20 + Инт + владение + мастерство алхимика + место + помощник (+2)</div>
     <div class="two">
@@ -81,7 +128,7 @@ footer{color:var(--muted);font-size:.88rem}
     <p class="muted">Помогает: числовое повышение Интеллекта (и временное, но не вместе с тиарой — берётся большее), камень удачи, помощник с мастерством не ниже твоего − 2 (с мастерством 0 бонуса не даёт). Преимущество не работает. Талис сейчас: +0 + 2 + 1 + 1 = <b>+4</b>; у Анариэль — +6.</p>
   </section>
 
-  <section class="step">
+  <section class="step" id="s3">
     <h2><b>3</b>Сложность</h2>
     <div class="tw"><table>
       <tr><th>Уровень</th><th class="n">1</th><th class="n">2</th><th class="n">3</th><th class="n">4</th><th class="n">5</th><th class="n">6</th><th class="n">7</th><th class="n">8</th><th class="n">9</th><th class="n">10</th></tr>
@@ -92,7 +139,7 @@ footer{color:var(--muted);font-size:.88rem}
     <p class="muted">Заговорные чернила — СЛ 10. Первая варка нового варианта формулы — СЛ +2. Противоядия: слабое 13 (с мастерства 4), среднее 17, сильное 21, легендарное 25.</p>
   </section>
 
-  <section class="step">
+  <section class="step" id="s4">
     <h2><b>4</b>Время и партии</h2>
     <div class="tw"><table>
       <tr><th>Что</th><th>Попытка</th></tr>
@@ -144,7 +191,7 @@ footer{color:var(--muted);font-size:.88rem}
     <p class="muted">Одна активная варка за раз.</p>
   </section>
 
-  <section class="step">
+  <section class="step" id="s5">
     <h2><b>5</b>Катализатор</h2>
     <p>Первые 5 применений стабильны (у самодельного — 4–7). Перед каждым следующим, до пяти, — проверка нестабильности тем же бонусом, СЛ 10/12/14/16/18. Каждая доза партии — одно применение.</p>
     <div class="tw"><table>
@@ -154,7 +201,7 @@ footer{color:var(--muted);font-size:.88rem}
     <p class="muted">В партии — пул d20 по порядку. На первом провале катализатор треснул: эта доза испорчена, остальные не варятся и материалов не тратят. Их можно доварить другим катализатором в той же попытке.</p>
   </section>
 
-  <section class="step">
+  <section class="step" id="s6">
     <h2><b>6</b>Результат каждой дозы</h2>
     <div class="tw"><table class="res">
       <tr><th>Бросок</th><th>Итог</th><th>В рост</th></tr>
@@ -168,7 +215,7 @@ footer{color:var(--muted);font-size:.88rem}
     <p class="muted">Травы, эссенция и применение катализатора тратятся при каждой попытке, проваленной тоже. Срока годности у готовых предметов нет, кроме дефекта «Выдыхается».</p>
   </section>
 
-  <section class="step">
+  <section class="step" id="s7">
     <h2><b>7</b>Рост мастерства</h2>
     <div class="tw"><table>
       <tr><th>Переход</th><th class="n">1→2</th><th class="n">2→3</th><th class="n">3→4</th><th class="n">4→5</th><th class="n">5→…→10</th></tr>
@@ -178,7 +225,7 @@ footer{color:var(--muted);font-size:.88rem}
     <p class="ex">Пример: партия из 4 доз 3.3 на мастерстве 3 — два успеха, одна нестабильная, один провал. В рост идёт <b>+2</b>. Будь одна из удачных доз натуральной 20 — было бы +3.</p>
   </section>
 
-  <section class="step">
+  <section class="step" id="s8">
     <h2><b>8</b>Осечка (натуральная 1)</h2>
     <div class="tw"><table>
       <tr><th class="n">к6</th><th>Что случилось</th><th>Кого задевает</th></tr>
