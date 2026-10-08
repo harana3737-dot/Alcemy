@@ -99,9 +99,31 @@ for d in data:
         k, t, gp, use = COMP[d["n"]]
         d["cm"] = dict(k=k, t=t, gp=gp, use=use)
 
+# Вкладки «Свитки» и «Кузня» — шпаргалки ремёсел союзников, встраиваются как есть в теневой DOM (свои стили и id не пересекаются с помощником)
+def craft(fname, host):
+    src = (pathlib.Path(ROOT) / fname).read_text(encoding="utf-8")
+    css = src.split("<style>", 1)[1].split("</style>", 1)[0]
+    body = src.split("</style>", 1)[1].split("<script>", 1)[0]
+    body = body[body.index('<div class="wrap">'):]
+    code = src.split("<script>", 1)[1].split("</script>", 1)[0].strip()
+    for a, b in [(':root:not([data-theme="light"]){', ':host(:not([data-theme="light"])){'), (':root[data-theme="dark"]{', ':host([data-theme="dark"]){'),
+                 ("@media print{:root:not(#print){", "@media print{:host{"), (":root{", ":host{"), ("body{", ":host{display:block;")]:
+        assert a in css, f"{fname}: в стилях нет «{a}» — поправь craft() в helper.py"
+        css = css.replace(a, b, 1)
+    css += ('\n:host{--display:"Prata",Georgia,serif;--body:"Golos Text",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;background:transparent;font-size:15px}'
+            "\n.wrap{padding:18px 0 0;max-width:none}")
+    assert code.startswith("(function(R){") and code.endswith("})(document);"), f"{fname}: скрипт должен быть (function(R){{…}})(document);"
+    code = (code[:-len("(document);")] + "(r);").replace("</", "<\\/")
+    doc = json.dumps("<style>" + css + "</style>" + body, ensure_ascii=False).replace("</", "<\\/")
+    return (f"(()=>{{const h=document.getElementById('{host}');if(!h||!h.attachShadow)return;const r=h.attachShadow({{mode:'open'}});r.innerHTML={doc};"
+            "const th=()=>{const t=document.documentElement.getAttribute('data-theme');t?h.setAttribute('data-theme',t):h.removeAttribute('data-theme')};th();"
+            "new MutationObserver(th).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});"
+            f"try{{{code}}}catch(e){{console.error(e)}}}})();")
+CRAFTS = craft("Шпаргалка свитков.html", "craft-scroll") + "\n" + craft("Шпаргалка кузнеца.html", "craft-smith")
+
 js = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
 html = (HERE / "helper_tpl.html").read_text(encoding="utf-8")
-html = html.replace("__TABLE_TOOLS__", (HERE / "table_tools.js").read_text(encoding="utf-8"))
+html = html.replace("__TABLE_TOOLS__", (HERE / "table_tools.js").read_text(encoding="utf-8")).replace("__CRAFTS__", CRAFTS)
 html = html.replace("__DATA__", js).replace("__CLS__", json.dumps(CLS, ensure_ascii=False)).replace("__N__", str(len(data)))
 html = html.replace("__SEED__", json.dumps(dict(id=seed_id, items=seed, mat=MAT, mid=hashlib.sha1(json.dumps(MAT, ensure_ascii=False).encode()).hexdigest()[:10]), ensure_ascii=False).replace("</", "<\\/"))
 out = pathlib.Path(ROOT) / "Помощник варки.html"

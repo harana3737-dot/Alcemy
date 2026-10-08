@@ -86,7 +86,7 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
 .eff{font-size:14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .empty{color:var(--muted);padding:30px 0;text-align:center}
 .tbtn{float:right;font:inherit;font-size:12px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:3px 10px;cursor:pointer}
-.tabs{display:flex;gap:6px;margin-top:16px;border-bottom:1px solid var(--line)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;border-bottom:1px solid var(--line)}
 .tabs button{font:inherit;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:8px 12px;cursor:pointer;margin-bottom:-1px}
 .tabs button[aria-selected=true]{color:var(--ink);border-color:var(--acc);font-weight:600}
 .tb{font:500 11px "JetBrains Mono",monospace;background:var(--acc);color:var(--panel);border-radius:999px;padding:1px 6px;margin-left:3px}
@@ -187,6 +187,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
   <button type="button" role="tab" data-tab="belt" aria-selected="false">Пояс <span id="beltBadge" class="tb"></span></button>
   <button type="button" role="tab" data-tab="jour" aria-selected="false">Журнал</button>
   <button type="button" role="tab" data-tab="plan" aria-selected="false">Вылазка</button>
+  <button type="button" role="tab" data-tab="scroll" aria-selected="false">Свитки</button>
+  <button type="button" role="tab" data-tab="smith" aria-selected="false">Кузня</button>
 </nav>
 <div class="grid" id="tab-brew">
   <div class="card" id="availability" style="grid-column:1/-1"></div>
@@ -290,6 +292,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <div class="btns"><button type="button" class="btn soft" id="plCopy">Скопировать список</button><button type="button" class="btn ghost" id="plClear">Убрать полученное и пустое</button></div>
   </div>
 </div>
+<div id="tab-scroll" hidden><div id="craft-scroll"></div></div>
+<div id="tab-smith" hidden><div id="craft-smith"></div></div>
 <div id="tab-jour" hidden>
   <div class="card" style="margin-bottom:16px"><h2>Часы и дни кампании</h2><div id="jhrs"></div>
     <p class="note">Часы считаются сами: варка (партия — за время одной попытки, 6.1), пробы и попытки исследований, чернила, противоядия, катализатор, переработка, подходы долгой варки. Остальное — вручную. По дням — часы алхимии и монеты, ушедшие на материалы: для расчёта экономики.</p></div>
@@ -945,7 +949,7 @@ function renderPlan(){
 
 // вкладки
 function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';ls.set('tab',t);if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
+  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';$('tab-scroll').hidden=t!=='scroll';$('tab-smith').hidden=t!=='smith';ls.set('tab',t);if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
@@ -1797,9 +1801,11 @@ function mishapPicker(el,what){
 
 __TABLE_TOOLS__
 
+__CRAFTS__
+
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0)S.sel=si;
-list();render();renderBelt();tab(['belt','jour','plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+list();render();renderBelt();tab(['belt','jour','plan','scroll','smith'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
 </body>
 </html>
