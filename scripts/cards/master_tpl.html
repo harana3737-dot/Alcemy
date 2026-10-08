@@ -137,6 +137,8 @@ dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:10p
 .bdg.harm{background:var(--harm-soft);border-color:transparent;color:var(--harm)}
 .bdg.misc{background:var(--misc-soft);border-color:transparent;color:var(--misc)}
 .bdg.tox{font-family:var(--f-mono)}
+.bdg.psn{background:var(--harm);border-color:var(--harm);color:var(--panel);font-weight:600}
+.el.psn{border-left-width:6px}
 .bdgs{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
 .el{border-left:3px solid transparent}
 .el.help{border-left-color:var(--help)}.el.harm{border-left-color:var(--harm)}.el.misc{border-left-color:var(--misc)}
@@ -346,7 +348,7 @@ const TIER=l=>l<=2?'обычный (I–II)':l<=5?'необычный (III–V)'
 const TX=t=>t>=3?'3 и больше':String(t);
 const PR=c=>+String(c.p).replace(/[^\d]/g,'')||0;
 const FG=[
-  {id:'g',t:'Задача',vals:c=>c.g,order:['Урон','Контроль','Защита','Усиление','Восстановление','Передвижение','Разведка','Общение','Утилита','Контрольный яд']},
+  {id:'g',t:'Задача',vals:c=>c.k==='psn'?c.g:c.g.filter(g=>g!=='Контрольный яд'),order:['Урон','Контроль','Защита','Усиление','Восстановление','Передвижение','Разведка','Общение','Утилита','Контрольный яд']},
   {id:'k',t:'Класс',vals:c=>[CLS[c.k]||c.k],order:ORDER.map(k=>CLS[k])},
   {id:'r',t:'Редкость',vals:c=>[TIER(c.l)],order:['обычный (I–II)','необычный (III–V)','редкий (VI–VII)','очень редкий (VIII–IX)','легендарный (X)']},
   {id:'e',t:'Эссенция',vals:c=>c.es.filter(e=>!/^по |^особая/.test(e)),order:['Тело','Разум','Чувства','Движение','Стихия','Покров','Вода/дыхание','Смерть/душа','Эфир']},
@@ -375,7 +377,8 @@ const HARM=['Урон','Контроль','Контрольный яд'],HELP=['
 const tone=c=>c.g.some(g=>HARM.includes(g))?'harm':c.g.some(g=>HELP.includes(g))?'help':'misc';
 const SAB={'Силы':'Сил','Ловкости':'Лов','Телосложения':'Тел','Интеллекта':'Инт','Мудрости':'Мдр','Харизмы':'Хар','атака заклинанием':'атака'};
 const svShort=v=>!v||v.startsWith('нет')?'':v.split(', ').map(x=>SAB[x]||x).join('/');
-function badges(c){const B=[[CLS[c.k]||c.k,tone(c)]];
+function badges(c){const B=[c.k==='psn'?['☠ контрольный яд','psn']:[CLS[c.k]||c.k,tone(c)]];
+  if(c.k==='chg'&&c.g.includes('Контрольный яд'))B.push(['варится и ядом']);
   if(EMODE==='table'){if(c.ac)B.push([c.ac]);
     if(c.dc)B.push([`СЛ ${c.dc}`+(svShort(c.sv)?' · '+svShort(c.sv):'')]);else if(svShort(c.sv)==='атака')B.push(['атака']);
     if(c.c!=='нет')B.push([c.c.startsWith('алхим')?'алх. концентрация':'концентрация']);
@@ -396,7 +399,7 @@ function renderEls(){
   $('emode').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===EMODE));
   $('emodeN').textContent=EMODE==='table'?'Метки: действие, СЛ и спасбросок, концентрация, токсичность, длительность. Варка — в раскрытой карточке, свёрнута.':'Метки: СЛ варки, время, катализатор, эссенция, цена. Применение — в раскрытой карточке, свёрнуто.';{const n=FG.reduce((s,f)=>s+SEL[f.id].size,0);$('fgs').textContent='Все фильтры'+(n?` · выбрано ${n}`:'')}
   const box=$('els');box.innerHTML='';
-  list.forEach(c=>{const d=document.createElement('div');d.className='el '+tone(c);
+  list.forEach(c=>{const d=document.createElement('div');d.className='el '+tone(c)+(c.k==='psn'?' psn':'');
     const use=`${c.q||''}<dl><dt>Задачи</dt><dd>${esc(c.g.join(', '))}</dd></dl>`,brew=c.b||'';
     d.innerHTML=`<button type="button" aria-expanded="false"><span class="lv">${ROM[c.l]}</span><span><span class="nm">${esc(c.n)}</span><span class="bdgs">${badges(c)}</span></span><span class="k">${esc(c.p)} зм</span></button>
       <div class="d" hidden>${EMODE==='table'
