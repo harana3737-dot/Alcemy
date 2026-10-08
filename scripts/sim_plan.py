@@ -1,21 +1,22 @@
 """Недельная варка Талиса: цена единицы (часы и золото) по ступеням мастерства и доход в час на продажу.
 Поверх sim.py, sim_week.py и sim_volume.py; правила не меняются. Заряды и склянки I–V по цене, травам и СЛ
 совпадают с чернилами того же уровня (справочник цен), поэтому доход в час у них один."""
-import sys
-sys.argv = ["x", "10"]
-exec(open(__file__.replace("sim_plan.py", "sim.py"), encoding="utf-8").read().split("# проверка точного расчёта")[0])
-_w = {"__file__": __file__.replace("sim_plan.py", "sim_week.py")}
-exec(open(_w["__file__"], encoding="utf-8").read(), _w)
-_v = {"__file__": __file__.replace("sim_plan.py", "sim_volume.py")}
-exec(open(_v["__file__"], encoding="utf-8").read(), _v)
-TALIS = _w["TALIS"]
+import random as _random
+from sim_week import TALIS
+import sim_volume as volume
+from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
+
 ROM = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"]
 # Доз в партии зелья (6.2): мастерство → (1.1, 2.2, 3.3, 4.4, 5.5); 6.6+ — по одной
-BATCH_T = {1: (2,), 2: (4, 2), 3: (6, 5, 4), 4: (8, 6, 5, 4), 5: (10, 8, 6, 5, 4), 6: (10, 10, 8, 6, 5)}
+BATCH_T = {1: (2,), 2: (4, 2), 3: (6, 5, 4), 4: (8, 6, 5, 4), 5: (10, 8, 6, 5, 4),
+           6: (10, 10, 8, 6, 5), 7: (10, 10, 10, 8, 6), 8: (10, 10, 10, 10, 8),
+           9: (10, 10, 10, 10, 10), 10: (10, 10, 10, 10, 10)}
 
 
 def batch_p(m, l):
-    row = BATCH_T[min(m, 6)]
+    if m not in BATCH_T or not 1 <= l <= 10:
+        raise ValueError('Мастерство и уровень должны быть от 1 до 10')
+    row = BATCH_T[m]
     return row[l - 1] if l <= len(row) else 1
 
 
@@ -42,7 +43,7 @@ def potion(m, l):
     return 2 / batch_p(m, l) / ok, (l * HERB[l] * (1 - p5) + CAT_PRICE[l] / 5) / ok
 
 
-def per_hour(m):
+def per_hour(m, *, rng=None):
     b = TALIS[m]
     pot = max(scenario(b, P_SL[l], l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], .5, 2)["per_try"] * batch_p(m, l) / 2
               for l in range(1, min(m, 10) + 1))
@@ -52,27 +53,36 @@ def per_hour(m):
     if m >= 6:
         res = []
         for l in range(6, min(m, 8) + 1):
-            price = _v["CHG"][l]
-            st = _v["volume_stats"](b, l, price, price / 3 + _v["ESS"][l], False, 6000)
+            price = volume.CHG[l]
+            st = volume.volume_stats(b, l, price, price / 3 + volume.ESS[l], False, 6000, rng=rng)
             res.append((st["profit"] / st["hours"], ROM[l], st["hours"]))
         vol = max(res)
     return dict(pot=pot, ink=best_ink, vol=vol)
 
 
-if __name__ == "__main__":
-    for m in range(2, 10):
-        print("M", m, "bonus", TALIS[m], {k: (round(v[0], 1) if isinstance(v, tuple) else round(v, 1)) if v else None for k, v in per_hour(m).items()},
-              "vol", per_hour(m)["vol"] and (per_hour(m)["vol"][1], round(per_hour(m)["vol"][2], 1)), "inkbest", per_hour(m)["ink"][1])
-        print("   ink sets k:", {ROM[k]: tuple(round(x, 2) for x in ink_set(m, k)) for k in range(1, 6)})
-        print("   elixir l:", {ROM[l]: tuple(round(x, 2) for x in elixir(m, l)) for l in range(1, min(m, 5) + 1)})
-        print("   potion l:", {f"{l}.{l}": tuple(round(x, 2) for x in potion(m, l)) for l in range(1, min(m, 9) + 1)})
 
 
-def week(m, ink_k, kit_l, heal_l, hours, sets=2.5, kit_n=3, heal_n=4):
+def week(m, ink_k, kit_l, heal_l, hours, sets=2.5, kit_n=3, heal_n=4, *, income=None):
+    """Ожидаемые затраты заказа; fits_expected_budget не гарантирует срок."""
+    if min(hours, sets, kit_n, heal_n) < 0:
+        raise ValueError('Часы и количества не могут быть отрицательными')
     ih, ig, ist = ink_set(m, ink_k); eh, eg = elixir(m, kit_l); ph, pg = potion(m, heal_l)
     fixed = sets * ih + kit_n * eh + heal_n * ph
-    ph_best = per_hour(m)
+    ph_best = per_hour(m) if income is None else income
     best = max(ph_best["pot"], ph_best["ink"][0], ph_best["vol"][0] if ph_best["vol"] else 0)
     free = max(0, hours - fixed)
     return dict(ink=(sets * ih, sets * ig, ist), kit=(kit_n * eh, kit_n * eg), heal=(heal_n * ph, heal_n * pg),
-                fixed=fixed, free=free, sale=free * best, best=best)
+                fixed=fixed, free=free, sale=free * best, best=best,
+                budget_hours=hours, fits_expected_budget=fixed <= hours + 1e-9,
+                shortfall_hours=max(0, fixed - hours), estimate_only=True)
+
+
+if __name__ == "__main__":
+    rng = _random.Random(90)
+    for m in range(2, 10):
+        rate = per_hour(m, rng=rng)
+        print("M", m, "bonus", TALIS[m], {k: (round(v[0], 1) if isinstance(v, tuple) else round(v, 1)) if v else None for k, v in rate.items()},
+              "vol", rate["vol"] and (rate["vol"][1], round(rate["vol"][2], 1)), "inkbest", rate["ink"][1])
+        print("   ink sets k:", {ROM[k]: tuple(round(x, 2) for x in ink_set(m, k)) for k in range(1, 6)})
+        print("   elixir l:", {ROM[l]: tuple(round(x, 2) for x in elixir(m, l)) for l in range(1, min(m, 5) + 1)})
+        print("   potion l:", {f"{l}.{l}": tuple(round(x, 2) for x in potion(m, l)) for l in range(1, min(m, 9) + 1)})

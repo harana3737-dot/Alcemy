@@ -1,92 +1,110 @@
 import pathlib
 HERE = pathlib.Path(__file__).resolve().parent
 import html, json, re
-exec(open(HERE / "gen.py", encoding="utf-8").read())
+from cards_model import (
+    CLS,
+    CLS_ORDER,
+    ESS_TYPES,
+    PSN_RECIPE,
+    RAR,
+    ROM,
+    ROOT,
+    TASKS,
+    card_tags,
+    clean,
+    params,
+    recipe,
+)
+from gen import build_materials, write_materials
 
 
-import urllib.parse
-RULES = urllib.parse.quote("Алхимия Талиса — правила v0.3.html")
-SEC_IDS = set(re.findall(r'id="(s-[^"]+)"', open(ROOT / "Алхимия Талиса — правила v0.3.html", encoding="utf-8").read()))
+def main():
+    data = build_materials()
+    write_materials(data)
+    C, md, cards, fams = (data[k] for k in ("C", "md", "cards", "fams"))
+    import urllib.parse
+    RULES = urllib.parse.quote("Алхимия Талиса — правила v0.3.html")
+    SEC_IDS = set(re.findall(r'id="(s-[^"]+)"', open(ROOT / "Алхимия Талиса — правила v0.3.html", encoding="utf-8").read()))
 
 
-def rules_links(t):
-    def rep(m):
-        a, b = m.group(1), m.group(2)
-        sid = f"s-{a}-{b}"
-        return f'<a class="lnk" href="{RULES}#{sid}">{a}.{b}</a>' if sid in SEC_IDS else m.group(0)
-    return re.sub(r"(?<![\d.])(\d{1,2})\.(\d{1,2})(?![\d+])", lambda m: rep(m) if m.group(1) != m.group(2) else m.group(0), t)
+    def rules_links(t):
+        def rep(m):
+            a, b = m.group(1), m.group(2)
+            sid = f"s-{a}-{b}"
+            return f'<a class="lnk" href="{RULES}#{sid}">{a}.{b}</a>' if sid in SEC_IDS else m.group(0)
+        return re.sub(r"(?<![\d.])(\d{1,2})\.(\d{1,2})(?![\d+])", lambda m: rep(m) if m.group(1) != m.group(2) else m.group(0), t)
 
 
-def tx(s):
-    s = html.escape(s.replace("\\[", "[").replace("\\]", "]"))
-    return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
+    def tx(s):
+        s = html.escape(s.replace("\\[", "[").replace("\\]", "]"))
+        return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
 
 
-def card_html(c):
-    l = c["lvl"]
-    quick = [(k, tx(v)) for k, v in params(c)]
-    brew = [("Источник", tx(c["src"]))] + [(k, tx(v)) for k, v in recipe(c)]
-    if c["fam"]:
-        brew.append(("Формула", f'<button class="lnk" data-fam="{tx(c["fam"])}">{tx(c["fam"])}</button>'))
-    tags = f'<span class="tag lv">{ROM[l]}</span><span class="tag">{RAR[l]}</span><span class="tag cls-{c["cls"]}">{CLS[c["cls"]]}</span>'
-    if c["off"]:
-        tags += '<span class="tag">официальный, изменён</span>' if c["changed"] else '<span class="tag">официальный</span>'
-    else:
-        tags += '<span class="tag">домашний</span>'
-    if c["open"]:
-        tags += '<span class="tag open">открытый вопрос</span>'
-    out = [f'<article class="card" id="{c["id"]}" data-lvl="{l}" data-cls="{c["cls"]}" data-fam="{tx(c["fam"] or "")}" data-task="{tx("|".join(c["tasks"]))}" data-ess="{tx("|".join(c["ess_types"]))}" data-name="{tx(c["name"].lower())}">',
-           f'<h3>{tx(c["name"])}</h3><div class="tags">{tags}</div>']
-    out.append(f'<p class="tagline">{tx(" · ".join(card_tags(c)))}</p>')
-    if c["changed"]:
-        out.append(f'<p class="chgd">Изменено относительно источника: {tx(c["changed"])}.</p>')
-    out.append('<dl class="quick">' + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in quick) + "</dl>")
-    out.append(f'<p class="eff"><b>Эффект.</b> {tx(c["eff"])}</p>')
-    if c["mech"]:
-        out.append(f'<p class="mech"><b>Особые правила.</b> {tx(c["mech"])}</p>')
-    if c["open"]:
-        out.append(f'<p class="openq"><b>Открытый вопрос.</b> {tx(c["open"])}</p>')
-    if c["cls"] == "psn":
-        out.append(f'<p class="mech"><b>Рецепт.</b> {tx(PSN_RECIPE.format(fam=c["fam"]))}</p>')
-    if c["alt"]:
-        out.append(f'<p class="alt"><i>Альтернатива: {tx(c["alt"])}.</i></p>')
-    det = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in brew)
-    note = f'<p class="note">{tx(c["note"])}</p>' if c["note"] else ""
-    out.append(f'<details class="brew"><summary>Варка, источник{", примечание" if c["note"] else ""}</summary><dl>{det}</dl>{note}</details>')
-    out.append('<a class="lnk top" href="#list">↑ к списку</a></article>')
-    return clean("".join(out))
+    def card_html(c):
+        l = c["lvl"]
+        quick = [(k, tx(v)) for k, v in params(c)]
+        brew = [("Источник", tx(c["src"]))] + [(k, tx(v)) for k, v in recipe(c)]
+        if c["fam"]:
+            brew.append(("Формула", f'<button class="lnk" data-fam="{tx(c["fam"])}">{tx(c["fam"])}</button>'))
+        tags = f'<span class="tag lv">{ROM[l]}</span><span class="tag">{RAR[l]}</span><span class="tag cls-{c["cls"]}">{CLS[c["cls"]]}</span>'
+        if c["off"]:
+            tags += '<span class="tag">официальный, изменён</span>' if c["changed"] else '<span class="tag">официальный</span>'
+        else:
+            tags += '<span class="tag">домашний</span>'
+        if c["open"]:
+            tags += '<span class="tag open">открытый вопрос</span>'
+        out = [f'<article class="card" id="{c["id"]}" data-lvl="{l}" data-cls="{c["cls"]}" data-fam="{tx(c["fam"] or "")}" data-task="{tx("|".join(c["tasks"]))}" data-ess="{tx("|".join(c["ess_types"]))}" data-name="{tx(c["name"].lower())}">',
+               f'<h3>{tx(c["name"])}</h3><div class="tags">{tags}</div>']
+        out.append(f'<p class="tagline">{tx(" · ".join(card_tags(c)))}</p>')
+        if c["changed"]:
+            out.append(f'<p class="chgd">Изменено относительно источника: {tx(c["changed"])}.</p>')
+        out.append('<dl class="quick">' + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in quick) + "</dl>")
+        out.append(f'<p class="eff"><b>Эффект.</b> {tx(c["eff"])}</p>')
+        if c["mech"]:
+            out.append(f'<p class="mech"><b>Особые правила.</b> {tx(c["mech"])}</p>')
+        if c["open"]:
+            out.append(f'<p class="openq"><b>Открытый вопрос.</b> {tx(c["open"])}</p>')
+        if c["cls"] == "psn":
+            out.append(f'<p class="mech"><b>Рецепт.</b> {tx(PSN_RECIPE.format(fam=c["fam"]))}</p>')
+        if c["alt"]:
+            out.append(f'<p class="alt"><i>Альтернатива: {tx(c["alt"])}.</i></p>')
+        det = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in brew)
+        note = f'<p class="note">{tx(c["note"])}</p>' if c["note"] else ""
+        out.append(f'<details class="brew"><summary>Варка, источник{", примечание" if c["note"] else ""}</summary><dl>{det}</dl>{note}</details>')
+        out.append('<a class="lnk top" href="#list">↑ к списку</a></article>')
+        return clean("".join(out))
 
 
-index_rows = "".join(
-    f'<tr data-go="{c["id"]}" data-lvl="{c["lvl"]}" data-cls="{c["cls"]}" data-fam="{tx(c["fam"] or "")}" data-name="{tx(c["name"].lower())}">'
-    f'<td><a class="lnk" href="#{c["id"]}">{tx(c["name"])}</a></td><td data-v="{c["lvl"]}">{ROM[c["lvl"]]}</td><td>{CLS[c["cls"]]}</td>'
-    f'<td data-v="{tx(c["tox"].split(" ")[0])}">{tx(c["tox"].split(" ")[0])}</td><td class="num" data-v="{re.sub(r"[^0-9]", "", c["price"].split(" усл")[0].split("+")[0]) or 0}">{tx(c["price"])}</td></tr>'
-    for c in cards)
-lvl_opts = "".join(f'<option value="{l}">{ROM[l]} · {RAR[l]}</option>' for l in range(1, 11))
-cls_opts = "".join(f'<option value="{k}">{CLS[k]}</option>' for k in CLS_ORDER)
-task_opts = "".join(f'<option value="{t}">{t}</option>' for t in TASKS)
-_ess = sorted({t for c in C for t in c['ess_types']}, key=lambda t: (ESS_TYPES.index(t) if t in ESS_TYPES else 99, t))
-ess_opts = "".join(f'<option value="{tx(t)}">{tx(t)}</option>' for t in _ess)
-fam_opts = "".join(f'<option value="{tx(f)}">{tx(f)}</option>' for f in sorted(fams))
-removed = md_removed = "\n".join(md)[("\n".join(md)).index("| Предмет | Куда |"):("\n".join(md)).index('<a id="found">')]
-found = "\n".join(md)[("\n".join(md)).index("- **Масло стихии"):]
+    index_rows = "".join(
+        f'<tr data-go="{c["id"]}" data-lvl="{c["lvl"]}" data-cls="{c["cls"]}" data-fam="{tx(c["fam"] or "")}" data-name="{tx(c["name"].lower())}">'
+        f'<td><a class="lnk" href="#{c["id"]}">{tx(c["name"])}</a></td><td data-v="{c["lvl"]}">{ROM[c["lvl"]]}</td><td>{CLS[c["cls"]]}</td>'
+        f'<td data-v="{tx(c["tox"].split(" ")[0])}">{tx(c["tox"].split(" ")[0])}</td><td class="num" data-v="{re.sub(r"[^0-9]", "", c["price"].split(" усл")[0].split("+")[0]) or 0}">{tx(c["price"])}</td></tr>'
+        for c in cards)
+    lvl_opts = "".join(f'<option value="{l}">{ROM[l]} · {RAR[l]}</option>' for l in range(1, 11))
+    cls_opts = "".join(f'<option value="{k}">{CLS[k]}</option>' for k in CLS_ORDER)
+    task_opts = "".join(f'<option value="{t}">{t}</option>' for t in TASKS)
+    _ess = sorted({t for c in C for t in c['ess_types']}, key=lambda t: (ESS_TYPES.index(t) if t in ESS_TYPES else 99, t))
+    ess_opts = "".join(f'<option value="{tx(t)}">{tx(t)}</option>' for t in _ess)
+    fam_opts = "".join(f'<option value="{tx(f)}">{tx(f)}</option>' for f in sorted(fams))
+    removed = md_removed = "\n".join(md)[("\n".join(md)).index("| Предмет | Куда |"):("\n".join(md)).index('<a id="found">')]
+    found = "\n".join(md)[("\n".join(md)).index("- **Масло стихии"):]
 
 
-def md_table(t):
-    rows = [r.strip().strip("|").split("|") for r in t.strip().splitlines() if r.strip() and not r.startswith("| ---")]
-    h = "".join(f"<th>{tx(x.strip())}</th>" for x in rows[0])
-    b = "".join("<tr>" + "".join(f"<td>{tx(x.strip())}</td>" for x in r) + "</tr>" for r in rows[1:])
-    return f"<table><thead><tr>{h}</tr></thead><tbody>{b}</tbody></table>"
+    def md_table(t):
+        rows = [r.strip().strip("|").split("|") for r in t.strip().splitlines() if r.strip() and not r.startswith("| ---")]
+        h = "".join(f"<th>{tx(x.strip())}</th>" for x in rows[0])
+        b = "".join("<tr>" + "".join(f"<td>{tx(x.strip())}</td>" for x in r) + "</tr>" for r in rows[1:])
+        return f"<table><thead><tr>{h}</tr></thead><tbody>{b}</tbody></table>"
 
 
-def md_list(t):
-    items = [rules_links(tx(x[2:])) for x in t.strip().splitlines() if x.startswith("- ")]
-    return "<ul>" + "".join(f"<li>{i}</li>" for i in items) + "</ul>"
+    def md_list(t):
+        items = [rules_links(tx(x[2:])) for x in t.strip().splitlines() if x.startswith("- ")]
+        return "<ul>" + "".join(f"<li>{i}</li>" for i in items) + "</ul>"
 
 
-HOW = md[md.index('<a id="how"></a>\n\n## Как читать карточку\n') + 1]
+    HOW = md[md.index('<a id="how"></a>\n\n## Как читать карточку\n') + 1]
 
-page = f"""<!doctype html>
+    page = f"""<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Карточки эликсиров</title>
 <style>
@@ -155,5 +173,9 @@ function apply(){{const q=$('#q').value.trim().toLowerCase(),l=$('#fl').value,k=
  $('#cnt').textContent=n+' из {len(C)}'}}
 ['#q','#fl','#fc','#ff','#ft','#fe'].forEach(s=>$(s).addEventListener('input',apply));apply();addEventListener('load',()=>{{setBar();if(location.hash){{onHash();const el=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(el)el.scrollIntoView()}}}});
 </script></body></html>"""
-open(ROOT / "Карточки эликсиров.html", "w", encoding="utf-8").write(page)
-print("html ok", len(page))
+    open(ROOT / "Карточки эликсиров.html", "w", encoding="utf-8").write(page)
+    print("html ok", len(page))
+
+
+if __name__ == "__main__":
+    main()

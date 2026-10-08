@@ -1,18 +1,14 @@
 """Регрессии Д-05/Д-06. Запуск: python3 -B scripts/test_economy.py."""
-from pathlib import Path
-import runpy
 import unittest
-import warnings
 
 
 class EconomyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Старые генераторы читают исходники через exec(open(...).read()).
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", ResourceWarning)
-            cls.week = runpy.run_path(str(Path(__file__).with_name("sim_week.py")))
-        cls.player = cls.week["_p"]
+        import sim_week
+        import sim_player
+        cls.week = vars(sim_week) | sim_week.build_tables()
+        cls.player = vars(sim_player)
 
     def test_growth_probabilities_against_all_die_pairs(self):
         for bonus in (-3, 0, 4, 12):

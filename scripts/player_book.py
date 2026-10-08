@@ -262,10 +262,11 @@ def build(root=ROOT):
     if re.search(r'@@[A-Z_]+@@', page):
         raise ValueError('Не заменены поля шаблона')
     ids = re.findall(r'\bid="([^"]+)"', page)
-    if len(ids) != len(set(ids)):
+    id_set = set(ids)
+    if len(ids) != len(id_set):
         raise ValueError('Повторяющиеся якоря')
     for target in re.findall(r'href="#([^"]+)"', page):
-        if target not in ids:
+        if target not in id_set:
             raise ValueError('Неизвестная внутренняя ссылка: ' + target)
     out = root / (BOOK + '.html')
     out.write_text(page, encoding='utf-8')
