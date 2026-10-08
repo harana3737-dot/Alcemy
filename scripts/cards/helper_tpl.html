@@ -177,7 +177,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
   <h1>Помощник варки</h1>
   <p>Выбери рецепт из __N__ и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. «Пояс» — сумка, выпитое, токсичность, концентрация и отдых. «Журнал» — мастерство, рецепты, исследования; записанная варка сама идёт в сумку и в рост мастерства. «Вылазка» — что есть, что заказано и что хотим, цена, часы и кому. Правила v0.3; материал игрока, не карточки мастера.</p>
 <div class="btns"><button type="button" class="btn soft" id="backupExport">Скачать сохранение</button><button type="button" class="btn ghost" id="backupImport">Восстановить из файла</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p class="note" id="backupStatus" aria-live="polite"></p>
-<dialog id="restoreDialog"><h2>Восстановление сохранения</h2><p id="restoreSummary"></p><p class="note">Заменит сумки, материалы, деньги, журнал и настройки. Перед заменой скачивается копия текущего состояния.</p><div class="btns"><button type="button" class="btn" id="restoreApply">Восстановить</button><button type="button" class="btn ghost" id="restoreCancel">Отмена</button></div></dialog>
+<dialog id="restoreDialog"><h2>Восстановление сохранения</h2><p id="restoreSummary"></p><p class="note">Заменит сумки, материалы, деньги, журнал и настройки. Перед заменой скачивается копия текущего состояния.</p><div class="btns"><button type="button" class="btn" id="restoreApply">Восстановить</button><button type="button" class="btn ghost" id="restoreCancel" autofocus>Отмена</button></div></dialog>
 </header>
 <nav class="tabs" role="tablist">
   <button type="button" role="tab" data-tab="brew" aria-selected="true">Варка</button>

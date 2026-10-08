@@ -152,6 +152,14 @@ details.sub>summary{cursor:pointer;font:600 12px var(--f-body);text-transform:up
 .counts{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;margin-top:4px}
 .counts b{font-weight:600}
 .q.hide{display:none}
+details.grp{margin:18px 0 0}
+details.grp>summary{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;cursor:pointer;list-style:none;padding:4px 0 10px}
+details.grp>summary::-webkit-details-marker{display:none}
+details.grp>summary::before{content:'▸';color:var(--muted);font-size:14px;transition:transform .15s}
+details.grp[open]>summary::before{transform:rotate(90deg)}
+details.grp>summary h2{margin:0;flex:0 1 auto}
+.gcnt{font-size:13px;color:var(--muted);flex:1;min-width:180px}
+.gcnt b{color:var(--ink);font-weight:600}
 /* Калькулятор */
 .calc .in{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px 12px;margin:6px 0 10px}
 .calc label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
@@ -270,6 +278,7 @@ function renderSum(){const t=tally(),agreed=NQ-t.talk;
   $('sumN').textContent=`${agreed} из ${NQ}`;
   $('sumBar').innerHTML=[['ok','var(--acc)'],['alt','var(--warn)'],['talk','var(--gold)']].map(([k,c])=>`<i style="width:${100*t[k]/NQ}%;background:${c}"></i>`).join('');
   $('sumC').innerHTML=`<span><b>${t.ok}</b> принято</span><span><b>${t.alt}</b> с изменением</span><span><b>${t.talk}</b> обсудить</span><span class="muted">${t.none} не отмечено</span>`}
+let GCLOSED=new Set();try{GCLOSED=new Set(JSON.parse(ls.get('mgclosed')||'[]'))}catch(e){}
 let SHOW=['all','open','hot'].includes(ls.get('mshow'))?ls.get('mshow'):'all';
 const shown=a=>SHOW==='all'||(SHOW==='open'?a.c!=='ok':a.c==='alt'||a.c==='talk');
 function renderShow(){$('qshow').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===SHOW));
@@ -278,8 +287,15 @@ function renderShow(){$('qshow').querySelectorAll('button').forEach(b=>b.setAttr
 $('qshow').querySelectorAll('button').forEach(b=>b.onclick=()=>{SHOW=b.dataset.v;ls.set('mshow',SHOW);renderQs()});
 function renderQs(){
   const box=$('qs');box.innerHTML='';
-  G.forEach(g=>{if(!g.q.some(q=>shown(A['q'+q.n]||{})))return;const h=document.createElement('h2');h.textContent=g.t;box.appendChild(h);
-    const c=document.createElement('div');c.className='card';box.appendChild(c);
+  G.forEach((g,gi)=>{if(!g.q.some(q=>shown(A['q'+q.n]||{})))return;
+    // группа сворачивается; в заголовке — свой счётчик и «оставить как есть» для неотмеченных
+    const cnt={ok:0,alt:0,talk:0,none:0};g.q.forEach(q=>{const c=(A['q'+q.n]||{}).c;cnt[c in LBL?c:'none']++});
+    const det=document.createElement('details');det.className='grp';det.open=!GCLOSED.has(gi);
+    det.innerHTML=`<summary><h2>${esc(g.t)}</h2><span class="gcnt"><b>${g.q.length-cnt.talk}</b> из ${g.q.length} согласовано · принято ${cnt.ok}, с изменением ${cnt.alt}, обсудить ${cnt.talk}${cnt.none?`, не отмечено ${cnt.none}`:''}</span>${cnt.none?`<button type="button" class="btn" data-all>Оставить как есть (${cnt.none})</button>`:''}</summary>`;
+    det.ontoggle=()=>{det.open?GCLOSED.delete(gi):GCLOSED.add(gi);ls.set('mgclosed',JSON.stringify([...GCLOSED]))};
+    const ba=det.querySelector('[data-all]');if(ba)ba.onclick=e=>{e.preventDefault();g.q.forEach(q=>{const cur=A['q'+q.n]||{};if(!(cur.c in LBL))save(q.n,{...cur,c:'ok'})});renderQs()};
+    box.appendChild(det);
+    const c=document.createElement('div');c.className='card';det.appendChild(c);
     g.q.forEach(q=>{const a=A['q'+q.n]||{};if(!shown(a))return;const el=document.createElement('div');el.className='q'+(a.c==='alt'?' alt':a.c==='talk'?' talk':'');el.id='q'+q.n;
       el.innerHTML=`<div class="n">${q.n}</div><div class="t">${md(q.q)}</div>
         <div class="opt"><b>Играем</b><span>${md(q.y)}</span>${q.a&&q.a!=='—'?`<b>Иначе</b><span>${md(q.a)}</span>`:''}</div>
