@@ -156,3 +156,45 @@ $('restoreApply').onclick=async()=>{
     $('restoreSummary').textContent='Не восстановлено: '+err.message+(rolled?'. Предыдущее состояние возвращено.':'. Откат не завершён: восстанови скачанную копию после восстановления связи.');
   }finally{$('restoreApply').disabled=false;$('restoreCancel').disabled=false}
 };
+
+// ===== Блоки для листа LSS: текст для ручного переноса (лист в LSS правит игрок) =====
+const LSS_UNIT={marks:' отметок',count:' успехов'};
+function lssLabel(t){
+  let m=t.name.match(/^Формула «(.+?)».*цель (.+)$/);if(m)return `${m[1]} (${m[2]})`;
+  m=t.name.match(/^Формула «(.+?)».*по образцу (.+)$/);if(m)return `${m[1]} (по образцу ${m[2]})`;
+  m=t.name.match(/^Мастерство (\d+) → (\d+)$/);if(m)return `Рост мастерства ${m[1]} → ${m[2]}`;
+  return t.name;
+}
+function lssBlocks(){
+  const m=+$('m').value||1,out=[],tr=[...TR].sort((a,b)=>(a.order??99)-(b.order??99));
+  // Этапы Корневой метки: только первый незавершённый, следующие ещё не начаты
+  const open=tr.filter(t=>!t.done),firstRoot=open.find(t=>/^Корневая метка/.test(t.name));
+  const prog=[`${m} уровень алхимии, +${MB(m)} к алхимии.`].concat(open.filter(t=>!/^Корневая метка/.test(t.name)||t===firstRoot)
+    .map(t=>`${lssLabel(t)}: ${fmtZ(t.current)} из ${fmtZ(t.target)}${LSS_UNIT[t.mode]||''}.`));
+  out.push({t:'Прогресс («2 уровень алхимии… Крепкого… чернила…») — заменить целиком',x:prog.join('\n')});
+  const rec=tr.filter(t=>t.done&&/^(Рецепт|Формула)/.test(t.name)).map(t=>'Рецепт открыт: '+t.name.replace(/^Рецепт:\s*/,''));
+  out.push({t:'Открытые рецепты («Рецепт открыт…») — заменить целиком',x:rec.join('\n')||'Открытых рецептов нет.'});
+  const unit=n=>(SEED.items.find(i=>i.n===n)||{}).u,qty=(n,q)=>unit(n)?` (${q} ${unit(n)})`:q!==1?` ×${fmtZ(q)}`:'';
+  const mine=ST.bag.filter(i=>i.who==='p1'&&i.q>0),line=i=>i.n+qty(i.n,i.q);
+  const bag=['Зелья и расходники',...mine.filter(i=>i.note!=='на разборку').map(line),'','На разборку',...mine.filter(i=>i.note==='на разборку').map(line)];
+  out.push({t:'Снаряжение: подразделы «Зелья и расходники» и «На разборку» — заменить',x:bag.join('\n')});
+  const M=ST.mat||{herbs:[],ess:[],cat:[],other:[]};
+  const ing=['Ингредиенты',...M.herbs.filter(h=>h.q>0).map(h=>`${KIND[h.k]||h.k} травы ${h.l} ур. ×${fmtZ(h.q)}`),
+    ...M.ess.filter(e=>e.q>0).map(e=>`${e.n} (эссенция ${e.types.join(' / ')} ${ROM[e.l]})${e.q!==1?' ×'+fmtZ(e.q):''}`),
+    ...M.cat.map(c=>`Катализатор ${ROM[c.o]} порядка — применений ${c.used} из ${cmax(c)}`),
+    ...M.other.filter(o=>o.q>0).map(o=>o.n+(o.q!==1?' ×'+fmtZ(o.q):''))];
+  out.push({t:'Снаряжение: подраздел «Ингредиенты» — заменить',x:ing.join('\n')});
+  out.push({t:'Монеты — сверить сумму',x:`Всего ${fmtZ(M.gold||0)} зм. Раздели на зм, см и мм как удобно: 1 зм = 10 см = 100 мм.`});
+  return out;
+}
+$('lssOpen').onclick=()=>{
+  if(!JDB||!ST.mat){$('backupStatus').textContent='Дождись загрузки сумки и журнала.';return}
+  const box=$('lssBody');box.innerHTML='';
+  lssBlocks().forEach(b=>{const d=document.createElement('div');d.className='lb';
+    d.innerHTML=`<h3>${esc(b.t)}</h3><textarea readonly aria-label="${esc(b.t)}"></textarea><button type="button" class="btn sm soft">Скопировать</button>`;
+    const ta=d.querySelector('textarea'),bt=d.querySelector('button');ta.value=b.x;ta.rows=Math.min(14,b.x.split('\n').length+1);
+    bt.onclick=async()=>{try{await navigator.clipboard.writeText(b.x);bt.textContent='Скопировано'}catch(e){ta.select();bt.textContent='Выделено — скопируй вручную'}setTimeout(()=>bt.textContent='Скопировать',1600)};
+    box.appendChild(d)});
+  $('lssDialog').showModal();
+};
+$('lssClose').onclick=()=>$('lssDialog').close();

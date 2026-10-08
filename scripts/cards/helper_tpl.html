@@ -168,6 +168,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 .sugg button{font:inherit;font-size:14px;text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;color:var(--ink);cursor:pointer}
 .sugg button:hover,.sugg button:focus-visible{background:var(--chip)}
 .sugg small{color:var(--muted);margin-left:6px;font-size:12px}
+#lssDialog{max-width:min(680px,calc(100vw - 32px));border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink)}
+#lssDialog .lb{margin:12px 0}#lssDialog .lb h3{font-size:15px;margin:0 0 4px}#lssDialog textarea{width:100%;box-sizing:border-box;min-height:120px;font:13px/1.45 var(--f-mono,ui-monospace,monospace)}
 </style>
 </head>
 <body>
@@ -176,8 +178,9 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
   <button class="tbtn" id="theme" type="button">тема</button>
   <h1>Помощник варки</h1>
   <p>Выбери рецепт из __N__ и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. «Пояс» — сумка, выпитое, токсичность, концентрация и отдых. «Журнал» — мастерство, рецепты, исследования; записанная варка сама идёт в сумку и в рост мастерства. «Вылазка» — что есть, что заказано и что хотим, цена, часы и кому. Правила v0.3; материал игрока, не карточки мастера.</p>
-<div class="btns"><button type="button" class="btn soft" id="backupExport">Скачать сохранение</button><button type="button" class="btn ghost" id="backupImport">Восстановить из файла</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p class="note" id="backupStatus" aria-live="polite"></p>
+<div class="btns"><button type="button" class="btn soft" id="backupExport">Скачать сохранение</button><button type="button" class="btn ghost" id="backupImport">Восстановить из файла</button><button type="button" class="btn ghost" id="lssOpen">Блоки для LSS</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p class="note" id="backupStatus" aria-live="polite"></p>
 <dialog id="restoreDialog"><h2>Восстановление сохранения</h2><p id="restoreSummary"></p><p class="note">Заменит сумки, материалы, деньги, журнал и настройки. Перед заменой скачивается копия текущего состояния.</p><div class="btns"><button type="button" class="btn" id="restoreApply">Восстановить</button><button type="button" class="btn ghost" id="restoreCancel" autofocus>Отмена</button></div></dialog>
+<dialog id="lssDialog" aria-labelledby="lssH"><h2 id="lssH">Блоки для листа LSS</h2><p class="note">Текст собран из сумки, материалов и журнала помощника. Скопируй блок и вставь в указанный раздел листа. Порядок разделов и журнал переносов — в «Талис — карта листа LSS».</p><div id="lssBody"></div><div class="btns"><button type="button" class="btn ghost" id="lssClose" autofocus>Закрыть</button></div></dialog>
 </header>
 <nav class="tabs" role="tablist">
   <button type="button" role="tab" data-tab="brew" aria-selected="true">Варка</button>

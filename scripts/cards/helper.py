@@ -33,6 +33,8 @@ for line in sheet.split("## Снаряжение", 1)[1].split("\n"):
         q = int(m.group(1) or m.group(2)) if m else 1
         n = n[:m.start()] if m else n
         it = dict(n=n, q=q, note="на разборку" if block == "На разборку" else "")
+        if m and m.group(2):
+            it["u"] = "исп."  # «Аптечка (10 исп.)» — для блоков LSS
         if n in CARD_OF:
             it["card"] = CARD_OF[n]
         seed.append(it)
@@ -53,7 +55,28 @@ MAT = dict(
     other=[dict(n="Сырой катализатор I порядка", q=1, note="сначала изготовить (5.3, СЛ 11)"),
            dict(n="Лечебные травы на 60 зм", q=1, note="материалы этапа I Корневой метки, не для варки"),
            dict(n="Ошмётки руды из аномалии", q=1, note="возможно, сырьё для катализатора — порядок у мастера")])
-seed_id = hashlib.sha1(json.dumps(seed, ensure_ascii=False).encode()).hexdigest()[:10]
+
+# Материалы переписаны из листа вручную (там свободный текст) — сверка, чтобы лист и помощник не разошлись
+def sheet_check():
+    eq = sheet.split("## Снаряжение", 1)[1]
+    ing = eq.split("Ингредиенты", 1)[1].split("\n\n", 1)[0] if "Ингредиенты" in eq else ""
+    errs = []
+    gm = re.search(r"Монеты:\s*([\d\s]+(?:,\d+)?)\s*зм", eq)
+    if not gm or float(gm.group(1).replace(" ", "").replace(",", ".")) != MAT["gold"]:
+        errs.append(f"монеты: в листе {gm.group(1) if gm else 'не найдены'}, в MAT {MAT['gold']}")
+    num = lambda pat: sum(int(x) for x in re.findall(pat, ing))
+    herbs = {(h["k"], h["l"]): h["q"] for h in MAT["herbs"]}
+    if num(r"Лечебные травы 1 ур\. ×(\d+)") + num(r"Трава 1\.1 ×(\d+)") != herbs.get(("heal", 1), 0):
+        errs.append("лечебные травы 1 ур.")
+    if num(r"Ядовитые травы 1 ур\. ×(\d+)") != herbs.get(("poison", 1), 0):
+        errs.append("ядовитые травы 1 ур.")
+    for x in MAT["ess"] + MAT["other"]:
+        if x["n"].split()[0].lower() not in ing.lower():
+            errs.append(f"«{x['n']}» нет в блоке «Ингредиенты»")
+    if errs:
+        raise SystemExit("helper.py: MAT не совпадает с листом персонажа — " + "; ".join(errs) + ". Поправь MAT или лист.")
+sheet_check()
+seed_id = hashlib.sha1(json.dumps([{k: v for k, v in it.items() if k != "u"} for it in seed], ensure_ascii=False).encode()).hexdigest()[:10]
 
 # Дорогие компоненты исходных заклинаний (8.10; по текстам 5etools): use — расходуемый (тратится при каждой варке), иначе инструмент рецепта
 COMP = {
