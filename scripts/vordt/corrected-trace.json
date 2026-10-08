@@ -1,0 +1,3939 @@
+{
+  "parameters": {
+    "hp": 130,
+    "ac": 15,
+    "speed": 40,
+    "reach": 5,
+    "approach": true,
+    "potions": true,
+    "legend_attacks": 0,
+    "leap": false,
+    "legendary_resistances": 0,
+    "leap_distance": 50,
+    "leap_dc": 15,
+    "leap_dice": [
+      2,
+      6,
+      5
+    ],
+    "legend_attack_cost": 1,
+    "leap_cost": 1,
+    "legend_points": null,
+    "breath_dice": [
+      10,
+      6
+    ],
+    "breath_dc": 14,
+    "breath_range": 30,
+    "breath_replaces": 1,
+    "attack_bonus": 7,
+    "attack_dice": [
+      2,
+      8,
+      5
+    ],
+    "attacks": 2,
+    "rage": true,
+    "max_rounds": 50,
+    "policy": "фронт",
+    "precreated_slot": true,
+    "song_precast": false,
+    "absorb_elements": false,
+    "boss_policy": "attack_if_in_range"
+  },
+  "seed": 9,
+  "tactic": "паутина",
+  "status": "defeat",
+  "rounds": 11,
+  "falls": 3,
+  "dead": 3,
+  "standing": 0,
+  "boss_hp": 17,
+  "events": [
+    {
+      "round": 0,
+      "clock": 0,
+      "actor": null,
+      "phase": "setup",
+      "event": "setup",
+      "parameters": {
+        "hp": 130,
+        "ac": 15,
+        "speed": 40,
+        "reach": 5,
+        "approach": true,
+        "potions": true,
+        "legend_attacks": 0,
+        "leap": false,
+        "legendary_resistances": 0,
+        "leap_distance": 50,
+        "leap_dc": 15,
+        "leap_dice": [
+          2,
+          6,
+          5
+        ],
+        "legend_attack_cost": 1,
+        "leap_cost": 1,
+        "legend_points": null,
+        "breath_dice": [
+          10,
+          6
+        ],
+        "breath_dc": 14,
+        "breath_range": 30,
+        "breath_replaces": 1,
+        "attack_bonus": 7,
+        "attack_dice": [
+          2,
+          8,
+          5
+        ],
+        "attacks": 2,
+        "rage": true,
+        "max_rounds": 50,
+        "policy": "фронт",
+        "precreated_slot": true,
+        "song_precast": false,
+        "absorb_elements": false,
+        "boss_policy": "attack_if_in_range"
+      },
+      "positions": {
+        "Талис": [
+          0,
+          -15
+        ],
+        "Лаэль": [
+          0,
+          15
+        ],
+        "Фаэнон": [
+          0,
+          0
+        ]
+      },
+      "boss_position": [
+        50,
+        0
+      ],
+      "slots": {
+        "Талис": {
+          "1": 4,
+          "2": 4
+        },
+        "Лаэль": {
+          "1": 3,
+          "2": 3
+        },
+        "Фаэнон": {
+          "1": 4,
+          "2": 0
+        }
+      }
+    },
+    {
+      "round": 1,
+      "clock": 1,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Талис",
+      "hp": 34,
+      "armor": 15,
+      "reaction": true,
+      "pos": [
+        0,
+        -15
+      ]
+    },
+    {
+      "round": 1,
+      "clock": 1,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Талис",
+      "spell": "Паутина",
+      "level": 2,
+      "kind": "action",
+      "slots": {
+        "1": 4,
+        "2": 3
+      }
+    },
+    {
+      "round": 1,
+      "clock": 1,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "metamagic",
+      "cost": 3,
+      "ordinary": 0,
+      "feat": 0
+    },
+    {
+      "round": 1,
+      "clock": 1,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "web_created",
+      "bounds": [
+        50,
+        -10,
+        70,
+        10
+      ],
+      "heightened": true,
+      "immune": []
+    },
+    {
+      "round": 1,
+      "clock": 1,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 130,
+      "falls": 0
+    },
+    {
+      "round": 1,
+      "clock": 2,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Лаэль",
+      "hp": 27,
+      "armor": 16,
+      "reaction": true,
+      "pos": [
+        0,
+        15
+      ]
+    },
+    {
+      "round": 1,
+      "clock": 2,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "bonus_action",
+      "action": "bladesong",
+      "target": "Лаэль",
+      "armor": 20
+    },
+    {
+      "round": 1,
+      "clock": 2,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Лаэль",
+      "spell": "Волшебные стрелы",
+      "level": 2,
+      "kind": "action",
+      "slots": {
+        "1": 3,
+        "2": 2
+      }
+    },
+    {
+      "round": 1,
+      "clock": 2,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "boss_damage",
+      "damage_type": "force",
+      "amount": 14,
+      "hp": 116
+    },
+    {
+      "round": 1,
+      "clock": 2,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 116,
+      "falls": 0
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Фаэнон",
+      "hp": 41,
+      "armor": 16,
+      "reaction": true,
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "move",
+      "target": "Фаэнон",
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        5,
+        0
+      ],
+      "movement_left": 25
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "move",
+      "target": "Фаэнон",
+      "start": [
+        5,
+        0
+      ],
+      "end": [
+        10,
+        0
+      ],
+      "movement_left": 20
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "move",
+      "target": "Фаэнон",
+      "start": [
+        10,
+        0
+      ],
+      "end": [
+        15,
+        0
+      ],
+      "movement_left": 15
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "move",
+      "target": "Фаэнон",
+      "start": [
+        15,
+        0
+      ],
+      "end": [
+        20,
+        0
+      ],
+      "movement_left": 10
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "move",
+      "target": "Фаэнон",
+      "start": [
+        20,
+        0
+      ],
+      "end": [
+        25,
+        0
+      ],
+      "movement_left": 5
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "move",
+      "target": "Фаэнон",
+      "start": [
+        25,
+        0
+      ],
+      "end": [
+        30,
+        0
+      ],
+      "movement_left": 0
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "action",
+      "action": "dash",
+      "target": "Фаэнон"
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "move",
+      "target": "Фаэнон",
+      "start": [
+        30,
+        0
+      ],
+      "end": [
+        35,
+        0
+      ],
+      "movement_left": 25
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "move",
+      "target": "Фаэнон",
+      "start": [
+        35,
+        0
+      ],
+      "end": [
+        40,
+        0
+      ],
+      "movement_left": 20
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "move",
+      "target": "Фаэнон",
+      "start": [
+        40,
+        0
+      ],
+      "end": [
+        45,
+        0
+      ],
+      "movement_left": 15
+    },
+    {
+      "round": 1,
+      "clock": 3,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 116,
+      "falls": 0
+    },
+    {
+      "round": 1,
+      "clock": 4,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "web_save",
+      "source": "start_of_turn",
+      "face": 3,
+      "restrained": true
+    },
+    {
+      "round": 1,
+      "clock": 4,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath",
+      "targets": [
+        "Фаэнон"
+      ],
+      "raw_damage": 44,
+      "position": [
+        50,
+        0
+      ]
+    },
+    {
+      "round": 1,
+      "clock": 4,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath_save",
+      "target": "Фаэнон",
+      "face": 6,
+      "saved": false
+    },
+    {
+      "round": 1,
+      "clock": 4,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "damage",
+      "target": "Фаэнон",
+      "damage_type": "cold",
+      "received": 44,
+      "temporary": 0,
+      "hp_damage": 44,
+      "hp": 0,
+      "dead": false
+    },
+    {
+      "round": 1,
+      "clock": 4,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Фаэнон",
+      "face": 2,
+      "total": 9,
+      "hit": false,
+      "critical": false,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 1,
+      "clock": 4,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "turn_end",
+      "hp": 116,
+      "falls": 1
+    },
+    {
+      "round": 2,
+      "clock": 5,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Талис",
+      "hp": 34,
+      "armor": 15,
+      "reaction": true,
+      "pos": [
+        0,
+        -15
+      ]
+    },
+    {
+      "round": 2,
+      "clock": 5,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Талис",
+      "spell": "Хроматический шар",
+      "level": 2,
+      "kind": "action",
+      "slots": {
+        "1": 4,
+        "2": 2
+      }
+    },
+    {
+      "round": 2,
+      "clock": 5,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Талис",
+      "spell": "Хроматический шар",
+      "face": 5,
+      "distance": 50
+    },
+    {
+      "round": 2,
+      "clock": 5,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 116,
+      "falls": 1
+    },
+    {
+      "round": 2,
+      "clock": 6,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Лаэль",
+      "hp": 27,
+      "armor": 20,
+      "reaction": true,
+      "pos": [
+        0,
+        15
+      ]
+    },
+    {
+      "round": 2,
+      "clock": 6,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Лаэль",
+      "spell": "Волшебные стрелы",
+      "level": 2,
+      "kind": "action",
+      "slots": {
+        "1": 3,
+        "2": 1
+      }
+    },
+    {
+      "round": 2,
+      "clock": 6,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "boss_damage",
+      "damage_type": "force",
+      "amount": 13,
+      "hp": 103
+    },
+    {
+      "round": 2,
+      "clock": 6,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 103,
+      "falls": 1
+    },
+    {
+      "round": 2,
+      "clock": 7,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Фаэнон",
+      "hp": 0,
+      "armor": 16,
+      "reaction": true,
+      "pos": [
+        45,
+        0
+      ]
+    },
+    {
+      "round": 2,
+      "clock": 7,
+      "actor": "Фаэнон",
+      "phase": "turn",
+      "event": "death_save",
+      "target": "Фаэнон",
+      "face": 7,
+      "stable": false,
+      "dead": false
+    },
+    {
+      "round": 2,
+      "clock": 7,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 103,
+      "falls": 1
+    },
+    {
+      "round": 2,
+      "clock": 8,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath_recharge"
+    },
+    {
+      "round": 2,
+      "clock": 8,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "web_save",
+      "source": "start_of_turn",
+      "face": 8,
+      "restrained": true
+    },
+    {
+      "round": 2,
+      "clock": 8,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath",
+      "targets": [
+        "Фаэнон"
+      ],
+      "raw_damage": 29,
+      "position": [
+        50,
+        0
+      ]
+    },
+    {
+      "round": 2,
+      "clock": 8,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath_save",
+      "target": "Фаэнон",
+      "face": 2,
+      "saved": false
+    },
+    {
+      "round": 2,
+      "clock": 8,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "damage",
+      "target": "Фаэнон",
+      "damage_type": "cold",
+      "received": 29,
+      "temporary": 0,
+      "hp_damage": 29,
+      "hp": 0,
+      "dead": false
+    },
+    {
+      "round": 2,
+      "clock": 8,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "damage",
+      "target": "Фаэнон",
+      "damage_type": "bludgeoning",
+      "received": 20,
+      "temporary": 0,
+      "hp_damage": 20,
+      "hp": 0,
+      "dead": true
+    },
+    {
+      "round": 2,
+      "clock": 8,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Фаэнон",
+      "face": 16,
+      "total": 23,
+      "hit": true,
+      "critical": true,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 2,
+      "clock": 8,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "turn_end",
+      "hp": 103,
+      "falls": 1
+    },
+    {
+      "round": 3,
+      "clock": 9,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Талис",
+      "hp": 34,
+      "armor": 15,
+      "reaction": true,
+      "pos": [
+        0,
+        -15
+      ]
+    },
+    {
+      "round": 3,
+      "clock": 9,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Талис",
+      "spell": "Хроматический шар",
+      "level": 2,
+      "kind": "action",
+      "slots": {
+        "1": 4,
+        "2": 1
+      }
+    },
+    {
+      "round": 3,
+      "clock": 9,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "boss_damage",
+      "damage_type": "acid",
+      "amount": 23,
+      "hp": 80
+    },
+    {
+      "round": 3,
+      "clock": 9,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Талис",
+      "spell": "Хроматический шар",
+      "face": 20,
+      "distance": 50
+    },
+    {
+      "round": 3,
+      "clock": 9,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 80,
+      "falls": 1
+    },
+    {
+      "round": 3,
+      "clock": 10,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Лаэль",
+      "hp": 27,
+      "armor": 20,
+      "reaction": true,
+      "pos": [
+        0,
+        15
+      ]
+    },
+    {
+      "round": 3,
+      "clock": 10,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Лаэль",
+      "spell": "Волшебные стрелы",
+      "level": 2,
+      "kind": "action",
+      "slots": {
+        "1": 3,
+        "2": 0
+      }
+    },
+    {
+      "round": 3,
+      "clock": 10,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "boss_damage",
+      "damage_type": "force",
+      "amount": 12,
+      "hp": 68
+    },
+    {
+      "round": 3,
+      "clock": 10,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 68,
+      "falls": 1
+    },
+    {
+      "round": 3,
+      "clock": 11,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 68,
+      "falls": 1
+    },
+    {
+      "round": 3,
+      "clock": 12,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "web_save",
+      "source": "start_of_turn",
+      "face": 3,
+      "restrained": true
+    },
+    {
+      "round": 3,
+      "clock": 12,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "web_escape",
+      "face": 3,
+      "total": 8,
+      "success": false
+    },
+    {
+      "round": 3,
+      "clock": 12,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "turn_end",
+      "hp": 68,
+      "falls": 1
+    },
+    {
+      "round": 4,
+      "clock": 13,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Талис",
+      "hp": 34,
+      "armor": 15,
+      "reaction": true,
+      "pos": [
+        0,
+        -15
+      ]
+    },
+    {
+      "round": 4,
+      "clock": 13,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Талис",
+      "spell": "Хроматический шар",
+      "level": 2,
+      "kind": "action",
+      "slots": {
+        "1": 4,
+        "2": 0
+      }
+    },
+    {
+      "round": 4,
+      "clock": 13,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "boss_damage",
+      "damage_type": "acid",
+      "amount": 10,
+      "hp": 58
+    },
+    {
+      "round": 4,
+      "clock": 13,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Талис",
+      "spell": "Хроматический шар",
+      "face": 19,
+      "distance": 50
+    },
+    {
+      "round": 4,
+      "clock": 13,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 58,
+      "falls": 1
+    },
+    {
+      "round": 4,
+      "clock": 14,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Лаэль",
+      "hp": 27,
+      "armor": 20,
+      "reaction": true,
+      "pos": [
+        0,
+        15
+      ]
+    },
+    {
+      "round": 4,
+      "clock": 14,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Лаэль",
+      "spell": "Волшебные стрелы",
+      "level": 1,
+      "kind": "action",
+      "slots": {
+        "1": 2,
+        "2": 0
+      }
+    },
+    {
+      "round": 4,
+      "clock": 14,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "boss_damage",
+      "damage_type": "force",
+      "amount": 9,
+      "hp": 49
+    },
+    {
+      "round": 4,
+      "clock": 14,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 49,
+      "falls": 1
+    },
+    {
+      "round": 4,
+      "clock": 15,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 49,
+      "falls": 1
+    },
+    {
+      "round": 4,
+      "clock": 16,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "web_save",
+      "source": "start_of_turn",
+      "face": 8,
+      "restrained": true
+    },
+    {
+      "round": 4,
+      "clock": 16,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "web_escape",
+      "face": 17,
+      "total": 22,
+      "success": true
+    },
+    {
+      "round": 4,
+      "clock": 16,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        50,
+        0
+      ],
+      "end": [
+        45,
+        -5
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 4,
+      "clock": 16,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        45,
+        -5
+      ],
+      "end": [
+        40,
+        -10
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 4,
+      "clock": 16,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        40,
+        -10
+      ],
+      "end": [
+        35,
+        -15
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 4,
+      "clock": 16,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        35,
+        -15
+      ],
+      "end": [
+        30,
+        -15
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 4,
+      "clock": 16,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        30,
+        -15
+      ],
+      "end": [
+        25,
+        -15
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 4,
+      "clock": 16,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        25,
+        -15
+      ],
+      "end": [
+        20,
+        -15
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 4,
+      "clock": 16,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        20,
+        -15
+      ],
+      "end": [
+        15,
+        -15
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 4,
+      "clock": 16,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        15,
+        -15
+      ],
+      "end": [
+        10,
+        -15
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 4,
+      "clock": 16,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "turn_end",
+      "hp": 49,
+      "falls": 1
+    },
+    {
+      "round": 5,
+      "clock": 17,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Талис",
+      "hp": 34,
+      "armor": 15,
+      "reaction": true,
+      "pos": [
+        0,
+        -15
+      ]
+    },
+    {
+      "round": 5,
+      "clock": 17,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        0,
+        -15
+      ],
+      "end": [
+        -5,
+        -10
+      ],
+      "movement_left": 25
+    },
+    {
+      "round": 5,
+      "clock": 17,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        -5,
+        -10
+      ],
+      "end": [
+        -10,
+        -5
+      ],
+      "movement_left": 20
+    },
+    {
+      "round": 5,
+      "clock": 17,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        -10,
+        -5
+      ],
+      "end": [
+        -15,
+        0
+      ],
+      "movement_left": 15
+    },
+    {
+      "round": 5,
+      "clock": 17,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        -15,
+        0
+      ],
+      "end": [
+        -20,
+        5
+      ],
+      "movement_left": 10
+    },
+    {
+      "round": 5,
+      "clock": 17,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        -20,
+        5
+      ],
+      "end": [
+        -25,
+        10
+      ],
+      "movement_left": 5
+    },
+    {
+      "round": 5,
+      "clock": 17,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        -25,
+        10
+      ],
+      "end": [
+        -30,
+        15
+      ],
+      "movement_left": 0
+    },
+    {
+      "round": 5,
+      "clock": 17,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Талис",
+      "spell": "Хроматический шар",
+      "level": 1,
+      "kind": "action",
+      "slots": {
+        "1": 3,
+        "2": 0
+      }
+    },
+    {
+      "round": 5,
+      "clock": 17,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Талис",
+      "spell": "Хроматический шар",
+      "face": 2,
+      "distance": 40
+    },
+    {
+      "round": 5,
+      "clock": 17,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 49,
+      "falls": 1
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Лаэль",
+      "hp": 27,
+      "armor": 20,
+      "reaction": true,
+      "pos": [
+        0,
+        15
+      ]
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        0,
+        15
+      ],
+      "end": [
+        -5,
+        20
+      ],
+      "movement_left": 35
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -5,
+        20
+      ],
+      "end": [
+        -10,
+        25
+      ],
+      "movement_left": 30
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -10,
+        25
+      ],
+      "end": [
+        -15,
+        30
+      ],
+      "movement_left": 25
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -15,
+        30
+      ],
+      "end": [
+        -20,
+        35
+      ],
+      "movement_left": 20
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -20,
+        35
+      ],
+      "end": [
+        -25,
+        40
+      ],
+      "movement_left": 15
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -25,
+        40
+      ],
+      "end": [
+        -30,
+        45
+      ],
+      "movement_left": 10
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -30,
+        45
+      ],
+      "end": [
+        -35,
+        50
+      ],
+      "movement_left": 5
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "level": 0,
+      "kind": "action",
+      "slots": {
+        "1": 2,
+        "2": 0
+      }
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "boss_damage",
+      "damage_type": "fire",
+      "amount": 9,
+      "hp": 40
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "face": 12,
+      "distance": 65
+    },
+    {
+      "round": 5,
+      "clock": 18,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 40,
+      "falls": 1
+    },
+    {
+      "round": 5,
+      "clock": 19,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 40,
+      "falls": 1
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath_recharge"
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        10,
+        -15
+      ],
+      "end": [
+        5,
+        -10
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        5,
+        -10
+      ],
+      "end": [
+        0,
+        -5
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        0,
+        -5
+      ],
+      "end": [
+        -5,
+        0
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath",
+      "targets": [
+        "Талис"
+      ],
+      "raw_damage": 31,
+      "position": [
+        -5,
+        0
+      ]
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath_save",
+      "target": "Талис",
+      "face": 19,
+      "saved": true
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "damage",
+      "target": "Талис",
+      "damage_type": "cold",
+      "received": 7,
+      "temporary": 7,
+      "hp_damage": 0,
+      "hp": 34,
+      "dead": false
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "concentration_save",
+      "target": "Талис",
+      "face": 1,
+      "dc": 10,
+      "total": 6
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "concentration_ended",
+      "reason": "damage"
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -5,
+        0
+      ],
+      "end": [
+        -10,
+        5
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -10,
+        5
+      ],
+      "end": [
+        -15,
+        10
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -15,
+        10
+      ],
+      "end": [
+        -20,
+        15
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -20,
+        15
+      ],
+      "end": [
+        -25,
+        20
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -25,
+        20
+      ],
+      "end": [
+        -30,
+        25
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 5,
+      "clock": 20,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "turn_end",
+      "hp": 40,
+      "falls": 1
+    },
+    {
+      "round": 6,
+      "clock": 21,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Талис",
+      "hp": 34,
+      "armor": 15,
+      "reaction": true,
+      "pos": [
+        -30,
+        15
+      ]
+    },
+    {
+      "round": 6,
+      "clock": 21,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        -30,
+        15
+      ],
+      "end": [
+        -25,
+        10
+      ],
+      "movement_left": 25
+    },
+    {
+      "round": 6,
+      "clock": 21,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        -25,
+        10
+      ],
+      "end": [
+        -20,
+        5
+      ],
+      "movement_left": 20
+    },
+    {
+      "round": 6,
+      "clock": 21,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        -20,
+        5
+      ],
+      "end": [
+        -15,
+        0
+      ],
+      "movement_left": 15
+    },
+    {
+      "round": 6,
+      "clock": 21,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        -15,
+        0
+      ],
+      "end": [
+        -10,
+        -5
+      ],
+      "movement_left": 10
+    },
+    {
+      "round": 6,
+      "clock": 21,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        -10,
+        -5
+      ],
+      "end": [
+        -5,
+        -10
+      ],
+      "movement_left": 5
+    },
+    {
+      "round": 6,
+      "clock": 21,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        -5,
+        -10
+      ],
+      "end": [
+        0,
+        -15
+      ],
+      "movement_left": 0
+    },
+    {
+      "round": 6,
+      "clock": 21,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Талис",
+      "spell": "Хроматический шар",
+      "level": 1,
+      "kind": "action",
+      "slots": {
+        "1": 2,
+        "2": 0
+      }
+    },
+    {
+      "round": 6,
+      "clock": 21,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "boss_damage",
+      "damage_type": "acid",
+      "amount": 14,
+      "hp": 26
+    },
+    {
+      "round": 6,
+      "clock": 21,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Талис",
+      "spell": "Хроматический шар",
+      "face": 13,
+      "distance": 40
+    },
+    {
+      "round": 6,
+      "clock": 21,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 26,
+      "falls": 1
+    },
+    {
+      "round": 6,
+      "clock": 22,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Лаэль",
+      "hp": 27,
+      "armor": 20,
+      "reaction": true,
+      "pos": [
+        -35,
+        50
+      ]
+    },
+    {
+      "round": 6,
+      "clock": 22,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -35,
+        50
+      ],
+      "end": [
+        -40,
+        55
+      ],
+      "movement_left": 35
+    },
+    {
+      "round": 6,
+      "clock": 22,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -40,
+        55
+      ],
+      "end": [
+        -45,
+        60
+      ],
+      "movement_left": 30
+    },
+    {
+      "round": 6,
+      "clock": 22,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -45,
+        60
+      ],
+      "end": [
+        -50,
+        65
+      ],
+      "movement_left": 25
+    },
+    {
+      "round": 6,
+      "clock": 22,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -50,
+        65
+      ],
+      "end": [
+        -55,
+        70
+      ],
+      "movement_left": 20
+    },
+    {
+      "round": 6,
+      "clock": 22,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -55,
+        70
+      ],
+      "end": [
+        -60,
+        75
+      ],
+      "movement_left": 15
+    },
+    {
+      "round": 6,
+      "clock": 22,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -60,
+        75
+      ],
+      "end": [
+        -65,
+        80
+      ],
+      "movement_left": 10
+    },
+    {
+      "round": 6,
+      "clock": 22,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -65,
+        80
+      ],
+      "end": [
+        -70,
+        85
+      ],
+      "movement_left": 5
+    },
+    {
+      "round": 6,
+      "clock": 22,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "level": 0,
+      "kind": "action",
+      "slots": {
+        "1": 2,
+        "2": 0
+      }
+    },
+    {
+      "round": 6,
+      "clock": 22,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "face": 4,
+      "distance": 60
+    },
+    {
+      "round": 6,
+      "clock": 22,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 26,
+      "falls": 1
+    },
+    {
+      "round": 6,
+      "clock": 23,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 26,
+      "falls": 1
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -30,
+        25
+      ],
+      "end": [
+        -25,
+        20
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -25,
+        20
+      ],
+      "end": [
+        -20,
+        15
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -20,
+        15
+      ],
+      "end": [
+        -15,
+        10
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -15,
+        10
+      ],
+      "end": [
+        -10,
+        5
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -10,
+        5
+      ],
+      "end": [
+        -5,
+        0
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -5,
+        0
+      ],
+      "end": [
+        0,
+        -5
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        0,
+        -5
+      ],
+      "end": [
+        0,
+        -10
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Талис",
+      "spell": "Щит",
+      "level": 1,
+      "kind": "reaction",
+      "slots": {
+        "1": 1,
+        "2": 0
+      }
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "shield",
+      "target": "Талис",
+      "armor": 20
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Талис",
+      "face": 9,
+      "total": 16,
+      "hit": false,
+      "critical": false,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Талис",
+      "face": 11,
+      "total": 18,
+      "hit": false,
+      "critical": false,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Талис",
+      "face": 3,
+      "total": 10,
+      "hit": false,
+      "critical": false,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 6,
+      "clock": 24,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "turn_end",
+      "hp": 26,
+      "falls": 1
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Талис",
+      "hp": 34,
+      "armor": 15,
+      "reaction": true,
+      "pos": [
+        0,
+        -15
+      ]
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Талис",
+      "spell": "Щит",
+      "level": 1,
+      "kind": "reaction",
+      "slots": {
+        "1": 0,
+        "2": 0
+      }
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "shield",
+      "target": "Талис",
+      "armor": 20
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Талис",
+      "face": 10,
+      "total": 17,
+      "hit": false,
+      "critical": false,
+      "opportunity": true,
+      "distance": 5
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        0,
+        -15
+      ],
+      "end": [
+        5,
+        -20
+      ],
+      "movement_left": 25
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        5,
+        -20
+      ],
+      "end": [
+        10,
+        -25
+      ],
+      "movement_left": 20
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        10,
+        -25
+      ],
+      "end": [
+        15,
+        -30
+      ],
+      "movement_left": 15
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        15,
+        -30
+      ],
+      "end": [
+        20,
+        -35
+      ],
+      "movement_left": 10
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        20,
+        -35
+      ],
+      "end": [
+        25,
+        -40
+      ],
+      "movement_left": 5
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        25,
+        -40
+      ],
+      "end": [
+        30,
+        -45
+      ],
+      "movement_left": 0
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Талис",
+      "spell": "Леденящее прикосновение",
+      "level": 0,
+      "kind": "action",
+      "slots": {
+        "1": 0,
+        "2": 0
+      }
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "boss_damage",
+      "damage_type": "necrotic",
+      "amount": 2,
+      "hp": 24
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Талис",
+      "spell": "Леденящее прикосновение",
+      "face": 10,
+      "distance": 35
+    },
+    {
+      "round": 7,
+      "clock": 25,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 24,
+      "falls": 1
+    },
+    {
+      "round": 7,
+      "clock": 26,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Лаэль",
+      "hp": 27,
+      "armor": 20,
+      "reaction": true,
+      "pos": [
+        -70,
+        85
+      ]
+    },
+    {
+      "round": 7,
+      "clock": 26,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "level": 0,
+      "kind": "action",
+      "slots": {
+        "1": 2,
+        "2": 0
+      }
+    },
+    {
+      "round": 7,
+      "clock": 26,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "boss_damage",
+      "damage_type": "fire",
+      "amount": 1,
+      "hp": 23
+    },
+    {
+      "round": 7,
+      "clock": 26,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "face": 17,
+      "distance": 95
+    },
+    {
+      "round": 7,
+      "clock": 26,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 23,
+      "falls": 1
+    },
+    {
+      "round": 7,
+      "clock": 27,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 23,
+      "falls": 1
+    },
+    {
+      "round": 7,
+      "clock": 28,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        0,
+        -10
+      ],
+      "end": [
+        5,
+        -15
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 7,
+      "clock": 28,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        5,
+        -15
+      ],
+      "end": [
+        10,
+        -20
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 7,
+      "clock": 28,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        10,
+        -20
+      ],
+      "end": [
+        15,
+        -25
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 7,
+      "clock": 28,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        15,
+        -25
+      ],
+      "end": [
+        20,
+        -30
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 7,
+      "clock": 28,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        20,
+        -30
+      ],
+      "end": [
+        25,
+        -35
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 7,
+      "clock": 28,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        25,
+        -35
+      ],
+      "end": [
+        30,
+        -40
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 7,
+      "clock": 28,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "damage",
+      "target": "Талис",
+      "damage_type": "bludgeoning",
+      "received": 20,
+      "temporary": 1,
+      "hp_damage": 19,
+      "hp": 15,
+      "dead": false
+    },
+    {
+      "round": 7,
+      "clock": 28,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Талис",
+      "face": 18,
+      "total": 25,
+      "hit": true,
+      "critical": false,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 7,
+      "clock": 28,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Талис",
+      "face": 12,
+      "total": 19,
+      "hit": false,
+      "critical": false,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 7,
+      "clock": 28,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Талис",
+      "face": 8,
+      "total": 15,
+      "hit": false,
+      "critical": false,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 7,
+      "clock": 28,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "turn_end",
+      "hp": 23,
+      "falls": 1
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Талис",
+      "hp": 15,
+      "armor": 15,
+      "reaction": true,
+      "pos": [
+        30,
+        -45
+      ]
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "damage",
+      "target": "Талис",
+      "damage_type": "bludgeoning",
+      "received": 14,
+      "temporary": 0,
+      "hp_damage": 14,
+      "hp": 1,
+      "dead": false
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Талис",
+      "face": 19,
+      "total": 26,
+      "hit": true,
+      "critical": false,
+      "opportunity": true,
+      "distance": 5
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        30,
+        -45
+      ],
+      "end": [
+        35,
+        -50
+      ],
+      "movement_left": 25
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        35,
+        -50
+      ],
+      "end": [
+        40,
+        -55
+      ],
+      "movement_left": 20
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        40,
+        -55
+      ],
+      "end": [
+        45,
+        -60
+      ],
+      "movement_left": 15
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        45,
+        -60
+      ],
+      "end": [
+        50,
+        -65
+      ],
+      "movement_left": 10
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        50,
+        -65
+      ],
+      "end": [
+        55,
+        -70
+      ],
+      "movement_left": 5
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "move",
+      "target": "Талис",
+      "start": [
+        55,
+        -70
+      ],
+      "end": [
+        60,
+        -75
+      ],
+      "movement_left": 0
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "bonus_action",
+      "action": "potion",
+      "level": 3,
+      "target": "Талис"
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "heal",
+      "target": "Талис",
+      "amount": 9,
+      "source": "зелье",
+      "hp": 10
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Талис",
+      "spell": "Леденящее прикосновение",
+      "level": 0,
+      "kind": "action",
+      "slots": {
+        "1": 0,
+        "2": 0
+      }
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "boss_damage",
+      "damage_type": "necrotic",
+      "amount": 6,
+      "hp": 17
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Талис",
+      "spell": "Леденящее прикосновение",
+      "face": 18,
+      "distance": 35
+    },
+    {
+      "round": 8,
+      "clock": 29,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 1
+    },
+    {
+      "round": 8,
+      "clock": 30,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Лаэль",
+      "hp": 27,
+      "armor": 20,
+      "reaction": true,
+      "pos": [
+        -70,
+        85
+      ]
+    },
+    {
+      "round": 8,
+      "clock": 30,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -70,
+        85
+      ],
+      "end": [
+        -65,
+        80
+      ],
+      "movement_left": 35
+    },
+    {
+      "round": 8,
+      "clock": 30,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "level": 0,
+      "kind": "action",
+      "slots": {
+        "1": 2,
+        "2": 0
+      }
+    },
+    {
+      "round": 8,
+      "clock": 30,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "face": 5,
+      "distance": 120
+    },
+    {
+      "round": 8,
+      "clock": 30,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 1
+    },
+    {
+      "round": 8,
+      "clock": 31,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 1
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath_recharge"
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        30,
+        -40
+      ],
+      "end": [
+        35,
+        -45
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        35,
+        -45
+      ],
+      "end": [
+        40,
+        -50
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        40,
+        -50
+      ],
+      "end": [
+        45,
+        -55
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath",
+      "targets": [
+        "Талис"
+      ],
+      "raw_damage": 26,
+      "position": [
+        45,
+        -55
+      ]
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath_save",
+      "target": "Талис",
+      "face": 1,
+      "saved": false
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "damage",
+      "target": "Талис",
+      "damage_type": "cold",
+      "received": 13,
+      "temporary": 0,
+      "hp_damage": 13,
+      "hp": 0,
+      "dead": false
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        45,
+        -55
+      ],
+      "end": [
+        50,
+        -60
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        50,
+        -60
+      ],
+      "end": [
+        55,
+        -65
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        55,
+        -65
+      ],
+      "end": [
+        60,
+        -70
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Талис",
+      "face": 2,
+      "total": 9,
+      "hit": false,
+      "critical": false,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "damage",
+      "target": "Талис",
+      "damage_type": "bludgeoning",
+      "received": 24,
+      "temporary": 0,
+      "hp_damage": 24,
+      "hp": 0,
+      "dead": false
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Талис",
+      "face": 15,
+      "total": 22,
+      "hit": true,
+      "critical": true,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 8,
+      "clock": 32,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 2
+    },
+    {
+      "round": 9,
+      "clock": 33,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Талис",
+      "hp": 0,
+      "armor": 15,
+      "reaction": true,
+      "pos": [
+        60,
+        -75
+      ]
+    },
+    {
+      "round": 9,
+      "clock": 33,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "death_save",
+      "target": "Талис",
+      "face": 10,
+      "stable": false,
+      "dead": false
+    },
+    {
+      "round": 9,
+      "clock": 33,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 2
+    },
+    {
+      "round": 9,
+      "clock": 34,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Лаэль",
+      "hp": 27,
+      "armor": 20,
+      "reaction": true,
+      "pos": [
+        -65,
+        80
+      ]
+    },
+    {
+      "round": 9,
+      "clock": 34,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -65,
+        80
+      ],
+      "end": [
+        -60,
+        75
+      ],
+      "movement_left": 35
+    },
+    {
+      "round": 9,
+      "clock": 34,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -60,
+        75
+      ],
+      "end": [
+        -55,
+        70
+      ],
+      "movement_left": 30
+    },
+    {
+      "round": 9,
+      "clock": 34,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -55,
+        70
+      ],
+      "end": [
+        -50,
+        65
+      ],
+      "movement_left": 25
+    },
+    {
+      "round": 9,
+      "clock": 34,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -50,
+        65
+      ],
+      "end": [
+        -45,
+        60
+      ],
+      "movement_left": 20
+    },
+    {
+      "round": 9,
+      "clock": 34,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -45,
+        60
+      ],
+      "end": [
+        -40,
+        55
+      ],
+      "movement_left": 15
+    },
+    {
+      "round": 9,
+      "clock": 34,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "move",
+      "target": "Лаэль",
+      "start": [
+        -40,
+        55
+      ],
+      "end": [
+        -35,
+        50
+      ],
+      "movement_left": 10
+    },
+    {
+      "round": 9,
+      "clock": 34,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "level": 0,
+      "kind": "action",
+      "slots": {
+        "1": 2,
+        "2": 0
+      }
+    },
+    {
+      "round": 9,
+      "clock": 34,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "face": 5,
+      "distance": 120
+    },
+    {
+      "round": 9,
+      "clock": 34,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 2
+    },
+    {
+      "round": 9,
+      "clock": 35,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 2
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        60,
+        -70
+      ],
+      "end": [
+        55,
+        -65
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        55,
+        -65
+      ],
+      "end": [
+        50,
+        -60
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        50,
+        -60
+      ],
+      "end": [
+        45,
+        -55
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        45,
+        -55
+      ],
+      "end": [
+        40,
+        -50
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        40,
+        -50
+      ],
+      "end": [
+        35,
+        -45
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        35,
+        -45
+      ],
+      "end": [
+        30,
+        -40
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        30,
+        -40
+      ],
+      "end": [
+        25,
+        -35
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        25,
+        -35
+      ],
+      "end": [
+        20,
+        -30
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_action",
+      "action": "dash"
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        20,
+        -30
+      ],
+      "end": [
+        15,
+        -25
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        15,
+        -25
+      ],
+      "end": [
+        10,
+        -20
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        10,
+        -20
+      ],
+      "end": [
+        5,
+        -15
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        5,
+        -15
+      ],
+      "end": [
+        0,
+        -10
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        0,
+        -10
+      ],
+      "end": [
+        -5,
+        -5
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -5,
+        -5
+      ],
+      "end": [
+        -10,
+        0
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -10,
+        0
+      ],
+      "end": [
+        -15,
+        5
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -15,
+        5
+      ],
+      "end": [
+        -20,
+        10
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 9,
+      "clock": 36,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 2
+    },
+    {
+      "round": 10,
+      "clock": 37,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Талис",
+      "hp": 0,
+      "armor": 15,
+      "reaction": true,
+      "pos": [
+        60,
+        -75
+      ]
+    },
+    {
+      "round": 10,
+      "clock": 37,
+      "actor": "Талис",
+      "phase": "turn",
+      "event": "death_save",
+      "target": "Талис",
+      "face": 5,
+      "stable": false,
+      "dead": true
+    },
+    {
+      "round": 10,
+      "clock": 37,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 2
+    },
+    {
+      "round": 10,
+      "clock": 38,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "turn_start",
+      "target": "Лаэль",
+      "hp": 27,
+      "armor": 20,
+      "reaction": true,
+      "pos": [
+        -35,
+        50
+      ]
+    },
+    {
+      "round": 10,
+      "clock": 38,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "level": 0,
+      "kind": "action",
+      "slots": {
+        "1": 2,
+        "2": 0
+      }
+    },
+    {
+      "round": 10,
+      "clock": 38,
+      "actor": "Лаэль",
+      "phase": "turn",
+      "event": "spell_attack",
+      "target": "Лаэль",
+      "spell": "Огненный снаряд",
+      "face": 3,
+      "distance": 40
+    },
+    {
+      "round": 10,
+      "clock": 38,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 2
+    },
+    {
+      "round": 10,
+      "clock": 39,
+      "actor": "Вордт",
+      "phase": "legendary",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 2
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath_recharge"
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -20,
+        10
+      ],
+      "end": [
+        -25,
+        15
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -25,
+        15
+      ],
+      "end": [
+        -30,
+        20
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -30,
+        20
+      ],
+      "end": [
+        -35,
+        25
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath",
+      "targets": [
+        "Лаэль"
+      ],
+      "raw_damage": 38,
+      "position": [
+        -35,
+        25
+      ]
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "breath_save",
+      "target": "Лаэль",
+      "face": 6,
+      "saved": false
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "damage",
+      "target": "Лаэль",
+      "damage_type": "cold",
+      "received": 38,
+      "temporary": 0,
+      "hp_damage": 38,
+      "hp": 0,
+      "dead": false
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "bladesong_ended",
+      "reason": "incapacitated",
+      "target": "Лаэль"
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -35,
+        25
+      ],
+      "end": [
+        -35,
+        30
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -35,
+        30
+      ],
+      "end": [
+        -35,
+        35
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -35,
+        35
+      ],
+      "end": [
+        -35,
+        40
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_move",
+      "start": [
+        -35,
+        40
+      ],
+      "end": [
+        -35,
+        45
+      ],
+      "own_turn": true
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "damage",
+      "target": "Лаэль",
+      "damage_type": "bludgeoning",
+      "received": 22,
+      "temporary": 0,
+      "hp_damage": 22,
+      "hp": 0,
+      "dead": false
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Лаэль",
+      "face": 20,
+      "total": 27,
+      "hit": true,
+      "critical": true,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "damage",
+      "target": "Лаэль",
+      "damage_type": "bludgeoning",
+      "received": 16,
+      "temporary": 0,
+      "hp_damage": 16,
+      "hp": 0,
+      "dead": true
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "boss_attack",
+      "target": "Лаэль",
+      "face": 17,
+      "total": 24,
+      "hit": true,
+      "critical": true,
+      "opportunity": false,
+      "distance": 5
+    },
+    {
+      "round": 10,
+      "clock": 40,
+      "actor": "Вордт",
+      "phase": "turn",
+      "event": "turn_end",
+      "hp": 17,
+      "falls": 3
+    }
+  ]
+}
