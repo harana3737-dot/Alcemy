@@ -1,3 +1,4 @@
+from reading_guides import add_guide, strip_guide
 """Правила за столом: действующий текст v0.3 без альтернатив, статусов и истории правок.
 Источник один — «Алхимия Талиса — правила v0.3 (черновик на утверждение).md»; этот файл собирается из него.
 Запуск: python3 scripts/table_rules.py [--diff]  (--diff печатает всё вырезанное для проверки)"""
@@ -32,7 +33,7 @@ REPL = [(r"; цены — из линейки мастера v0\.2", ""), (r"\(�
         (r"Здесь только правила: какие эликсиры входят в формулы, как пересмотрены официальные эликсиры и какие заклинания 6–9 уровня можно конвертировать\. Сами эликсиры — уровень, эффект, состав, цена, альтернативы —",
          "Здесь — какие эликсиры входят в формулы. Сами эликсиры — уровень, эффект, состав, цена —")]
 
-lines = SRC.read_text(encoding="utf-8").splitlines()
+lines = strip_guide(SRC.read_text(encoding="utf-8")).splitlines()
 out, skip_lv, i = [], None, 0
 while i < len(lines):
     ln = lines[i]
@@ -99,7 +100,7 @@ text = "\n".join(head + body[k:])
 text = re.sub(r"\n{3,}", "\n\n", text).replace(" .", ".").replace(" ,", ",")
 left = re.findall(r"\*Альтернатива|\bЖ-\d+", text)
 assert not left, f"table_rules.py: в правилах за столом остались альтернативы или номера решений: {sorted(set(left))}"
-OUT.write_text(text.rstrip() + "\n", encoding="utf-8")
+OUT.write_text(add_guide(text.rstrip() + "\n", "Алхимия Талиса — правила за столом"), encoding="utf-8")
 print("ok", OUT.name, len(text), "вырезано", len(CUT))
 if "--diff" in sys.argv:
     print("\n".join(CUT))

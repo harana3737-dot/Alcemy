@@ -8,7 +8,8 @@ TABLE = "table" in sys.argv[1:]
 SRC = ROOT / ("Алхимия Талиса — правила за столом.md" if TABLE else "Алхимия Талиса — правила v0.3 (черновик на утверждение).md")
 OUT = ROOT / ("Алхимия Талиса — правила за столом.html" if TABLE else "Алхимия Талиса — правила v0.3.html")
 
-lines = SRC.read_text(encoding="utf-8").splitlines()
+lines = [line for line in SRC.read_text(encoding="utf-8").splitlines()
+         if line not in ("<!-- reading-guide:start -->", "<!-- reading-guide:end -->")]
 JOURNAL = ROOT / "Журнал решений.md"
 chg_lines = JOURNAL.read_text(encoding="utf-8").splitlines()   # таблица изменений относительно v0.2
 

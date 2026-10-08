@@ -16,6 +16,7 @@ from cards_model import (
     recipe,
 )
 from gen import build_materials, write_materials
+from reading_guides import guide_html
 
 
 def main():
@@ -136,6 +137,7 @@ body{{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(sa
 </style></head><body><main>
 <h1>Карточки эликсиров — Алхимия Талиса</h1>
 <p class="sub">Черновик, 05.10.2026 · {len(C)} карточек · реестр эликсиров + правила v0.3 · эффекты по PHB 2014 и DMG 2014</p>
+{guide_html(chr(10).join(md), "Карточки эликсиров")}
 <details><summary>Как читать карточку</summary>{md_list(HOW)}</details>
 <div class="bar" id="top">
 <input id="q" type="search" placeholder="Поиск по названию или тексту">

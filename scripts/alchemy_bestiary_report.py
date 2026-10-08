@@ -1,4 +1,5 @@
 """Воспроизводимый прогон; --write создаёт отчёт и CSV, --check сверяет их."""
+from reading_guides import add_guide
 import argparse
 import csv
 import hashlib
@@ -213,7 +214,7 @@ def render(monsters, rows):
              'Команды: `python3 -B scripts/alchemy_bestiary_report.py --write`, затем `python3 -B scripts/alchemy_bestiary_report.py --check` и `python3 -B -m unittest discover -s scripts -p "test_alchemy_bestiary.py"`. Все построчные результаты: `scripts/alchemy_bestiary/results.csv`.', '',
              f'SHA256 бестиария: `{b.SHA}`.', f'SHA256 CSV: `{hashlib.sha256(csv_text.encode()).hexdigest()}`.', '',
              'Ограничения: нет симуляции ответных атак, сохранения концентрации, перемещения, расхода ячеек всей группы, смертей от обычного урона и вероятности выиграть бой. Поглощение стихий монстром считается нулевым уроном без расчёта лечения. Носитель использует обычную рапиру; её основной урон остаётся немагическим, кроме масла остроты. Триггеры высоких обычных ядов посчитаны как вероятности, без обратной связи остальных 11 эффектов.', '']
-    return '\n'.join(text), csv_text
+    return add_guide('\n'.join(text), 'Алхимия и магия — проверка на бестиарии'), csv_text
 
 
 def main():

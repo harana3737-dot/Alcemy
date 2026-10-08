@@ -6,6 +6,7 @@ python3 -B scripts/elixir_catalog_review.py --write
 Рекомендации относятся к группе Талис/Лаэль/Фаэнон, не меняют правила.
 """
 from pathlib import Path
+from reading_guides import add_guide
 import re
 import sys
 
@@ -218,7 +219,7 @@ if __name__=='__main__':
             main()
         head, tail = source.split(start)
         _, footer = tail.split(end)
-        report.write_text(head + start + '\n\n' + output.getvalue() + '\n' + end + footer, encoding='utf-8')
+        report.write_text(add_guide(head + start + '\n\n' + output.getvalue() + '\n' + end + footer, 'Группа — обзор каталога эликсиров'), encoding='utf-8')
         print('Обзор обновлён: 103 эликсира-эффекта')
     else:
         main()

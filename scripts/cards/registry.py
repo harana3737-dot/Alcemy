@@ -2,6 +2,10 @@
 Запуск: python3 scripts/cards/registry.py → «Реестр расхождений с источниками.md».
 Сравнивает уровень/редкость, длительность, кубы урона и спасбросок. Каждое отличие помечается:
 намеренное (записано в карточке или следует из правила системы) или «не объяснено»."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from reading_guides import add_guide
 import json, pathlib, re
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -192,7 +196,7 @@ def main():
     for c, s, ds in sorted(with_diff, key=lambda r: (r[0]["lvl"], r[0]["name"])):
         for d in ds:
             L.append(f"| {c['name']} ({ROM[c['lvl']]}) | {s} | {d[0]} | {d[1]} | {d[2]} | {d[3]} |")
-    (ROOT / "Реестр расхождений с источниками.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+    (ROOT / "Реестр расхождений с источниками.md").write_text(add_guide("\n".join(L) + "\n", "Реестр расхождений с источниками"), encoding="utf-8")
     print(f"проверено {checked}, с отличиями {len(with_diff)}, не объяснено {len(unexpl)}")
     for c, s, d in unexpl:
         print(" ", c["name"], "|", d)
