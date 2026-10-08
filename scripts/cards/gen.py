@@ -134,6 +134,8 @@ exec(open(HERE / "tasks.py", encoding="utf-8").read())
 ESS_TYPES = ["Тело", "Разум", "Чувства", "Движение", "Стихия", "Покров", "Вода/дыхание", "Смерть/душа", "Эфир"]
 for c in C:
     c["tasks"] = tasks_of(c["name"])
+    if c["cls"] != "psn":  # «Контрольный яд» — задача только отдельного класса (Ж-84); у заряда-основы ссылка «Как яд» в карточке
+        c["tasks"] = [t for t in c["tasks"] if t != "Контрольный яд"]
     found = [t for t in ESS_TYPES if t in c["ess"]]
     c["ess_types"] = found if found and not c["ess"].startswith("по ") else (["по характеристике (Сноровка)"] if c["ess"].startswith("по ") else ["особая: " + c["ess"]])
     if c["note"] and "[решает мастер]" in c["note"].replace("\\", "") and not c["open"]:
@@ -342,7 +344,7 @@ for k in CLS_ORDER:
     md.append(f"**{CLS[k].capitalize()}** ({len(items)}): " + ", ".join(f"{link(c)} {ROM[c['lvl']]}" for c in items) + "\n")
 
 md.append('<a id="by-task"></a>\n\n## По задаче\n')
-md.append("Задача — для чего эликсир чаще всего нужен; у многих две. Внутри — по уровню: название, уровень, класс, цена. «Контрольный яд» — кандидаты из черновика 8.6: пока это заряды. Обычные яды 1–10 карточек не имеют — они варятся как зелья (7.5).\n")
+md.append("Задача — для чего эликсир чаще всего нужен; у многих две. Внутри — по уровню: название, уровень, класс, цена. «Контрольный яд» — только карточки этого класса (Ж-84); заряд того же заклинания — отдельная карточка со ссылкой «Как яд». Обычные яды 1–10 карточек не имеют — они варятся как зелья (7.5).\n")
 for t in TASKS:
     items = [c for c in cards if t in c["tasks"]]
     md.append(f"**{t}** ({len(items)}): " + "; ".join(f"{link(c)} {ROM[c['lvl']]} · {CLS[c['cls']]} · {c['price']} зм" for c in items) + "\n")
