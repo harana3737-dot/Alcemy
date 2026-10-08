@@ -46,12 +46,8 @@ def card_html(c):
         out.append(f'<p class="mech"><b>Особые правила.</b> {tx(c["mech"])}</p>')
     if c["open"]:
         out.append(f'<p class="openq"><b>Открытый вопрос.</b> {tx(c["open"])}</p>')
-    if c["cls"] == "chg" and c["name"] in POISON_OF:
-        p_ = POISON_OF[c["name"]]
-        out.append(f'<p class="mech"><b>Как яд:</b> этот же рецепт варится ядом — <a class="lnk" href="#{p_["id"]}">{tx(p_["name"])}</a> (контрольный яд, 8.6): отдельного исследования нет, первая варка яда — СЛ +2.</p>')
     if c["cls"] == "psn":
-        b_ = BASE_OF[c["name"]]
-        out.append(f'<p class="mech"><b>Вариант доставки заряда</b> <a class="lnk" href="#{b_["id"]}">{tx(b_["name"])}</a>: кто знает рецепт зарядов и склянок этой эссенции («{tx(c["fam"])}», Ж-100), варит и яд; первая варка — СЛ +2 (Ж-83). Токсичность получает только тот, кто яд выпил или съел.</p>')
+        out.append(f'<p class="mech"><b>Рецепт.</b> {tx(PSN_RECIPE.format(fam=c["fam"]))}</p>')
     if c["alt"]:
         out.append(f'<p class="alt"><i>Альтернатива: {tx(c["alt"])}.</i></p>')
     det = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in brew)

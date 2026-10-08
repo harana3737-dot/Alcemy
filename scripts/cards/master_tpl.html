@@ -378,7 +378,6 @@ const tone=c=>c.g.some(g=>HARM.includes(g))?'harm':c.g.some(g=>HELP.includes(g))
 const SAB={'Силы':'Сил','Ловкости':'Лов','Телосложения':'Тел','Интеллекта':'Инт','Мудрости':'Мдр','Харизмы':'Хар','атака заклинанием':'атака'};
 const svShort=v=>!v||v.startsWith('нет')?'':v.split(', ').map(x=>SAB[x]||x).join('/');
 function badges(c){const B=[c.k==='psn'?['☠ контрольный яд','psn']:[CLS[c.k]||c.k,tone(c)]];
-  if(c.pz)B.push(['есть яд: отдельная карточка']);
   if(EMODE==='table'){if(c.ac)B.push([c.ac]);
     if(c.dc)B.push([`СЛ ${c.dc}`+(svShort(c.sv)?' · '+svShort(c.sv):'')]);else if(svShort(c.sv)==='атака')B.push(['атака']);
     if(c.c!=='нет')B.push([c.c.startsWith('алхим')?'алх. концентрация':'концентрация']);
