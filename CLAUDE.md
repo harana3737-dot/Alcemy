@@ -63,6 +63,8 @@
 
 ## Сборка
 
+- Весь комплект без записи в checkout: `python3 -B scripts/check_all.py` (`--slow` — также экономика, `--browser` — Playwright; Chromium по умолчанию `/opt/pw-browsers/chromium`, другой путь через `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`).
+
 - Правила (полные + за столом): `python3 scripts/rules_html.py`
 - Любой md → html (для мастера, экономика, ядро и т. п.): `python3 scripts/master_html.py "Имя файла без .md"`
 - Карточки: `python3 scripts/cards/gen.py && python3 scripts/cards/gen_html.py && python3 scripts/cards/check.py` (должно быть 0 ошибок); бонусы: `python3 scripts/cards/quality.py`
