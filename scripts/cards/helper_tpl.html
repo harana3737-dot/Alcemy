@@ -396,7 +396,7 @@ function list(){
   const r=D.map((c,i)=>[c,i]).filter(([c])=>(S.cls==='all'||c.k===S.cls)&&(!q||(c.n+' '+c.e+' '+c.f+' '+c.tk.join(' ')).toLowerCase().includes(q)));
   r.forEach(([c,i])=>{const b=document.createElement('button');b.type='button';b.className='item';b.setAttribute('role','option');
     b.setAttribute('aria-current',S.sel===i);b.innerHTML=`<span class="lv">${ROM[c.l]}</span><span class="nm"></span><span class="kl">${CLS[c.k]}</span>`;
-    b.querySelector('.nm').textContent=c.n;b.onclick=()=>{S.sel=i;ls.set('sel',c.n);list();render();if(innerWidth<880)$('out').scrollIntoView({behavior:'smooth'})};L.appendChild(b)});
+    b.querySelector('.nm').textContent=c.n;b.onclick=()=>{BASIC_SELECTED=null;AV.selected=c.n;AV.mode='all';S.sel=i;ls.set('sel',c.n);list();render();if(innerWidth<880)$('out').scrollIntoView({behavior:'smooth'})};L.appendChild(b)});
   $('count').textContent=r.length?`${r.length} из ${D.length}`:'Ничего не нашлось';
 }
 
@@ -502,6 +502,7 @@ function pickBonuses(c,t){
 const pct=x=>Math.round(x*100)+'%';
 function render(keepSit){
   renderAvailability();
+  if(BASIC_SELECTED){renderBasicRecipe(BASIC_SELECTED);return}
   if(S.sel===null){sitList(null);return}
   const c=D[S.sel], M=Math.max(1,Math.min(10,+$('m').value||1)), B=+$('b').value||0;
   if(!keepSit)sitList(c);
@@ -1875,7 +1876,7 @@ __TABLE_TOOLS__
 __CRAFTS__
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
-if(si>=0)S.sel=si;
+if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=BASIC.find(c=>c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
 list();render();renderBelt();tab(['belt','jour','plan','scroll','smith'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
 </body>

@@ -396,7 +396,7 @@ function list(){
   const r=D.map((c,i)=>[c,i]).filter(([c])=>(S.cls==='all'||c.k===S.cls)&&(!q||(c.n+' '+c.e+' '+c.f+' '+c.tk.join(' ')).toLowerCase().includes(q)));
   r.forEach(([c,i])=>{const b=document.createElement('button');b.type='button';b.className='item';b.setAttribute('role','option');
     b.setAttribute('aria-current',S.sel===i);b.innerHTML=`<span class="lv">${ROM[c.l]}</span><span class="nm"></span><span class="kl">${CLS[c.k]}</span>`;
-    b.querySelector('.nm').textContent=c.n;b.onclick=()=>{S.sel=i;ls.set('sel',c.n);list();render();if(innerWidth<880)$('out').scrollIntoView({behavior:'smooth'})};L.appendChild(b)});
+    b.querySelector('.nm').textContent=c.n;b.onclick=()=>{BASIC_SELECTED=null;AV.selected=c.n;AV.mode='all';S.sel=i;ls.set('sel',c.n);list();render();if(innerWidth<880)$('out').scrollIntoView({behavior:'smooth'})};L.appendChild(b)});
   $('count').textContent=r.length?`${r.length} из ${D.length}`:'Ничего не нашлось';
 }
 
@@ -502,6 +502,7 @@ function pickBonuses(c,t){
 const pct=x=>Math.round(x*100)+'%';
 function render(keepSit){
   renderAvailability();
+  if(BASIC_SELECTED){renderBasicRecipe(BASIC_SELECTED);return}
   if(S.sel===null){sitList(null);return}
   const c=D[S.sel], M=Math.max(1,Math.min(10,+$('m').value||1)), B=+$('b').value||0;
   if(!keepSit)sitList(c);
@@ -1926,6 +1927,13 @@ function supply(c,q=1){
   return {deficits,warnings,ready:knows(c)&&c.l<=M&&c.l<=(S.t.lab?10:$('anar').checked?8:5)&&!deficits.length};
 }
 let AV={mode:'known',selected:'Зелье лечения 1.1',q:1};
+let BASIC_SELECTED=null;
+function chooseAvailableRecipe(c){if(!c)return;AV.selected=c.n;BASIC_SELECTED=c.k==='basic'?c:null;S.sel=c.k==='basic'?null:D.indexOf(c);ls.set('sel',c.n);list();render();}
+function renderBasicRecipe(c){
+  sitList(null);const batch=batchInfo(c.n,c.l,null,Math.max(1,Math.min(10,+$('m').value||1)),S.t.lab);
+  $('out').innerHTML=`<div class="title"><h2>${esc(c.n)}</h2><span class="badge">${ROM[c.l]} · ${c.b} основа</span></div><p class="note">Выбранный рецепт. ${esc(batch.why)}; ${batch.t} ч на подход. Записывай фактические исходы ниже; выбор рецепта материалы не тратит.</p><div id="basicRec"></div>`;
+  recForm($('basicRec'),{name:c.n,lvl:c.l});
+}
 function renderAvailability(){
   const box=$('availability');if(!box||!ST.mat)return;
   const c=RECIPES.find(c=>c.n===AV.selected)||RECIPES[0],check=supply(c,AV.q);
@@ -1942,8 +1950,8 @@ function renderAvailability(){
   if(filtered.some(x=>x.n===c.n))$('avRecipe').value=c.n;
   else if(filtered.length){AV.selected=filtered[0].n;renderAvailability();return;}
   $('avKnown').disabled=!filtered.length||(knows(c)&&!knownRecipes().includes(recipeKey(c)));$('avOpen').disabled=!filtered.length;
-  $('avMode').onchange=e=>{AV.mode=e.target.value;renderAvailability()};
-  $('avRecipe').onchange=e=>{AV.selected=e.target.value;renderAvailability()};
+  $('avMode').onchange=e=>{AV.mode=e.target.value;renderAvailability();if($('avRecipe').value)chooseAvailableRecipe(RECIPES.find(c=>c.n===$('avRecipe').value))};
+  $('avRecipe').onchange=e=>chooseAvailableRecipe(RECIPES.find(c=>c.n===e.target.value));
   $('avQty').onchange=e=>{AV.q=Math.max(1,Math.min(100,+e.target.value||1));renderAvailability()};
   $('avKnown').onchange=e=>{const on=e.target.checked;mutate(()=>{const keys=knownRecipes().filter(k=>k!==recipeKey(c));if(on)keys.push(recipeKey(c));ST.knownRecipes=keys;logx('Известные рецепты: '+recipeKey(c)+' — '+(on?'да':'нет'))})};
   $('avCopy').onclick=async()=>{try{await navigator.clipboard.writeText('Докупка для '+c.n+' ×'+AV.q+'\n'+check.deficits.map(d=>`${d.n}: ${fmtZ(d.q)}${d.price==null?' — цена у мастера':' — '+fmtZ(d.price)+' зм'}`).join('\n'));$('avCopy').textContent='Скопировано'}catch(e){$('avCopy').textContent='Не скопировалось'}};
@@ -2194,7 +2202,7 @@ $('lssClose').onclick=()=>$('lssDialog').close();
 })(r);}catch(e){console.error(e)}})();
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
-if(si>=0)S.sel=si;
+if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=BASIC.find(c=>c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
 list();render();renderBelt();tab(['belt','jour','plan','scroll','smith'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
 </body>
