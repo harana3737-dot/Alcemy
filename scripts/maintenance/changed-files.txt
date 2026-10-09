@@ -1,0 +1,29 @@
+CLAUDE.md
+scripts/cards/cards_model.py
+scripts/cards/check.py
+scripts/cards/helper.py
+scripts/cards/helper_tpl.html
+scripts/cards/master_panel.py
+scripts/check_all.py
+scripts/maintenance/README.md
+scripts/maintenance/baseline.json
+scripts/maintenance/changed-files.txt
+scripts/maintenance/check-before.txt
+scripts/maintenance/check-data.txt
+scripts/master_html.py
+scripts/party_kit_report.py
+scripts/rules_data.py
+scripts/rules_html.py
+scripts/sim.py
+scripts/sim_plan.py
+scripts/sim_player.py
+scripts/sim_volume.py
+scripts/sim_week.py
+scripts/table_rules.py
+scripts/test_builder_imports.py
+scripts/test_check_all.py
+scripts/test_economy_audit.py
+scripts/test_rules_data.py
+Для игрока — начни отсюда.md
+История проверок — оглавление.md
+Первая варка — по шагам.md

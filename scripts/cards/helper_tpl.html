@@ -342,9 +342,9 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 <script>
 const D=JSON.parse(document.getElementById('data').textContent), CLS=__CLS__;
 const ORDER=["eff","chg","psn","rea","fl","oilw","oils","salve"];
-const ROM=["","I","II","III","IV","V","VI","VII","VIII","IX","X"];
-const DC=[12,12,13,15,17,19,21,23,25,27];
-const MB=m=>m>=10?5:m>=8?4:m>=6?3:m>=4?2:m>=2?1:0;
+const ROM=__RULE_ROM__;
+const DC=__RULE_DC__;
+const MB=__RULE_MB__;
 const $=id=>document.getElementById(id);
 const S={sel:null,cls:"all",t:{}};
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -446,8 +446,8 @@ function brew(c,M,B,t){
   if(!batchable(c))nwhy=c.l>=6?'VI+ — одной дозой':'заряды, склянки и масла кары партиями не варятся';
   else if(c.l>M)nwhy='выше мастерства — одной дозой';
   else if(t.first)nwhy='рецепт ещё не освоен';
-  else{n=Math.min(M-c.l+2,(c.l<=2?3:2)+(t.lab?1:0));nwhy='(мастерство − уровень) + 2'}
-  const time=c.l<=2?'2 часа':c.l<=5?'4 часа':c.l<=7?'объём 90':c.l<=9?'объём 240':'объём 500';
+  else{n=Math.min(__RULE_ELIXIR_T__);nwhy='(мастерство − уровень) + 2'}
+  const time=__RULE_TIME__;
   const tnote=c.l<=5?'':c.l<=7?'≈5 подходов по 2 часа':c.l<=9?'≈12 подходов по 2 часа':'≈24 подхода, сюжетные условия';
   const cat=c.l<=2?'не нужен':c.l<=5?'I порядка':c.l<=7?'II порядка':c.l<=9?'III порядка':'IV порядка';
   // шансы одной проверки
@@ -539,7 +539,7 @@ function durMin(d){
   return 60;
 }
 const byName=n=>D.find(c=>c.n===n);
-const CAT_DC=[0,11,17,21,25];
+const CAT_DC=__RULE_CAT_DC__;
 const stab=x=>x.stable||5, cmax=x=>stab(x)+5; // после стабильных — до 5 рискованных (5.2)
 const instDC=(x,n)=>10+2*(n-stab(x)-1); // СЛ проверки нестабильности n-го применения
 const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
@@ -821,9 +821,9 @@ function renderBelt(){
 }
 
 // ===== Бой: «Мой ход» раз в раунд; лечение зелий по раундам (7.2, Ж-91), яд на оружии (7.5, 8.6). Чужие ходы и цели — у мастера =====
-const HEAL_R=[0,1,1,1,2,2,3,3,4,4,6], HEAL_F=[0,0,1,-1,0,1,2,1,0,0,0];
+const HEAL_R=__RULE_HEAL_R__, HEAL_F=__RULE_HEAL_F__;
 // кубики в порядке потери: сначала меньший, затем основные (7.2)
-const HEAL_D=[[],[4],[4,4],[4,4,4,4],[4,6],[6,6],[6,6,6],[10,10,10],[4,12,12,12],[10,12,12,12],[12,12,12,12,12,12]];
+const HEAL_D=__RULE_HEAL_D__;
 const healLvl=n=>{const m=String(n).match(/^Зелье(?: лечения)? (\d+)\.\1\b/);return m&&+m[1]<=10?+m[1]:0};
 const healMods=t=>({strong:/\+2 к лечению|Крепк/i.test(t),twin:/Сдвоен/i.test(t),weak:/Слаб/i.test(t),slow:/Медлен/i.test(t)});
 function healRound(lv,k,md){const d=HEAL_D[lv].slice(Math.min(k,HEAL_D[lv].length-1)),f=HEAL_F[lv]+(md.strong?2:0),cnt={};
@@ -1208,7 +1208,7 @@ function recForm(box,opts){
 recForm($('jrec'),{});
 
 // ===== Материалы Талиса: травы, эссенции, катализаторы; расход при записи варки =====
-const HERB_P=[0,0.1,0.5,1,2,4,8,16,32,64,128];
+const HERB_P=__RULE_HERB__;
 const ORD=l=>l<=2?0:l<=5?1:l<=7?2:l<=9?3:4;
 const KIND={heal:'Лечебные',poison:'Ядовитые',any:'Любые'};
 const fmtZ=v=>(Math.round(v*100)/100).toString().replace('.',',');
@@ -1412,9 +1412,9 @@ function sampleBtn(t){
 }
 
 // ===== Варка чернил (10.1–10.5) =====
-const INK={dc:[10,12,12,13,15,17,19,21,23,25],price:[15,30,120,300,1200,2500,7500,12500,25000,50000],
-  time:['2 часа','2 часа','2 часа','4 часа','4 часа','4 часа','объём 90','объём 90','объём 240','объём 240'],
-  place:['инструменты','инструменты','инструменты','инструменты','рабочее место','рабочее место','полная лаборатория','полная лаборатория','полная лаборатория','мастерская лаборатория']};
+const INK={dc:__RULE_INK_DC__,price:__RULE_INK_PRICES__,
+  time:__RULE_INK_TIMES__,
+  place:__RULE_INK_PLACES__};
 const inkName=l=>l?`Чернила ${ROM[l]}`:'Чернила заговора';
 const INKQ={n20:['отличные','+4'],hi:['качественные','+2'],ok:['стандартные','±0'],un:['нестабильные','−2']};
 // катализатор в формах чернил и противоядий: проверка по выбранному, галочка «треснул»
@@ -1672,7 +1672,7 @@ function essForm(box){
 catForm($('jcat'));essForm($('jess'));
 
 // ===== Объём работы VI+ (6.3): подходы по 2 часа, прогресс, метки качества, заминки, дефекты, простой =====
-const VOLUME=l=>l>=10?500:l>=8?240:90;
+const VOLUME=__RULE_VOLUME__;
 const WEEK=7*1440, MONTH=30*1440;
 const vols=()=>{if(!ST.vol)ST.vol=[];return ST.vol};
 function volIdle(v){const idle=ST.T-v.last;return {weeks:Math.floor(idle/WEEK),def:Math.max(0,Math.floor(idle/WEEK)-1),ruined:idle>=MONTH}}
@@ -1785,12 +1785,12 @@ function renderHours(){
 function batchInfo(n,lvl,c,M,lab){
   if(!c){ if(lvl>=6)return {size:1,why:'зелья 6.6+ партиями не варятся',t:2};
     if(lvl>M)return {size:1,why:'выше мастерства — одной дозой (3.1)',t:2};
-    const sz=M<=2?2*(M-lvl)+2:(lvl===M?4:Math.min(10,Math.max(5,2*(M-lvl)+2)));return {size:sz,why:`партия зелий до ${sz} (6.2)`,t:2,batch:true}}
+    const sz=__RULE_POTION_BATCH__;return {size:sz,why:`партия зелий до ${sz} (6.2)`,t:2,batch:true}}
   const t=c.l<=2?2:4;
   if(c.l>=6)return {size:1,why:'VI+ — объём работы',t:0};
   if(!['eff','oilw','salve'].includes(c.k))return {size:1,why:'заряды, склянки и масла кары партиями не варятся',t};
   if(c.l>M)return {size:1,why:'выше мастерства — одной дозой',t};
-  const sz=Math.min(M-c.l+2,(c.l<=2?3:2)+(lab?1:0));return {size:sz,why:`партия эликсиров до ${sz} (6.2)`,t,batch:true};
+  const sz=Math.min(__RULE_ELIXIR_LAB__);return {size:sz,why:`партия эликсиров до ${sz} (6.2)`,t,batch:true};
 }
 function brewHours(n,lvl,c,att,M){const b=batchInfo(n,lvl,c,M,S.t.lab);if(!att)return 0;if(S.t.first&&b.batch)return att*b.t;return b.batch?Math.ceil(att/b.size)*b.t:att*b.t}
 // осечка (раздел 2)

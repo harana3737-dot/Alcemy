@@ -2,25 +2,24 @@
 чернила против покупки у Анариэль, стоимость прокачки мастерства 1 → 10. Правила v0.3.
 «Родной» бонус: Инт +0 (как у Талиса), владение по брекетам, мастерство алхимика, минимальная лаборатория."""
 
+from rules_data import PLAYER_PROF, MB, PLAYER_LAB, HEAL, OWN_BATCH, NEED
+
 import random as _random
 
 import sim_volume as volume
 
 from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
 
-PROF = {1: 2, 2: 2, 3: 2, 4: 3, 5: 3, 6: 3, 7: 3, 8: 4, 9: 4, 10: 4}
+PROF = PLAYER_PROF
 
-MB = {1: 0, 2: 1, 3: 1, 4: 2, 5: 2, 6: 3, 7: 3, 8: 4, 9: 4, 10: 5}
 
-LAB = {1: 0, 2: 0, 3: 0, 4: 1, 5: 1, 6: 3, 7: 3, 8: 3, 9: 5, 10: 5}
+LAB = PLAYER_LAB
 
 NATIVE = {l: PROF[l] + MB[l] + LAB[l] for l in range(1, 11)}   # Инт +0
 
-HEAL = {1: (2.5, 2.5), 2: (6, 6), 3: (9, 9), 4: (6, 9.5), 5: (8, 12.5), 6: (12.5, 27), 7: (17.5, 36), 8: (22, 61), 9: (25, 64), 10: (39, 136.5)}
 
-BATCH = {1: 2, 2: 2, 3: 4, 4: 4, 5: 4}     # партия зелья своего уровня на мастерстве = уровню (6.2); 6.6+ — без партий
+BATCH = OWN_BATCH
 
-NEED = {1: 10, 2: 15, 3: 20, 4: 25, 5: 25, 6: 25, 7: 25, 8: 25, 9: 25}   # успехов зелья уровня m для перехода m → m+1
 
 def base_cost(l):
     return l * HERB[l] + CAT_PRICE[l] / 5
