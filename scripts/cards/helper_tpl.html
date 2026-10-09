@@ -185,6 +185,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 .resb select{width:auto;max-width:100%;padding:4px 6px;font-size:13px}
 .resb .bad{color:var(--bad);font-weight:600}.resb .wr{color:var(--warn)}.resb small{color:var(--muted)}
 .sugg{display:grid;gap:2px;margin-top:4px;max-height:44vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px}
+.combo-row{margin:10px 0;align-items:end}.combo-row select{max-width:100%}.combo-warnings{color:var(--bad)}#comboConcentration{width:100%;min-width:0}
+@media(max-width:480px){.combo-row{flex-wrap:wrap}.combo-row>div:first-child{flex:1 1 100%}}
 .sugg[hidden],.sugg:empty{display:none}
 .sugg button{font:inherit;font-size:14px;text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;color:var(--ink);cursor:pointer}
 .sugg button:hover,.sugg button:focus-visible{background:var(--chip)}
@@ -210,11 +212,13 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
   <button type="button" role="tab" data-tab="brew" aria-selected="true">Варка</button>
   <button type="button" role="tab" data-tab="belt" aria-selected="false">Пояс <span id="beltBadge" class="tb"></span></button>
   <button type="button" role="tab" data-tab="jour" aria-selected="false">Журнал</button>
+  <button type="button" role="tab" data-tab="combo" aria-selected="false">Сочетания</button>
   <button type="button" role="tab" data-tab="plan" aria-selected="false">Вылазка</button>
   <button type="button" role="tab" data-tab="scroll" aria-selected="false">Свитки</button>
   <button type="button" role="tab" data-tab="smith" aria-selected="false">Кузня</button>
 </nav>
 <div class="grid" id="tab-brew">
+  <div class="card" id="activeBrews" style="grid-column:1/-1" hidden></div>
   <div class="card" id="availability" style="grid-column:1/-1"></div>
   <div class="side">
     <div class="card">
@@ -316,6 +320,15 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <div class="btns"><button type="button" class="btn soft" id="plCopy">Скопировать список</button><button type="button" class="btn ghost" id="plClear">Убрать полученное и пустое</button></div>
   </div>
 </div>
+<div id="tab-combo" hidden><div class="card">
+  <h2>Проверить сочетание</h2>
+  <p class="note">План для одного персонажа: учитывает текущую токсичность и действующую алхимическую концентрацию. Для зарядов проверяется концентрация после применения. Выбор здесь сохраняется как план.</p>
+  <div class="row"><div><label class="f" for="comboWho">Персонаж</label><select id="comboWho"></select></div><div><label class="f" for="comboConcentration">Текущее заклинание с концентрацией <small>У Талиса записанное в «Бое» учитывается автоматически</small></label><input id="comboConcentration" type="text" placeholder="Нет концентрации"></div></div>
+  <label class="tg"><input id="comboCatalog" type="checkbox"><span>Планировать из каталога<small>По умолчанию — эликсиры из сумки выбранного персонажа.</small></span></label>
+  <div id="comboItems"></div><div class="btns"><button type="button" class="btn" id="comboAdd">Добавить эликсир</button><button type="button" class="btn ghost" id="comboClear">Очистить план</button></div>
+  <div id="comboResult" role="status" aria-live="polite"></div>
+  <p class="note">Основные варианты токсичности из карточек. Особые бонусы флакона, выбор варианта и несовместимость остальных эффектов проверь по описаниям ниже. Одноимённые эффекты не складываются. Предметы, хиты и действующие эффекты эта проверка не меняет.</p>
+</div></div>
 <div id="tab-scroll" hidden><div id="craft-scroll"></div></div>
 <div id="tab-smith" hidden><div id="craft-smith"></div></div>
 <div id="tab-jour" hidden>
@@ -840,7 +853,7 @@ function renderBelt(){
   if(typeof renderPlan==='function'&&!$('tab-plan').hidden)renderPlan();
   talis();
   $('now').textContent=fmtT(ST.T);
-  renderPeople();renderBag();renderMat();renderOD();preview();renderFight();renderAvailability();
+  renderPeople();renderBag();renderMat();renderOD();preview();renderFight();renderAvailability();renderActiveBrews();renderCombo();
   $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
   $('undo').disabled=!UNDO.length;
   const t=ST.people[0];if(t){const x=toxOfP(t.id);const b=$('beltBadge');b.textContent=x?`${x}/${t.limit}`:'';b.classList.toggle('hot',x>t.limit)}
@@ -1021,7 +1034,7 @@ function renderPlan(){
 
 // вкладки
 function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';$('tab-scroll').hidden=t!=='scroll';$('tab-smith').hidden=t!=='smith';ls.set('tab',t);document.body.classList.toggle('battle-mobile',t==='belt'&&$('tab-belt').classList.contains('combat'));if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
+  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';$('tab-scroll').hidden=t!=='scroll';$('tab-smith').hidden=t!=='smith';$('tab-combo').hidden=t!=='combo';if(t==='brew'){renderAvailability();renderActiveBrews()}if(t==='combo')renderCombo();ls.set('tab',t);document.body.classList.toggle('battle-mobile',t==='belt'&&$('tab-belt').classList.contains('combat'));if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
@@ -1873,11 +1886,13 @@ function mishapPicker(el,what){
 
 __TABLE_TOOLS__
 
+__TABLE_COMBINATIONS__
+
 __CRAFTS__
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=BASIC.find(c=>c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
-list();render();renderBelt();tab(['belt','jour','plan','scroll','smith'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+list();render();renderBelt();tab(['belt','jour','plan','scroll','smith','combo'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
 </body>
 </html>

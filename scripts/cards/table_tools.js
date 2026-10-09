@@ -62,9 +62,10 @@ function renderBasicRecipe(c){
   recForm($('basicRec'),{name:c.n,lvl:c.l});
 }
 function renderAvailability(){
-  const box=$('availability');if(!box||!ST.mat)return;
-  const c=RECIPES.find(c=>c.n===AV.selected)||RECIPES[0],check=supply(c,AV.q);
+  const box=$('availability');if(!box||!ST.mat||$('tab-brew').hidden)return;
   const filtered=RECIPES.filter(c=>AV.mode==='all'||AV.mode==='known'&&knows(c)||AV.mode==='ready'&&supply(c).ready);
+  if(filtered.length&&!filtered.some(c=>c.n===AV.selected))AV.selected=filtered[0].n;
+  const c=RECIPES.find(c=>c.n===AV.selected)||RECIPES[0],check=supply(c,AV.q);
   box.innerHTML=`<h2>Что могу сварить</h2><div class="row"><div><label class="f">Показать</label><select id="avMode"><option value="known">Известные рецепты</option><option value="ready">Есть материалы на одну попытку</option><option value="all">Все рецепты</option></select></div><div><label class="f">Рецепт</label><select id="avRecipe">${filtered.map(x=>`<option value="${esc(x.n)}">${esc(x.n)} · ${ROM[x.l]}</option>`).join('')}</select></div><div><label class="f">Доз / попыток</label><input id="avQty" type="number" min="1" max="100" value="${AV.q}"></div></div>
   <p class="note">Отметь известные рецепты или ступени формул здесь — названия записей журнала могут быть произвольными. Материалы считаются на каждую попытку, без предполагаемой экономии на удачных бросках.</p>
   ${!filtered.length?'<p class="note">Подходящих рецептов нет. Выбери «Все рецепты», чтобы отметить освоенное.</p>':''}
@@ -75,7 +76,6 @@ function renderAvailability(){
   <div class="btns"><button id="avCopy" type="button" class="btn soft">Скопировать докупку</button><button id="avOpen" type="button" class="btn">Перейти к варке</button></div>`;
   $('avMode').value=AV.mode;
   if(filtered.some(x=>x.n===c.n))$('avRecipe').value=c.n;
-  else if(filtered.length){AV.selected=filtered[0].n;renderAvailability();return;}
   $('avKnown').disabled=!filtered.length||(knows(c)&&!knownRecipes().includes(recipeKey(c)));$('avOpen').disabled=!filtered.length;
   $('avMode').onchange=e=>{AV.mode=e.target.value;renderAvailability();if($('avRecipe').value)chooseAvailableRecipe(RECIPES.find(c=>c.n===$('avRecipe').value))};
   $('avRecipe').onchange=e=>chooseAvailableRecipe(RECIPES.find(c=>c.n===e.target.value));

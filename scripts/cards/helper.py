@@ -90,7 +90,7 @@ def build():
         b5, b20 = _g["quality"](c)
         data.append(dict(n=c["name"], l=c["lvl"], k=c["cls"], f=c["fam"] or "", e=c["ess"], t=c["tox"], d=c["dur"],
                          p=c["price"], b=c["base"], a=c["a89"].startswith("да"), s=_g["saves"](c), ar=_g["area"](c) or "", tk=c["tasks"],
-                         up=_g["UPCAST"].get(c["name"], "none"), b5=b5, b20=b20, eff=c["eff"]))
+                         cc=c.get("conc")=="да", up=_g["UPCAST"].get(c["name"], "none"), b5=b5, b20=b20, eff=c["eff"]))
 
     # Сумка из листа персонажа: блоки «Зелья и расходники» и «На разборку»
     CARD_OF = {"Зелье сопротивления (некротика)": "Сопротивление", "Зелье подводного дыхания": "Водное дыхание"}
@@ -201,6 +201,7 @@ def build():
 
     js = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     html = (HERE / "helper_tpl.html").read_text(encoding="utf-8")
+    html = html.replace("__TABLE_COMBINATIONS__", (HERE / "table_combinations.js").read_text(encoding="utf-8"))
     html = html.replace("__TABLE_TOOLS__", (HERE / "table_tools.js").read_text(encoding="utf-8")).replace("__CRAFTS__", CRAFTS)
     from rules_data import helper_values
     for marker, value in helper_values().items():
@@ -210,7 +211,7 @@ def build():
     html = html.replace("__SEED__", json.dumps(dict(id=seed_id, items=seed, mat=MAT, mid=hashlib.sha1(json.dumps(MAT, ensure_ascii=False).encode()).hexdigest()[:10]), ensure_ascii=False).replace("</", "<\\/"))
     out = pathlib.Path(ROOT) / "Помощник варки.html"
     from generated_files import generated_html
-    html = generated_html(html, "scripts/cards/helper.py", "scripts/cards/helper_tpl.html; scripts/cards/table_tools.js", version=True)
+    html = generated_html(html, "scripts/cards/helper.py", "scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js", version=True)
     out.write_text(html, encoding="utf-8")
     print(out, len(data), len(html), seed_id, seed)
 
