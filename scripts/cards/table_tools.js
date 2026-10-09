@@ -54,6 +54,13 @@ function supply(c,q=1){
   return {deficits,warnings,ready:knows(c)&&c.l<=M&&c.l<=(S.t.lab?10:$('anar').checked?8:5)&&!deficits.length};
 }
 let AV={mode:'known',selected:'Зелье лечения 1.1',q:1};
+let BASIC_SELECTED=null;
+function chooseAvailableRecipe(c){if(!c)return;AV.selected=c.n;BASIC_SELECTED=c.k==='basic'?c:null;S.sel=c.k==='basic'?null:D.indexOf(c);ls.set('sel',c.n);list();render();}
+function renderBasicRecipe(c){
+  sitList(null);const batch=batchInfo(c.n,c.l,null,Math.max(1,Math.min(10,+$('m').value||1)),S.t.lab);
+  $('out').innerHTML=`<div class="title"><h2>${esc(c.n)}</h2><span class="badge">${ROM[c.l]} · ${c.b} основа</span></div><p class="note">Выбранный рецепт. ${esc(batch.why)}; ${batch.t} ч на подход. Записывай фактические исходы ниже; выбор рецепта материалы не тратит.</p><div id="basicRec"></div>`;
+  recForm($('basicRec'),{name:c.n,lvl:c.l});
+}
 function renderAvailability(){
   const box=$('availability');if(!box||!ST.mat)return;
   const c=RECIPES.find(c=>c.n===AV.selected)||RECIPES[0],check=supply(c,AV.q);
@@ -70,8 +77,8 @@ function renderAvailability(){
   if(filtered.some(x=>x.n===c.n))$('avRecipe').value=c.n;
   else if(filtered.length){AV.selected=filtered[0].n;renderAvailability();return;}
   $('avKnown').disabled=!filtered.length||(knows(c)&&!knownRecipes().includes(recipeKey(c)));$('avOpen').disabled=!filtered.length;
-  $('avMode').onchange=e=>{AV.mode=e.target.value;renderAvailability()};
-  $('avRecipe').onchange=e=>{AV.selected=e.target.value;renderAvailability()};
+  $('avMode').onchange=e=>{AV.mode=e.target.value;renderAvailability();if($('avRecipe').value)chooseAvailableRecipe(RECIPES.find(c=>c.n===$('avRecipe').value))};
+  $('avRecipe').onchange=e=>chooseAvailableRecipe(RECIPES.find(c=>c.n===e.target.value));
   $('avQty').onchange=e=>{AV.q=Math.max(1,Math.min(100,+e.target.value||1));renderAvailability()};
   $('avKnown').onchange=e=>{const on=e.target.checked;mutate(()=>{const keys=knownRecipes().filter(k=>k!==recipeKey(c));if(on)keys.push(recipeKey(c));ST.knownRecipes=keys;logx('Известные рецепты: '+recipeKey(c)+' — '+(on?'да':'нет'))})};
   $('avCopy').onclick=async()=>{try{await navigator.clipboard.writeText('Докупка для '+c.n+' ×'+AV.q+'\n'+check.deficits.map(d=>`${d.n}: ${fmtZ(d.q)}${d.price==null?' — цена у мастера':' — '+fmtZ(d.price)+' зм'}`).join('\n'));$('avCopy').textContent='Скопировано'}catch(e){$('avCopy').textContent='Не скопировалось'}};
@@ -109,6 +116,10 @@ function validateSnapshot(data){
   if(s.plan&&(!Array.isArray(s.plan.items)||s.plan.items.some(i=>typeof i.n!=='string'||!ids.has(i.who)||!Number.isFinite(i.q)||i.q<0)))fail();
   if(s.hrs&&(!Number.isFinite(s.hrs.total)||!Array.isArray(s.hrs.log)||s.hrs.log.some(l=>typeof l.w!=='string'||!Number.isFinite(l.T)||!Number.isFinite(l.h))))fail();
   if(s.fight&&(!Array.isArray(s.fight.heals)||!Array.isArray(s.fight.coats)||!Array.isArray(s.fight.now)))fail();
+  if(s.talis){const r=s.talis,n=x=>Number.isSafeInteger(x)&&x>=0;
+    if(!n(r.hp)||r.hp>TALIS_LIMITS.hp||!n(r.temp)||!n(r.sp)||r.sp>TALIS_LIMITS.sp||!n(r.meta)||r.meta>TALIS_LIMITS.meta||
+      !r.slots||![1,2].every(l=>n(r.slots[l]))||typeof r.concentration!=='string'||typeof r.reaction!=='boolean'||
+      (r.dc!==null&&(!n(r.dc)||r.dc<10))||!n(r.lastDamage))fail();}
   for(const b of s.bag)if(typeof b.n!=='string'||!ids.has(b.who)||!Number.isFinite(b.q)||b.q<0)fail();
   for(const h of s.mat.herbs)if(!['heal','poison'].includes(h.k)||!Number.isInteger(h.l)||h.l<1||h.l>10||!Number.isFinite(h.q)||h.q<0)fail();
   for(const e of s.mat.ess)if(typeof e.id!=='string'||typeof e.n!=='string'||!Array.isArray(e.types)||e.types.some(t=>typeof t!=='string')||!Number.isInteger(e.l)||e.l<1||e.l>10||!Number.isFinite(e.q)||e.q<0)fail();

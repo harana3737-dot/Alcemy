@@ -103,6 +103,26 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
 .btn.soft{background:var(--acc-soft);border-color:transparent}
 .btn.ghost{color:var(--muted)}
 .btn[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:var(--panel);font-weight:600}
+.talis{border-block:1px solid var(--line);margin:12px 0;padding:10px 0;min-width:0}
+.talis h3{margin:0;font-size:17px}.fresources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0}.fresources>div{min-width:0}.fresources b{font-size:20px}.talis .btns{flex-wrap:wrap}.talis label{min-width:0;flex:1 1 130px;font-size:12px}.talis input{margin-top:4px}
+
+.mobile-tools{display:none}
+@media(max-width:480px){
+  body.battle-mobile .wrap{padding-top:8px}
+  body.battle-mobile header{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px}
+  body.battle-mobile header h1{font-size:16px;margin:0;grid-column:1;grid-row:1}
+  body.battle-mobile #theme{grid-column:3;grid-row:1;float:none!important;margin:0!important;padding:6px;font-size:11px}
+  body.battle-mobile .mobile-tools{grid-column:2;grid-row:1;display:block;font-size:11px;padding:6px;max-width:120px}
+  body.battle-mobile #headerDetails{display:none;grid-column:1/-1}
+  body.battle-mobile.battle-header-open #headerDetails{display:block}
+  body.battle-mobile .tabs{position:sticky;top:0;z-index:20;background:var(--bg);margin-top:8px;gap:0}
+  body.battle-mobile .tabs button{font-size:12px;padding:7px 6px;flex:1 1 auto}
+  #tab-belt.combat{display:flex;flex-direction:column;gap:10px}
+  #tab-belt.combat #fight{order:-1;margin-top:8px!important}
+  #tab-belt.combat .clock .btns{gap:4px}
+  #tab-belt.combat .clock .btn{font-size:12px;padding:6px}
+}
+
 /* «Только бой» на поясе: прячет подготовку и пояснения, остаётся то, что нужно за столом */
 #tab-belt.combat .prep,#tab-belt.combat .hint{display:none}
 .btn.big{width:100%;background:var(--acc);color:var(--panel);border-color:var(--acc);font-weight:600;padding:10px;margin-top:10px}
@@ -178,8 +198,11 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 <header>
   <button class="tbtn" id="theme" type="button">тема</button>
   <h1>Помощник варки</h1>
+  <button type="button" class="btn ghost mobile-tools" id="mobileTools" aria-expanded="false" aria-controls="headerDetails">Сохранения и описание</button>
+  <div id="headerDetails">
   <p>Выбери рецепт из __N__ и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. «Пояс» — сумка, выпитое, токсичность, концентрация и отдых. «Журнал» — мастерство, рецепты, исследования; записанная варка сама идёт в сумку и в рост мастерства. «Вылазка» — что есть, что заказано и что хотим, цена, часы и кому. Правила v0.3; материал игрока, не карточки мастера.</p>
 <div class="btns"><button type="button" class="btn soft" id="backupExport">Скачать сохранение</button><button type="button" class="btn ghost" id="backupImport">Восстановить из файла</button><button type="button" class="btn ghost" id="lssOpen">Блоки для LSS</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p class="note" id="backupStatus" aria-live="polite"></p>
+</div>
 <dialog id="restoreDialog"><h2>Восстановление сохранения</h2><p id="restoreSummary"></p><p class="note">Заменит сумки, материалы, деньги, журнал и настройки. Перед заменой скачивается копия текущего состояния.</p><div class="btns"><button type="button" class="btn" id="restoreApply">Восстановить</button><button type="button" class="btn ghost" id="restoreCancel" autofocus>Отмена</button></div></dialog>
 <dialog id="lssDialog" aria-labelledby="lssH"><h2 id="lssH">Блоки для листа LSS</h2><p class="note">Текст собран из сумки, материалов и журнала помощника. Скопируй блок и вставь в указанный раздел листа. Порядок разделов и журнал переносов — в «Талис — карта листа LSS».</p><div id="lssBody"></div><div class="btns"><button type="button" class="btn ghost" id="lssClose" autofocus>Закрыть</button></div></dialog>
 </header>
@@ -196,8 +219,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
   <div class="side">
     <div class="card">
       <div class="row">
-        <div><label class="f" for="m">Мастерство</label><input id="m" type="number" min="1" max="10" value="2"></div>
-        <div><label class="f" for="b">Бонус проверки</label><input id="b" type="number" min="-5" max="30" value="4"></div>
+        <div><label class="f" for="m">Мастерство <small>по листу, 4 уровень; если не изменено</small></label><input id="m" type="number" min="1" max="10" value="2"></div>
+        <div><label class="f" for="b">Бонус проверки <small>по листу, 4 уровень; если не изменено</small></label><input id="b" type="number" min="-5" max="30" value="4"></div>
       </div>
       <label class="tg" style="margin-top:6px"><input type="checkbox" id="anar"><span><span class="t">Варю у Анариэль</span><small>полная лаборатория +3 вместо рабочего места +1: бонус +2, уровни до 8; на что пускает и сколько берёт — решает мастер</small></span></label>
       <p class="note">Бонус — с Интеллектом, инструментами, мастерством и местом (у Талиса +4 на рабочем месте, +6 у Анариэль). При смене мастерства и места бонус сдвигается сам и действует на всех вкладках.</p>
@@ -373,7 +396,7 @@ function list(){
   const r=D.map((c,i)=>[c,i]).filter(([c])=>(S.cls==='all'||c.k===S.cls)&&(!q||(c.n+' '+c.e+' '+c.f+' '+c.tk.join(' ')).toLowerCase().includes(q)));
   r.forEach(([c,i])=>{const b=document.createElement('button');b.type='button';b.className='item';b.setAttribute('role','option');
     b.setAttribute('aria-current',S.sel===i);b.innerHTML=`<span class="lv">${ROM[c.l]}</span><span class="nm"></span><span class="kl">${CLS[c.k]}</span>`;
-    b.querySelector('.nm').textContent=c.n;b.onclick=()=>{S.sel=i;ls.set('sel',c.n);list();render();if(innerWidth<880)$('out').scrollIntoView({behavior:'smooth'})};L.appendChild(b)});
+    b.querySelector('.nm').textContent=c.n;b.onclick=()=>{BASIC_SELECTED=null;AV.selected=c.n;AV.mode='all';S.sel=i;ls.set('sel',c.n);list();render();if(innerWidth<880)$('out').scrollIntoView({behavior:'smooth'})};L.appendChild(b)});
   $('count').textContent=r.length?`${r.length} из ${D.length}`:'Ничего не нашлось';
 }
 
@@ -479,6 +502,7 @@ function pickBonuses(c,t){
 const pct=x=>Math.round(x*100)+'%';
 function render(keepSit){
   renderAvailability();
+  if(BASIC_SELECTED){renderBasicRecipe(BASIC_SELECTED);return}
   if(S.sel===null){sitList(null);return}
   const c=D[S.sel], M=Math.max(1,Math.min(10,+$('m').value||1)), B=+$('b').value||0;
   if(!keepSit)sitList(c);
@@ -545,6 +569,7 @@ const instDC=(x,n)=>10+2*(n-stab(x)-1); // СЛ проверки нестаби�
 const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 let DM={};
 const SEED=JSON.parse($('seed').textContent);
+const TALIS_LIMITS=__COMBAT_LIMITS__;
 const bagCard=b=>byName(b.card||b.n);
 const uid=()=>Math.random().toString(36).slice(2,9);
 const NEW=()=>({v:1,u:0,T:8*60,dayOff:13,people:[{id:'p1',name:'Талис',limit:7,exh:0,intox:false},{id:'pF',name:'Фаэнон',limit:6,exh:0,intox:false},{id:'pL',name:'Лаэль',limit:6,exh:0,intox:false}],allies:1,ent:[],rests:[],r10:[],lrs:[],trig:[],bag:[],log:[]});
@@ -813,6 +838,7 @@ function renderPeople(){
 function renderBelt(){
   if(typeof renderJournal==='function'&&!$('tab-jour').hidden)renderJournal();
   if(typeof renderPlan==='function'&&!$('tab-plan').hidden)renderPlan();
+  talis();
   $('now').textContent=fmtT(ST.T);
   renderPeople();renderBag();renderMat();renderOD();preview();renderFight();renderAvailability();
   $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
@@ -830,6 +856,48 @@ function healRound(lv,k,md){const d=HEAL_D[lv].slice(Math.min(k,HEAL_D[lv].lengt
   d.forEach(x=>cnt[x]=(cnt[x]||0)+1);const dice=Object.keys(cnt).map(Number).sort((a,b)=>b-a).map(x=>`${cnt[x]}к${x}`).join('+');
   return dice+(f>0?'+'+f:f<0?'−'+(-f):'')+(md.weak?' −2 (не ниже 1)':'')}
 const fight=()=>ST.fight||(ST.fight={on:false,round:0,sub:0,turned:false,heals:[],coats:[],ctl:false,now:[]});
+// Ресурсы Талиса живут в том же ST, что сумки: belt/state и резервная копия.
+function talis(){
+  const defaults={hp:TALIS_LIMITS.hp,temp:0,sp:TALIS_LIMITS.sp,meta:TALIS_LIMITS.meta,
+    slots:{...TALIS_LIMITS.slots},concentration:'',reaction:false,dc:null,lastDamage:0};
+  if(!ST.talis)ST.talis=defaults;
+  else{for(const k of Object.keys(defaults))if(ST.talis[k]===undefined)ST.talis[k]=defaults[k];
+    for(const l of [1,2])if(ST.talis.slots[l]===undefined)ST.talis.slots[l]=defaults.slots[l]}
+  return ST.talis;
+}
+function damageTalis(n){const r=talis(),used=Math.min(r.temp,n);r.temp-=used;r.hp=Math.max(0,r.hp-(n-used));
+  r.lastDamage=n;r.dc=n>0&&r.concentration?Math.max(10,Math.floor(n/2)):null;
+  if(r.hp===0)r.concentration='';
+  logx(`Талис: урон ${n}, временных потрачено ${used}, хиты ${r.hp}${r.dc?'; СЛ концентрации '+r.dc:''}`);
+}
+function renderTalis(){const box=$('talis');if(!box)return;const r=talis(),L=TALIS_LIMITS;
+  box.innerHTML=`<h3>Талис</h3><p class="note">Максимумы: по листу, ${L.level} уровень; ячейки подтверждены игроком 09.10. Без заранее созданной ячейки.</p>
+    <div class="fresources"><div><b id="fHp">${r.hp} / ${L.hp}</b><div>Хиты</div></div><div><b id="fTemp">${r.temp}</b><div>Временные хиты</div></div></div>
+    <div class="btns"><label for="fAmount">Урон после сопротивлений / лечение<input type="number" id="fAmount" min="0" step="1" placeholder="Число, в том числе бросок зелья"></label><button type="button" class="btn soft" id="fDamage">−урон</button><button type="button" class="btn soft" id="fHeal">+лечение</button></div>
+    <div class="btns"><label for="fTempAmount">Новые временные хиты<input type="number" id="fTempAmount" min="0" step="1" placeholder="Не складываются"></label><button type="button" class="btn ghost" id="fSetTemp">Оставить большие</button><button type="button" class="btn ghost" id="fClearTemp">Убрать временные</button></div>
+    <div class="fresources">${[1,2].map(l=>`<div><b id="fSlot${l}">${r.slots[l]} / ${L.slots[l]}</b><div>Ячейки ${ROM[l]} · базовый максимум</div><div class="btns"><button type="button" class="btn sm" data-slot="${l}" ${r.slots[l]>0?'':'disabled'}>Потратить ${ROM[l]}</button><button type="button" class="btn sm ghost" data-to-sp="${l}" ${r.slots[l]>0&&r.sp+l<=L.sp?'':'disabled'}>${ROM[l]} → ${l} ед.</button><button type="button" class="btn sm ghost" data-from-sp="${l}" ${r.sp>=L.costs[l]?'':'disabled'}>${L.costs[l]} ед. → ${ROM[l]}</button></div></div>`).join('')}</div>
+    <div class="fresources"><div><b id="fSp">${r.sp} / ${L.sp}</b><div>Классовые единицы</div></div><div><b id="fMeta">${r.meta} / ${L.meta}</b><div>Только для метамагии</div></div></div>
+    <div class="btns"><label for="fSpAmount">Сколько единиц<input type="number" id="fSpAmount" min="1" step="1" value="1"></label><button type="button" class="btn sm soft" id="fSpendSp">Потратить классовые</button><button type="button" class="btn sm soft" id="fSpendMeta">Потратить метамагию</button></div>
+    <p class="note">Преобразование — бонусное действие в свой ход. Две единицы Адепта ячейку не создают. Созданные ячейки могут превышать базовый запас; при долгом отдыхе исчезают. Здесь отдых не выполняется.</p>
+    <label class="f" for="fConcentration">Концентрация на заклинании (отдельно от алхимической)</label><input type="search" id="fConcentration" placeholder="Например, Паутина" value="${esc(r.concentration)}">
+    <div class="btns"><button type="button" class="btn sm ghost" id="fStopConcentration">Концентрация прекращена</button><button type="button" class="btn sm soft" id="fReaction" ${r.reaction?'disabled':''}>${r.reaction?'Реакция потрачена до начала моего хода':'Потратить реакцию (Щит)'}</button></div>
+    <p class="note" id="fConcentrationDC" aria-live="polite">${r.dc?`Урон ${r.lastDamage}: СЛ концентрации ${r.dc}. Проверь спасбросок; при провале прекрати концентрацию.`:'При уроне: СЛ 10 или половина урона после сопротивлений, что больше; половина округляется вниз.'}${r.hp===0?' Хиты 0: концентрация прекращена. Спасброски от смерти веди отдельно.':''}</p>
+    <button type="button" class="btn" id="fWave">Перед волной</button><p class="note">Только для этого боя: так сказал мастер, 08.10. Это не правило отдыха. Расходники и временные хиты сохраняются.</p>`;
+  const amount=id=>{const n=+$(id).value;return $(id).value!==''&&Number.isSafeInteger(n)&&n>=0?n:null};
+  $('fDamage').onclick=()=>{const n=amount('fAmount');if(n!==null)mutate(()=>damageTalis(n))};
+  $('fHeal').onclick=()=>{const n=amount('fAmount');if(n!==null)mutate(()=>{r.hp=Math.min(L.hp,r.hp+n);logx(`Талис: лечение ${n}, хиты ${r.hp}`)})};
+  $('fSetTemp').onclick=()=>{const n=amount('fTempAmount');if(n!==null)mutate(()=>{r.temp=Math.max(r.temp,n);logx(`Талис: временные хиты ${r.temp}`)})};
+  $('fClearTemp').onclick=()=>mutate(()=>{r.temp=0;logx('Талис: временные хиты убраны')});
+  box.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>mutate(()=>{const l=+b.dataset.slot;if(r.slots[l]>0){r.slots[l]--;logx(`Талис: потрачена ячейка ${ROM[l]}`)}}));
+  box.querySelectorAll('[data-to-sp]').forEach(b=>b.onclick=()=>mutate(()=>{const l=+b.dataset.toSp;if(r.slots[l]>0&&r.sp+l<=L.sp){r.slots[l]--;r.sp+=l;logx(`Талис: ячейка ${ROM[l]} → ${l} классовых единиц (бонусное действие)`)} }));
+  box.querySelectorAll('[data-from-sp]').forEach(b=>b.onclick=()=>mutate(()=>{const l=+b.dataset.fromSp;if(r.sp>=L.costs[l]){r.sp-=L.costs[l];r.slots[l]++;logx(`Талис: ${L.costs[l]} классовых единиц → ячейка ${ROM[l]} (бонусное действие)`)} }));
+  for(const [id,key] of [['fSpendSp','sp'],['fSpendMeta','meta']])$(id).onclick=()=>{const n=amount('fSpAmount');if(n!==null&&n>0&&n<=r[key])mutate(()=>{r[key]-=n;logx(`Талис: потрачено ${n} ${key==='sp'?'классовых единиц':'единиц только для метамагии'}`)})};
+  $('fConcentration').onchange=e=>{const value=e.target.value.trim();mutate(()=>{r.concentration=r.hp>0?value:'';r.dc=null;logx('Талис: концентрация '+(r.concentration||'прекращена'))})};
+  $('fStopConcentration').onclick=()=>mutate(()=>{r.concentration='';r.dc=null;logx('Талис: концентрация прекращена')});
+  $('fReaction').onclick=()=>mutate(()=>{r.reaction=true;logx('Талис: реакция потрачена')});
+  $('fWave').onclick=()=>{if(!confirm('Восстановить ресурсы Талиса перед волной? Расходники и временные хиты останутся.'))return;mutate(()=>{r.hp=L.hp;r.sp=L.sp;r.meta=L.meta;r.slots={...L.slots};r.reaction=false;r.dc=null;logx('Перед волной: хиты, ячейки, единицы чародейства и реакция Талиса восстановлены по словам мастера, 08.10; расходники и временные хиты сохранены')})};
+}
+
 // раунды, которые сейчас приходят у последовательности: сдвоенная — первые два сразу
 function healTick(h,first){const out=[];const n=first&&h.md.twin?2:1;for(let j=0;j<n&&h.i<HEAL_R[h.lv];j++){out.push(healRound(h.lv,h.i,h.md));h.i++}
   const who=P(h.who)?P(h.who).name:'';return `${esc(who)}: «${esc(h.n)}» — бросить <b>${out.join(' и ')}</b> (раунд ${h.i} из ${HEAL_R[h.lv]})`}
@@ -837,7 +905,7 @@ function startHeal(who,n,lv,md){const F=fight(),h={id:uid(),who,n,lv,md,i:0};
   if(md.slow){F.now=[`${P(who)?P(who).name:''}: «${esc(n)}» медленное — лечение с начала следующего хода`];h.wait=true}else F.now=[healTick(h,true)];
   if(h.i<HEAL_R[lv]||h.wait)F.heals.push(h);logx(`Бой: ${P(who)?P(who).name+' — ':''}«${n}», лечение по раундам`)}
 function myTurn(pid){const F=fight(),out=[];
-  if(pid==='p1'){if(F.turned){F.round++;F.sub++;if(F.sub>=10){F.sub=0;ST.T+=1}}F.turned=true;F.ctl=false}
+  if(pid==='p1'){talis().reaction=false;if(F.turned){F.round++;F.sub++;if(F.sub>=10){F.sub=0;ST.T+=1}}F.turned=true;F.ctl=false}
   F.heals.filter(h=>h.who===pid).forEach(h=>{if(h.wait){h.wait=false;out.push(healTick(h,true))}else out.push(healTick(h,false))});
   F.heals=F.heals.filter(h=>h.wait||h.i<HEAL_R[h.lv]);
   if(pid==='p1'){ST.ent.filter(e=>e.who==='p1'&&isActive(e)).forEach(e=>{const r=Math.max(0,Math.round((endOf(e)-ST.T)*10-F.sub));if(r<=1)out.push(`«${esc(e.n)}» кончается${r?' в этом раунде':''} — проверь`)});
@@ -846,7 +914,8 @@ function myTurn(pid){const F=fight(),out=[];
   F.now=out.length?out:['Ничего не срабатывает'];logx(`Бой: ${pid==='p1'?'раунд '+F.round+', ход Талиса':'ход '+(P(pid)?P(pid).name:'')}`)}
 // вид пояса: auto — «Только бой», пока идёт бой; ручной выбор держится до начала или конца боя
 let BV=['auto','all','combat'].includes(ls.get('beltView'))?ls.get('beltView'):'auto', lastOn=null;
-function applyBV(on){const c=BV==='combat'||(BV==='auto'&&on),t=$('tab-belt'),b=$('beltView');if(t)t.classList.toggle('combat',c);if(b)b.setAttribute('aria-pressed',c)}
+function applyBV(on){const c=BV==='combat'||(BV==='auto'&&on),t=$('tab-belt'),b=$('beltView');if(t)t.classList.toggle('combat',c);if(b)b.setAttribute('aria-pressed',c);document.body.classList.toggle('battle-mobile',!!(c&&t&&!t.hidden))}
+$('mobileTools').onclick=()=>{const open=document.body.classList.toggle('battle-header-open');$('mobileTools').setAttribute('aria-expanded',open)};
 $('beltView').onclick=()=>{BV=$('beltView').getAttribute('aria-pressed')==='true'?'all':'combat';ls.set('beltView',BV);applyBV(fight().on)};
 {const lim=()=>{$('pl').value=Math.max(0,(+$('pcon').value||0)+(+$('ppb').value||0)+2)};$('pcon').oninput=lim;$('ppb').oninput=lim}
 function renderFight(){const box=$('fight');if(!box)return;const F=fight();
@@ -859,6 +928,7 @@ function renderFight(){const box=$('fight');if(!box)return;const F=fight();
     <button type="button" class="btn" id="fTurn" style="background:var(--acc);color:var(--panel);border-color:var(--acc);font-weight:600">Мой ход</button>
     ${others.map(p=>`<button type="button" class="btn soft" data-ot="${p.id}">Ход: ${esc(p.name)}</button>`).join('')}
     <button type="button" class="btn ghost" id="fEnd">Конец боя</button></div>
+    <section class="talis" id="talis" aria-label="Ресурсы Талиса"></section>
     <div class="fnow">${F.now.map(t=>`<div>${t}</div>`).join('')}</div>
     <div class="fgrid"><div><div class="sect">Лечение по раундам</div><div id="fHeals"></div>
       <div class="row" style="flex-wrap:wrap;margin-top:6px"><div style="flex:0 0 90px"><select id="fhL" aria-label="Уровень зелья">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${l}.${l}</option>`).join('')}</select></div>
@@ -869,6 +939,7 @@ function renderFight(){const box=$('fight');if(!box)return;const F=fight();
       <div class="row" style="flex-wrap:wrap;margin-top:6px"><div style="flex:1 1 160px"><select id="fcB" aria-label="Яд из сумки">${bagPs.map((b,i)=>`<option value="${i}">${esc(b.n)} — ${esc(P(b.who)?P(b.who).name:'')} (${b.q})</option>`).join('')||'<option value="">в сумках нет ядов</option>'}</select></div>
         <div style="flex:0 0 auto"><button type="button" class="btn sm" id="fcAdd"${bagPs.length?'':' disabled'}>Нанести</button></div></div>
       <p class="note">Обычный яд — 5 атак, попал или нет (7.5). Контрольный — до первого попадания; от одного отравителя одна попытка за раунд, лишнее попадание дозу не тратит, а если яд на цели уже действует — тратится (8.6, Ж-99).</p></div></div>`;
+  renderTalis();
   const HB=$('fHeals');if(!F.heals.length)HB.innerHTML='<div class="note">Нет</div>';
   F.heals.forEach(h=>{const r=document.createElement('div');r.className='bagi';r.innerHTML=`<span class="nm"></span>`;
     r.querySelector('.nm').innerHTML=`${esc(h.n)}<small>${esc(P(h.who)?P(h.who).name:'')} · ${h.wait?'начнётся со следующего хода':`дальше ${healRound(h.lv,h.i,h.md)} · осталось раундов ${HEAL_R[h.lv]-h.i}`}</small>`;HB.appendChild(r)});
@@ -950,7 +1021,7 @@ function renderPlan(){
 
 // вкладки
 function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';$('tab-scroll').hidden=t!=='scroll';$('tab-smith').hidden=t!=='smith';ls.set('tab',t);if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
+  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';$('tab-scroll').hidden=t!=='scroll';$('tab-smith').hidden=t!=='smith';ls.set('tab',t);document.body.classList.toggle('battle-mobile',t==='belt'&&$('tab-belt').classList.contains('combat'));if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
@@ -1805,7 +1876,7 @@ __TABLE_TOOLS__
 __CRAFTS__
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
-if(si>=0)S.sel=si;
+if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=BASIC.find(c=>c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
 list();render();renderBelt();tab(['belt','jour','plan','scroll','smith'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
 </body>

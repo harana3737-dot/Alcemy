@@ -1,0 +1,111 @@
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B -m unittest discover -s scripts -p test_*.py
+----------------------------------------------------------------------
+Ran 152 tests in 3.285s
+
+OK
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B -m unittest discover -s scripts/cards -p test_*.py
+----------------------------------------------------------------------
+Ran 7 tests in 0.094s
+
+OK
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/cards/check.py
+Карточек: 184. Ошибок: 0. Предупреждений: 0.
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/player_book.py --check
+Готово: глав 25, справок 8 + 14; файлов для чтения 2, исходников 27; HTML 2281 КБ
+PASS: HTML актуален; оба архива собираются и проходят проверку целостности
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/bestiary_report.py --check
+PASS: независимый отчёт и подробный CSV воспроизводятся точно
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/alchemy_bestiary_report.py --check
+Проверено: 334 существ, 99759 строк
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/alchemy_magic_review.py --check
+Дополнительных строк: 9368
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/rules_html.py
+ok Алхимия Талиса — правила за столом.md 91420 вырезано 142
+ok 127805 заголовков 72
+ok 152367 заголовков 74
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/cards/gen.py
+184 cards
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/cards/gen_html.py
+184 cards
+html ok 386940
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/cards/quality.py
+ok 184
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/cards/registry.py
+проверено 179, с отличиями 50, не объяснено 0
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/cards/helper.py
+/tmp/alcemy-check-all-w5dr1gc3/repo/Помощник варки.html 184 390277 56a160bdf3 [{'n': 'Зелье лечения 2.2', 'q': 1, 'note': '', 'who': 'p1'}, {'n': 'Зелье 3.3', 'q': 2, 'note': '', 'who': 'p1'}, {'n': 'Зелье лечения 1.1', 'q': 5, 'note': '', 'who': 'p1'}, {'n': 'Зелье лечения 1.1 (+2 к лечению)', 'q': 1, 'note': '', 'who': 'p1'}, {'n': 'Свиток «Ложная жизнь»', 'q': 1, 'note': '', 'who': 'p1'}, {'n': 'Противоядие слабое (нейтрализует яды 1–5 уровней)', 'q': 1, 'note': '', 'who': 'p1'}, {'n': 'Аптечка', 'q': 10, 'note': '', 'u': 'исп.', 'who': 'p1'}, {'n': 'Зелье сопротивления (некротика)', 'q': 1, 'note': 'на разборку', 'card': 'Сопротивление', 'who': 'p1'}, {'n': 'Зелье подводного дыхания', 'q': 1, 'note': 'на разборку', 'card': 'Водное дыхание', 'who': 'p1'}, {'n': 'Яд 1.1', 'q': 1, 'note': 'на разборку', 'who': 'p1'}, {'n': 'Зелье подводного дыхания', 'q': 1, 'note': '', 'card': 'Водное дыхание', 'who': 'pF'}, {'n': 'Зелье подводного дыхания', 'q': 1, 'note': '', 'card': 'Водное дыхание', 'who': 'pL'}]
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/cards/master_panel.py
+Пульт мастера.html 42 вопросов, 184 карточек, 368469 байт
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/weekly_economy_report.py --write
+Обновлены пять таблиц недельного бюджета; игровые заметки сохранены.
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/elixir_catalog_review.py --write
+Обзор обновлён: 103 эликсира-эффекта
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Алхимия Талиса — затраты по логам
+ok 3 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Алхимия Талиса — ядро правил
+ok 7 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Алхимия и магия — проверка на бестиарии
+ok 12 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Алхимия — заклинания и метамагия
+ok 15 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Бой с Вордтом — план
+ok 12 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Бонусы за 5+ и 20 — что выгоднее брать
+ok 9 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Бонусы качества по карточкам
+ok 9 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Волна после Вордта — расчёт
+ok 6 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Группа — баффы и расходники
+ok 21 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Группа — обзор каталога эликсиров
+ok 17 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Для мастера — вопросы и изменения
+ok 28 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Для мастера — коротко на утверждение
+ok 6 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Для мастера — начни отсюда
+ok 3 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Для мастера — сводка варки
+ok 16 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Заклинания Талиса — проверка на бестиарии
+ok 28 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Исключения — что можно сократить
+ok 7 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Исправление боя с Вордтом — 2026-10-08
+ok 5 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Исправление экономики — 2026-10-08
+ok 5 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Недельная варка — план и бюджет
+ok 12 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Образец — кровь шахтёра
+ok 0 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Оценка проекта — 2026-10-08
+ok 8 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Очередь вопросов мастеру
+ok 7 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Проверка боя с Вордтом — 2026-10-08
+ok 8 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Проверка экономики — 2026-10-08
+ok 11 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Симуляция экономики зелий
+ok 24 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Сочетания — проверка баланса
+ok 16 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Талис — что делать сейчас
+ok 9 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/master_html.py Экономика алхимии — для мастера
+ok 20 заголовков
+$ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -B scripts/player_book.py
+Готово: глав 25, справок 8 + 14; файлов для чтения 2, исходников 27; HTML 2281 КБ
+$ node scripts/cards/test_claude_review.cjs
+OK: кузня отдельно и во вкладке, сохранения/миграция/история, свитки, пульт мастера
+$ node scripts/cards/test_table_combat.cjs
+PASS: 390/1280, ресурсы, зелье, волна без возврата расходников, концентрация, реакция, преобразования, сохранения и миграция
+$ node scripts/cards/test_table_mobile.cjs
+PASS: 390/1280, пустая кузня, пример и отказ очищать, журнал без прокрутки, компактная шапка, закреплённые вкладки, границы страницы
+$ node scripts/cards/test_table_tools.cjs
+PASS: availability, shortages, shared formulas, expired stock, purity, validation, 5.5 progress, export, restore, persistence
+$ node scripts/test_player_book.cjs
+PASS: 25 глав, 8+14 документов, вложенные ссылки и поиск, темы, шрифт, телефон, печать, чтение без JS и сети
+Устаревших нет

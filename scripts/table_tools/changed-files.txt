@@ -1,0 +1,23 @@
+scripts/cards/TABLE_TOOLS.md
+scripts/cards/helper.py
+scripts/cards/helper_tpl.html
+scripts/cards/master_tpl.html
+scripts/cards/table_tools.js
+scripts/cards/talis_resources.json
+scripts/cards/test_claude_review.cjs
+scripts/cards/test_combat_limits.py
+scripts/cards/test_seed_inventory.py
+scripts/cards/test_table_combat.cjs
+scripts/cards/test_table_mobile.cjs
+scripts/cards/test_table_tools.cjs
+scripts/table_tools/README.md
+scripts/table_tools/changed-files.txt
+scripts/table_tools/check-part-a.txt
+scripts/table_tools/check-part-b.txt
+scripts/wave_review.py
+Волна после Вордта — расчёт.html
+Волна после Вордта — расчёт.md
+Помощник варки.html
+Пульт мастера.html
+Шпаргалка кузнеца.html
+Шпаргалка свитков.html

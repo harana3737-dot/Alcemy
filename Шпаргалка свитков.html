@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Шпаргалка свитков</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -84,7 +85,7 @@ select,input[type=number]{font:inherit;color:var(--ink);background:var(--bg);bor
         </select></label>
       <label for="nth">Какой быстрый свиток с большого отдыха
         <select id="nth"><option value="0">1-й (0)</option><option value="2">2-й (−2)</option><option value="4">3-й (−4)</option><option value="6">4-й (−6)</option><option value="8">5-й (−8)</option></select></label>
-      <label for="base">Бонус Инт (Магия) персонажа
+      <label for="base">Бонус Инт (Магия) персонажа <small>Лаэль: по листу, 4 уровень; если не изменено</small>
         <input id="base" type="number" value="6" step="1"></label>
       <label for="ink">Чернила
         <select id="ink">
@@ -99,9 +100,9 @@ select,input[type=number]{font:inherit;color:var(--ink);background:var(--bg);bor
     </div>
     <div class="checks">
       <label><input type="checkbox" id="c-guild" data-b="2"> Мастерская Гильдии, архив Бренны, лаборатория +2</label>
-      <label><input type="checkbox" id="c-desk" data-b="1" checked> Хорошее место: стол, свет, сухо, тихо +1</label>
-      <label><input type="checkbox" id="c-book" data-b="1" checked> Книга, формула или образец свитка +1</label>
-      <label><input type="checkbox" id="c-calli" data-b="1" checked> Каллиграф сверх Магии +1</label>
+      <label><input type="checkbox" id="c-desk" data-b="1" checked> Хорошее место: стол, свет, сухо, тихо +1 <small>(начальный выбор; проверь)</small></label>
+      <label><input type="checkbox" id="c-book" data-b="1" checked> Книга, формула или образец свитка +1 <small>(начальный выбор; проверь)</small></label>
+      <label><input type="checkbox" id="c-calli" data-b="1" checked> Каллиграф сверх Магии +1 <small>(начальный выбор; проверь)</small></label>
       <label><input type="checkbox" id="c-help" data-b="1"> Помощник с Магией или каллиграфией +1</label>
       <label><input type="checkbox" id="c-more" data-b="1"> Материалов на 25% больше +1</label>
       <label><input type="checkbox" id="c-time" data-b="2"> Времени вдвое больше +2</label>
@@ -111,6 +112,7 @@ select,input[type=number]{font:inherit;color:var(--ink);background:var(--bg);bor
       <label><input type="checkbox" id="c-int" data-b="-2"> Прерывали −2 (или помеха)</label>
       <label><input type="checkbox" id="c-exh" data-dis="1"> Создатель истощён — помеха</label>
     </div>
+    <p class="muted">Числа ниже — расчёт выбранных условий, не записанная работа Лаэля.</p>
     <div class="out" aria-live="polite">
       <div class="tile"><span>СЛ</span><b id="o-dc">12</b></div>
       <div class="tile"><span>Бонус к d20</span><b id="o-bonus">+6</b></div>
