@@ -46,6 +46,8 @@ const shots=process.env.TABLE_TOOLS_SCREENSHOTS;
     // Не переносить режим мобильной шапки на другие вкладки.
     await page.locator('[data-tab="brew"]').click();assert.equal(await page.locator('#headerDetails').isVisible(),true);await fits();
     await page.goto(base+'/'+encodeURIComponent('Пульт мастера.html'));await fits();
+    assert.equal(await page.locator('#sumN').innerText(),'0 из 42');
+    assert.match(await page.locator('.sum').innerText(),/Не отмеченные считаются принятыми/);
     if(shots)await page.screenshot({path:path.join(shots,`master-${width}.png`)});
     assert.deepEqual(errors,[]);await context.close();
   }console.log('PASS: 390/1280, пустая кузня, пример и отказ очищать, журнал без прокрутки, компактная шапка, закреплённые вкладки, границы страницы');}
