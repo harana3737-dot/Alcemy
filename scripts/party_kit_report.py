@@ -6,6 +6,8 @@ python3 -B scripts/party_kit_report.py --level 9 --int-mod 1 --lab 3
 Цены берутся из каталога; владение зависит от уровня, не от алхимии.
 Таблицы печатаются в Markdown, без записи игровых данных.
 """
+
+from rules_data import HERB as HERB_DATA, MB as MB_DATA, ELIXIR_DC, PLACE_LIMIT, proficiency, elixir_batch
 from functools import lru_cache
 import argparse
 from pathlib import Path
@@ -17,16 +19,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / 'cards'))
 from cards_data import C
 
 CARDS = {c['name']: c for c in C}
-HERB = {1: .1, 2: .5, 3: 1, 4: 2, 5: 4, 6: 8, 7: 16, 8: 32}
-MB = {2: 1, 3: 1, 4: 2, 5: 2, 6: 3, 7: 3, 8: 4, 9: 4, 10: 5}
-DC = {1: 12, 2: 12, 3: 13, 4: 15, 5: 17, 6: 19, 7: 21, 8: 23}
-PLACE_LIMIT = {0: 3, 1: 5, 3: 8, 5: 10}
+HERB = {l: HERB_DATA[l] for l in range(1,9)}
+MB = {m: MB_DATA[m] for m in range(2,11)}
+DC = {l: ELIXIR_DC[l] for l in range(1,9)}
 
 
-def proficiency(level):
-    if not 1 <= level <= 20:
-        raise ValueError('Уровень персонажа должен быть от 1 до 20')
-    return 2 + (level - 1) // 4
 
 
 def workplace(m, lab=None):
@@ -77,8 +74,7 @@ def small(c, m, q, level=4, int_mod=0, lab=None):
     l = c['lvl']
     p = probability(bonus(m, level, int_mod, lab), DC[l])
     workshop = workplace(m, lab) == 5
-    cap = (4 if workshop else 3) if l <= 2 else (3 if workshop else 2)
-    batch = 1 if c['cls'] in ('fl', 'chg', 'rea', 'oils') else min(m - l + 2, cap)
+    batch = 1 if c['cls'] in ('fl', 'chg', 'rea', 'oils') else elixir_batch(m, l, workshop)
     duration = 2 if l <= 2 else 4
 
     @lru_cache(None)

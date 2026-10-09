@@ -3,15 +3,13 @@
 (3 заминки = дефект); провал 5+ — 0 и дефект; нат. 20 — прогресс ×2 и метка; нат. 1 — 0, −d20, дефект.
 Завершение — проверка с модификатором (метки − дефекты), от −2 до +2. Помощник: +2 к прогрессу подхода
 и +2 к завершающей проверке."""
+
+from rules_data import VOL, SL_E, ESS, CAT_E
 import random as _random
 from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
 
 random = _random.Random(90)
 
-VOL = {6: 90, 7: 90, 8: 240}
-SL_E = {6: 19, 7: 21, 8: 23}            # СЛ эликсира / чернил того же уровня
-ESS = {6: HERB[6], 7: 2.5 * HERB[7], 8: 2.5 * HERB[8]}   # VII–VIII — 2–3 травы, середина
-CAT_E = {6: 350, 7: 350, 8: 1750}
 
 
 def volume_run(bonus, sl, vol, helper, max_approaches=200, *, rng=None):

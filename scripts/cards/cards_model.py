@@ -2,6 +2,9 @@
 import pathlib
 
 HERE = pathlib.Path(__file__).resolve().parent
+import sys
+sys.path.insert(0, str(HERE.parent))
+from rules_data import ROM, CARD_RAR, ELIXIR_DC, CARD_CAT, CARD_TIME, CARD_TARGET
 
 ROOT = HERE.parent.parent
 
@@ -13,22 +16,16 @@ from copy import deepcopy
 
 from cards_data import C as RAW_C, CUT_CHARGES
 
-ROM = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"]
 
-RAR = {1: "обычный", 2: "обычный", 3: "необычный", 4: "необычный", 5: "необычный", 6: "редкий", 7: "редкий",
-       8: "очень редкий", 9: "очень редкий", 10: "легендарный"}
+RAR = CARD_RAR
 
-SL = [0, 12, 12, 13, 15, 17, 19, 21, 23, 25, 27]
+SL = [0]+list(ELIXIR_DC.values())
 
-CAT = [0, "—", "—", "I", "I", "I", "II", "II", "III", "III", "IV"]
+CAT = CARD_CAT
 
-TIME = {1: "2 часа", 2: "2 часа", 3: "4 часа", 4: "4 часа", 5: "4 часа",
-        6: "объём работы 90 (≈5 подходов по 2 часа)", 7: "объём работы 90 (≈5 подходов по 2 часа)",
-        8: "объём работы 240 (≈12 подходов по 2 часа)", 9: "объём работы 240 (≈12 подходов по 2 часа)",
-        10: "объём работы 500 (≈24 подхода) и сюжетные условия"}
+TIME = CARD_TIME
 
-TAB = {1: "13 / +5", 2: "13 / +5", 3: "15 / +7", 4: "15 / +7", 5: "17 / +9", 6: "17 / +9", 7: "18 / +10",
-       8: "18 / +10", 9: "19 / +11", 10: "19 / +11"}
+TAB = CARD_TARGET
 
 CLS = {"eff": "эликсир-эффект", "chg": "заряд", "psn": "контрольный яд", "rea": "заряд-реакция", "fl": "метательная склянка",
        "oilw": "масло оружия", "oils": "масло кары", "salve": "мазь"}

@@ -3,6 +3,7 @@
 Пересчёт поверх sim.py и sim_player.py; правила не меняются."""
 
 import random as _random
+from rules_data import WEEK_PROF, WEEK_LAB
 
 import sim_player as player
 
@@ -16,9 +17,9 @@ WEEK = {"А": 12, "Б": 22, "В": 30}
 
 DAYS = 12 / 8                                   # 1,5 рабочего дня
 
-def prof(m): return 2 if m <= 2 else 3 if m <= 7 else 4
+def prof(m): return WEEK_PROF[m]
 
-def lab(m): return 1 if m <= 5 else 3 if m <= 8 else 5
+def lab(m): return WEEK_LAB[m]
 
 TALIS = {m: prof(m) + MB[m] + lab(m) for m in range(1, 11)}
 

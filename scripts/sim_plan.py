@@ -1,16 +1,14 @@
 """Недельная варка Талиса: цена единицы (часы и золото) по ступеням мастерства и доход в час на продажу.
 Поверх sim.py, sim_week.py и sim_volume.py; правила не меняются. Заряды и склянки I–V по цене, травам и СЛ
 совпадают с чернилами того же уровня (справочник цен), поэтому доход в час у них один."""
+
+from rules_data import ROM, BATCH_T, elixir_batch
 import random as _random
 from sim_week import TALIS
 import sim_volume as volume
 from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
 
-ROM = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"]
 # Доз в партии зелья (6.2): мастерство → (1.1, 2.2, 3.3, 4.4, 5.5); 6.6+ — по одной
-BATCH_T = {1: (2,), 2: (4, 2), 3: (6, 5, 4), 4: (8, 6, 5, 4), 5: (10, 8, 6, 5, 4),
-           6: (10, 10, 8, 6, 5), 7: (10, 10, 10, 8, 6), 8: (10, 10, 10, 10, 8),
-           9: (10, 10, 10, 10, 10), 10: (10, 10, 10, 10, 10)}
 
 
 def batch_p(m, l):
@@ -31,7 +29,7 @@ def ink_set(m, k):
 
 def elixir(m, l):
     """одна доза эликсира-эффекта уровня l ≤ min(m, 5) партией (М − ур.) + 2, не больше 3 (I–II) / 2 (III–V)"""
-    size = min(m - l + 2, 3 if l <= 2 else 2)
+    size = elixir_batch(m, l)
     ok, un, _ = probs(TALIS[m], P_SL[l] + 2)
     hours = (2 if l <= 2 else 4) / size / ok
     return hours, (l * HERB[l] + HERB[l] + CAT_PRICE[l] / 5) / ok
