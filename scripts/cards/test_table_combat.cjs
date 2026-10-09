@@ -48,6 +48,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
     await page.locator('#fSpAmount').fill('2');await page.locator('#fSpendMeta').click();assert.equal(await page.locator('#fMeta').innerText(),'0 / 2');
     await page.reload();await page.locator('[data-tab="belt"]').click();assert.equal(await page.locator('#fHp').innerText(),'6 / 34');
     // Файл действительно скачивается, затем восстанавливается через интерфейс.
+    if(width===390)await page.locator('#mobileTools').click();
     const downloadEvent=page.waitForEvent('download');await page.locator('#backupExport').click();
     const download=await downloadEvent, saved=JSON.parse(fs.readFileSync(await download.path(),'utf8'));
     assert.equal(saved.state.talis.hp,6);assert.equal(saved.state.talis.meta,0);

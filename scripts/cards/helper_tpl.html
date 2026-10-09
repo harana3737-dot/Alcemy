@@ -105,6 +105,24 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
 .btn[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:var(--panel);font-weight:600}
 .talis{border-block:1px solid var(--line);margin:12px 0;padding:10px 0;min-width:0}
 .talis h3{margin:0;font-size:17px}.fresources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0}.fresources>div{min-width:0}.fresources b{font-size:20px}.talis .btns{flex-wrap:wrap}.talis label{min-width:0;flex:1 1 130px;font-size:12px}.talis input{margin-top:4px}
+
+.mobile-tools{display:none}
+@media(max-width:480px){
+  body.battle-mobile .wrap{padding-top:8px}
+  body.battle-mobile header{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px}
+  body.battle-mobile header h1{font-size:16px;margin:0;grid-column:1;grid-row:1}
+  body.battle-mobile #theme{grid-column:3;grid-row:1;float:none!important;margin:0!important;padding:6px;font-size:11px}
+  body.battle-mobile .mobile-tools{grid-column:2;grid-row:1;display:block;font-size:11px;padding:6px;max-width:120px}
+  body.battle-mobile #headerDetails{display:none;grid-column:1/-1}
+  body.battle-mobile.battle-header-open #headerDetails{display:block}
+  body.battle-mobile .tabs{position:sticky;top:0;z-index:20;background:var(--bg);margin-top:8px;gap:0}
+  body.battle-mobile .tabs button{font-size:12px;padding:7px 6px;flex:1 1 auto}
+  #tab-belt.combat{display:flex;flex-direction:column;gap:10px}
+  #tab-belt.combat #fight{order:-1;margin-top:8px!important}
+  #tab-belt.combat .clock .btns{gap:4px}
+  #tab-belt.combat .clock .btn{font-size:12px;padding:6px}
+}
+
 /* «Только бой» на поясе: прячет подготовку и пояснения, остаётся то, что нужно за столом */
 #tab-belt.combat .prep,#tab-belt.combat .hint{display:none}
 .btn.big{width:100%;background:var(--acc);color:var(--panel);border-color:var(--acc);font-weight:600;padding:10px;margin-top:10px}
@@ -180,8 +198,11 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 <header>
   <button class="tbtn" id="theme" type="button">тема</button>
   <h1>Помощник варки</h1>
+  <button type="button" class="btn ghost mobile-tools" id="mobileTools" aria-expanded="false" aria-controls="headerDetails">Сохранения и описание</button>
+  <div id="headerDetails">
   <p>Выбери рецепт из __N__ и отметь ситуацию: страница подскажет бонус на 5+ и натуральную 20 и посчитает шансы. «Пояс» — сумка, выпитое, токсичность, концентрация и отдых. «Журнал» — мастерство, рецепты, исследования; записанная варка сама идёт в сумку и в рост мастерства. «Вылазка» — что есть, что заказано и что хотим, цена, часы и кому. Правила v0.3; материал игрока, не карточки мастера.</p>
 <div class="btns"><button type="button" class="btn soft" id="backupExport">Скачать сохранение</button><button type="button" class="btn ghost" id="backupImport">Восстановить из файла</button><button type="button" class="btn ghost" id="lssOpen">Блоки для LSS</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p class="note" id="backupStatus" aria-live="polite"></p>
+</div>
 <dialog id="restoreDialog"><h2>Восстановление сохранения</h2><p id="restoreSummary"></p><p class="note">Заменит сумки, материалы, деньги, журнал и настройки. Перед заменой скачивается копия текущего состояния.</p><div class="btns"><button type="button" class="btn" id="restoreApply">Восстановить</button><button type="button" class="btn ghost" id="restoreCancel" autofocus>Отмена</button></div></dialog>
 <dialog id="lssDialog" aria-labelledby="lssH"><h2 id="lssH">Блоки для листа LSS</h2><p class="note">Текст собран из сумки, материалов и журнала помощника. Скопируй блок и вставь в указанный раздел листа. Порядок разделов и журнал переносов — в «Талис — карта листа LSS».</p><div id="lssBody"></div><div class="btns"><button type="button" class="btn ghost" id="lssClose" autofocus>Закрыть</button></div></dialog>
 </header>
@@ -892,7 +913,8 @@ function myTurn(pid){const F=fight(),out=[];
   F.now=out.length?out:['Ничего не срабатывает'];logx(`Бой: ${pid==='p1'?'раунд '+F.round+', ход Талиса':'ход '+(P(pid)?P(pid).name:'')}`)}
 // вид пояса: auto — «Только бой», пока идёт бой; ручной выбор держится до начала или конца боя
 let BV=['auto','all','combat'].includes(ls.get('beltView'))?ls.get('beltView'):'auto', lastOn=null;
-function applyBV(on){const c=BV==='combat'||(BV==='auto'&&on),t=$('tab-belt'),b=$('beltView');if(t)t.classList.toggle('combat',c);if(b)b.setAttribute('aria-pressed',c)}
+function applyBV(on){const c=BV==='combat'||(BV==='auto'&&on),t=$('tab-belt'),b=$('beltView');if(t)t.classList.toggle('combat',c);if(b)b.setAttribute('aria-pressed',c);document.body.classList.toggle('battle-mobile',!!(c&&t&&!t.hidden))}
+$('mobileTools').onclick=()=>{const open=document.body.classList.toggle('battle-header-open');$('mobileTools').setAttribute('aria-expanded',open)};
 $('beltView').onclick=()=>{BV=$('beltView').getAttribute('aria-pressed')==='true'?'all':'combat';ls.set('beltView',BV);applyBV(fight().on)};
 {const lim=()=>{$('pl').value=Math.max(0,(+$('pcon').value||0)+(+$('ppb').value||0)+2)};$('pcon').oninput=lim;$('ppb').oninput=lim}
 function renderFight(){const box=$('fight');if(!box)return;const F=fight();
@@ -998,7 +1020,7 @@ function renderPlan(){
 
 // вкладки
 function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';$('tab-scroll').hidden=t!=='scroll';$('tab-smith').hidden=t!=='smith';ls.set('tab',t);if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
+  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';$('tab-scroll').hidden=t!=='scroll';$('tab-smith').hidden=t!=='smith';ls.set('tab',t);document.body.classList.toggle('battle-mobile',t==='belt'&&$('tab-belt').classList.contains('combat'));if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
