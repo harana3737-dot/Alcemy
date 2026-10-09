@@ -1,114 +1,117 @@
 """HTML-версия «Для мастера — вопросы и изменения.md»: оглавление, светлая и тёмная тема.
 Запуск: python3 scripts/master_html.py [имя файла без .md]"""
-import html, re, pathlib
-
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-import sys
-NAME = sys.argv[1] if len(sys.argv) > 1 else "Для мастера — вопросы и изменения"
-SRC = ROOT / f"{NAME}.md"
-OUT = ROOT / f"{NAME}.html"
 
 
-def inline(t):
-    t = html.escape(t)
-    t = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img src="\2" alt="\1" loading="lazy">', t)
-    t = re.sub(r"\[([^\]]+)\]\((https?://[^)]+)\)", r'<a href="\2">\1</a>', t)
-    t = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", t)
-    t = re.sub(r"<b>⚠ (.+?)</b>", r'<span class="badge">⚠ \1</span>', t)  # **⚠ …** — плашка-предупреждение
-    t = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<i>\1</i>", t)
-    return t
+def build():
+    import html, re, pathlib
+
+    ROOT = pathlib.Path(__file__).resolve().parent.parent
+    import sys
+    NAME = sys.argv[1] if len(sys.argv) > 1 else "Для мастера — вопросы и изменения"
+    SRC = ROOT / f"{NAME}.md"
+    OUT = ROOT / f"{NAME}.html"
 
 
-lines = [line for line in SRC.read_text(encoding="utf-8").splitlines()
-         if line not in ("<!-- reading-guide:start -->", "<!-- reading-guide:end -->")]
-toc, n = [], 0
+    def inline(t):
+        t = html.escape(t)
+        t = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img src="\2" alt="\1" loading="lazy">', t)
+        t = re.sub(r"\[([^\]]+)\]\((https?://[^)]+)\)", r'<a href="\2">\1</a>', t)
+        t = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", t)
+        t = re.sub(r"<b>⚠ (.+?)</b>", r'<span class="badge">⚠ \1</span>', t)  # **⚠ …** — плашка-предупреждение
+        t = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<i>\1</i>", t)
+        return t
 
 
-def render(lines):
-    """Блоки md → HTML: заголовки, абзацы, списки, таблицы, цитаты (>), разделители (---)."""
-    global n
-    body, para, i = [], [], 0
+    lines = [line for line in SRC.read_text(encoding="utf-8").splitlines()
+             if line not in ("<!-- reading-guide:start -->", "<!-- reading-guide:end -->")]
+    toc, n = [], 0
 
-    def flush():
-        if para:
-            txt = ""
-            for k, ln in enumerate(para):
-                txt += inline(ln.strip()) + ("<br>" if ln.endswith("  ") and k < len(para) - 1 else " ")
-            body.append("<p>" + txt.strip() + "</p>")
-            para.clear()
 
-    while i < len(lines):
-        ln = lines[i]
-        m = re.match(r"(#{1,4}) (.+)", ln)
-        if m:
-            flush()
-            lv, txt = len(m.group(1)), m.group(2)
-            if lv == 1:
-                body.append(f"<h1>{inline(txt)}</h1>")
-            else:
-                n += 1
-                hid = f"h{n}"
-                toc.append((lv, txt, hid))
-                body.append(f'<h{lv} id="{hid}">{inline(txt)}</h{lv}>')
-            i += 1
-            continue
-        if ln.startswith(">"):
-            flush()
-            inner = []
-            while i < len(lines) and lines[i].startswith(">"):
-                inner.append(re.sub(r"^> ?", "", lines[i]))
-                i += 1
-            body.append("<blockquote>" + "".join(render(inner)) + "</blockquote>")
-            continue
-        if ln.strip() == "---":
-            flush()
-            body.append("<hr>")
-            i += 1
-            continue
-        if ln.startswith("|"):
-            flush()
-            rows = []
-            while i < len(lines) and lines[i].startswith("|"):
-                if not lines[i].startswith("| ---"):
-                    rows.append([c.strip() for c in lines[i].strip().strip("|").split("|")])
-                i += 1
-            head, rest = rows[0], rows[1:]
-            tb = "<div class=\"wrap\"><table><thead><tr>" + "".join(f"<th>{inline(c)}</th>" for c in head) + "</tr></thead><tbody>"
-            # строка с ★ в первой ячейке — рекомендуемый вариант, подсвечивается фоном
-            tb += "".join(("<tr class=\"hl\">" if r[0].startswith("★") else "<tr>") + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in rest) + "</tbody></table></div>"
-            body.append(tb)
-            continue
-        for pat, tag in ((r"\s*- ", "ul"), (r"\d+\. ", "ol")):
-            if re.match(pat, ln) and (tag == "ul" or i + 1 < len(lines) and re.match(pat, lines[i + 1])):
+    def render(lines):
+        """Блоки md → HTML: заголовки, абзацы, списки, таблицы, цитаты (>), разделители (---)."""
+        nonlocal n
+        body, para, i = [], [], 0
+
+        def flush():
+            if para:
+                txt = ""
+                for k, ln in enumerate(para):
+                    txt += inline(ln.strip()) + ("<br>" if ln.endswith("  ") and k < len(para) - 1 else " ")
+                body.append("<p>" + txt.strip() + "</p>")
+                para.clear()
+
+        while i < len(lines):
+            ln = lines[i]
+            m = re.match(r"(#{1,4}) (.+)", ln)
+            if m:
                 flush()
-                items = []
-                while i < len(lines) and re.match(pat, lines[i]):
-                    items.append(re.sub("^" + pat, "", lines[i]))
+                lv, txt = len(m.group(1)), m.group(2)
+                if lv == 1:
+                    body.append(f"<h1>{inline(txt)}</h1>")
+                else:
+                    n += 1
+                    hid = f"h{n}"
+                    toc.append((lv, txt, hid))
+                    body.append(f'<h{lv} id="{hid}">{inline(txt)}</h{lv}>')
+                i += 1
+                continue
+            if ln.startswith(">"):
+                flush()
+                inner = []
+                while i < len(lines) and lines[i].startswith(">"):
+                    inner.append(re.sub(r"^> ?", "", lines[i]))
                     i += 1
-                body.append(f"<{tag}>" + "".join(f"<li>{inline(x)}</li>" for x in items) + f"</{tag}>")
-                break
-        else:
-            if not ln.strip():
+                body.append("<blockquote>" + "".join(render(inner)) + "</blockquote>")
+                continue
+            if ln.strip() == "---":
                 flush()
+                body.append("<hr>")
+                i += 1
+                continue
+            if ln.startswith("|"):
+                flush()
+                rows = []
+                while i < len(lines) and lines[i].startswith("|"):
+                    if not lines[i].startswith("| ---"):
+                        rows.append([c.strip() for c in lines[i].strip().strip("|").split("|")])
+                    i += 1
+                head, rest = rows[0], rows[1:]
+                tb = "<div class=\"wrap\"><table><thead><tr>" + "".join(f"<th>{inline(c)}</th>" for c in head) + "</tr></thead><tbody>"
+                # строка с ★ в первой ячейке — рекомендуемый вариант, подсвечивается фоном
+                tb += "".join(("<tr class=\"hl\">" if r[0].startswith("★") else "<tr>") + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in rest) + "</tbody></table></div>"
+                body.append(tb)
+                continue
+            for pat, tag in ((r"\s*- ", "ul"), (r"\d+\. ", "ol")):
+                if re.match(pat, ln) and (tag == "ul" or i + 1 < len(lines) and re.match(pat, lines[i + 1])):
+                    flush()
+                    items = []
+                    while i < len(lines) and re.match(pat, lines[i]):
+                        items.append(re.sub("^" + pat, "", lines[i]))
+                        i += 1
+                    body.append(f"<{tag}>" + "".join(f"<li>{inline(x)}</li>" for x in items) + f"</{tag}>")
+                    break
             else:
-                para.append(ln)
-            i += 1
-    flush()
-    return body
+                if not ln.strip():
+                    flush()
+                else:
+                    para.append(ln)
+                i += 1
+        flush()
+        return body
 
 
-body = render(lines)
+    body = render(lines)
 
-TITLE = html.escape(re.sub(r"^# ", "", lines[0]).replace("Алхимия Талиса: ", "").replace(" — для мастера", ""))
-TITLE = TITLE[:1].upper() + TITLE[1:]
-toc_html = "".join(f'<li class="t{lv}"><a href="#{hid}">{inline(t)}</a></li>' for lv, t, hid in toc if lv <= 4)
-# оглавление — только если есть хотя бы два раздела (короткие карточки без него)
-nav = f'<nav><b>Содержание</b><ul>{toc_html}</ul></nav>' if sum(1 for lv, _, _ in toc if lv >= 2) >= 2 else ""
-# закреплённая полоска разделов: в бою прыгнуть к нужному за одно касание
-bar_items = [(t, hid) for lv, t, hid in toc if lv == 2]
-if nav and len(bar_items) >= 3:
-    nav = '<div class="bar">' + "".join(f'<a href="#{hid}">{inline(re.split(r"[:(]", t)[0].strip())}</a>' for t, hid in bar_items) + "</div>" + nav
-page = f"""<!doctype html>
+    TITLE = html.escape(re.sub(r"^# ", "", lines[0]).replace("Алхимия Талиса: ", "").replace(" — для мастера", ""))
+    TITLE = TITLE[:1].upper() + TITLE[1:]
+    toc_html = "".join(f'<li class="t{lv}"><a href="#{hid}">{inline(t)}</a></li>' for lv, t, hid in toc if lv <= 4)
+    # оглавление — только если есть хотя бы два раздела (короткие карточки без него)
+    nav = f'<nav><b>Содержание</b><ul>{toc_html}</ul></nav>' if sum(1 for lv, _, _ in toc if lv >= 2) >= 2 else ""
+    # закреплённая полоска разделов: в бою прыгнуть к нужному за одно касание
+    bar_items = [(t, hid) for lv, t, hid in toc if lv == 2]
+    if nav and len(bar_items) >= 3:
+        nav = '<div class="bar">' + "".join(f'<a href="#{hid}">{inline(re.split(r"[:(]", t)[0].strip())}</a>' for t, hid in bar_items) + "</div>" + nav
+    page = f"""<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{TITLE}</title>
 <style>
@@ -134,5 +137,9 @@ th,td{{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;verti
 {nav}
 {"".join(body[1:])}
 </main></body></html>"""
-OUT.write_text(page, encoding="utf-8")
-print("ok", len(toc), "заголовков")
+    OUT.write_text(page, encoding="utf-8")
+    print("ok", len(toc), "заголовков")
+
+
+if __name__ == '__main__':
+    build()

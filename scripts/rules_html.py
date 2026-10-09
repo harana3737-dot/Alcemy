@@ -1,222 +1,225 @@
 """Собирает HTML-версию правил из md: оглавление, поиск, кликабельные ссылки на разделы,
 скрываемые альтернативы. Запуск: python3 scripts/rules_html.py — полная редакция;
 python3 scripts/rules_html.py table — «правила за столом» (сначала собрать их: scripts/table_rules.py)."""
-import html, re, pathlib, sys
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-TABLE = "table" in sys.argv[1:]
-SRC = ROOT / ("Алхимия Талиса — правила за столом.md" if TABLE else "Алхимия Талиса — правила v0.3 (черновик на утверждение).md")
-OUT = ROOT / ("Алхимия Талиса — правила за столом.html" if TABLE else "Алхимия Талиса — правила v0.3.html")
 
-lines = [line for line in SRC.read_text(encoding="utf-8").splitlines()
-         if line not in ("<!-- reading-guide:start -->", "<!-- reading-guide:end -->")]
-JOURNAL = ROOT / "Журнал решений.md"
-chg_lines = JOURNAL.read_text(encoding="utf-8").splitlines()   # таблица изменений относительно v0.2
+def build():
+    import html, re, pathlib, sys
 
-# ---------- id заголовков ----------
-TR = dict(zip("абвгдеёжзийклмнопрстуфхцчшщъыьэюя", "a b v g d e e zh z i y k l m n o p r s t u f h ts ch sh sch _ y _ e yu ya".split()))
-def slug(t):
-    t = "".join(TR.get(ch, ch) for ch in t.lower())
-    return re.sub(r"[^a-z0-9]+", "-", t).strip("-")[:40]
+    ROOT = pathlib.Path(__file__).resolve().parent.parent
+    TABLE = "table" in sys.argv[1:]
+    SRC = ROOT / ("Алхимия Талиса — правила за столом.md" if TABLE else "Алхимия Талиса — правила v0.3 (черновик на утверждение).md")
+    OUT = ROOT / ("Алхимия Талиса — правила за столом.html" if TABLE else "Алхимия Талиса — правила v0.3.html")
 
-def head_id(text):
-    m = re.match(r"(\d+)\.(\d+)?\s", text + " ")
-    if m:
-        return f"s-{m.group(1)}" + (f"-{m.group(2)}" if m.group(2) else "")
-    m = re.match(r"А\.(\d)", text)
-    if m:
-        return f"s-a{m.group(1)}"
-    return "h-" + slug(text)
+    lines = [line for line in SRC.read_text(encoding="utf-8").splitlines()
+             if line not in ("<!-- reading-guide:start -->", "<!-- reading-guide:end -->")]
+    JOURNAL = ROOT / "Журнал решений.md"
+    chg_lines = JOURNAL.read_text(encoding="utf-8").splitlines()   # таблица изменений относительно v0.2
 
-heads = []
-for ln in lines:
-    m = re.match(r"(#{1,4}) (.+)", ln)
-    if m:
-        heads.append((len(m.group(1)), m.group(2), head_id(m.group(2))))
-IDS = {h[2] for h in heads}
-PRICE_ID = next(h[2] for h in heads if h[1].startswith("Справочник цен"))
-APP_ID = next(h[2] for h in heads if h[1].startswith("Приложение А"))
+    # ---------- id заголовков ----------
+    TR = dict(zip("абвгдеёжзийклмнопрстуфхцчшщъыьэюя", "a b v g d e e zh z i y k l m n o p r s t u f h ts ch sh sch _ y _ e yu ya".split()))
+    def slug(t):
+        t = "".join(TR.get(ch, ch) for ch in t.lower())
+        return re.sub(r"[^a-z0-9]+", "-", t).strip("-")[:40]
 
-def sec_ids(cell):
-    """«8.4, А.1», «7.3–7.4», «Справочник цен» → id разделов"""
-    out = []
-    for m in re.finditer(r"А\.(\d)|(\d{1,2})\.(\d{1,2})|(?<![\d.])(\d{1,2})(?![\d.])|Справочник цен|Приложение А", cell):
-        if m.group(1): sid = f"s-a{m.group(1)}"
-        elif m.group(2): sid = f"s-{m.group(2)}-{m.group(3)}"
-        elif m.group(4): sid = f"s-{m.group(4)}"
-        elif m.group(0) == "Справочник цен": sid = PRICE_ID
-        else: sid = APP_ID
-        if sid in IDS:
-            out.append((m.group(0), sid))
-    return out
+    def head_id(text):
+        m = re.match(r"(\d+)\.(\d+)?\s", text + " ")
+        if m:
+            return f"s-{m.group(1)}" + (f"-{m.group(2)}" if m.group(2) else "")
+        m = re.match(r"А\.(\d)", text)
+        if m:
+            return f"s-a{m.group(1)}"
+        return "h-" + slug(text)
 
-def status_label(st):
-    st = st.strip()
-    if st.startswith("утверждено мастером"): return "ok", "утверждено мастером"
-    if st.startswith("частично"): return "part", "частично утверждено"
-    if st.startswith("решение игрока") or st.startswith("утверждено игроком"): return "pl", "решение игрока"
-    if st.startswith("предложение"): return "prop", "предложение"
-    return "prop", "изменено"
+    heads = []
+    for ln in lines:
+        m = re.match(r"(#{1,4}) (.+)", ln)
+        if m:
+            heads.append((len(m.group(1)), m.group(2), head_id(m.group(2))))
+    IDS = {h[2] for h in heads}
+    PRICE_ID = next(h[2] for h in heads if h[1].startswith("Справочник цен"))
+    APP_ID = next(h[2] for h in heads if h[1].startswith("Приложение А"))
 
-CHANGED = {}
-_in = False
-for ln in chg_lines:
-    if ln.startswith("| Раздел | Правка | Статус |"):
-        _in = True; continue
-    if _in:
-        if not ln.startswith("|"):
-            break
-        if ln.startswith("| ---"):
-            continue
-        c = [x.strip() for x in ln.strip().strip("|").split("|")]
-        for _, sid in sec_ids(c[0]):
-            CHANGED.setdefault(sid, status_label(c[2]))
-if TABLE:
+    def sec_ids(cell):
+        """«8.4, А.1», «7.3–7.4», «Справочник цен» → id разделов"""
+        out = []
+        for m in re.finditer(r"А\.(\d)|(\d{1,2})\.(\d{1,2})|(?<![\d.])(\d{1,2})(?![\d.])|Справочник цен|Приложение А", cell):
+            if m.group(1): sid = f"s-a{m.group(1)}"
+            elif m.group(2): sid = f"s-{m.group(2)}-{m.group(3)}"
+            elif m.group(4): sid = f"s-{m.group(4)}"
+            elif m.group(0) == "Справочник цен": sid = PRICE_ID
+            else: sid = APP_ID
+            if sid in IDS:
+                out.append((m.group(0), sid))
+        return out
+
+    def status_label(st):
+        st = st.strip()
+        if st.startswith("утверждено мастером"): return "ok", "утверждено мастером"
+        if st.startswith("частично"): return "part", "частично утверждено"
+        if st.startswith("решение игрока") or st.startswith("утверждено игроком"): return "pl", "решение игрока"
+        if st.startswith("предложение"): return "prop", "предложение"
+        return "prop", "изменено"
+
     CHANGED = {}
-
-# ---------- инлайн ----------
-def link(target, label):
-    return f'<a class="ref" href="#{target}">{label}</a>'
-
-def refs(t):
-    # «раздел 6», «раздела 2», «разделе 4»
-    t = re.sub(r"(раздел[аеу]?|разделы) (\d+)(?![.\d])",
-               lambda m: m.group(1) + " " + (link(f"s-{m.group(2)}", m.group(2)) if f"s-{m.group(2)}" in IDS else m.group(2)), t)
-    # А.N
-    t = re.sub(r"(?<![\w.])А\.(\d)(?!\d)", lambda m: link(f"s-a{m.group(1)}", f"А.{m.group(1)}") if f"s-a{m.group(1)}" in IDS else m.group(0), t)
-    # N.M — только существующие разделы; «зелья» вида 7.7 / 8.8 — только в контексте ссылки
-    def dec(m):
-        a, b = m.group(1), m.group(2)
-        sid = f"s-{a}-{b}"
-        if sid not in IDS:
-            return m.group(0)
-        if a == b:  # 7.7, 8.8 — чаще зелья, а не разделы
-            pre = m.string[max(0, m.start() - 3):m.start()]
-            post = m.string[m.end():m.end() + 1]
-            if not (re.search(r"(\(|, |по |— )$", pre) and post in (")", ",", ";")):
-                return m.group(0)
-        return link(sid, f"{a}.{b}")
-    t = re.sub(r"(?<![\d.])(\d{1,2})\.(\d{1,2})(?![\d+])", dec, t)
-    t = re.sub(r"\((справочник цен)\)", lambda m: "(" + link(PRICE_ID, m.group(1)) + ")", t)
-    return t
-
-def inline(t, ref=True):
-    t = t.replace("\\[", "[").replace("\\]", "]")
-    t = html.escape(t, quote=False)
-    t = re.sub(r"`(.+?)`", r"<code>\1</code>", t)
-    t = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", t)
-    t = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<i>\1</i>", t)
-    return refs(t) if ref else t
-
-# ---------- блоки ----------
-out, toc = [], []
-i, n = 0, len(lines)
-def first_col(c):
-    t = html.escape(c, quote=False)
-    for tok, sid in sorted(sec_ids(c), key=lambda x: -len(x[0])):
-        t = re.sub(rf"(?<![\w.>]){re.escape(html.escape(tok, quote=False))}(?![\w.<])", link(sid, html.escape(tok, quote=False)), t, count=1)
-    return t
-
-def table(rows, cls=""):
-    cells = [[c.strip() for c in r.strip().strip("|").split("|")] for r in rows if not re.match(r"\s*\|\s*-", r)]
-    log = cells[0][:3] == ["Раздел", "Правка", "Статус"]
-    h = "".join(f"<th>{inline(c)}</th>" for c in cells[0])
-    b = "".join("<tr>" + "".join(f"<td>{first_col(c) if log and k == 0 else inline(c)}</td>" for k, c in enumerate(r)) + "</tr>" for r in cells[1:])
-    return f'<div class="wrap{cls}"><table><thead><tr>{h}</tr></thead><tbody>{b}</tbody></table></div>'
-
-def para(t, indent=False):
-    t = t.strip()
-    cls = []
-    if re.match(r"\*Альтернатива", t):
-        cls.append("alt")
-    if indent:
-        cls.append("cont")
-    c = f' class="{" ".join(cls)}"' if cls else ""
-    return f"<p{c}>{inline(t)}</p>"
-
-skip_first_h1 = True
-while i < n:
-    ln = lines[i]
-    if not ln.strip():
-        i += 1; continue
-    m = re.match(r"(#{1,4}) (.+)", ln)
-    if m:
-        lv, txt = len(m.group(1)), m.group(2)
-        hid = head_id(txt)
-        if lv == 1 and skip_first_h1:
-            skip_first_h1 = False; i += 1; continue
-        if lv <= 3:
-            toc.append((lv, txt, hid))
-        top = '<a class="ref totop" href="#toc-h">↑ оглавление</a>' if lv <= 2 else ""
-        badge = ""
-        if hid in CHANGED:
-            k, lab = CHANGED[hid]
-            badge = f'<span class="badge b-{k}">{lab}</span>'
-        out.append((lv, hid, f'<h{lv} id="{hid}">{inline(txt, False)}{badge}{top}</h{lv}>'))
-        i += 1; continue
-    s = ln.lstrip()
-    ind = len(ln) - len(s) >= 2
-    if s.startswith("|"):
-        rows = []
-        while i < n and lines[i].lstrip().startswith("|"):
-            rows.append(lines[i]); i += 1
-        out.append(table(rows, " cont" if ind else "")); continue
-    if s.startswith("> "):
-        q = []
-        while i < n and lines[i].lstrip().startswith(">"):
-            q.append(lines[i].lstrip()[1:].strip()); i += 1
-        out.append(f'<blockquote class="note">{inline(" ".join(q))}</blockquote>'); continue
-    if re.match(r"(- |\d+\. )", s) and not ind:
-        tag = "ol" if re.match(r"\d+\. ", s) else "ul"
-        items = []
-        while i < n:
-            l2 = lines[i]; s2 = l2.lstrip()
-            if re.match(r"(- |\d+\. )", s2) and len(l2) - len(s2) < 2:
-                items.append([re.sub(r"^(- |\d+\. )", "", s2)]); i += 1
-            elif s2 and len(l2) - len(s2) >= 2 and items and not s2.startswith("|"):
-                items[-1].append("\n" + s2); i += 1
-            elif not s2 and i + 1 < n and (re.match(r"(- |\d+\. )", lines[i+1].lstrip()) or lines[i+1].startswith("  ")) and not lines[i+1].lstrip().startswith("|"):
-                i += 1
-            else:
+    _in = False
+    for ln in chg_lines:
+        if ln.startswith("| Раздел | Правка | Статус |"):
+            _in = True; continue
+        if _in:
+            if not ln.startswith("|"):
                 break
-        lis = []
-        for it in items:
-            body = inline(it[0]) + "".join(para(x) for x in it[1:])
-            lis.append(f"<li>{body}</li>")
-        out.append(f"<{tag}>{''.join(lis)}</{tag}>"); continue
-    buf = [s]; i += 1
-    while i < n and lines[i].strip() and not re.match(r"\s*(#|\||> |- |\d+\. )", lines[i]):
-        buf.append(lines[i].strip()); i += 1
-    out.append(para(" ".join(buf), ind))
+            if ln.startswith("| ---"):
+                continue
+            c = [x.strip() for x in ln.strip().strip("|").split("|")]
+            for _, sid in sec_ids(c[0]):
+                CHANGED.setdefault(sid, status_label(c[2]))
+    if TABLE:
+        CHANGED = {}
 
-# какие блоки показывать в режиме «только изменения»
-stack = {}
-flags = []
-for item in out:
-    if isinstance(item, tuple):
-        lv, hid, _ = item
-        for k in list(stack):
-            if k >= lv: del stack[k]
-        stack[lv] = hid in CHANGED
-    flags.append(any(stack.values()))
-for idx, item in enumerate(out):          # заголовок-родитель показывается, если изменено что-то внутри
-    if isinstance(item, tuple) and not flags[idx]:
-        lv = item[0]
-        for j in range(idx + 1, len(out)):
-            if isinstance(out[j], tuple) and out[j][0] <= lv: break
-            if flags[j]: flags[idx] = True; break
-def wrap_cls(h, chg):
-    if not chg: return h
-    return re.sub(r"^<(\w+)( class=\")?", lambda m: f'<{m.group(1)} class="chg ' if m.group(2) else f'<{m.group(1)} class="chg"', h, count=1)
-out = [wrap_cls(it[2] if isinstance(it, tuple) else it, flags[k]) for k, it in enumerate(out)]
+    # ---------- инлайн ----------
+    def link(target, label):
+        return f'<a class="ref" href="#{target}">{label}</a>'
 
-title = lines[0].lstrip("# ").strip()
-toc_html = "".join(f'<li class="t{lv}{" chg" if hid in CHANGED else ""}"><a class="ref" href="#{hid}">{inline(txt, False)}</a></li>' for lv, txt, hid in toc)
+    def refs(t):
+        # «раздел 6», «раздела 2», «разделе 4»
+        t = re.sub(r"(раздел[аеу]?|разделы) (\d+)(?![.\d])",
+                   lambda m: m.group(1) + " " + (link(f"s-{m.group(2)}", m.group(2)) if f"s-{m.group(2)}" in IDS else m.group(2)), t)
+        # А.N
+        t = re.sub(r"(?<![\w.])А\.(\d)(?!\d)", lambda m: link(f"s-a{m.group(1)}", f"А.{m.group(1)}") if f"s-a{m.group(1)}" in IDS else m.group(0), t)
+        # N.M — только существующие разделы; «зелья» вида 7.7 / 8.8 — только в контексте ссылки
+        def dec(m):
+            a, b = m.group(1), m.group(2)
+            sid = f"s-{a}-{b}"
+            if sid not in IDS:
+                return m.group(0)
+            if a == b:  # 7.7, 8.8 — чаще зелья, а не разделы
+                pre = m.string[max(0, m.start() - 3):m.start()]
+                post = m.string[m.end():m.end() + 1]
+                if not (re.search(r"(\(|, |по |— )$", pre) and post in (")", ",", ";")):
+                    return m.group(0)
+            return link(sid, f"{a}.{b}")
+        t = re.sub(r"(?<![\d.])(\d{1,2})\.(\d{1,2})(?![\d+])", dec, t)
+        t = re.sub(r"\((справочник цен)\)", lambda m: "(" + link(PRICE_ID, m.group(1)) + ")", t)
+        return t
 
-BTNS = "" if TABLE else ('<button id="alt" aria-pressed="true" title="Показать или скрыть альтернативы для мастера">Альтернативы</button>\n'
+    def inline(t, ref=True):
+        t = t.replace("\\[", "[").replace("\\]", "]")
+        t = html.escape(t, quote=False)
+        t = re.sub(r"`(.+?)`", r"<code>\1</code>", t)
+        t = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", t)
+        t = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<i>\1</i>", t)
+        return refs(t) if ref else t
+
+    # ---------- блоки ----------
+    out, toc = [], []
+    i, n = 0, len(lines)
+    def first_col(c):
+        t = html.escape(c, quote=False)
+        for tok, sid in sorted(sec_ids(c), key=lambda x: -len(x[0])):
+            t = re.sub(rf"(?<![\w.>]){re.escape(html.escape(tok, quote=False))}(?![\w.<])", link(sid, html.escape(tok, quote=False)), t, count=1)
+        return t
+
+    def table(rows, cls=""):
+        cells = [[c.strip() for c in r.strip().strip("|").split("|")] for r in rows if not re.match(r"\s*\|\s*-", r)]
+        log = cells[0][:3] == ["Раздел", "Правка", "Статус"]
+        h = "".join(f"<th>{inline(c)}</th>" for c in cells[0])
+        b = "".join("<tr>" + "".join(f"<td>{first_col(c) if log and k == 0 else inline(c)}</td>" for k, c in enumerate(r)) + "</tr>" for r in cells[1:])
+        return f'<div class="wrap{cls}"><table><thead><tr>{h}</tr></thead><tbody>{b}</tbody></table></div>'
+
+    def para(t, indent=False):
+        t = t.strip()
+        cls = []
+        if re.match(r"\*Альтернатива", t):
+            cls.append("alt")
+        if indent:
+            cls.append("cont")
+        c = f' class="{" ".join(cls)}"' if cls else ""
+        return f"<p{c}>{inline(t)}</p>"
+
+    skip_first_h1 = True
+    while i < n:
+        ln = lines[i]
+        if not ln.strip():
+            i += 1; continue
+        m = re.match(r"(#{1,4}) (.+)", ln)
+        if m:
+            lv, txt = len(m.group(1)), m.group(2)
+            hid = head_id(txt)
+            if lv == 1 and skip_first_h1:
+                skip_first_h1 = False; i += 1; continue
+            if lv <= 3:
+                toc.append((lv, txt, hid))
+            top = '<a class="ref totop" href="#toc-h">↑ оглавление</a>' if lv <= 2 else ""
+            badge = ""
+            if hid in CHANGED:
+                k, lab = CHANGED[hid]
+                badge = f'<span class="badge b-{k}">{lab}</span>'
+            out.append((lv, hid, f'<h{lv} id="{hid}">{inline(txt, False)}{badge}{top}</h{lv}>'))
+            i += 1; continue
+        s = ln.lstrip()
+        ind = len(ln) - len(s) >= 2
+        if s.startswith("|"):
+            rows = []
+            while i < n and lines[i].lstrip().startswith("|"):
+                rows.append(lines[i]); i += 1
+            out.append(table(rows, " cont" if ind else "")); continue
+        if s.startswith("> "):
+            q = []
+            while i < n and lines[i].lstrip().startswith(">"):
+                q.append(lines[i].lstrip()[1:].strip()); i += 1
+            out.append(f'<blockquote class="note">{inline(" ".join(q))}</blockquote>'); continue
+        if re.match(r"(- |\d+\. )", s) and not ind:
+            tag = "ol" if re.match(r"\d+\. ", s) else "ul"
+            items = []
+            while i < n:
+                l2 = lines[i]; s2 = l2.lstrip()
+                if re.match(r"(- |\d+\. )", s2) and len(l2) - len(s2) < 2:
+                    items.append([re.sub(r"^(- |\d+\. )", "", s2)]); i += 1
+                elif s2 and len(l2) - len(s2) >= 2 and items and not s2.startswith("|"):
+                    items[-1].append("\n" + s2); i += 1
+                elif not s2 and i + 1 < n and (re.match(r"(- |\d+\. )", lines[i+1].lstrip()) or lines[i+1].startswith("  ")) and not lines[i+1].lstrip().startswith("|"):
+                    i += 1
+                else:
+                    break
+            lis = []
+            for it in items:
+                body = inline(it[0]) + "".join(para(x) for x in it[1:])
+                lis.append(f"<li>{body}</li>")
+            out.append(f"<{tag}>{''.join(lis)}</{tag}>"); continue
+        buf = [s]; i += 1
+        while i < n and lines[i].strip() and not re.match(r"\s*(#|\||> |- |\d+\. )", lines[i]):
+            buf.append(lines[i].strip()); i += 1
+        out.append(para(" ".join(buf), ind))
+
+    # какие блоки показывать в режиме «только изменения»
+    stack = {}
+    flags = []
+    for item in out:
+        if isinstance(item, tuple):
+            lv, hid, _ = item
+            for k in list(stack):
+                if k >= lv: del stack[k]
+            stack[lv] = hid in CHANGED
+        flags.append(any(stack.values()))
+    for idx, item in enumerate(out):          # заголовок-родитель показывается, если изменено что-то внутри
+        if isinstance(item, tuple) and not flags[idx]:
+            lv = item[0]
+            for j in range(idx + 1, len(out)):
+                if isinstance(out[j], tuple) and out[j][0] <= lv: break
+                if flags[j]: flags[idx] = True; break
+    def wrap_cls(h, chg):
+        if not chg: return h
+        return re.sub(r"^<(\w+)( class=\")?", lambda m: f'<{m.group(1)} class="chg ' if m.group(2) else f'<{m.group(1)} class="chg"', h, count=1)
+    out = [wrap_cls(it[2] if isinstance(it, tuple) else it, flags[k]) for k, it in enumerate(out)]
+
+    title = lines[0].lstrip("# ").strip()
+    toc_html = "".join(f'<li class="t{lv}{" chg" if hid in CHANGED else ""}"><a class="ref" href="#{hid}">{inline(txt, False)}</a></li>' for lv, txt, hid in toc)
+
+    BTNS = "" if TABLE else ('<button id="alt" aria-pressed="true" title="Показать или скрыть альтернативы для мастера">Альтернативы</button>\n'
         '<button id="chg" aria-pressed="false" title="Показать только разделы, изменённые относительно v0.2">Только изменения</button>')
-TITLE = "Алхимия: правила за столом" if TABLE else "Алхимия Талиса v0.3"
-page = f"""<!doctype html>
+    TITLE = "Алхимия: правила за столом" if TABLE else "Алхимия Талиса v0.3"
+    page = f"""<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{TITLE}</title>
 <style>
@@ -283,9 +286,13 @@ function filter(){{const q=$('#q').value.trim().toLowerCase();let n=0;
  $('#cnt').textContent=n?('найдено блоков: '+n):'ничего не найдено'}}
 $('#q').addEventListener('input',filter);
 </script></body></html>"""
-OUT.write_text(page, encoding="utf-8")
-print("ok", len(page), "заголовков", len(heads))
-if not TABLE:   # «правила за столом» собираются из полной редакции при каждой сборке
-    import subprocess
-    subprocess.run([sys.executable, str(ROOT / "scripts" / "table_rules.py")], check=True)
-    subprocess.run([sys.executable, __file__, "table"], check=True)
+    OUT.write_text(page, encoding="utf-8")
+    print("ok", len(page), "заголовков", len(heads))
+    if not TABLE:   # «правила за столом» собираются из полной редакции при каждой сборке
+        import subprocess
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "table_rules.py")], check=True)
+        subprocess.run([sys.executable, __file__, "table"], check=True)
+
+
+if __name__ == '__main__':
+    build()
