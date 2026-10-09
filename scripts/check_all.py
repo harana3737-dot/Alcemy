@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+from document_paths import paired_html_sources
 
 ROOT = Path(__file__).resolve().parent.parent
 CHECKS = ('player_book.py', 'bestiary_report.py', 'alchemy_bestiary_report.py', 'alchemy_magic_review.py')
@@ -71,9 +72,8 @@ def check(root=ROOT, *, slow=False, browser=False):
         if slow:
             run(py+['scripts/report.py'], copy, env, failures)
         # HTML с парным Markdown, кроме специализированных сборщиков.
-        for html in sorted(copy.glob('*.html')):
-            if html.stem not in SPECIAL_HTML and html.with_suffix('.md').exists():
-                run(py+['scripts/master_html.py', html.stem], copy, env, failures)
+        for source in paired_html_sources(copy, SPECIAL_HTML):
+            run(py+['scripts/master_html.py', source.relative_to(copy).with_suffix('').as_posix()], copy, env, failures)
         run(py+['scripts/player_book.py'], copy, env, failures)
         if browser:
             executable = env.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH', '/opt/pw-browsers/chromium')
