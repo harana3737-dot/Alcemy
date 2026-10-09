@@ -109,6 +109,10 @@ function validateSnapshot(data){
   if(s.plan&&(!Array.isArray(s.plan.items)||s.plan.items.some(i=>typeof i.n!=='string'||!ids.has(i.who)||!Number.isFinite(i.q)||i.q<0)))fail();
   if(s.hrs&&(!Number.isFinite(s.hrs.total)||!Array.isArray(s.hrs.log)||s.hrs.log.some(l=>typeof l.w!=='string'||!Number.isFinite(l.T)||!Number.isFinite(l.h))))fail();
   if(s.fight&&(!Array.isArray(s.fight.heals)||!Array.isArray(s.fight.coats)||!Array.isArray(s.fight.now)))fail();
+  if(s.talis){const r=s.talis,n=x=>Number.isSafeInteger(x)&&x>=0;
+    if(!n(r.hp)||r.hp>TALIS_LIMITS.hp||!n(r.temp)||!n(r.sp)||r.sp>TALIS_LIMITS.sp||!n(r.meta)||r.meta>TALIS_LIMITS.meta||
+      !r.slots||![1,2].every(l=>n(r.slots[l]))||typeof r.concentration!=='string'||typeof r.reaction!=='boolean'||
+      (r.dc!==null&&(!n(r.dc)||r.dc<10))||!n(r.lastDamage))fail();}
   for(const b of s.bag)if(typeof b.n!=='string'||!ids.has(b.who)||!Number.isFinite(b.q)||b.q<0)fail();
   for(const h of s.mat.herbs)if(!['heal','poison'].includes(h.k)||!Number.isInteger(h.l)||h.l<1||h.l>10||!Number.isFinite(h.q)||h.q<0)fail();
   for(const e of s.mat.ess)if(typeof e.id!=='string'||typeof e.n!=='string'||!Array.isArray(e.types)||e.types.some(t=>typeof t!=='string')||!Number.isInteger(e.l)||e.l<1||e.l>10||!Number.isFinite(e.q)||e.q<0)fail();

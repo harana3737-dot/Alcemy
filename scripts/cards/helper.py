@@ -3,6 +3,32 @@
 Не для карточек мастера. Запуск: python3 scripts/cards/helper.py → «Помощник варки.html»."""
 
 
+
+def combat_limits(sheet, confirmed):
+    """Числа боя из листа; отсутствующие ячейки — явное подтверждение игрока."""
+    import re
+    def number(pattern):
+        match = re.search(pattern, sheet)
+        if not match:
+            raise ValueError('Ресурсы боя: не найдено однозначное число в листе: ' + pattern)
+        return int(match.group(1))
+    main = sheet.split('## Основное', 1)[1].split('## Алхимия', 1)[0]
+    level = number(r'Чародей (\d+)')
+    hp = number(r'- Хиты (\d+),')
+    pools = re.search(r'Единиц чародейства (\d+): (\d+) класса \+ (\d+) от Адепта метамагии', main)
+    if not pools or int(pools[1]) != int(pools[2]) + int(pools[3]):
+        raise ValueError('Ресурсы боя: неоднозначные запасы единиц чародейства')
+    costs = dict((int(a), int(b)) for a,b in re.findall(r'^(\d+)-й уровень — (\d+) единиц', sheet, re.M))
+    if set(costs) != set(range(1,6)):
+        raise ValueError('Ресурсы боя: неполная стоимость создания ячеек')
+    if confirmed.get('level') != level or set(confirmed.get('slots', {})) != {'1','2'}:
+        raise ValueError('Ресурсы боя: максимумы ячеек требуют подтверждения для этого уровня')
+    if any(type(n) is not int or n < 0 for n in confirmed['slots'].values()):
+        raise ValueError('Ресурсы боя: неверные максимумы ячеек')
+    return dict(level=level, hp=hp, sp=int(pools[2]), meta=int(pools[3]),
+                slots=confirmed['slots'], costs=costs)
+
+
 def build():
     import hashlib, json, pathlib, re
     HERE = pathlib.Path(__file__).resolve().parent
@@ -20,6 +46,7 @@ def build():
     # Сумка из листа персонажа: блоки «Зелья и расходники» и «На разборку»
     CARD_OF = {"Зелье сопротивления (некротика)": "Сопротивление", "Зелье подводного дыхания": "Водное дыхание"}
     sheet = (pathlib.Path(ROOT) / "Талис — лист персонажа.md").read_text(encoding="utf-8")
+    limits = combat_limits(sheet, json.loads((HERE / 'talis_resources.json').read_text(encoding='utf-8')))
     seed, block = [], None
     assert "## Снаряжение" in sheet, "Талис — лист персонажа.md: нет раздела «## Снаряжение»"
     for line in sheet.split("## Снаряжение", 1)[1].split("\n"):
@@ -128,6 +155,7 @@ def build():
     from rules_data import helper_values
     for marker, value in helper_values().items():
         html = html.replace(marker, value)
+    html = html.replace("__COMBAT_LIMITS__", json.dumps(limits, ensure_ascii=False))
     html = html.replace("__DATA__", js).replace("__CLS__", json.dumps(CLS, ensure_ascii=False)).replace("__N__", str(len(data)))
     html = html.replace("__SEED__", json.dumps(dict(id=seed_id, items=seed, mat=MAT, mid=hashlib.sha1(json.dumps(MAT, ensure_ascii=False).encode()).hexdigest()[:10]), ensure_ascii=False).replace("</", "<\\/"))
     out = pathlib.Path(ROOT) / "Помощник варки.html"
