@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Шпаргалка кузнеца</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -45,6 +46,17 @@ td.n,th.n{font-family:var(--mono);text-align:right;padding-right:14px;white-spac
 .mark{font:500 .72rem var(--mono);color:var(--mid);border:1px solid var(--mid);border-radius:4px;padding:0 4px;white-space:nowrap}
 footer{color:var(--muted);font-size:.88rem}
 /* Журнал работы */
+.sample-banner{border:2px solid var(--accent);background:var(--warn-soft);border-radius:8px;padding:10px;font-weight:700}
+.sample-on .out,.sample-on #log tbody{background:repeating-linear-gradient(135deg,var(--panel) 0 8px,var(--accent-soft) 8px 12px)}
+.sample-on .tile{background:transparent}
+@media(max-width:480px){
+  #log{width:100%}#log thead{display:none}#log tbody,#log tr{display:block}
+  #log tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:1px solid var(--line);padding:6px 0}
+  #log td,#log td.n{display:block;border:0;padding:4px;text-align:left;white-space:normal;overflow-wrap:anywhere;font-size:.82rem}
+  #log td::before{content:attr(data-label);display:block;color:var(--muted);font:.75rem var(--body)}
+  #log td[colspan]{grid-column:1/-1}.tile b{font-size:1.08rem}
+}
+
 .calc{border-color:var(--accent)}
 .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 .fields label{display:grid;gap:2px;font-size:.88rem;color:var(--muted);min-width:0}
@@ -75,17 +87,18 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
   <section class="step calc" aria-labelledby="calc-h">
     <h2 id="calc-h"><b>⚒</b>Журнал работы</h2>
     <div class="fields">
-      <label for="job" class="wide">Работа (раздел 10 — подставит объём и СЛ)
+      <label for="job" class="wide">Работа (выбор для расчёта, не записанная работа; раздел 10)
         <select id="job"></select></label>
-      <label for="vol">Объём работы<input id="vol" type="number" min="1" value="100"></label>
-      <label for="dc">СЛ работы<input id="dc" type="number" min="1" value="14"></label>
+      <label for="vol">Объём по выбранной работе<input id="vol" type="number" min="1" value="100"></label>
+      <label for="dc">СЛ по выбранной работе<input id="dc" type="number" min="1" value="14"></label>
       <label for="abk">Проверка на<select id="abk"><option value="str">Силу — ковка, правка</option><option value="dex">Ловкость — отделка, рукояти</option><option value="int">Интеллект — чертежи, анализ</option><option value="wis">Мудрость — особые случаи</option></select></label>
-      <label for="ab">Модификатор<input id="ab" type="number" value="4"></label>
-      <label for="pb">Владение инструментами<input id="pb" type="number" value="2"></label>
-      <label for="ml">Мастерство кузнеца (0–10)<input id="ml" type="number" min="0" max="10" value="2"></label>
-      <label for="ws">Рабочее место
+      <label for="ab">Модификатор <small>Фаэнон: по листу, 4 уровень; если не изменено</small><input id="ab" type="number" value="4"></label>
+      <label for="pb">Владение инструментами <small>Фаэнон: по листу, 4 уровень; если не изменено</small><input id="pb" type="number" value="2"></label>
+      <label for="ml">Мастерство кузнеца (0–10) <small>По уточнению игрока, 08.10; если не изменено</small><input id="ml" type="number" min="0" max="10" value="2"></label>
+      <label for="ws">Рабочее место <small>Кузница Фаэнона, по уточнению игрока; если не изменено</small>
         <select id="ws"><option value="0">Инструменты +0</option><option value="1">Обычная кузница +1</option><option value="3" selected>Хорошая кузница +3 (кузнец Фаэнона)</option><option value="5">Мастерская кузница +5</option></select></label>
     </div>
+    <div id="sample-banner" class="sample-banner" hidden>Пример, не работа Фаэнона. Новая работа — очистить</div>
     <div class="out" aria-live="polite">
       <div class="tile"><span>Бонус проверки</span><b id="o-b">+6</b></div>
       <div class="tile"><span>Прогресс</span><b id="o-p">0/100</b></div>
@@ -99,6 +112,7 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
       <button id="add" type="button">Записать подход</button>
       <button id="undo" type="button" class="ghost">Отменить последний</button>
       <button id="reset" type="button" class="ghost">Новая работа</button>
+      <button id="sample" type="button" class="ghost">Показать пример</button>
     </div>
     <div class="tw"><table id="log"><thead><tr><th class="n">№</th><th class="n">d20</th><th class="n">Итог</th><th>Исход</th><th class="n">+Прогресс</th><th class="n">Всего</th></tr></thead><tbody></tbody></table></div>
     <p id="final" class="ex"></p>
@@ -324,16 +338,18 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
       const rb=st.sample?b:r.b,rdc=st.sample?dc:r.dc;
       const s=step(r.d,rb,rdc,r.sub);prog=Math.max(0,prog+s.p-s.minus);mk+=s.mk;sn+=s.sn;df+=s.df;
       const add=s.minus?`−${s.minus}`:'+'+fmt(s.p);
-      rows.push(`<tr><td class="n">${i+1}</td><td class="n">${r.d}</td><td class="n">${r.d+rb}</td><td><span class="dot ${s.c}"></span>${s.txt}${s.mk?`, +${s.mk} метк.`:''}${s.sn?', заминка':''}${s.df?', дефект':''}</td><td class="n">${add}</td><td class="n">${fmt(Math.min(prog,vol))}</td></tr>`);});
+      rows.push(`<tr><td class="n" data-label="№">${i+1}</td><td class="n" data-label="d20">${r.d}</td><td class="n" data-label="Итог">${r.d+rb}</td><td data-label="Исход"><span class="dot ${s.c}"></span>${s.txt}${s.mk?`, +${s.mk} метк.`:''}${s.sn?', заминка':''}${s.df?', дефект':''}</td><td class="n" data-label="+Прогресс">${add}</td><td class="n" data-label="Всего">${fmt(Math.min(prog,vol))}</td></tr>`);});
     const dfTot=df+Math.floor(sn/3), snLeft=sn%3;
     $('log').caption&&$('log').deleteCaption();if(st.sample){const c=$('log').createCaption();c.className='muted';c.style.textAlign='left';c.textContent='Пример: четыре подхода для показа. «Новая работа» очищает журнал.';}
     $('log').tBodies[0].innerHTML=rows.join('')||'<tr><td colspan="6" class="muted">Подходов пока нет. Введите d20 и нажмите «Записать подход».</td></tr>';
     $('o-b').textContent=(b>=0?'+':'')+b;
-    $('o-p').textContent=`${fmt(Math.min(prog,vol))}/${vol}`;
+    $('sample-banner').hidden=!st.sample;
+    $('sample-banner').closest('.calc').classList.toggle('sample-on',st.sample);
+    $('o-p').textContent=`${st.sample?'пример · ':''}${fmt(Math.min(prog,vol))}/${vol}`;
     $('o-mk').textContent=`${mk} / ${snLeft} / ${dfTot}`;
     $('o-bar').style.width=Math.min(100,prog/vol*100)+'%';
     const a=avg(b,dc);
-    $('o-left').textContent=prog>=vol?'готово':(a>0?`≈${Math.ceil((vol-prog)/a)} (${Math.ceil((vol-prog)/a)*2} ч)`:'—');
+    $('o-left').textContent=!st.rolls.length?'подходов нет':prog>=vol?'готово':(a>0?`≈${Math.ceil((vol-prog)/a)} (${Math.ceil((vol-prog)/a)*2} ч)`:'—');
     const mod=Math.max(-5,Math.min(5,mk-dfTot));
     $('final').innerHTML=prog>=vol
       ? `<b>Прогресс набран.</b> Финальная отделка: d20 ${b>=0?'+':''}${b} ${mod>=0?'+':'−'} ${Math.abs(mod)} (метки и дефекты) против СЛ ${dc}. Обычное от ${dc-b-mod}, хорошее от ${dc+5-b-mod}, отличное от ${dc+10-b-mod} на d20.`
@@ -347,13 +363,12 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
   $('d20').addEventListener('input',()=>{$('sub-l').hidden=+$('d20').value!==1;});
   $('add').addEventListener('click',()=>{const d=Math.round(+$('d20').value);if(!(d>=1&&d<=20)){$('d20').focus();return;}
     const r={d,b:bonus(),dc:+$('dc').value||10};if(d===1){const s=Math.round(+$('sub').value);if(!(s>=1&&s<=20)){$('sub').focus();return;}r.sub=s;}
-    if(st.sample){st.rolls=[];st.sample=false;}st.rolls.push(r);$('d20').value='';$('sub').value='';$('sub-l').hidden=true;render();});
+    if(st.sample){if(!confirm('Очистить пример и записать настоящий подход?'))return;st.rolls=[];st.sample=false;}st.rolls.push(r);$('d20').value='';$('sub').value='';$('sub-l').hidden=true;render();});
   $('d20').addEventListener('keydown',e=>{if(e.key==='Enter')$('add').click();});
   $('undo').addEventListener('click',()=>{st.rolls.pop();render();});
   $('reset').addEventListener('click',()=>{st.sample=false;st.rolls=[];render();});
   load();
-  if(!st.rolls.length&&!localStorage_has()){st.rolls=[{d:11},{d:16},{d:8},{d:20}];st.sample=true;}
-  function localStorage_has(){try{return localStorage.getItem('smith-log-5')!==null}catch(e){return false}}
+  $('sample').addEventListener('click',()=>{if(st.rolls.length&&!st.sample&&!confirm('Заменить текущую работу примером?'))return;st.rolls=[{d:11},{d:16},{d:8},{d:20}];st.sample=true;render();});
   render();
 })(document);
 </script>
