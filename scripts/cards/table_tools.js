@@ -87,7 +87,7 @@ function renderAvailability(){
 ['m','anar'].forEach(id=>$(id).addEventListener('change',renderAvailability));
 
 function snapshot(){
-  return {format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(['m','b','anar','sel','tab','theme'].map(k=>[k,ls.get(k)]))};
+  return {plans:{combo:JSON.parse(JSON.stringify(COMBO)),brewing:{...BP}},format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(['m','b','anar','sel','tab','theme'].map(k=>[k,ls.get(k)]))};
 }
 let DL;  // в опубликованном помощнике — capability downloads; вне Claude — обычная ссылка
 async function downloadSnapshot(data,prefix='alcemy-save'){
@@ -127,6 +127,18 @@ function validateSnapshot(data){
   for(const o of s.mat.other)if(typeof o.n!=='string'||!Number.isFinite(o.q)||o.q<0)fail();
   if(s.knownRecipes&&(!Array.isArray(s.knownRecipes)||s.knownRecipes.some(k=>typeof k!=='string')))fail();
   if(s.mat.pools&&(!Array.isArray(s.mat.pools)||s.mat.pools.some(p=>!['heal','poison'].includes(p.k)||!Number.isInteger(p.min)||p.min<1||p.min>10||!Number.isFinite(p.v)||p.v<0)))fail();
+  if(data.plans!=null){
+    const c=data.plans.combo,b=data.plans.brewing;
+    if(!c||!b||typeof c.who!=='string'||typeof c.catalog!=='boolean'||!Array.isArray(c.items)||c.items.length>5)fail();
+    if(c.concentration!=null&&typeof c.concentration!=='string'||c.search!=null&&typeof c.search!=='string'||c.filter!=null&&!['','soft','alchemy','normal','none'].includes(c.filter))fail();
+    for(const item of c.items){
+      if(!item||typeof item.n!=='string'||!Number.isInteger(item.q)||item.q<1||item.q>5||item.variant!=null&&(!Number.isInteger(item.variant)||item.variant<0)||item.note!=null&&typeof item.note!=='string')fail();
+      if(item.mods!=null&&(typeof item.mods!=='object'||Array.isArray(item.mods)||Object.values(item.mods).some(v=>typeof v!=='boolean')))fail();
+      if(item.other!=null&&(!Array.isArray(item.other)||item.other.some(v=>typeof v!=='string')))fail();
+    }
+    for(const key of ['budget','hours','week','progress'])if(b[key]!=null&&(!Number.isFinite(b[key])||b[key]<0))fail();
+    if(typeof b.search!=='string'||typeof b.stockOnly!=='boolean'||!['',...PLAN_NEEDS].includes(b.need))fail();
+  }
   for(const k of ['m','b','anar','sel','tab','theme'])if(data.settings[k]!=null&&typeof data.settings[k]!=='string')fail();
   if(data.settings.m!=null&&(!Number.isInteger(+data.settings.m)||+data.settings.m<1||+data.settings.m>10))fail();
   if(data.settings.b!=null&&(!Number.isFinite(+data.settings.b)||+data.settings.b< -5||+data.settings.b>30))fail();
@@ -156,14 +168,15 @@ $('restoreApply').onclick=async()=>{
     localStorage.setItem('belt',JSON.stringify(restored));
     if(DOC){clearTimeout(saveT);await DOC.set({s:JSON.stringify(restored),u:restored.u})}
     ST=restored;TR=next.tracks;S.t={...(next.situation||{})};UNDO=[];UNDOJ={};
+    if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));BP={...next.plans.brewing};ls.set('combo',JSON.stringify(COMBO));ls.set('brewing-plan',JSON.stringify(BP))}
     for(const [key,value] of Object.entries(next.settings))if(['m','b','anar','sel','tab','theme'].includes(key)){if(value==null)localStorage.removeItem(key);else ls.set(key,String(value))}
     $('m').value=ls.get('m')||2;lastM=+$('m').value;$('b').value=ls.get('b')||4;$('anar').checked=ls.get('anar')==='1';
     if(ls.get('theme'))document.documentElement.dataset.theme=ls.get('theme');
     S.sel=D.findIndex(c=>c.n===ls.get('sel'));if(S.sel<0)S.sel=null;
-    renderBelt();renderJournal();list();render();tab(['belt','jour','plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+    renderBelt();renderJournal();list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
     PENDING_SAVE=null;$('restoreDialog').close();$('backupStatus').textContent='Сохранение восстановлено.';
   }catch(err){
-    let rolled=true;try{for(const t of old.tracks){const {id,...data}=t;await col.doc(id).set(data)}for(const t of next.tracks)if(!old.tracks.some(o=>o.id===t.id))await col.doc(t.id).delete();ST=old.state;TR=old.tracks;S.t={...old.situation};localStorage.setItem('belt',JSON.stringify(ST));if(DOC)await DOC.set({s:JSON.stringify(ST),u:Date.now()});renderBelt();renderJournal()}catch(e){rolled=false}
+    let rolled=true;try{for(const t of old.tracks){const {id,...data}=t;await col.doc(id).set(data)}for(const t of next.tracks)if(!old.tracks.some(o=>o.id===t.id))await col.doc(t.id).delete();ST=old.state;TR=old.tracks;S.t={...old.situation};if(old.plans){COMBO=old.plans.combo;BP=old.plans.brewing;ls.set('combo',JSON.stringify(COMBO));ls.set('brewing-plan',JSON.stringify(BP))}localStorage.setItem('belt',JSON.stringify(ST));if(DOC)await DOC.set({s:JSON.stringify(ST),u:Date.now()});renderBelt();renderJournal()}catch(e){rolled=false}
     $('restoreSummary').textContent='Не восстановлено: '+err.message+(rolled?'. Предыдущее состояние возвращено.':'. Откат не завершён: восстанови скачанную копию после восстановления связи.');
   }finally{$('restoreApply').disabled=false;$('restoreCancel').disabled=false}
 };

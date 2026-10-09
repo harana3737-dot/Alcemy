@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY; BUILDER: scripts/cards/helper.py; SOURCE: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js -->
+<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY; BUILDER: scripts/cards/helper.py; SOURCE: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -213,6 +213,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
   <button type="button" role="tab" data-tab="brew" aria-selected="true">Варка</button>
   <button type="button" role="tab" data-tab="belt" aria-selected="false">Пояс <span id="beltBadge" class="tb"></span></button>
   <button type="button" role="tab" data-tab="jour" aria-selected="false">Журнал</button>
+  <button type="button" role="tab" data-tab="brewing-plan" aria-selected="false">План варки</button>
   <button type="button" role="tab" data-tab="combo" aria-selected="false">Сочетания</button>
   <button type="button" role="tab" data-tab="plan" aria-selected="false">Вылазка</button>
   <button type="button" role="tab" data-tab="scroll" aria-selected="false">Свитки</button>
@@ -321,14 +322,16 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <div class="btns"><button type="button" class="btn soft" id="plCopy">Скопировать список</button><button type="button" class="btn ghost" id="plClear">Убрать полученное и пустое</button></div>
   </div>
 </div>
+<div id="tab-brewing-plan" hidden><div id="brewingPlanning"></div></div>
 <div id="tab-combo" hidden><div class="card">
   <h2>Проверить сочетание</h2>
   <p class="note">План для одного персонажа: учитывает текущую токсичность и действующую алхимическую концентрацию. Для зарядов проверяется концентрация после применения. Выбор здесь сохраняется как план.</p>
   <div class="row"><div><label class="f" for="comboWho">Персонаж</label><select id="comboWho"></select></div><div><label class="f" for="comboConcentration">Текущее заклинание с концентрацией <small>У Талиса записанное в «Бое» учитывается автоматически</small></label><input id="comboConcentration" type="text" placeholder="Нет концентрации"></div></div>
   <label class="tg"><input id="comboCatalog" type="checkbox"><span>Планировать из каталога<small>По умолчанию — эликсиры из сумки выбранного персонажа.</small></span></label>
+  <div class="row"><div><label class="f" for="comboKit">Пресеты Codex</label><select id="comboKit"></select></div><div><label class="f" for="comboSearch">Поиск в каталоге</label><input id="comboSearch" type="search"></div><div><label class="f" for="comboFilter">Фильтр</label><select id="comboFilter"><option value="">Все</option><option value="soft">Мягкие</option><option value="alchemy">Алхимическая концентрация</option><option value="normal">Обычная концентрация</option><option value="none">Без концентрации</option></select></div></div>
   <div id="comboItems"></div><div class="btns"><button type="button" class="btn" id="comboAdd">Добавить эликсир</button><button type="button" class="btn ghost" id="comboClear">Очистить план</button></div>
   <div id="comboResult" role="status" aria-live="polite"></div>
-  <p class="note">Основные варианты токсичности из карточек. Особые бонусы флакона, выбор варианта и несовместимость остальных эффектов проверь по описаниям ниже. Одноимённые эффекты не складываются. Предметы, хиты и действующие эффекты эта проверка не меняет.</p>
+  <p class="note">Выбери вариант и бонусы каждого флакона. Пометки из сумки переносятся при выборе флакона; ручное изменение становится сценарием. Пресеты — рекомендации Codex, наличие проверяется по сумке. Одноимённые эффекты не складываются. Предметы, хиты и действующие эффекты эта проверка не меняет.</p>
 </div></div>
 <div id="tab-scroll" hidden><div id="craft-scroll"></div></div>
 <div id="tab-smith" hidden><div id="craft-smith"></div></div>
@@ -641,7 +644,7 @@ setTimeout(async()=>{
     const db=await window.claude.use('db'), user=await window.claude.use('user');
     if(!db||!user)return;
     const id=await user.id();if(!id)return;
-    JDB=db;db.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется автоматически.');renderJournal()},()=>jstat('Связь с журналом потеряна — обнови страницу.',true));
+    JDB=db;db.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется автоматически.');renderJournal();renderBrewingPlan()},()=>jstat('Связь с журналом потеряна — обнови страницу.',true));
     DOC=db.collection('belt').doc('state');
     let snap=await DOC.get();const shared=snap.exists, su=shared?(snap.data().u||0):-1;
     if(!shared){const old=await db.collection('data/users/'+id).doc('belt').get().catch(()=>null);if(old&&old.exists)snap=old}
@@ -651,7 +654,7 @@ setTimeout(async()=>{
     DOC.onSnapshot(sn=>{if(!sn.exists||saveT&&sn.metadata&&sn.metadata.hasPendingWrites)return;const d=sn.data();if(!d||!d.s||(d.u||0)<=(ST.u||0))return;try{const x=JSON.parse(d.s);if(x&&x.v===1){ST=x;ls.set('belt',d.s);UNDO=[];renderBelt();if(!$('tab-jour').hidden)renderJournal()}}catch(e){}},()=>{});
     setSave('сохраняется в аккаунте');renderBelt();
   }catch(e){setSave('сохраняется в этом браузере')}
-  finally{if(!JDB){JDB=localDB();JDB.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется только в этом браузере (не на claude.ai).');renderJournal()})}
+  finally{if(!JDB){JDB=localDB();JDB.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется только в этом браузере (не на claude.ai).');renderJournal();renderBrewingPlan()})}
     if(matInit()){ST.u=Date.now();save()}migrate();if(ST.seed===undefined)applySeed();else if(ST.seed!==SEED.id)syncSeed();else renderBelt()}
 },0);
 function migrate(){
@@ -714,9 +717,8 @@ function fillDrink(){
     l.querySelector('.t').textContent=t;l.querySelector('small').textContent=h;const i=l.querySelector('input');i.checked=!!DM[id];
     i.onchange=()=>{DM[id]=i.checked;if(id==='long'&&i.checked)DM.dbl=false;if(id==='dbl'&&i.checked)DM.long=false;fillDrink()};box.appendChild(l)});
   const TV=toxVars(c);if(TV.length>1){const l=document.createElement('div');l.innerHTML=`<label class="f">Вариант</label><select aria-label="Вариант">${TV.map((x,i)=>`<option value="${i}" ${(DM.tv||0)===i?'selected':''}>${esc(x.v)} — токсичность ${x.t}</option>`).join('')}</select>`;l.querySelector('select').onchange=e=>{DM.tv=+e.target.value;fillDrink()};box.appendChild(l)}
-  let tox=toxOf(c)+(DM.heavy?1:0), dur;
-  if(k==='chg'){dur=DM.short?10:DM.lwin?240:60;$('ddurL').textContent='Окно, мин'}
-  else{const b=durMin(c.d);dur=b;if(DM.long)dur=Math.min(Math.round(b*1.5),b+60);if(DM.dbl)dur=Math.min(b*2,b+480);if(DM.short)dur=Math.round(dur/2);$('ddurL').textContent=/\dк\d/.test(c.d)?'Минут (бросок: '+c.d+'; стоит максимум — впиши выпавшее)':'Минут'}
+  const profile=flaskProfile(c,DM,DM.tv);let tox=profile.tox,dur=profile.duration;
+  $('ddurL').textContent=k==='chg'?'Окно, мин':/\dк\d/.test(c.d)?'Минут (бросок: '+c.d+'; стоит максимум — впиши выпавшее)':'Минут';
   $('dtox').value=tox;$('ddur').value=dur;preview();
 }
 function preview(){
@@ -854,7 +856,7 @@ function renderBelt(){
   if(typeof renderPlan==='function'&&!$('tab-plan').hidden)renderPlan();
   talis();
   $('now').textContent=fmtT(ST.T);
-  renderPeople();renderBag();renderMat();renderOD();preview();renderFight();renderAvailability();renderActiveBrews();renderCombo();
+  renderPeople();renderBag();renderMat();renderOD();preview();renderFight();renderAvailability();renderActiveBrews();renderCombo();renderBrewingPlan();
   $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
   $('undo').disabled=!UNDO.length;
   const t=ST.people[0];if(t){const x=toxOfP(t.id);const b=$('beltBadge');b.textContent=x?`${x}/${t.limit}`:'';b.classList.toggle('hot',x>t.limit)}
@@ -1035,7 +1037,7 @@ function renderPlan(){
 
 // вкладки
 function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';$('tab-scroll').hidden=t!=='scroll';$('tab-smith').hidden=t!=='smith';$('tab-combo').hidden=t!=='combo';if(t==='brew'){renderAvailability();renderActiveBrews()}if(t==='combo')renderCombo();ls.set('tab',t);document.body.classList.toggle('battle-mobile',t==='belt'&&$('tab-belt').classList.contains('combat'));if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
+  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';$('tab-scroll').hidden=t!=='scroll';$('tab-smith').hidden=t!=='smith';$('tab-combo').hidden=t!=='combo';$('tab-brewing-plan').hidden=t!=='brewing-plan';if(t==='brewing-plan')renderBrewingPlan();if(t==='brew'){renderAvailability();renderActiveBrews()}if(t==='combo')renderCombo();ls.set('tab',t);document.body.classList.toggle('battle-mobile',t==='belt'&&$('tab-belt').classList.contains('combat'));if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
@@ -1048,7 +1050,7 @@ function localDB(){const rd=()=>{try{return JSON.parse(ls.get('tracks')||'{}')}c
   return {collection:()=>col}}
 const JG=[["mastery","Мастерство"],["recipe","Рецепты"],["research","Исследования"],["project","Сюжетные проекты"]];
 const JQ={marks:[[1,"успех +1"],[2,"на 5+ +2"],[3,"нат. 20 +3"]],count:[[1,"успех +1"],[2,"нат. 20 +2"]],roll:[]};
-const MGOAL=m=>m===1?10:m===2?15:m===3?20:25;
+const MGOAL=m=>PLAN_RULES.growth[m]||25;
 const jstat=(t,err)=>{const s=$('jstat');if(s){s.textContent=t;s.style.color=err?'var(--bad)':''}};
 const fmtDay=t=>{try{return new Date(t).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'})}catch(e){return''}};
 async function jUpdate(id,patch){
@@ -1974,7 +1976,7 @@ function renderAvailability(){
 ['m','anar'].forEach(id=>$(id).addEventListener('change',renderAvailability));
 
 function snapshot(){
-  return {format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(['m','b','anar','sel','tab','theme'].map(k=>[k,ls.get(k)]))};
+  return {plans:{combo:JSON.parse(JSON.stringify(COMBO)),brewing:{...BP}},format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(['m','b','anar','sel','tab','theme'].map(k=>[k,ls.get(k)]))};
 }
 let DL;  // в опубликованном помощнике — capability downloads; вне Claude — обычная ссылка
 async function downloadSnapshot(data,prefix='alcemy-save'){
@@ -2014,6 +2016,18 @@ function validateSnapshot(data){
   for(const o of s.mat.other)if(typeof o.n!=='string'||!Number.isFinite(o.q)||o.q<0)fail();
   if(s.knownRecipes&&(!Array.isArray(s.knownRecipes)||s.knownRecipes.some(k=>typeof k!=='string')))fail();
   if(s.mat.pools&&(!Array.isArray(s.mat.pools)||s.mat.pools.some(p=>!['heal','poison'].includes(p.k)||!Number.isInteger(p.min)||p.min<1||p.min>10||!Number.isFinite(p.v)||p.v<0)))fail();
+  if(data.plans!=null){
+    const c=data.plans.combo,b=data.plans.brewing;
+    if(!c||!b||typeof c.who!=='string'||typeof c.catalog!=='boolean'||!Array.isArray(c.items)||c.items.length>5)fail();
+    if(c.concentration!=null&&typeof c.concentration!=='string'||c.search!=null&&typeof c.search!=='string'||c.filter!=null&&!['','soft','alchemy','normal','none'].includes(c.filter))fail();
+    for(const item of c.items){
+      if(!item||typeof item.n!=='string'||!Number.isInteger(item.q)||item.q<1||item.q>5||item.variant!=null&&(!Number.isInteger(item.variant)||item.variant<0)||item.note!=null&&typeof item.note!=='string')fail();
+      if(item.mods!=null&&(typeof item.mods!=='object'||Array.isArray(item.mods)||Object.values(item.mods).some(v=>typeof v!=='boolean')))fail();
+      if(item.other!=null&&(!Array.isArray(item.other)||item.other.some(v=>typeof v!=='string')))fail();
+    }
+    for(const key of ['budget','hours','week','progress'])if(b[key]!=null&&(!Number.isFinite(b[key])||b[key]<0))fail();
+    if(typeof b.search!=='string'||typeof b.stockOnly!=='boolean'||!['',...PLAN_NEEDS].includes(b.need))fail();
+  }
   for(const k of ['m','b','anar','sel','tab','theme'])if(data.settings[k]!=null&&typeof data.settings[k]!=='string')fail();
   if(data.settings.m!=null&&(!Number.isInteger(+data.settings.m)||+data.settings.m<1||+data.settings.m>10))fail();
   if(data.settings.b!=null&&(!Number.isFinite(+data.settings.b)||+data.settings.b< -5||+data.settings.b>30))fail();
@@ -2043,14 +2057,15 @@ $('restoreApply').onclick=async()=>{
     localStorage.setItem('belt',JSON.stringify(restored));
     if(DOC){clearTimeout(saveT);await DOC.set({s:JSON.stringify(restored),u:restored.u})}
     ST=restored;TR=next.tracks;S.t={...(next.situation||{})};UNDO=[];UNDOJ={};
+    if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));BP={...next.plans.brewing};ls.set('combo',JSON.stringify(COMBO));ls.set('brewing-plan',JSON.stringify(BP))}
     for(const [key,value] of Object.entries(next.settings))if(['m','b','anar','sel','tab','theme'].includes(key)){if(value==null)localStorage.removeItem(key);else ls.set(key,String(value))}
     $('m').value=ls.get('m')||2;lastM=+$('m').value;$('b').value=ls.get('b')||4;$('anar').checked=ls.get('anar')==='1';
     if(ls.get('theme'))document.documentElement.dataset.theme=ls.get('theme');
     S.sel=D.findIndex(c=>c.n===ls.get('sel'));if(S.sel<0)S.sel=null;
-    renderBelt();renderJournal();list();render();tab(['belt','jour','plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+    renderBelt();renderJournal();list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
     PENDING_SAVE=null;$('restoreDialog').close();$('backupStatus').textContent='Сохранение восстановлено.';
   }catch(err){
-    let rolled=true;try{for(const t of old.tracks){const {id,...data}=t;await col.doc(id).set(data)}for(const t of next.tracks)if(!old.tracks.some(o=>o.id===t.id))await col.doc(t.id).delete();ST=old.state;TR=old.tracks;S.t={...old.situation};localStorage.setItem('belt',JSON.stringify(ST));if(DOC)await DOC.set({s:JSON.stringify(ST),u:Date.now()});renderBelt();renderJournal()}catch(e){rolled=false}
+    let rolled=true;try{for(const t of old.tracks){const {id,...data}=t;await col.doc(id).set(data)}for(const t of next.tracks)if(!old.tracks.some(o=>o.id===t.id))await col.doc(t.id).delete();ST=old.state;TR=old.tracks;S.t={...old.situation};if(old.plans){COMBO=old.plans.combo;BP=old.plans.brewing;ls.set('combo',JSON.stringify(COMBO));ls.set('brewing-plan',JSON.stringify(BP))}localStorage.setItem('belt',JSON.stringify(ST));if(DOC)await DOC.set({s:JSON.stringify(ST),u:Date.now()});renderBelt();renderJournal()}catch(e){rolled=false}
     $('restoreSummary').textContent='Не восстановлено: '+err.message+(rolled?'. Предыдущее состояние возвращено.':'. Откат не завершён: восстанови скачанную копию после восстановления связи.');
   }finally{$('restoreApply').disabled=false;$('restoreCancel').disabled=false}
 };
@@ -2100,11 +2115,27 @@ $('lssClose').onclick=()=>$('lssDialog').close();
 
 // План сочетаний: проверка не расходует предметы и не меняет действующие эффекты.
 let COMBO={who:'p1',catalog:false,items:[],concentration:''};
-try{const saved=JSON.parse(ls.get('combo')||'null');if(saved&&Array.isArray(saved.items))COMBO={...COMBO,...saved,items:saved.items.filter(x=>x&&typeof x.n==='string').slice(0,5).map(x=>({n:x.n,q:Math.max(1,Math.min(5,Math.floor(+x.q||1)))}))}}catch(e){}
+try{const saved=JSON.parse(ls.get('combo')||'null');if(saved&&Array.isArray(saved.items))COMBO={...COMBO,...saved,items:saved.items.filter(x=>x&&typeof x.n==='string').slice(0,5).map(x=>({...x,n:x.n,q:Math.max(1,Math.min(5,Math.floor(+x.q||1)))}))}}catch(e){}
+// Та же арифметика флакона используется в форме фактического выпивания.
+function flaskProfile(c,mods={},variant=0){
+  const variants=toxVars(c),v=variants[Math.max(0,Math.min(variants.length-1,Math.floor(+variant||0)))];
+  const charge=isChg(c),base=durMin(c.d);
+  let duration=charge?(mods.short?10:mods.lwin?240:60):base;
+  if(!charge){if(mods.long)duration=Math.min(Math.round(base*1.5),base+60);if(mods.dbl)duration=Math.min(base*2,base+480);if(mods.short)duration=Math.round(duration/2)}
+  return {variant:v.v,tox:v.t+(mods.heavy?1:0),duration,uses:charge&&mods.twin?2:1,clean:!charge&&!!mods.clean};
+}
+const FLASK_NAMES={'Долгое действие':'long','Двойной срок':'dbl','Чистый':'clean','Долгое окно':'lwin','Двойной заряд':'twin','дефект: Короткое':'short','дефект: Тяжёлое':'heavy'};
+function flaskNote(note){const mods={};String(note||'').split(' + ').forEach(x=>{if(FLASK_NAMES[x.trim()])mods[FLASK_NAMES[x.trim()]]=true});return mods}
+const COMBO_KITS={
+  'Защита':['Доспехи мага','Щит веры'],
+  'Разведка':['Видение невидимого','Паук'],
+  'Урон и реакция':['Психическая плеть','Щит']
+};
+function comboMatches(c){return (!COMBO.search||c.n.toLocaleLowerCase('ru').includes(COMBO.search.toLocaleLowerCase('ru')))&&(!COMBO.filter||COMBO.filter==='soft'&&toxVars(c).some(v=>v.t===0)||COMBO.filter==='alchemy'&&c.a||COMBO.filter==='normal'&&c.cc||COMBO.filter==='none'&&!c.a&&!c.cc)}
 function checkCombo(items,context){
   const rows=items.map(item=>{
     const c=byName(item.n),q=Math.max(1,Math.min(5,Math.floor(+item.q||1)));
-    return c&&DRINK(c)?{c,q,tox:toxVars(c)[0].t*q}:null;
+    const profile=c&&flaskProfile(c,item.mods||{},item.variant);if(profile)profile.other=item.other||[];return c&&DRINK(c)?{c,q,profile,note:item.note||'',tox:profile.tox*q}:null;
   }).filter(Boolean);
   const warnings=[],alchemy=[...(context.alchemy||[])],normal=[];
   const names=new Set(context.names||[]);
@@ -2117,6 +2148,7 @@ function checkCombo(items,context){
   if(alchemy.length>1)warnings.push(`Алхимическая концентрация: одновременно один эффект. Новый прекратит предыдущий: ${alchemy.join(' → ')}.`);
   const concentration=(context.concentration||'').trim();
   if(normal.length+(concentration?1:0)>1)warnings.push(`Обычная концентрация: одновременно один эффект. После применения заряда прежний прекратится: ${[concentration,...normal].filter(Boolean).join(' → ')}.`);
+  for(const item of items){const qualities=Object.entries(item.mods||{}).filter(([k,v])=>v&&['long','dbl','clean','lwin','twin'].includes(k)).length+(item.other||[]).length;if(qualities>2||qualities>1&&(item.mods?.dbl||item.mods?.twin||(item.other||[]).some(n=>['Крепкая привязка','Полное усиление'].includes(n))))warnings.push('Качество одного флакона: натуральная 20 даёт один бонус 20 либо два разных бонуса 5+; проверь выбранное сочетание бонусов.');if((item.other||[]).includes('Сильная привязка')&&(item.other||[]).includes('Крепкая привязка'))warnings.push('Привязка одного флакона: выбери +1 или +2; вместе они не складываются.')}
   const added=rows.reduce((sum,row)=>sum+row.tox,0),total=context.tox+added,excess=Math.max(0,total-context.limit);
   if(excess&&added)warnings.push(`Передозировка: превышение ${excess}, спасбросок Телосложения СЛ ${10+2*excess}. При провале — интоксикация и ${excess}к6 урона без типа${excess>=3?', также 1 истощение':''}.`);
   else if(excess)warnings.push('Текущая токсичность уже выше предела; план не добавляет токсичности.');
@@ -2131,7 +2163,8 @@ function renderCombo(){
   if($('tab-combo').hidden)return;
   if(!P(COMBO.who))COMBO.who=ST.people[0]?.id;
   const p=P(COMBO.who);if(!p)return;
-  const stock=comboStock(p.id),options=D.filter(c=>DRINK(c)&&(COMBO.catalog||stock.has(c.n))).sort((a,b)=>a.n.localeCompare(b.n,'ru'));
+  $('comboSearch').value=COMBO.search||'';$('comboFilter').value=COMBO.filter||'';
+  const stock=comboStock(p.id),options=D.filter(c=>DRINK(c)&&(COMBO.catalog||stock.has(c.n))&&comboMatches(c)).sort((a,b)=>a.n.localeCompare(b.n,'ru'));
   $('comboWho').innerHTML=ST.people.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');$('comboWho').value=p.id;
   $('comboCatalog').checked=!!COMBO.catalog;
   $('comboConcentration').value=p.id==='p1'?(ST.talis?.concentration||COMBO.concentration):COMBO.concentration;
@@ -2140,27 +2173,48 @@ function renderCombo(){
   COMBO.items.forEach((item,index)=>{
     const row=document.createElement('div');row.className='row combo-row';
     const missing=!options.some(c=>c.n===item.n);
-    row.innerHTML=`<div><label class="f">Эликсир ${index+1}</label><select class="combo-name" aria-label="Эликсир ${index+1}">${missing?`<option value="${esc(item.n)}">${esc(item.n)} — нет в выбранной сумке</option>`:''}${options.map(c=>`<option value="${esc(c.n)}">${esc(c.n)}${COMBO.catalog?'':' · '+stock.get(c.n)+' доз'}</option>`).join('')}</select></div><div style="flex:0 0 70px"><label class="f">Доз</label><input class="combo-qty" aria-label="Доз ${index+1}" type="number" min="1" max="5" value="${item.q}"></div><button type="button" class="btn ghost combo-remove" aria-label="Убрать эликсир ${index+1}">Убрать</button>`;
+    row.innerHTML=`<div><label class="f">Эликсир ${index+1}</label><select class="combo-name" aria-label="Эликсир ${index+1}">${missing?`<option value="${esc(item.n)}">${esc(item.n)} — вне фильтра или нет в сумке</option>`:''}${options.map(c=>`<option value="${esc(c.n)}">${esc(c.n)}${COMBO.catalog?'':' · '+stock.get(c.n)+' доз'}</option>`).join('')}</select></div><div style="flex:0 0 70px"><label class="f">Доз</label><input class="combo-qty" aria-label="Доз ${index+1}" type="number" min="1" max="5" value="${item.q}"></div><button type="button" class="btn ghost combo-remove" aria-label="Убрать эликсир ${index+1}">Убрать</button>`;
     row.querySelector('select').value=item.n;
-    row.querySelector('select').onchange=e=>{COMBO.items[index].n=e.target.value;saveCombo()};
+    row.querySelector('select').onchange=e=>{COMBO.items[index]={n:e.target.value,q:item.q};saveCombo()};
     row.querySelector('input').onchange=e=>{COMBO.items[index].q=Math.max(1,Math.min(5,Math.floor(+e.target.value||1)));saveCombo()};
     row.querySelector('button').onclick=()=>{COMBO.items.splice(index,1);saveCombo()};root.appendChild(row);
+    const c=byName(item.n);if(!c)return;
+    const extras=document.createElement('div');extras.className='card';extras.style.marginBottom='12px';
+    const bottles=myBag(p.id).filter(b=>bagCard(b)===c&&b.q>0);
+    extras.innerHTML=`<label class="f">Флакон из сумки / сценарий</label><select class="combo-bottle"><option value="">Сценарий: бонусы задаются вручную</option>${bottles.map(b=>`<option value="${esc(b.note||'') || '__plain__'}">${esc(b.note||'Обычный')} · ${b.q} доз</option>`).join('')}</select><label class="f">Вариант токсичности</label><select class="combo-variant">${toxVars(c).map((v,i)=>`<option value="${i}">${esc(v.v)} · ${v.t}</option>`).join('')}</select><div class="toggles">${MODS[isChg(c)?'chg':'eff'].filter(m=>isChg(c)||durMin(c.d)>0||!['long','dbl','short'].includes(m[0])).map(([id,n,h])=>`<label class="tg"><input type="checkbox" data-mod="${id}" ${item.mods?.[id]?'checked':''}><span>${esc(n)}<small>${esc(h)}</small></span></label>`).join('')}</div><p class="note">5+: ${esc(c.b5)}. Нат. 20: ${esc(c.b20)}. Бонусы к СЛ, кубам и целям применяются по карточке; продление ограниченного ресурса не добавляет применений.</p>`;
+    const special=document.createElement('div');special.className='toggles';
+    const basicNames=new Set(MODS[isChg(c)?'chg':'eff'].map(x=>x[1]));
+    const qualities=bonusLists(c.n,c.l,c),other=[...qualities.L5,...qualities.L20].filter(n=>!KEEP_OFF.has(n)&&!basicNames.has(n));
+    special.innerHTML=other.map(n=>`<label class="tg"><input type="checkbox" data-quality="${esc(n)}" ${(item.other||[]).includes(n)?'checked':''}><span>${esc(n)}</span></label>`).join('');
+    special.querySelectorAll('input').forEach(el=>el.onchange=()=>{item.other=(item.other||[]).filter(n=>n!==el.dataset.quality);if(el.checked)item.other.push(el.dataset.quality);delete item.note;saveCombo()});extras.appendChild(special);
+    extras.querySelector('.combo-bottle').value=item.note===undefined?'':item.note||'__plain__';
+    extras.querySelector('.combo-bottle').onchange=e=>{if(!e.target.value){delete item.note}else{item.note=e.target.value==='__plain__'?'':e.target.value;item.mods=flaskNote(item.note);item.other=item.note.split(' + ').filter(n=>other.includes(n));const variant=toxVars(c).findIndex(v=>v.v!=='основной'&&item.note.includes(v.v));item.variant=Math.max(0,variant)}saveCombo()};
+    extras.querySelector('.combo-variant').value=item.variant||0;
+    extras.querySelector('.combo-variant').onchange=e=>{item.variant=+e.target.value;saveCombo()};
+    extras.querySelectorAll('[data-mod]').forEach(el=>el.onchange=()=>{item.mods={...item.mods,[el.dataset.mod]:el.checked};delete item.note;if(el.checked&&el.dataset.mod==='long')item.mods.dbl=false;if(el.checked&&el.dataset.mod==='dbl')item.mods.long=false;saveCombo()});root.appendChild(extras);
   });
   const result=checkCombo(COMBO.items,{tox:toxOfP(p.id),limit:p.limit,
     alchemy:ST.ent.filter(e=>e.who===p.id&&e.a&&isActive(e)).map(e=>e.n),
     names:ST.ent.filter(e=>e.who===p.id&&isActive(e)&&e.k==='eff').map(e=>e.n),
     concentration:$('comboConcentration').value});
   const stockWarnings=[];
-  for(const [name,q] of COMBO.items.reduce((m,x)=>m.set(x.n,(m.get(x.n)||0)+x.q),new Map())){
-    const lack=q-(stock.get(name)||0);if(lack>0)stockWarnings.push(`«${name}»: не хватает ${lack} доз в сумке.`);
-  }
+  const requested=new Map();
+  for(const item of COMBO.items){const key=JSON.stringify([item.n,item.note??null]);requested.set(key,(requested.get(key)||0)+item.q)}
+
+  for(const [key,q] of requested){const [name,note]=JSON.parse(key);if(note===null)continue;const have=myBag(p.id).filter(b=>bagCard(b)?.n===name&&(b.note||'')===note).reduce((s,b)=>s+b.q,0);if(q>have)stockWarnings.push(`«${name}» (${note||'обычный'}): не хватает ${q-have} доз с этой пометкой.`)}
+  const all=new Map();for(const item of COMBO.items)all.set(item.n,(all.get(item.n)||0)+item.q);
+  for(const [name,q] of all){const lack=q-(stock.get(name)||0);if(lack>0)stockWarnings.push(`«${name}»: не хватает ${lack} доз в сумке.`)}
   const warnings=[...result.warnings,...stockWarnings];
   $('comboResult').innerHTML=`<p><b>Токсичность: ${toxOfP(p.id)} + ${result.added} = ${result.total} из ${p.limit}</b>${result.excess?' · превышение '+result.excess:' · запас '+(p.limit-result.total)}</p>
     ${warnings.length?'<ul class="combo-warnings">'+warnings.map(w=>`<li>${esc(w)}</li>`).join('')+'</ul>':'<p>Конфликтов концентрации и превышения токсичности по выбранному плану нет.</p>'}
-    ${result.rows.map(r=>`<details><summary>${esc(r.c.n)} ×${r.q} · токсичность ${r.tox} · ${r.c.a?'алхимическая концентрация':r.c.cc?'обычная концентрация после применения':'без концентрации'}</summary><p>${esc(r.c.eff)}</p></details>`).join('')}`;
+    ${result.rows.map(r=>`<details><summary>${esc(r.c.n)} ×${r.q} · токсичность ${r.tox} · ${r.c.a?'алхимическая концентрация':r.c.cc?'обычная концентрация после применения':'без концентрации'}</summary><p>${esc(r.note)}${r.note?'<br>':''}${r.profile.variant!=='основной'?esc(r.profile.variant)+' · ':''}${isChg(r.c)?'Окно':'Длительность'}: ${r.profile.duration} мин${/\dк\d/.test(r.c.d)&&!isChg(r.c)?' (максимум; фактически брось кубы)':''}${isChg(r.c)?' · применений на флакон: '+r.profile.uses:''}. ${r.profile.clean?'Остаточная токсичность снимается 10 минутами отдыха после конца эффекта.':'Остаточная токсичность — до короткого отдыха.'}</p><p>${r.profile.other.map(n=>esc(n)+(n==='Сильная привязка'?' — +1 к табличной СЛ / атаке; свои заклинательные значения не повышает':n==='Крепкая привязка'?' — +2 к табличной СЛ / атаке; свои заклинательные значения не повышает':n==='Усиленное заклинание'?' — кубы как ячейкой на уровень выше; цели и длительность не меняются':n==='Полное усиление'?' — как ячейкой на уровень выше, по строке усиления исходного заклинания':n==='Лёгкий глоток'?' — влить союзнику бонусным действием':'' )).join('<br>')}</p><p>${esc(r.c.eff)}</p></details>`).join('')}`;
   $('comboAdd').disabled=COMBO.items.length>=5||!options.length;
   $('comboAdd').onclick=()=>{COMBO.items.push({n:options[0].n,q:1});saveCombo()};
 }
+$('comboKit').innerHTML='<option value="">Выбрать комплект…</option>'+Object.keys(COMBO_KITS).map(n=>`<option>${esc(n)}</option>`).join('');
+$('comboKit').onchange=e=>{const kit=COMBO_KITS[e.target.value];if(kit){COMBO.items=kit.filter(n=>byName(n)).map(n=>({n,q:1}));COMBO.catalog=true;COMBO.search='';COMBO.filter='';$('comboSearch').value='';$('comboFilter').value='';saveCombo()}};
+$('comboSearch').value=COMBO.search||'';$('comboSearch').oninput=e=>{COMBO.search=e.target.value;saveCombo()};
+$('comboFilter').value=COMBO.filter||'';$('comboFilter').onchange=e=>{COMBO.filter=e.target.value;saveCombo()};
 function saveCombo(){ls.set('combo',JSON.stringify(COMBO));renderCombo()}
 $('comboWho').onchange=e=>{COMBO.who=e.target.value;COMBO.concentration='';saveCombo()};
 $('comboCatalog').onchange=e=>{COMBO.catalog=e.target.checked;saveCombo()};
@@ -2172,6 +2226,95 @@ function renderActiveBrews(){
   const list=ST.vol||[];box.hidden=!list.length;
   box.innerHTML=list.length?`<b>Незавершённые варки: ${list.length}</b><ul>${list.map(v=>`<li>${esc(v.n)}: ${fmtZ(v.prog)} / ${v.volume}${volIdle(v).ruined?' — испорчена':v.prog>=v.volume?' — готова к завершающей проверке':''}</li>`).join('')}</ul><button type="button" class="btn soft" id="openActiveBrews">Открыть в журнале</button>`:'';
   if(list.length)$('openActiveBrews').onclick=()=>{tab('jour');$('jvol').scrollIntoView({block:'start'})};
+}
+
+
+// Сценарии планирования хранятся отдельно от фактических ресурсов и журнала.
+const PLAN_RULES={"potionDC": {"1": 10, "2": 10, "3": 11, "4": 13, "5": 15, "6": 17, "7": 19, "8": 21, "9": 23, "10": 25}, "growth": {"1": 10, "2": 15, "3": 20, "4": 25, "5": 25, "6": 25, "7": 25, "8": 25, "9": 25}, "catalyst": {"1": 0, "2": 0, "3": 70, "4": 70, "5": 70, "6": 350, "7": 350, "8": 1750, "9": 1750, "10": 7500}};
+let BP={budget:null,hours:2,need:'Лечение',stockOnly:false,search:'',week:12,progress:null};
+try{const saved=JSON.parse(ls.get('brewing-plan')||'null');if(saved&&typeof saved==='object')for(const key of Object.keys(BP))if(Object.hasOwn(saved,key))BP[key]=saved[key]}catch(e){}
+const PLAN_NEEDS=['Лечение','Защита','Контроль','Мобильность','Разведка','Урон','Рост мастерства'];
+function recipeNeeds(c){
+  if(c.k==='basic')return c.b==='лечебная'?['Лечение']:['Урон'];
+  const tags=c.tk||[],text=(Array.isArray(tags)?tags.join(' '):String(tags)).toLowerCase();
+  const map={'Лечение':/лечен|восстанов|хиты|исцелен/,'Защита':/защит|сопротив|кд|спасброс|временн/,'Контроль':/контрол|обездвиж|оглуш|опут|очаров|ослеп|страх/,'Мобильность':/мобиль|движ|скорост|полёт|телепорт/,'Разведка':/развед|восприят|скрыт|зрен|общен|обнаруж/,'Урон':/урон/};
+  return Object.entries(map).filter(([,re])=>re.test(text)).map(([n])=>n);
+}
+function planChance(c,bonus,unstable=S.t.ess){
+  const dc=(c.k==='basic'?PLAN_RULES.potionDC[c.l]:DC[c.l-1])+(unstable&&c.k!=='basic'?2:0);
+  const p=chancesTxt(dc,bonus+(S.t.help?2:0));
+  return {dc,p,success:p.ok+p.hi+p.n20,growth:p.ok+p.hi+2*p.n20};
+}
+// Точное ожидание числа полных партий до цели: прибавки 0/1/2 за дозу.
+// Включает избыток прогресса в последней партии, но не создаёт реальные успехи.
+function expectedBatches(remaining,size,success,natural20=.05){
+  if(remaining<=0)return 0;
+  let pmf=[1];
+  for(let i=0;i<size;i++){const next=Array(pmf.length+2).fill(0);pmf.forEach((p,j)=>{next[j]+=p*(1-success);next[j+1]+=p*(success-natural20);next[j+2]+=p*natural20});pmf=next}
+  if(pmf[0]>=1-1e-12)return Infinity;
+  const expected=Array(remaining+1).fill(0);
+  for(let r=1;r<=remaining;r++){let value=1;for(let gain=1;gain<pmf.length;gain++)value+=pmf[gain]*expected[Math.max(0,r-gain)];expected[r]=value/(1-pmf[0])}
+  return expected[remaining];
+}
+// Ожидание подходов по 6.3: учитывает половину прогресса, нат. 1 и границу нуля.
+// Метки/дефекты меняют завершающую проверку, а не объём; простой здесь отсутствует.
+const VOLUME_CACHE=new Map();
+function volumeHours(level,dc,bonus){
+  const volume=VOLUME(level),key=[volume,dc,bonus].join(':');if(VOLUME_CACHE.has(key))return VOLUME_CACHE.get(key);
+  const transitions=[];
+  for(let r=2;r<=20;r++){const total=r+bonus;transitions.push([r===20?2*total:total>=dc?total:total>=dc-4?Math.floor(total/2):0,.05])}
+  for(let n=1;n<=20;n++)transitions.push([-n,.0025]);
+  const E=Array(volume+1).fill(0);
+  for(let sweep=0;sweep<1000;sweep++){
+    let change=0;
+    for(let i=volume-1;i>=0;i--){let value=1,self=0;for(const [delta,p] of transitions){const j=Math.max(0,Math.min(volume,i+delta));if(j===i)self+=p;else value+=p*E[j]}value/=1-self;change=Math.max(change,Math.abs(value-E[i]));E[i]=value}
+    if(change<1e-8)break;
+  }
+  const result=E[0]*2;VOLUME_CACHE.set(key,result);return result;
+}
+function masteryForecast(M,B,progress,week){
+  if(M>=10)return null;
+  const target=PLAN_RULES.growth[M],remaining=Math.max(0,target-progress),c={k:'basic',l:M};
+  const chance=planChance(c,B),batch=batchInfo('',M,null,M,S.t.lab),batches=expectedBatches(remaining,batch.size,chance.success),attempts=batches*batch.size;
+  // Консервативно: полная стоимость трав, без выбора экономии за качество.
+  // Катализатор — 5 стабильных применений; ремонт и риск сверх ресурса исключены.
+  const perDose=M*HERB_P[M]+PLAN_RULES.catalyst[M]/5;
+  return {target,remaining,dc:chance.dc,bonus:B+(S.t.help?2:0),success:chance.success,size:batch.size,batches,attempts,hours:batches*batch.t,gold:attempts*perDose,herbs:attempts*M,catalystUses:M>=3?attempts:0,weeks:week>0?batches*batch.t/week:null};
+}
+function recommendBrews(config){
+  const M=Math.max(1,Math.min(10,+$('m').value||1)),B=+$('b').value||0,budget=Math.max(0,+config.budget||0),hours=Math.max(0,+config.hours||0),result=[];
+  for(const c of RECIPES){
+    if(!knows(c)||c.l>M||c.l>(S.t.lab?10:$('anar').checked?8:5))continue;
+    if(config.search&&!c.n.toLowerCase().includes(String(config.search).toLowerCase()))continue;
+    const needs=recipeNeeds(c),growth=c.l===M;
+    if(config.need==='Рост мастерства'?!growth:config.need&&!needs.includes(config.need))continue;
+    const check=supply(c),unknown=check.deficits.some(d=>d.price==null),cost=check.deficits.reduce((s,d)=>s+(d.price||0),0);
+    if(unknown||cost>budget+1e-8||config.stockOnly&&check.deficits.length)continue;
+    const chance=planChance(c,B,S.t.ess||check.warnings.some(w=>w.startsWith('нестабильная эссенция'))),batch=batchInfo(c.n,c.l,c.k==='basic'?null:c,M,S.t.lab);
+    const long=c.k!=='basic'&&c.l>=6;
+    const time=long?volumeHours(c.l,chance.dc,B+(S.t.help?2:0)):batch.t;
+    if(time>hours+1e-8)continue;
+        // Рекомендация — отдельная альтернатива, не общий комплект с общими материалами.
+    result.push({c,check,cost,time,long,chance,needs,growth});
+  }
+  // Рекомендации Codex: сначала без докупки, затем цена; при равной цене —
+  // шанс годной дозы, время и название. Не выдумываем численную «силу» эффекта.
+  return result.sort((a,b)=>a.cost-b.cost||b.chance.success-a.chance.success||a.time-b.time||a.c.n.localeCompare(b.c.n,'ru'));
+}
+function saveBrewingPlan(){ls.set('brewing-plan',JSON.stringify(BP));renderBrewingPlan()}
+function renderBrewingPlan(){
+  const box=$('brewingPlanning');if(!box||$('tab-brewing-plan').hidden)return;
+  const M=Math.max(1,Math.min(10,+$('m').value||1)),B=+$('b').value||0;
+  const track=TR.find(t=>t.group==='mastery'&&(t.id===`mastery-${M}-${M+1}`||t.name===`Мастерство ${M} → ${M+1}`));
+  const progress=BP.progress==null?Math.max(0,+track?.current||0):Math.max(0,Math.floor(+BP.progress||0)),week=Math.max(0,+BP.week||0),forecast=masteryForecast(M,B,progress,week);
+  const budget=BP.budget==null?ST.mat.gold||0:Math.max(0,+BP.budget||0),options=recommendBrews({...BP,budget});
+  box.innerHTML=`<div class="card"><h2>До следующего мастерства</h2><p>Мастерство ${M} · общий бонус варки ${B>=0?'+':''}${B}${S.t.help?' +2 от помощника':''}. Бонус и мастерство берутся с вкладки «Варка».</p><div class="row"><div><label class="f">Уже набрано успехов <small>Пусто — брать из журнала</small></label><input id="bpProgress" type="number" min="0" max="25" value="${BP.progress==null?'':progress}" placeholder="${progress}"></div><div><label class="f">Часов варки в неделю</label><input id="bpWeek" type="number" min="0" max="168" value="${week}"></div></div><div id="bpForecast">${M<10&&!knows(BASIC.find(c=>c.l===M&&c.b==='лечебная'))?'<p class="note">Рецепт зелья лечения этого уровня не отмечен известным: прогноз — сценарий после освоения рецепта (либо для известного яда того же уровня).</p>':''}${!forecast?'<p>Мастерство X: следующей ступени нет.</p>':`<p>До ${M+1}: <b>${forecast.remaining} из ${forecast.target}</b> успехов. Зелья уровня ${M}, СЛ ${forecast.dc}, годная доза ${pct(forecast.success)}, партия ${forecast.size}.</p><p>В среднем: <b>${fmtZ(forecast.hours)} ч</b> · ${fmtZ(forecast.batches)} партий · ${fmtZ(forecast.attempts)} попыток${forecast.weeks==null?'':' · '+fmtZ(forecast.weeks)+' недель'}.</p><p>Стоимость расхода: <b>${fmtZ(forecast.gold)} зм</b>; травы ур. ${M}: ${fmtZ(forecast.herbs)} шт${forecast.catalystUses?' · применений катализатора: '+fmtZ(forecast.catalystUses):''}.</p>`}</div><p class="note">Ожидание, не срок с гарантией: каждую дозу проверяют отдельно, натуральная 20 даёт два успеха. Модель — освоенные зелья текущего уровня, обычные партии, неизменный бонус, без ремонтных осечек, нестабильных катализаторов, руководства и перерывов. Полная ценность расхода включает уже имеющиеся материалы; это не список докупки. Экономия трав за 5+ не заложена. Будущий уровень персонажа автоматически не повышается.</p></div>
+  <div class="card" style="margin-top:16px"><h2>Что варить сегодня</h2><p class="note">Рекомендации Codex. Пять отдельных альтернатив на одну дозу / попытку, каждая проверяется по текущему запасу. Порядок: минимум докупки, затем шанс годной дозы и время. Известные рецепты отметь в «Что могу сварить».</p><div class="row"><div><label class="f">Бюджет докупки, зм <small>Пусто — деньги из материалов</small></label><input id="bpBudget" type="number" min="0" value="${BP.budget==null?'':budget}" placeholder="${budget}"></div><div><label class="f">Есть часов</label><input id="bpHours" type="number" min="0" max="10000" step="0.5" value="${Math.max(0,+BP.hours||0)}"></div><div><label class="f">Нужда группы</label><select id="bpNeed"><option value="">Любая</option>${PLAN_NEEDS.map(n=>`<option>${n}</option>`).join('')}</select></div></div><div class="row"><div><label class="f">Поиск рецепта</label><input id="bpSearch" type="search" value="${esc(String(BP.search||''))}"></div><label class="tg"><input id="bpStock" type="checkbox" ${BP.stockOnly?'checked':''}><span>Только имеющиеся материалы</span></label></div><div id="bpOptions">${!options.length?'<p>Подходящих варок нет: проверь известные рецепты, мастерство, оборудование, время, бюджет и материалы. Позиции с неизвестной ценой не считаются доступными за деньги.</p>':`<p>Подходит: ${options.length}. Показаны первые пять.</p>`+options.slice(0,5).map((r,i)=>`<div class="card"><h3>${esc(r.c.n)} · ${ROM[r.c.l]}</h3><p>Докупка ${fmtZ(r.cost)} зм · ${r.long?'ожидаемая работа ≈':'время '}${fmtZ(r.time)} ч · ${r.long?'шанс завершающей проверки до меток и дефектов':'годная доза'} ${pct(r.chance.success)}${r.growth?' · ожидаемый рост '+fmtZ(r.chance.growth)+' на проверку':''}.</p>${r.long?'<p class="note">VI+: время без простоев, с заминками и потерей прогресса. Метки и дефекты меняют финальный шанс; часы — среднее, фактическая варка может не уложиться.</p>':''}${r.check.deficits.length?'<ul>'+r.check.deficits.map(d=>`<li>${esc(d.n)}: ${fmtZ(d.q)} · ${fmtZ(d.price)} зм</li>`).join('')+'</ul>':'<p>Материалы на попытку есть.</p>'}${r.check.warnings.length?'<p class="note">'+r.check.warnings.map(esc).join(' · ')+'</p>':''}<button type="button" class="btn soft bpOpen" data-index="${i}">Открыть рецепт</button></div>`).join('')}</div><p class="note">Докупка — справочные цены; наличие у продавца проверяет мастер. Нестабильная эссенция добавляет +2 к СЛ в прогнозе; риск катализатора не включён в шанс. Подбор не расходует материалы, деньги и часы и не обещает готовую дозу. Категории берутся из задач карточек; эффекты сверяй по рецепту.</p></div>`;
+  $('bpNeed').value=BP.need;
+  for(const [id,key] of [['bpProgress','progress'],['bpBudget','budget'],['bpWeek','week'],['bpHours','hours']])$(id).onchange=e=>{BP[key]=e.target.value===''&&['progress','budget'].includes(key)?null:Math.max(0,Math.min(key==='progress'?25:key==='week'?168:1000000,+e.target.value||0));saveBrewingPlan()};
+  $('bpNeed').onchange=e=>{BP.need=e.target.value;saveBrewingPlan()};$('bpStock').onchange=e=>{BP.stockOnly=e.target.checked;saveBrewingPlan()};
+  $('bpSearch').onchange=e=>{BP.search=e.target.value;saveBrewingPlan()};
+  box.querySelectorAll('.bpOpen').forEach(el=>el.onclick=()=>{tab('brew');chooseAvailableRecipe(options[+el.dataset.index].c);$('out').scrollIntoView({block:'start'})});
 }
 
 
@@ -2294,8 +2437,8 @@ function renderActiveBrews(){
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=BASIC.find(c=>c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
-list();render();renderBelt();tab(['belt','jour','plan','scroll','smith','combo'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+list();render();renderBelt();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
-<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 04948f623bb4</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
+<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка c17767281665</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
 </body>
 </html>

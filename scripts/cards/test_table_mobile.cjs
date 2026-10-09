@@ -46,7 +46,7 @@ const shots=process.env.TABLE_TOOLS_SCREENSHOTS;
     if(shots)await page.screenshot({path:path.join(shots,`battle-${width}.png`)});
     // Не переносить режим мобильной шапки на другие вкладки.
     await page.locator('[data-tab="brew"]').click();assert.equal(await page.locator('#headerDetails').isVisible(),true);await fits();
-    for(const tab of ['belt','jour','plan','scroll','smith','combo','brew']){
+    for(const tab of ['belt','jour','plan','scroll','smith','combo','brewing-plan','brew']){
       await page.locator(`[data-tab="${tab}"]`).click();await fits();
     }
     await page.goto(base+'/'+encodeURIComponent('Пульт мастера.html'));await fits();
