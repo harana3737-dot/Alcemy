@@ -8,9 +8,11 @@ from pathlib import Path
 import re
 import random
 import sim_plan as p
+from generated_files import marker
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / 'Недельная варка — план и бюджет.md'
+NOTE = marker('scripts/weekly_economy_report.py', 'scripts/sim_plan.py; scripts/rules_data.py', partial=True)
 
 
 def number(x, digits=1):
@@ -29,13 +31,13 @@ def replace_table(text, heading, replacement):
     if not match:
         raise ValueError('Не найдена таблица: ' + heading)
     a, b = start + match.start(), start + match.end()
-    return text[:a] + replacement + text[b:]
+    return text[:a] + NOTE + '\n' + replacement + text[b:]
 
 
 def build():
     rng = random.Random(20261008)
     rates = {m: p.per_hour(m, rng=rng) for m in range(2, 11)}
-    text = SOURCE.read_text(encoding='utf-8')
+    text = SOURCE.read_text(encoding='utf-8').replace(NOTE + '\n', '')
     text = re.sub(r'^\d{2}\.\d{2}\.\d{4}\.(?: Пересчёт Codex\.)?',
                   '08.10.2026. Пересчёт Codex.', text, count=1, flags=re.M)
     for heading, fn, headers, last in (

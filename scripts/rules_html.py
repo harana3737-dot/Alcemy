@@ -12,7 +12,7 @@ def build():
     OUT = ROOT / ("Алхимия Талиса — правила за столом.html" if TABLE else "Алхимия Талиса — правила v0.3.html")
 
     lines = [line for line in SRC.read_text(encoding="utf-8").splitlines()
-             if line not in ("<!-- reading-guide:start -->", "<!-- reading-guide:end -->")]
+             if not line.lstrip().startswith("<!--")]
     JOURNAL = ROOT / "Журнал решений.md"
     chg_lines = JOURNAL.read_text(encoding="utf-8").splitlines()   # таблица изменений относительно v0.2
 
@@ -286,6 +286,8 @@ function filter(){{const q=$('#q').value.trim().toLowerCase();let n=0;
  $('#cnt').textContent=n?('найдено блоков: '+n):'ничего не найдено'}}
 $('#q').addEventListener('input',filter);
 </script></body></html>"""
+    from generated_files import generated_html
+    page = generated_html(page, "scripts/rules_html.py", SRC.name)
     OUT.write_text(page, encoding="utf-8")
     print("ok", len(page), "заголовков", len(heads))
     if not TABLE:   # «правила за столом» собираются из полной редакции при каждой сборке

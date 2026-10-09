@@ -17,6 +17,7 @@ import shutil
 import tempfile
 from urllib.parse import unquote
 import zipfile
+from generated_files import generated_html
 
 ROOT = Path(__file__).resolve().parent.parent
 BOOK = 'Для игрока — книга алхимии'
@@ -269,6 +270,7 @@ def build(root=ROOT):
         if target not in id_set:
             raise ValueError('Неизвестная внутренняя ссылка: ' + target)
     out = root / (BOOK + '.html')
+    page = generated_html(page, "scripts/player_book.py", "Для игрока — книга алхимии.md; scripts/player_book_tpl.html")
     out.write_text(page, encoding='utf-8')
     entries = {
         BOOK + '.html': out.read_bytes(),
@@ -280,7 +282,7 @@ def build(root=ROOT):
     }
     for doc in DOCUMENTS:
         source_entries[doc.filename] = (root / doc.filename).read_bytes()
-    for name in ('scripts/player_book.py', 'scripts/player_book_tpl.html', 'scripts/test_player_book.cjs'):
+    for name in ('scripts/player_book.py', 'scripts/player_book_tpl.html', 'scripts/generated_files.py', 'scripts/test_player_book.cjs'):
         source_entries[name] = (root / name).read_bytes()
     write_archive(root / ARCHIVE, entries)
     write_archive(root / SOURCE_ARCHIVE, source_entries)
@@ -293,7 +295,7 @@ def check(root=ROOT):
         temporary = Path(directory)
         inputs = {BOOK + '.md', 'Для игрока — начни отсюда.md',
                   *(doc.filename for doc in DOCUMENTS),
-                  'scripts/player_book.py', 'scripts/player_book_tpl.html',
+                  'scripts/player_book.py', 'scripts/player_book_tpl.html', 'scripts/generated_files.py',
                   'scripts/test_player_book.cjs'}
         for name in inputs:
             destination = temporary / name

@@ -1,4 +1,8 @@
+<!doctype html>
+<html lang="ru">
+<head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Пульт мастера</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -118,6 +122,7 @@ dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:10p
 .el .d dl{display:grid;grid-template-columns:max-content 1fr;gap:3px 12px;margin:6px 0}
 .el .d dt{color:var(--muted);font-size:13px}.el .d dd{margin:0}
 @media(max-width:520px){.el .d{padding-left:4px}.q .opt{grid-template-columns:1fr}.q .opt>b{padding-top:6px}}
+@media(max-width:520px){.el .bdg{white-space:normal;overflow-wrap:anywhere;max-width:100%}}
 
 /* Талис */
 .facts{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:6px 0 4px}
@@ -176,6 +181,8 @@ details.grp>summary h2{margin:0;flex:0 1 auto}
 .callout{border-left:3px solid var(--warn);background:var(--warn-soft);border-radius:8px;padding:8px 10px;font-size:14px;margin:8px 0}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
+</head>
+<body>
 
 <div class="wrap">
 <header>
@@ -466,3 +473,5 @@ $('talis').innerHTML=T.map(s=>`<li>${md(s)}</li>`).join('');
     <dt>Итог</dt><dd>${md(r.result)}</dd>${r.credit?`<dt>Зачёт</dt><dd>${md(r.credit)}</dd>`:''}</dl>`}}
 $('sample').innerHTML=J('d-sample').filter(s=>s.trim()&&!s.startsWith('|')).map(s=>s.startsWith('- ')?`<li>${md(s.slice(2))}</li>`:`<p>${md(s)}</p>`).join('').replace(/(<li>.*?<\/li>)+/gs,m=>`<ul>${m}</ul>`);
 </script>
+</body>
+</html>

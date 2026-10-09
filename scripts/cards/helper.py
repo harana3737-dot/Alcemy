@@ -209,6 +209,8 @@ def build():
     html = html.replace("__DATA__", js).replace("__CLS__", json.dumps(CLS, ensure_ascii=False)).replace("__N__", str(len(data)))
     html = html.replace("__SEED__", json.dumps(dict(id=seed_id, items=seed, mat=MAT, mid=hashlib.sha1(json.dumps(MAT, ensure_ascii=False).encode()).hexdigest()[:10]), ensure_ascii=False).replace("</", "<\\/"))
     out = pathlib.Path(ROOT) / "Помощник варки.html"
+    from generated_files import generated_html
+    html = generated_html(html, "scripts/cards/helper.py", "scripts/cards/helper_tpl.html; scripts/cards/table_tools.js", version=True)
     out.write_text(html, encoding="utf-8")
     print(out, len(data), len(html), seed_id, seed)
 

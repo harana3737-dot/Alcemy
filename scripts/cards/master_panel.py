@@ -150,6 +150,8 @@ def build():
     out = (tpl.replace("__GROUPS__", dump(groups)).replace("__EXTRA__", dump(extra)).replace("__NQ__", str(nq))
               .replace("__CARDS__", dump(cards)).replace("__CLS__", dump(CLS)).replace("__ORDER__", dump(ORDER))
               .replace("__TALIS__", dump(talis)).replace("__ROOT__", dump(root)).replace("__QUICK__", dump(quick)).replace("__SAMPLE__", dump(sample)).replace("__CORE__", core))
+    from generated_files import generated_html
+    out = generated_html(out, "scripts/cards/master_panel.py", "scripts/cards/master_tpl.html", version=True)
     (ROOT / "Пульт мастера.html").write_text(out, encoding="utf-8")
     print("Пульт мастера.html", nq, "вопросов,", len(cards), "карточек,", len(out), "байт")
 
