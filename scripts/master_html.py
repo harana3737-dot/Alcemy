@@ -8,8 +8,10 @@ def build():
     ROOT = pathlib.Path(__file__).resolve().parent.parent
     import sys
     NAME = sys.argv[1] if len(sys.argv) > 1 else "Для мастера — вопросы и изменения"
-    SRC = ROOT / f"{NAME}.md"
-    OUT = ROOT / f"{NAME}.html"
+    from document_paths import markdown_path, html_path
+    SRC = markdown_path(ROOT, NAME)
+    OUT = html_path(ROOT, SRC)
+    OUT.parent.mkdir(parents=True, exist_ok=True)
 
 
     def inline(t):
@@ -138,7 +140,20 @@ th,td{{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;verti
 {"".join(body[1:])}
 </main></body></html>"""
     from generated_files import generated_html
-    page = generated_html(page, "scripts/master_html.py", SRC.name)
+    # Изображения и локальные HTML-ссылки остаются относительными к Markdown.
+    from urllib.parse import unquote, quote, urlsplit
+    import os
+    def rebase(match):
+        value = html.unescape(match[2])
+        if value.startswith(('#', 'http:', 'https:', 'mailto:', 'data:', '//')):
+            return match[0]
+        parts = urlsplit(value)
+        target = SRC.parent / unquote(parts.path)
+        path = os.path.relpath(target, OUT.parent)
+        value = quote(path, safe='/—()') + ('?' + parts.query if parts.query else '') + ('#' + parts.fragment if parts.fragment else '')
+        return match[1] + html.escape(value, quote=True) + match[3]
+    page = re.sub(r'((?:href|src)=["\'])([^"\']+)(["\'])', rebase, page)
+    page = generated_html(page, "scripts/master_html.py", SRC.relative_to(ROOT).as_posix())
     OUT.write_text(page, encoding="utf-8")
     print("ok", len(toc), "заголовков")
 
