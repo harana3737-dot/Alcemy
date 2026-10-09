@@ -29,6 +29,55 @@ def combat_limits(sheet, confirmed):
                 slots=confirmed['slots'], costs=costs)
 
 
+
+def bag_discrepancies(sheet, seed):
+    """Независимо сверить сумку Талиса с именами и количествами в снаряжении."""
+    import re
+    from collections import Counter
+    equipment = sheet.split('## Снаряжение', 1)[1].split('\n## ', 1)[0]
+    expected, actual = Counter(), Counter()
+    for heading in ('Зелья и расходники', 'На разборку'):
+        block = re.search(r'^' + re.escape(heading) + r'\s*\n((?:•[^\n]*(?:\n|$))+)', equipment, re.M)
+        if not block:
+            return ['Не найден список «' + heading + '» в снаряжении листа']
+        for line in block[1].splitlines():
+            name = line.removeprefix('•').strip()
+            quantity, unit = 1, ''
+            use = re.search(r'\s+\((\d+) исп\.\)$', name)
+            if use:
+                quantity, unit = int(use[1]), 'исп.'
+                name = name[:use.start()]
+            else:
+                title, separator, count = name.rpartition(' ×')
+                if separator:
+                    if not count.isdigit():
+                        return ['Неоднозначное количество: ' + name]
+                    name, quantity = title, int(count)
+            expected[(name.strip(), heading == 'На разборку', unit)] += quantity
+    errors = []
+    for item in seed:
+        if item.get('who') != 'p1':
+            continue
+        if type(item.get('q')) is not int or item['q'] < 0:
+            errors.append('Неверное количество в начальной сумке: ' + str(item.get('n')))
+            continue
+        actual[(item.get('n','').strip(), item.get('note') == 'на разборку', item.get('u',''))] += item['q']
+    for key in sorted(expected.keys() | actual.keys()):
+        if expected[key] != actual[key]:
+            name, disassemble, unit = key
+            errors.append(f'{name}' + (' [на разборку]' if disassemble else '') +
+                          f': в листе {expected[key]}, в сумке {actual[key]}' + (' ' + unit if unit else ''))
+    return errors
+
+
+def validate_seed(sheet, seed):
+    import sys
+    errors = bag_discrepancies(sheet, seed)
+    if errors:
+        print('ПРЕДУПРЕЖДЕНИЕ: сумка по умолчанию расходится с листом:\n  ' + '\n  '.join(errors), file=sys.stderr)
+        raise ValueError('Сборка помощника остановлена: проверь названия и количества в исходниках')
+
+
 def build():
     import hashlib, json, pathlib, re
     HERE = pathlib.Path(__file__).resolve().parent
@@ -71,6 +120,7 @@ def build():
     # Союзники — по строке «Зелья союзников» в листе
     ALLY = [dict(n="Зелье подводного дыхания", q=1, note="", card="Водное дыхание", who=w) for w in ("pF", "pL")]
     seed += ALLY
+    validate_seed(sheet, seed)
     # Материалы Талиса — по блоку «Ингредиенты» листа (сверено 05.10.2026)
     MAT = dict(
         gold=132.58,  # «Монеты» в листе
