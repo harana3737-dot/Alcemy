@@ -175,6 +175,8 @@ function apply(){{const q=$('#q').value.trim().toLowerCase(),l=$('#fl').value,k=
  $('#cnt').textContent=n+' из {len(C)}'}}
 ['#q','#fl','#fc','#ff','#ft','#fe'].forEach(s=>$(s).addEventListener('input',apply));apply();addEventListener('load',()=>{{setBar();if(location.hash){{onHash();const el=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(el)el.scrollIntoView()}}}});
 </script></body></html>"""
+    from generated_files import generated_html
+    page = generated_html(page, "scripts/cards/gen_html.py", "scripts/cards/cards_data.py; scripts/cards/cards_meta.py")
     open(ROOT / "Карточки эликсиров.html", "w", encoding="utf-8").write(page)
     print("html ok", len(page))
 

@@ -4,6 +4,7 @@
 Экономические отчёты оформляются из сохранённого текста без новых расчётов.
 """
 import re
+from generated_files import marker
 
 START = '<!-- reading-guide:start -->'
 END = '<!-- reading-guide:end -->'
@@ -109,6 +110,20 @@ GENERATED = (
     'Симуляция экономики зелий',
 )
 
+# Метка остаётся внутри заменяемого блока: strip_guide сохраняет исходное тело.
+BUILD_SOURCES = {
+    'Карточки эликсиров': ('scripts/cards/gen.py', 'scripts/cards/cards_data.py; scripts/cards/cards_meta.py; scripts/rules_data.py'),
+    'Бонусы качества по карточкам': ('scripts/cards/quality.py', 'scripts/cards/cards_data.py; scripts/cards/upcast.py'),
+    'Реестр расхождений с источниками': ('scripts/cards/registry.py', 'scripts/cards/cards_data.py; scripts/cards/src/'),
+    'Алхимия Талиса — правила за столом': ('scripts/table_rules.py', 'Алхимия Талиса — правила v0.3 (черновик на утверждение).md'),
+    'Экономика алхимии — для мастера': ('scripts/report.py', 'scripts/rules_data.py; scripts/sim*.py'),
+    'Симуляция экономики зелий': ('scripts/report.py', 'scripts/rules_data.py; scripts/sim*.py'),
+    'Алхимия и магия — проверка на бестиарии': ('scripts/alchemy_bestiary_report.py', 'scripts/alchemy_bestiary.py; scripts/bestiary/srd2014-monsters.json'),
+    'Алхимия — заклинания и метамагия': ('scripts/alchemy_magic_review.py', 'scripts/alchemy_magic_review.py; scripts/alchemy_bestiary/web-review/'),
+    'Группа — обзор каталога эликсиров': ('scripts/elixir_catalog_review.py', 'scripts/elixir_catalog_review.py; scripts/cards/cards_data.py'),
+}
+PARTIAL = {'Группа — обзор каталога эликсиров'}
+
 
 def strip_guide(text):
     """Возвращает исходное тело побайтно (UTF-8), включая пробелы и переносы."""
@@ -130,6 +145,9 @@ def guide_block(name, text):
         checked, total, changed, unexplained = counts.groups()
         conclusions = (f'Сверено {checked} из {total} карточек; с отличиями — {changed}, без объяснения — {unexplained}.',) + conclusions[1:]
     lines = [START]
+    if name in BUILD_SOURCES:
+        builder, source = BUILD_SOURCES[name]
+        lines.append(marker(builder, source, partial=name in PARTIAL))
     if conclusions:
         lines += ['## Коротко', ''] + ['- ' + item for item in conclusions] + ['']
     lines += ['**Как читать.** ' + route, END, '', '']

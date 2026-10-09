@@ -302,7 +302,9 @@ def calculate():
                   for name in ('Псионический заряд', 'Конус холода', 'Синаптический заряд', 'Звёздная корона: один выстрел')]
         lines.append(f'| {RU_NAMES[key]} | {rates} | ' + ' | '.join(damage) + ' |')
     lines += ['', (DATA / 'method.md').read_text(), '']
-    return '\n'.join(lines).rstrip() + '\n', output.getvalue()
+    from generated_files import marker
+    note = marker('scripts/bestiary_report.py', 'scripts/bestiary/srd2014-monsters.json; scripts/bestiary_report.py')
+    return note + '\n' + '\n'.join(lines).rstrip() + '\n', output.getvalue()
 
 
 def main():

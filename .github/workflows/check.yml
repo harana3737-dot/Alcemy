@@ -1,0 +1,39 @@
+name: Проверка проекта
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Установить закреплённую версию Playwright вне checkout
+        shell: bash
+        run: |
+          browser_env="$RUNNER_TEMP/alcemy-playwright"
+          mkdir -p "$browser_env"
+          cp scripts/ci/package.json scripts/ci/package-lock.json "$browser_env/"
+          npm ci --prefix "$browser_env"
+          "$browser_env/node_modules/.bin/playwright" install --with-deps chromium
+          echo "NODE_PATH=$browser_env/node_modules" >> "$GITHUB_ENV"
+          browser_path=$(NODE_PATH="$browser_env/node_modules" node -e "process.stdout.write(require('playwright').chromium.executablePath())")
+          echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$browser_path" >> "$GITHUB_ENV"
+      - name: Проверить данные, расчёты, сборку, ссылки и страницы в браузере
+        run: python3 -B scripts/check_all.py --slow --browser

@@ -23,7 +23,7 @@ def build():
 
 
     lines = [line for line in SRC.read_text(encoding="utf-8").splitlines()
-             if line not in ("<!-- reading-guide:start -->", "<!-- reading-guide:end -->")]
+             if not line.lstrip().startswith("<!--")]
     toc, n = [], 0
 
 
@@ -137,6 +137,8 @@ th,td{{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;verti
 {nav}
 {"".join(body[1:])}
 </main></body></html>"""
+    from generated_files import generated_html
+    page = generated_html(page, "scripts/master_html.py", SRC.name)
     OUT.write_text(page, encoding="utf-8")
     print("ok", len(toc), "заголовков")
 
