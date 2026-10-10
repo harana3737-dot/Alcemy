@@ -143,7 +143,9 @@ def build():
         return dict(stages=[dict(n=a, t=b, v=int(c), dc=int(d), gp=int(e), x=f.strip(" ,—").strip()) for a, b, c, d, e, f in st],
                     total=sum(int(x[4]) for x in st), approach=pick("Подход"), mats=pick("Материалы"), result=итог.replace("Итог — ", ""), credit=зачёт)
     root = root_struct(root) or root
-    sample = (ROOT / "Образец — кровь шахтёра.md").read_text(encoding="utf-8").splitlines()[1:]
+    # Служебные метки (<!-- reading-guide:… --> и т. п.) мастеру не показываем
+    sample = [x for x in (ROOT / "Образец — кровь шахтёра.md").read_text(encoding="utf-8").splitlines()[1:]
+              if not re.fullmatch(r"\s*<!--.*-->\s*", x)]
 
     tpl = (HERE / "master_tpl.html").read_text(encoding="utf-8")
     dump = lambda o: json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
