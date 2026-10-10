@@ -87,3 +87,7 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium python3 -B scripts/check_a
 - [`../ci/README.md`](../ci/README.md) — режим CI для исходников и строгая проверка готового комплекта.
 - [`phone_check.md`](phone_check.md) — локальная проверка своего сохранения на телефоне; [`market_guidance.md`](market_guidance.md) — сценарии спроса и выбора перебросов.
 - `.claude/skills/balance-auditor/SKILL.md` — проектный скилл для явного вызова `/balance-auditor` в Claude. Автоматический вызов отключён.
+
+## Повторить проверки оставшихся гипотез
+
+[Отчёт игроку](../../Аудит%20—%20проверка%20оставшихся%20гипотез.md) содержит условия и выводы. Числа: `python3 -B scripts/audit_tools/hypotheses_probe.py --runs 10000 --output /tmp/hypotheses.json`. Для графика добавить `--plot /tmp/volume.png` (нужен matplotlib). Мобильная разметка: `node scripts/audit_tools/probe_mobile_tables.cjs /tmp/fresh-repo /tmp/mobile-tables.json`; экономика должна быть собрана в свежей временной копии. Скрипты не меняют игровые цены и решения.

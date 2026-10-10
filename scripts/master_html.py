@@ -128,7 +128,7 @@ p{{margin:.55em 0}}ul{{margin:.4em 0;padding-left:1.3em}}li{{margin:.2em 0;line-
 a{{color:var(--acc)}}i{{color:var(--mut)}}blockquote{{margin:.8em 0;padding:.4em 14px;border-left:3px solid var(--acc);background:var(--card);border-radius:0 8px 8px 0}}blockquote p{{margin:.45em 0}}img{{max-width:100%;height:auto;border-radius:8px;display:block}}hr{{border:0;border-top:1px solid var(--line);margin:1.2em 0}}
 nav{{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin:12px 0}}
 nav ul{{list-style:none;padding:0;margin:0}}nav .t2{{font-weight:700;margin-top:6px}}nav .t3{{padding-left:12px;color:var(--mut);font-size:.92rem;margin-top:4px}}nav .t4{{padding-left:24px;font-size:.92rem}}
-.wrap{{overflow-x:auto;margin:8px 0}}table{{border-collapse:collapse;width:100%;font-size:.92rem;font-variant-numeric:tabular-nums}}
+.wrap{{overflow-x:auto;margin:8px 0}}table{{border-collapse:collapse;width:100%;font-size:.92rem;font-variant-numeric:tabular-nums;overflow-wrap:normal}}
 tr.hl td{{background:var(--accbg)}}.badge{{display:inline-block;padding:0 7px;border-radius:6px;background:var(--warnbg);color:var(--warn);font-weight:600}}
 .bar{{position:sticky;top:0;z-index:5;display:flex;gap:6px;overflow-x:auto;padding:8px 0;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:none}}
 .bar a{{flex:none;padding:3px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);text-decoration:none;font-size:.88rem;white-space:nowrap}}
