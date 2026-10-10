@@ -653,7 +653,7 @@ setTimeout(async()=>{
     if(snap.exists){const d=snap.data();if(d&&d.s&&(d.u||0)>=(ST.u||0)){const x=JSON.parse(d.s);if(x&&x.v===1)ST=x}}
     if(!shared||(ST.u||0)>su)save();
     // подхватывать правки из других вкладок, устройств и от Claude
-    DOC.onSnapshot(sn=>{if(!sn.exists||saveT&&sn.metadata&&sn.metadata.hasPendingWrites)return;const d=sn.data();if(!d||!d.s||(d.u||0)<=(ST.u||0))return;try{const x=JSON.parse(d.s);if(x&&x.v===1){ST=x;ls.set('belt',d.s);UNDO=[];renderBelt();if(!$('tab-jour').hidden)renderJournal()}}catch(e){}},()=>{});
+    DOC.onSnapshot(sn=>{if(!sn.exists||saveT&&sn.metadata&&sn.metadata.hasPendingWrites)return;const d=sn.data();if(!d||!d.s||(d.u||0)<=(ST.u||0))return;try{const x=JSON.parse(d.s);if(x&&x.v===1){ST=x;ls.set('belt',d.s);UNDO=[];renderBelt()}}catch(e){}},()=>{});
     setSave('сохраняется в аккаунте');renderBelt();
   }catch(e){setSave('сохраняется в этом браузере')}
   finally{if(!JDB){JDB=localDB();JDB.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется только в этом браузере (не на claude.ai).');renderJournal();renderBrewingPlan()})}
@@ -856,11 +856,15 @@ function renderPeople(){
 function renderBelt(){
   if(typeof renderJournal==='function'&&!$('tab-jour').hidden)renderJournal();
   if(typeof renderPlan==='function'&&!$('tab-plan').hidden)renderPlan();
-  talis();
+  talis();fight();if(ST.mat)pools();
   $('now').textContent=fmtT(ST.T);
-  renderPeople();renderBag();renderMat();renderOD();preview();renderFight();renderAvailability();renderActiveBrews();renderCombo();renderBrewingPlan();
-  $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
-  $('undo').disabled=!UNDO.length;
+  // Скрытый пояс обновится при tab('belt'); данные сохраняются при каждой мутации.
+  if(!$('tab-belt').hidden){
+    renderPeople();renderBag();renderMat();renderOD();preview();renderFight();
+    $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
+    $('undo').disabled=!UNDO.length;
+  }
+  renderAvailability();renderActiveBrews();renderCombo();renderBrewingPlan();
   const t=ST.people[0];if(t){const x=toxOfP(t.id);const b=$('beltBadge');b.textContent=x?`${x}/${t.limit}`:'';b.classList.toggle('hot',x>t.limit)}
 }
 
