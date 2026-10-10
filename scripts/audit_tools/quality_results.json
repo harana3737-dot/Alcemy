@@ -1,0 +1,724 @@
+{
+  "date": "2026-10-10",
+  "base_commit": "e1ecdbf7e96ab20bbe80e1aed05cbf94d4c46375",
+  "before_tracked_files": 298,
+  "before_tracked_bytes": 45271892,
+  "after_visible_files": 306,
+  "after_visible_bytes": 19450768,
+  "python_files": 85,
+  "markdown_files": 96,
+  "storage": {
+    "results": {
+      "before_bytes": 24667919,
+      "after_bytes": 1500382,
+      "raw_sha256": "ef6963dd73337d388e4b24fe0750bd3404b370e133d665c6373cc626842e18a4"
+    },
+    "magic-results": {
+      "before_bytes": 2806444,
+      "after_bytes": 102486,
+      "raw_sha256": "495ce3bf94cf132bd42126608ef761f7957340ce7f19d79c1443d5d0d1366547"
+    }
+  },
+  "ruff_before": 46,
+  "largest_files": [
+    {
+      "file": "Для игрока — книга алхимии.html",
+      "bytes": 2340932
+    },
+    {
+      "file": "scripts/alchemy_bestiary/results.csv.gz",
+      "bytes": 1500382
+    },
+    {
+      "file": "scripts/bestiary/srd2014-monsters.json",
+      "bytes": 1340631
+    },
+    {
+      "file": "scripts/bestiary/results.csv",
+      "bytes": 984443
+    },
+    {
+      "file": "scripts/alchemy_bestiary/web-review/spells.json",
+      "bytes": 611119
+    },
+    {
+      "file": "Карточки эликсиров.html",
+      "bytes": 552739
+    },
+    {
+      "file": "Помощник варки.html",
+      "bytes": 545049
+    },
+    {
+      "file": "Пульт мастера.html",
+      "bytes": 543747
+    }
+  ],
+  "python_unit_tests": 220,
+  "javascript_lint_inputs": 22,
+  "csv_rows": {
+    "results": 99759,
+    "magic-results": 9368
+  },
+  "document_browser_views": [
+    {
+      "name": "Для игрока — начни отсюда",
+      "width": 360,
+      "localLinks": [
+        "%D0%9F%D0%B5%D1%80%D0%B2%D0%B0%D1%8F%20%D0%B2%D0%B0%D1%80%D0%BA%D0%B0%20%E2%80%94%20%D0%BF%D0%BE%20%D1%88%D0%B0%D0%B3%D0%B0%D0%BC.md",
+        "%D0%98%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%8F%20%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BE%D0%BA%20%E2%80%94%20%D0%BE%D0%B3%D0%BB%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5.md",
+        "%D0%90%D1%83%D0%B4%D0%B8%D1%82%20%E2%80%94%20%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81%D1%8B%20%D0%B4%D0%BB%D1%8F%20%D1%80%D0%B5%D1%88%D0%B5%D0%BD%D0%B8%D1%8F.md",
+        "%D0%90%D1%83%D0%B4%D0%B8%D1%82%20%E2%80%94%20%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0%20%D0%BE%D1%81%D1%82%D0%B0%D0%B2%D1%88%D0%B8%D1%85%D1%81%D1%8F%20%D0%B3%D0%B8%D0%BF%D0%BE%D1%82%D0%B5%D0%B7.md",
+        "%D0%90%D1%83%D0%B4%D0%B8%D1%82%20%E2%80%94%20%D0%BA%D0%BE%D0%B4%2C%20%D1%80%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%B9%20%D0%B8%20%D1%87%D0%B8%D1%82%D0%B0%D0%B5%D0%BC%D0%BE%D1%81%D1%82%D1%8C.md",
+        "%D0%98%D1%81%D1%82%D0%BE%D1%87%D0%BD%D0%B8%D0%BA%D0%B8/%D0%A1%D0%B5%D1%81%D1%81%D0%B8%D1%8F%209%20%E2%80%94%20%D0%B1%D0%BE%D0%B9%20%D1%81%20%D0%B3%D0%BE%D0%B1%D0%BB%D0%B8%D0%BD%D0%B0%D0%BC%D0%B8%20%D0%B8%20%D1%87%D0%B5%D1%80%D0%B2%D1%91%D0%BC.html",
+        "%D0%94%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D1%8B%D0%B5%20%D0%BC%D0%B0%D1%82%D0%B5%D1%80%D0%B8%D0%B0%D0%BB%D1%8B/README.md",
+        "%D0%90%D1%80%D1%85%D0%B8%D0%B2/%D0%9F%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B8/README.md",
+        "%D0%98%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%8F%20%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BE%D0%BA%20%E2%80%94%20%D0%BE%D0%B3%D0%BB%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5.md"
+      ],
+      "headers": [
+        "col",
+        "col"
+      ],
+      "bodyWidth": 360,
+      "viewport": 360
+    },
+    {
+      "name": "Для мастера — начни отсюда",
+      "width": 360,
+      "localLinks": [],
+      "headers": [
+        "col",
+        "col",
+        "col",
+        "col"
+      ],
+      "bodyWidth": 360,
+      "viewport": 360
+    },
+    {
+      "name": "Для игрока — начни отсюда",
+      "width": 1280,
+      "localLinks": [
+        "%D0%9F%D0%B5%D1%80%D0%B2%D0%B0%D1%8F%20%D0%B2%D0%B0%D1%80%D0%BA%D0%B0%20%E2%80%94%20%D0%BF%D0%BE%20%D1%88%D0%B0%D0%B3%D0%B0%D0%BC.md",
+        "%D0%98%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%8F%20%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BE%D0%BA%20%E2%80%94%20%D0%BE%D0%B3%D0%BB%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5.md",
+        "%D0%90%D1%83%D0%B4%D0%B8%D1%82%20%E2%80%94%20%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81%D1%8B%20%D0%B4%D0%BB%D1%8F%20%D1%80%D0%B5%D1%88%D0%B5%D0%BD%D0%B8%D1%8F.md",
+        "%D0%90%D1%83%D0%B4%D0%B8%D1%82%20%E2%80%94%20%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0%20%D0%BE%D1%81%D1%82%D0%B0%D0%B2%D1%88%D0%B8%D1%85%D1%81%D1%8F%20%D0%B3%D0%B8%D0%BF%D0%BE%D1%82%D0%B5%D0%B7.md",
+        "%D0%90%D1%83%D0%B4%D0%B8%D1%82%20%E2%80%94%20%D0%BA%D0%BE%D0%B4%2C%20%D1%80%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%B9%20%D0%B8%20%D1%87%D0%B8%D1%82%D0%B0%D0%B5%D0%BC%D0%BE%D1%81%D1%82%D1%8C.md",
+        "%D0%98%D1%81%D1%82%D0%BE%D1%87%D0%BD%D0%B8%D0%BA%D0%B8/%D0%A1%D0%B5%D1%81%D1%81%D0%B8%D1%8F%209%20%E2%80%94%20%D0%B1%D0%BE%D0%B9%20%D1%81%20%D0%B3%D0%BE%D0%B1%D0%BB%D0%B8%D0%BD%D0%B0%D0%BC%D0%B8%20%D0%B8%20%D1%87%D0%B5%D1%80%D0%B2%D1%91%D0%BC.html",
+        "%D0%94%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D1%8B%D0%B5%20%D0%BC%D0%B0%D1%82%D0%B5%D1%80%D0%B8%D0%B0%D0%BB%D1%8B/README.md",
+        "%D0%90%D1%80%D1%85%D0%B8%D0%B2/%D0%9F%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B8/README.md",
+        "%D0%98%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%8F%20%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BE%D0%BA%20%E2%80%94%20%D0%BE%D0%B3%D0%BB%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5.md"
+      ],
+      "headers": [
+        "col",
+        "col"
+      ],
+      "bodyWidth": 1280,
+      "viewport": 1280
+    },
+    {
+      "name": "Для мастера — начни отсюда",
+      "width": 1280,
+      "localLinks": [],
+      "headers": [
+        "col",
+        "col",
+        "col",
+        "col"
+      ],
+      "bodyWidth": 1280,
+      "viewport": 1280
+    }
+  ],
+  "verified_command": "check_all.py --sources --slow --browser",
+  "verified_exit_code": 0,
+  "csv_roundtrip_verified": true,
+  "readability_review": {
+    "method": "Word counts flag prose for manual review, not a Russian readability score; tables, lists and code excluded. Historical sources left intact.",
+    "documents": [
+      {
+        "file": ".claude/skills/balance-auditor/SKILL.md",
+        "paragraphs": 9,
+        "max_paragraph_words": 45,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "AGENTS.md",
+        "paragraphs": 2,
+        "max_paragraph_words": 42,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "CLAUDE.md",
+        "paragraphs": 1,
+        "max_paragraph_words": 26,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "STATUS.md",
+        "paragraphs": 6,
+        "max_paragraph_words": 93,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "WRITING.md",
+        "paragraphs": 22,
+        "max_paragraph_words": 62,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "WRITING_QUICK.md",
+        "paragraphs": 7,
+        "max_paragraph_words": 64,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/README.md",
+        "paragraphs": 12,
+        "max_paragraph_words": 45,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/alchemy_bestiary/README.md",
+        "paragraphs": 11,
+        "max_paragraph_words": 64,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/alchemy_bestiary/magic_review.md",
+        "paragraphs": 42,
+        "max_paragraph_words": 78,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/audit_tools/README.md",
+        "paragraphs": 18,
+        "max_paragraph_words": 42,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/audit_tools/completion.md",
+        "paragraphs": 16,
+        "max_paragraph_words": 54,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/audit_tools/implementation.md",
+        "paragraphs": 6,
+        "max_paragraph_words": 24,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/audit_tools/maintenance.md",
+        "paragraphs": 40,
+        "max_paragraph_words": 86,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/audit_tools/market_guidance.md",
+        "paragraphs": 10,
+        "max_paragraph_words": 58,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/audit_tools/phone_check.md",
+        "paragraphs": 6,
+        "max_paragraph_words": 57,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/audit_tools/scenarios.md",
+        "paragraphs": 12,
+        "max_paragraph_words": 57,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/bestiary/README.md",
+        "paragraphs": 6,
+        "max_paragraph_words": 52,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/bestiary/UPSTREAM_LICENSE.md",
+        "paragraphs": 5,
+        "max_paragraph_words": 76,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/bestiary/development.md",
+        "paragraphs": 18,
+        "max_paragraph_words": 77,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/bestiary/method.md",
+        "paragraphs": 5,
+        "max_paragraph_words": 37,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/cards/TABLE_TOOLS.md",
+        "paragraphs": 11,
+        "max_paragraph_words": 71,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/ci/README.md",
+        "paragraphs": 5,
+        "max_paragraph_words": 54,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/economy_audit/README.md",
+        "paragraphs": 4,
+        "max_paragraph_words": 34,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/maintenance/README.md",
+        "paragraphs": 13,
+        "max_paragraph_words": 56,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/merge-2026-10-09.md",
+        "paragraphs": 6,
+        "max_paragraph_words": 39,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/optimization_audit/README.md",
+        "paragraphs": 14,
+        "max_paragraph_words": 64,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/optimization_audit/implementation.md",
+        "paragraphs": 20,
+        "max_paragraph_words": 58,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/table_tools/README.md",
+        "paragraphs": 33,
+        "max_paragraph_words": 118,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/vordt/README.md",
+        "paragraphs": 8,
+        "max_paragraph_words": 112,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "scripts/wave/README.md",
+        "paragraphs": 23,
+        "max_paragraph_words": 125,
+        "paragraphs_over_120_words": 1
+      },
+      {
+        "file": "Алхимия Талиса — затраты по логам.md",
+        "paragraphs": 7,
+        "max_paragraph_words": 71,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Алхимия Талиса — правила v0.3 (черновик на утверждение).md",
+        "paragraphs": 240,
+        "max_paragraph_words": 91,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Алхимия Талиса — правила за столом.md",
+        "paragraphs": 158,
+        "max_paragraph_words": 88,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Алхимия Талиса — ядро правил.md",
+        "paragraphs": 22,
+        "max_paragraph_words": 67,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Алхимия и магия — проверка на бестиарии.md",
+        "paragraphs": 20,
+        "max_paragraph_words": 68,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Алхимия — заклинания и метамагия.md",
+        "paragraphs": 50,
+        "max_paragraph_words": 78,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Архив/Проверки/README.md",
+        "paragraphs": 4,
+        "max_paragraph_words": 25,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Архив/Проверки/Аудит v0.3 — 2026-10-05.md",
+        "paragraphs": 44,
+        "max_paragraph_words": 98,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Архив/Проверки/Аудит документов — 2026-10-06.md",
+        "paragraphs": 61,
+        "max_paragraph_words": 84,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Архив/Проверки/Исправление боя с Вордтом — 2026-10-08.md",
+        "paragraphs": 15,
+        "max_paragraph_words": 60,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Архив/Проверки/Исправление экономики — 2026-10-08.md",
+        "paragraphs": 14,
+        "max_paragraph_words": 56,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Архив/Проверки/Оценка проекта — 2026-10-08.md",
+        "paragraphs": 41,
+        "max_paragraph_words": 76,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Архив/Проверки/Проверка боя с Вордтом — 2026-10-08.md",
+        "paragraphs": 22,
+        "max_paragraph_words": 64,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Архив/Проверки/Проверка изменений Claude — 2026-10-08.md",
+        "paragraphs": 15,
+        "max_paragraph_words": 61,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Архив/Проверки/Проверка материалов — 2026-10-07.md",
+        "paragraphs": 20,
+        "max_paragraph_words": 88,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Архив/Проверки/Проверка экономики — 2026-10-08.md",
+        "paragraphs": 33,
+        "max_paragraph_words": 49,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Архив/Проверки/Редактура материалов — 2026-10-07.md",
+        "paragraphs": 11,
+        "max_paragraph_words": 45,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Аудит — вопросы для решения.md",
+        "paragraphs": 18,
+        "max_paragraph_words": 48,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Аудит — проверка оставшихся гипотез.md",
+        "paragraphs": 38,
+        "max_paragraph_words": 71,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Бой с Вордтом — план.md",
+        "paragraphs": 17,
+        "max_paragraph_words": 67,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Бонусы за 5+ и 20 — что выгоднее брать.md",
+        "paragraphs": 15,
+        "max_paragraph_words": 59,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Бонусы качества по карточкам.md",
+        "paragraphs": 2,
+        "max_paragraph_words": 56,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Волна после Вордта — расчёт.md",
+        "paragraphs": 20,
+        "max_paragraph_words": 62,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Вопросы v0.2 — Приложение Б.md",
+        "paragraphs": 7,
+        "max_paragraph_words": 55,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Глоссарий.md",
+        "paragraphs": 2,
+        "max_paragraph_words": 27,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Группа — баффы и расходники.md",
+        "paragraphs": 68,
+        "max_paragraph_words": 89,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Группа — обзор каталога эликсиров.md",
+        "paragraphs": 44,
+        "max_paragraph_words": 113,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Для игрока — книга алхимии.md",
+        "paragraphs": 181,
+        "max_paragraph_words": 80,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Для игрока — начни отсюда.md",
+        "paragraphs": 13,
+        "max_paragraph_words": 45,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Для мастера — вопросы и изменения.md",
+        "paragraphs": 142,
+        "max_paragraph_words": 85,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Для мастера — коротко на утверждение.md",
+        "paragraphs": 3,
+        "max_paragraph_words": 60,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Для мастера — начни отсюда.md",
+        "paragraphs": 4,
+        "max_paragraph_words": 36,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Для мастера — сводка варки.md",
+        "paragraphs": 13,
+        "max_paragraph_words": 91,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Для ревьюера — памятка.md",
+        "paragraphs": 9,
+        "max_paragraph_words": 37,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Дополнительные материалы/README.md",
+        "paragraphs": 2,
+        "max_paragraph_words": 27,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Журнал решений.md",
+        "paragraphs": 8,
+        "max_paragraph_words": 61,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Заклинания Талиса — проверка на бестиарии.md",
+        "paragraphs": 34,
+        "max_paragraph_words": 77,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Заметки на будущее.md",
+        "paragraphs": 22,
+        "max_paragraph_words": 67,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Игровые сценарии.md",
+        "paragraphs": 28,
+        "max_paragraph_words": 66,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Исключения — что можно сократить.md",
+        "paragraphs": 7,
+        "max_paragraph_words": 103,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "История проверок — оглавление.md",
+        "paragraphs": 3,
+        "max_paragraph_words": 29,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Источники/Логи сессий 1–13 и записки Талиса.md",
+        "paragraphs": 77,
+        "max_paragraph_words": 2210,
+        "paragraphs_over_120_words": 28
+      },
+      {
+        "file": "Источники/Материалы мастера.md",
+        "paragraphs": 8,
+        "max_paragraph_words": 26,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Источники/Мир и сеттинг — от мастера.md",
+        "paragraphs": 16,
+        "max_paragraph_words": 365,
+        "paragraphs_over_120_words": 1
+      },
+      {
+        "file": "Источники/Разбор сессий 11–12 с мастером.md",
+        "paragraphs": 40,
+        "max_paragraph_words": 18,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Источники/Сессия 9 — бой с гоблинами и червём.md",
+        "paragraphs": 9,
+        "max_paragraph_words": 44,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Источники/Талис — предыстория.md",
+        "paragraphs": 613,
+        "max_paragraph_words": 225,
+        "paragraphs_over_120_words": 6
+      },
+      {
+        "file": "Кандидаты в реестр — проверка баланса.md",
+        "paragraphs": 20,
+        "max_paragraph_words": 95,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Карточки эликсиров.md",
+        "paragraphs": 1454,
+        "max_paragraph_words": 490,
+        "paragraphs_over_120_words": 14
+      },
+      {
+        "file": "Конверсия заклинаний.md",
+        "paragraphs": 38,
+        "max_paragraph_words": 70,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Недельная варка — план и бюджет.md",
+        "paragraphs": 24,
+        "max_paragraph_words": 122,
+        "paragraphs_over_120_words": 1
+      },
+      {
+        "file": "Образец — кровь шахтёра.md",
+        "paragraphs": 8,
+        "max_paragraph_words": 23,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Очередь вопросов мастеру.md",
+        "paragraphs": 8,
+        "max_paragraph_words": 51,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Первая варка — по шагам.md",
+        "paragraphs": 7,
+        "max_paragraph_words": 44,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Протокол прогонов.md",
+        "paragraphs": 3,
+        "max_paragraph_words": 37,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Реестр расхождений с источниками.md",
+        "paragraphs": 4,
+        "max_paragraph_words": 48,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Ремёсла союзников — спорные места.md",
+        "paragraphs": 2,
+        "max_paragraph_words": 42,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Симуляция экономики зелий.md",
+        "paragraphs": 37,
+        "max_paragraph_words": 116,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Сочетания — проверка баланса.md",
+        "paragraphs": 23,
+        "max_paragraph_words": 80,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Талис — карта листа LSS.md",
+        "paragraphs": 4,
+        "max_paragraph_words": 40,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Талис — лист персонажа.md",
+        "paragraphs": 16,
+        "max_paragraph_words": 64,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Талис — что делать сейчас.md",
+        "paragraphs": 11,
+        "max_paragraph_words": 36,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Чек-лист конверсии.md",
+        "paragraphs": 2,
+        "max_paragraph_words": 31,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Шкала силы эликсиров.md",
+        "paragraphs": 21,
+        "max_paragraph_words": 69,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "Экономика алхимии — для мастера.md",
+        "paragraphs": 21,
+        "max_paragraph_words": 91,
+        "paragraphs_over_120_words": 0
+      },
+      {
+        "file": "сводка_проекта_2026-10-01.md",
+        "paragraphs": 6,
+        "max_paragraph_words": 84,
+        "paragraphs_over_120_words": 0
+      }
+    ],
+    "manually_reviewed": [
+      "Для игрока — начни отсюда.md",
+      "Для мастера — начни отсюда.md",
+      "Для игрока — книга алхимии.md",
+      "Алхимия Талиса — ядро правил.md",
+      "Для мастера — коротко на утверждение.md"
+    ]
+  }
+}

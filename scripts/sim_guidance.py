@@ -2,7 +2,7 @@
 можно перебросить за 1 единицу чародейства, новый результат обязателен. 5 единиц на долгий отдых."""
 import random as _random
 from rules_data import CAT_STABLE, unstable_fraction
-from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
+from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, probs, potion_bonus
 
 random = _random.Random(5)
 

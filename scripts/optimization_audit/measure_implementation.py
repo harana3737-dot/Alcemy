@@ -1,6 +1,7 @@
 """Compare real CLI timings in two temporary copies, never in a checkout."""
 import argparse
 import hashlib
+import gzip
 import json
 from pathlib import Path
 import statistics
@@ -55,8 +56,11 @@ def main():
                 print(f'{iteration + 1}/{args.runs}: {variant} complete', flush=True)
     hashes = {}
     for name in MATERIALS:
-        old = (roots['before'] / name).read_bytes()
-        new = (roots['after'] / name).read_bytes()
+        def material(root):
+            path = root / name
+            return path.read_bytes() if path.exists() else gzip.decompress(path.with_suffix(path.suffix + '.gz').read_bytes())
+        old = material(roots['before'])
+        new = material(roots['after'])
         if old != new:
             raise AssertionError(f'Changed material: {name}')
         hashes[name] = hashlib.sha256(new).hexdigest()

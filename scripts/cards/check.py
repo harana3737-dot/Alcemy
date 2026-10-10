@@ -1,11 +1,8 @@
 """Сверка карточек с таблицами правил v0.3. Запуск: python3 scripts/cards/check.py
 Ошибки — расхождение с правилом; предупреждения — то, что стоит проверить глазами."""
-import pathlib, re, sys
+import re, sys
 
-HERE = pathlib.Path(__file__).resolve().parent
-ROOT = HERE.parent.parent
 from cards_model import (
-    HERE,
     RAR,
     ROM,
     ROOT,

@@ -24,7 +24,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Установить закреплённую версию Playwright вне checkout
+      - name: Проверить Python на ошибки и неиспользуемый код
+        run: |
+          python -m pip install -r scripts/ci/requirements.txt
+          python -m ruff check scripts
+      - name: Установить закреплённые Playwright и ESLint вне checkout
         shell: bash
         run: |
           browser_env="$RUNNER_TEMP/alcemy-playwright"

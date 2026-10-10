@@ -6,7 +6,8 @@ from rules_data import unstable_fraction, CAT_STABLE, ROM, BATCH_T, elixir_batch
 import random as _random
 from sim_week import TALIS
 import sim_volume as volume
-from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
+from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INK, probs, scenario, p_bonus
+from sim import INSTAB as INSTAB  # Public table retained for existing callers.
 
 # Доз в партии зелья (6.2): мастерство → (1.1, 2.2, 3.3, 4.4, 5.5); 6.6+ — по одной
 

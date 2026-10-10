@@ -1,0 +1,10 @@
+# Результаты сборки остаются доступны, но не заслоняют исходники при ревью GitHub.
+*.csv.gz linguist-generated
+scripts/bestiary/results.csv linguist-generated
+questions.csv linguist-generated
+STATUS.md linguist-generated
+"Для игрока — книга алхимии.html" linguist-generated
+"Помощник варки.html" linguist-generated
+"Пульт мастера.html" linguist-generated
+"Карточки эликсиров.html" linguist-generated
+# Шпаргалки и оригиналы в Источниках пишутся вручную: общий *.html здесь не подходит.

@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import patch
 import alchemy_bestiary as a
 import alchemy_magic_review as r
 import bestiary_report as b

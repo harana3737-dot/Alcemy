@@ -6,10 +6,8 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from reading_guides import add_guide
-import json, pathlib, re
+import json, re
 
-HERE = pathlib.Path(__file__).resolve().parent
-ROOT = HERE.parent.parent
 from cards_model import (
     EN,
     HERE,
@@ -19,8 +17,8 @@ from cards_model import (
 )
 def main():
     C = prepare_cards()
-    ITEMS = json.load(open(HERE / "src" / "items.json", encoding="utf-8"))
-    SPELLS = json.load(open(HERE / "src" / "spells.json", encoding="utf-8"))
+    ITEMS = json.loads((HERE / "src" / "items.json").read_text(encoding="utf-8"))
+    SPELLS = json.loads((HERE / "src" / "spells.json").read_text(encoding="utf-8"))
     SP = {}
     for s in SPELLS:
         SP.setdefault(s["name"].lower(), s)
@@ -98,7 +96,7 @@ def main():
                 continue
             lo, hi = RAR_BAND.get(it.get("rarity"), (0, 99))
             if not lo <= c["lvl"] <= hi:
-                ok = documented(c, "уровень", "понижено", "поднято") or c["name"] in g["CHANGED"]
+                ok = documented(c, "уровень", "понижено", "поднято") or bool(c.get("changed"))
                 diffs.append(("уровень", f"{RAR_RU.get(it['rarity'], it['rarity'])} ({ROM[lo]}–{ROM[hi]})", ROM[c["lvl"]],
                               "намеренное: пересмотр уровней (А.2)" if ok else "не объяснено"))
             txt = flat(it.get("entries", []))

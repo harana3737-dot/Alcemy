@@ -1,5 +1,6 @@
 """Воспроизводимый прогон; --write создаёт отчёт и CSV, --check сверяет их."""
 from reading_guides import add_guide
+from result_archive import csv_archive
 import argparse
 import csv
 import hashlib
@@ -211,7 +212,7 @@ def render(monsters, rows):
              'Следующий разбор — «Алхимия — заклинания и метамагия»: Ускоренное заклинание сразу после ядовитого попадания, склянка вместе с Ускоренным заклинанием, Преобразованное и Усиленное, помощь Искусной остротой и способности Песни клинка. В этом срезе исправлен бонус доставки собственного яда чародея: кинжал с Ловкостью +2 вместо общего носителя рапиры с +3.', '',
              '## Воспроизведение', '',
              'Источники: `scripts/bestiary/srd2014-monsters.json`, лицензия `scripts/bestiary/UPSTREAM_LICENSE.md`, карточки `scripts/cards/cards_data.py`, разделы 7.2–7.6 и 8.6–8.11 правил.', '',
-             'Команды: `python3 -B scripts/alchemy_bestiary_report.py --write`, затем `python3 -B scripts/alchemy_bestiary_report.py --check` и `python3 -B -m unittest discover -s scripts -p "test_alchemy_bestiary.py"`. Все построчные результаты: `scripts/alchemy_bestiary/results.csv`.', '',
+             'Команды: `python3 -B scripts/alchemy_bestiary_report.py --write`, затем `python3 -B scripts/alchemy_bestiary_report.py --check` и `python3 -B -m unittest discover -s scripts -p "test_alchemy_bestiary.py"`. Все построчные результаты: `scripts/alchemy_bestiary/results.csv.gz` (после распаковки — обычный CSV).', '',
              f'SHA256 бестиария: `{b.SHA}`.', f'SHA256 CSV: `{hashlib.sha256(csv_text.encode()).hexdigest()}`.', '',
              'Ограничения: нет симуляции ответных атак, сохранения концентрации, перемещения, расхода ячеек всей группы, смертей от обычного урона и вероятности выиграть бой. Поглощение стихий монстром считается нулевым уроном без расчёта лечения. Носитель использует обычную рапиру; её основной урон остаётся немагическим, кроме масла остроты. Триггеры высоких обычных ядов посчитаны как вероятности, без обратной связи остальных 11 эффектов.', '']
     return add_guide('\n'.join(text), 'Алхимия и магия — проверка на бестиарии'), csv_text
@@ -223,14 +224,14 @@ def main():
     args = parser.parse_args()
     monsters, rows = calculate()
     report, csv_text = render(monsters, rows)
-    targets = {REPORT: report, DATA / 'results.csv': csv_text}
+    targets = {REPORT: report.encode('utf-8'), DATA / 'results.csv.gz': csv_archive(csv_text)}
     if args.check:
         for path, content in targets.items():
-            if not path.exists() or path.read_text() != content:
+            if not path.exists() or path.read_bytes() != content:
                 raise SystemExit('Нужно пересобрать: ' + str(path.relative_to(ROOT)))
     elif args.write:
         DATA.mkdir(exist_ok=True)
-        for path, content in targets.items(): path.write_text(content)
+        for path, content in targets.items(): path.write_bytes(content)
     else:
         print(report)
     print(f'Проверено: {len(monsters)} существ, {len(rows)} строк')

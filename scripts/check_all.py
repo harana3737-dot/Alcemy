@@ -87,6 +87,11 @@ def check(root=ROOT, *, slow=False, browser=False, sources=False):
             run(py+['scripts/player_book.py', '--check'], copy, env, failures)
         run(py+['scripts/check_html_budget.py'], copy, env, failures)
         run(['node', 'scripts/check_javascript.cjs'], copy, env, failures)
+        if subprocess.run(['node', '-e', "require.resolve('eslint'); require.resolve('globals')"],
+                          cwd=copy, env=env, capture_output=True).returncode == 0:
+            run(['node', 'scripts/lint_javascript.cjs'], copy, env, failures)
+        else:
+            print('ESLint не установлен: структурную компиляцию проверили; линтер обязателен в CI')
         if browser:
             executable = env.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH', '/opt/pw-browsers/chromium')
             env.update(PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=executable, CHROMIUM_PATH=executable)
