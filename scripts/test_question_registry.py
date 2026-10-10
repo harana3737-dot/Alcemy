@@ -2,18 +2,30 @@ import copy
 from pathlib import Path
 import tempfile
 import unittest
-from question_registry import ROOT, rows, csv_text, status_text, check_references, references, QUEUE, JOURNAL
+from question_registry import ROOT, rows, csv_text, status_text, check_references, references, QUEUE, JOURNAL, LEGACY, legacy_rows
 
 
 class RegistryTests(unittest.TestCase):
     def test_projection(self):
         records=rows();self.assertEqual((ROOT/'questions.csv').read_text(),csv_text(records))
         self.assertEqual((ROOT/'STATUS.md').read_text(),status_text(records))
-        self.assertEqual(sum(r['kind']=='lost_question' for r in records),31)
+        self.assertEqual(sum(r['kind']=='historical_question' and r['status']=='recovered' for r in records),31)
+        self.assertFalse(any(r['status']=='missing' for r in records))
         by={r['id']:r for r in records}
         self.assertEqual(by['В-19']['status'],'closed');self.assertEqual(by['В-05']['status'],'partial')
         self.assertEqual(by['В-33']['status'],'open');self.assertEqual(by['Ж-107']['date'],'08.10.2026')
         self.assertEqual(check_references(ROOT,records),[])
+
+    def test_legacy_integrity(self):
+        known={r['id'] for r in rows()}
+        original=(ROOT/LEGACY).read_text()
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);p=root/LEGACY
+            for bad in (original.replace('| 9 |','| 10 |',1),
+                        original.replace('В-04, В-11','В-999, В-11',1),
+                        '\n'.join(line for line in original.splitlines() if not line.startswith('| 39 |'))):
+                p.write_text(bad)
+                with self.assertRaises(ValueError):legacy_rows(root,known)
 
     def test_ranges(self):
         self.assertEqual([i for i,_ in references('В-29–В-31, Ж-105–107')],['В-29','В-30','В-31','Ж-105','Ж-106','Ж-107'])

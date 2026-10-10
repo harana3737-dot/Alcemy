@@ -9,7 +9,26 @@ import re
 ROOT=Path(__file__).resolve().parent.parent
 QUEUE='Очередь вопросов мастеру.md'
 JOURNAL='Журнал решений.md'
+LEGACY='сводка_проекта_2026-10-01.md'
 FIELDS=('id','kind','status','section','date','title','source','source_status')
+
+
+def legacy_rows(root,known):
+    result=[]
+    for line in (root/LEGACY).read_text(encoding='utf-8').splitlines():
+        if not re.match(r'^\| \d+ \|',line):continue
+        cells=[v.strip() for v in line.strip('|').split('|')]
+        if len(cells)!=5:raise ValueError('Неверная строка исторического вопроса')
+        number,title,body,links,note=cells
+        if not body or not title:raise ValueError('Пустой исторический вопрос')
+        for qid,_ in references(links):
+            if qid not in known:raise ValueError(f'Исторический вопрос {number}: несуществующий {qid}')
+        result.append(dict(id=f'legacy-{int(number):02}',kind='historical_question',status='recovered',
+                           section='раздел 4',date='',title=title,source=LEGACY,
+                           source_status='исторический вопрос; связь сейчас: '+links))
+    numbers=[int(r['id'].split('-')[-1]) for r in result]
+    if sorted(numbers)!=list(range(9,40)):raise ValueError('Исторические вопросы должны содержать ровно номера 9–39')
+    return result
 
 
 def rows(root=ROOT):
@@ -27,10 +46,8 @@ def rows(root=ROOT):
         qid,date,section,state,title=cells[:5]
         result.append(dict(id=qid,kind='decision',status='rejected' if state=='отклонено' else 'recorded',
                            section=section,date=date,title=title,source=JOURNAL,source_status=state))
-    # Источник этих номеров отсутствует. Это не В-09…В-39 из действующей очереди.
-    for number in range(9,40):
-        result.append(dict(id=f'legacy-{number:02}',kind='lost_question',status='missing',section='раздел 4',date='',
-                           title='Текст вопроса утерян',source='сводка_проекта_2026-10-01.md',source_status='источник отсутствует; см. очередь'))
+    # recovered означает восстановление содержания, а не решение вопроса.
+    result.extend(legacy_rows(root,{r['id'] for r in result}))
     ids=[r['id'] for r in result]
     if len(set(ids))!=len(ids):raise ValueError('Повторён ID в очереди или журнале')
     if len([r for r in result if r['kind']=='question'])<1:raise ValueError('Не найдены вопросы')
@@ -53,7 +70,7 @@ Codex, 10.10.2026. Служебный реестр; статусы взяты и
 
 В очереди: {count['open']} открытых, {count['partial']} частично решённых, {count['closed']} закрытых вопросов. В журнале: {decisions} записей решений. «Решение игрока, ждёт мастера» остаётся открытым вопросом; временное применение v0.3 не закрывает всю очередь автоматически.
 
-Старые вопросы 9–39 из `сводка_проекта_2026-10-01.md` представлены 31 строкой `legacy-09`…`legacy-39` со статусом `missing`. Их текст в проекте утерян. Эти номера не совпадают с действующими В-ID. Восстановление требует исходного текста или сведений мастера; вопросы не переоткрывались.
+Старые вопросы 9–39 восстановлены по сводке, переданной игроком 10.10.2026. В `{LEGACY}` сохранена сокращённая выжимка раздела 4 с темами, вариантами и связями с нынешними В-/Ж-ID; это не полная дословная копия сводки. В реестре — 31 строка `legacy-09`…`legacy-39` со статусом `recovered`: содержание найдено, но вопрос этим не объявляется решённым. Эти номера не совпадают с действующими В-ID; вопросы не переоткрывались. Ссылки сопоставления проверяются на существование.
 
 Пустая дата означает, что источник не сообщает индивидуальную дату вопроса. Для Ж-ID перенесена дата записи; дата сборки очереди не подменяет дату решения.
 
