@@ -33,7 +33,18 @@ class CheckAllTests(unittest.TestCase):
                 (copy/'x.md').write_bytes(b'new')
             with patch('check_all.run', side_effect=build):
                 self.assertEqual(check(root), 1)
+                self.assertEqual(check(root, sources=True), 0)
             self.assertEqual(snapshot(root), before)
+
+
+    def test_sources_keeps_failed_checks_fatal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'scripts').mkdir()
+            def fail(command, copy, env, failures):
+                failures.append(command)
+                return False
+            with patch('check_all.run',side_effect=fail):
+                self.assertEqual(check(root,sources=True),1)
 
 
 if __name__ == '__main__':

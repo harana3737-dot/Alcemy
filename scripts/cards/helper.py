@@ -89,8 +89,8 @@ def build():
     for c in sorted(C, key=lambda c: (c["lvl"], CLS_ORDER.index(c["cls"]), c["name"])):
         b5, b20 = _g["quality"](c)
         data.append(dict(n=c["name"], l=c["lvl"], k=c["cls"], f=c["fam"] or "", e=c["ess"], t=c["tox"], d=c["dur"],
-                         p=c["price"], b=c["base"], a=c["a89"].startswith("да"), s=_g["saves"](c), ar=_g["area"](c) or "", tk=c["tasks"],
-                         cc=c.get("conc")=="да", up=_g["UPCAST"].get(c["name"], "none"), b5=b5, b20=b20, eff=c["eff"]))
+                         p=c["price"], b=c["base"], a=c["stacks_8_9"], s=_g["saves"](c), ar=_g["area"](c) or "", tk=c["tasks"],
+                         cc=c["concentration"], up=_g["UPCAST"].get(c["name"], "none"), b5=b5, b20=b20, eff=c["eff"]))
 
     # Сумка из листа персонажа: блоки «Зелья и расходники» и «На разборку»
     CARD_OF = {"Зелье сопротивления (некротика)": "Сопротивление", "Зелье подводного дыхания": "Водное дыхание"}
