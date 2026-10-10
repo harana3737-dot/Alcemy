@@ -32,7 +32,7 @@ class EconomyTests(unittest.TestCase):
         self.assertEqual(self.player["growth_probs"](4, 10, True), (.9375, .5625, .0625))
         bonus, doses, hours, gold = self.week["growth_row"](2, guidance=True)
         self.assertEqual((bonus, doses, hours), (4, 15, 15))
-        self.assertAlmostEqual(gold, 6.5625)
+        self.assertAlmostEqual(gold, 5.625)
         row = self.player["growth"](extra=1, guidance=True)[1]  # Родной бонус 3 + 1 = 4.
         self.assertEqual((row[3], row[5]), (15, 15))
         self.assertAlmostEqual(row[6], gold)

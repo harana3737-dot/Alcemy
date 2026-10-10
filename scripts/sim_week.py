@@ -36,7 +36,7 @@ def growth_row(m, extra=0, guidance=False):
     per = ok + p20                               # натуральная 20 — второй успех
     doses = NEED[m] / per
     hours = doses / BATCH.get(m, 1) * 2
-    return b, doses, hours, doses * (base_cost(m) - p5 * m * HERB[m])   # на 5+ — экономия трав (7.7)
+    return b, doses, hours, doses * (base_cost(m) - (p5 + p20) * m * HERB[m])
 
 def ink_hour(m):
     """Доход в час на чернилах уровня m при бонусе Талиса на этом мастерстве (I–V; выше — как V)."""
@@ -114,12 +114,12 @@ def p_open_in(hours, b=4, N=40000, *, rng=None):
     ok = 0
     for _ in range(N):
         m = t = 0
-        while m < 3 and t < hours:
+        while m < 3 and t + 2 <= hours:
             t += 2; d = rng.randint(1, 20)
             if d == 20: m += 3
             elif d != 1 and d + b + 2 >= 17: m += 2
             elif d != 1 and d + b + 2 >= 12: m += 1
-        while m >= 3 and t < hours:
+        while m >= 3 and t + 2 <= hours:
             t += 2
             if rng.random() < ok_rate(b, 14): ok += 1; break
     return ok / N
@@ -138,7 +138,11 @@ def build_tables(player_tables=None):
     for m in range(2, 10):
         b, doses, h, gold = growth_row(m)
         _, _, hg, _ = growth_row(m, guidance=True)
-        lost = h * (ink_hour(m) - pot_hour(m))
+        # Та же политика, что в росте: пять стабильных применений и
+        # экономия трав на 5+/20; продажа не использует другой катализатор.
+        ok, un, _ = probs(b, P_SL[m])
+        revenue = doses * P_PRICE[m] * (.85 * ok + .5 * un)
+        lost = h * ink_hour(m) - (revenue - gold)
         GROW.append((m, b, NEED[m], doses, h, hg, gold, lost))
 
     QUEUE = []

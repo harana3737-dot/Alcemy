@@ -70,6 +70,33 @@ def proficiency(level):
     return 2 + (level - 1) // 4
 
 
+def normal_brewing_requirements(level):
+    """Обычная варка зелий/эликсиров: разделы 3.1, 8.2 и 4.
+
+    PLACE_LIMIT сопоставляет бонус места с потолком предмета.
+    Особые попытки выше мастерства остаются отдельными сценариями.
+    """
+    if type(level) is not int or not 1 <= level <= 10:
+        raise ValueError('Уровень предмета должен быть от 1 до 10')
+    laboratory = min(b for b, ceiling in PLACE_LIMIT.items() if ceiling >= level)
+    return level, laboratory
+
+
+def normal_brewing_allowed(level, mastery, laboratory):
+    required_mastery, required_laboratory = normal_brewing_requirements(level)
+    return mastery >= required_mastery and laboratory >= required_laboratory
+
+
+def normal_brewing_bonus_floor(level, intelligence=0, proficiency_bonus=2):
+    """Нижняя граница бонуса для явно заданных Интеллекта и владения.
+
+    Это граница сценария, а не универсальный запрет по итоговому бонусу.
+    Высокий итоговый бонус не заменяет мастерство и оборудование.
+    """
+    mastery, laboratory = normal_brewing_requirements(level)
+    return intelligence + proficiency_bonus + MB[mastery] + laboratory
+
+
 def elixir_batch(m, level, workshop=False):
     return min(m - level + ELIXIR_BATCH_OFFSET, ELIXIR_BATCH_CAP[level <= 2] + int(workshop))
 

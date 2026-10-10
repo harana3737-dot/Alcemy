@@ -54,7 +54,7 @@ def build_tables(*, seed=5, days=100000):
     for name, sl, mat, price, cat, per_day, item_kind, level in items:
         res = []
         for pts in (0, 2, 5):
-            best = max(sim(B, sl, mat, price, cat, per_day, pts, stop, days=days, u=unstable_fraction(.85), item_kind=item_kind, level=level, rng=rng) for stop in ((CAT_STABLE, CAT_STABLE + len(INSTAB)) if cat else (CAT_STABLE,)))
+            best = max(sim(B, sl, mat, price, cat, per_day, pts, stop, days=days, u=unstable_fraction(.85), item_kind=item_kind, level=level, rng=rng) for stop in (range(CAT_STABLE, CAT_STABLE + len(INSTAB) + 1) if cat else (CAT_STABLE,)))
             res.append(best)
         rows.append((name, sl, per_day, res))
 

@@ -1,7 +1,7 @@
 """Монте-Карло экономики зелий и чернил по правилам v0.3 + решение мастера:
 провал тратит травы и применение катализатора; партия — одно применение на дозу."""
 
-from rules_data import unstable_fraction, HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, ROM, CAT_STABLE
+from rules_data import unstable_fraction, HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, ROM, CAT_STABLE, normal_brewing_bonus_floor
 import random as _random
 import json
 import sys
@@ -87,15 +87,17 @@ def exact(bonus, sl, mat, price, cat, stop, unst_value, *, item_kind, level, all
     p5, p20 = p_bonus(bonus, sl)
     b5, b20 = potion_bonus(mat, price, item_kind=item_kind, level=level, allow_up_to_10=allow_up_to_10)
     v = ok * price + un * price * unst_value - mat + p5 * b5 + p20 * b20
-    reach, E, T = 1.0, -cat, 0.0
+    reach, E, T, successes = 1.0, -cat, 0.0, 0.0
     for use in range(1, stop + 1):
         if use > CAT_STABLE and cat:
             s = probs(bonus, INSTAB[use - CAT_STABLE - 1])[0]
             E += reach * (s * v - (1 - s) * mat); T += reach
+            successes += reach * s * ok
             reach *= s
         else:
             E += reach * v; T += reach
-    return E, T, ok
+            successes += reach * ok
+    return E, T, successes / T
 
 
 def scenario(bonus, sl, mat, price, cat, unst_value, hours, *, item_kind, level, allow_up_to_10=True):
@@ -122,7 +124,8 @@ def scenario_mc(bonus, sl, mat, price, cat, unst_value, hours, *, item_kind, lev
 
 
 def breakeven(sl, mat, price, cat, unst_value, hours, *, item_kind, level, allow_up_to_10=True):
-    for b in range(-2, 25):
+    floor = normal_brewing_bonus_floor(level) if item_kind == 'potion' else -2
+    for b in range(floor, 25):
         if scenario(b, sl, mat, price, cat, unst_value, hours, item_kind=item_kind, level=level, allow_up_to_10=allow_up_to_10)["per_try"] > 0:
             return b
     return None
@@ -141,16 +144,19 @@ def main():
     BONUSES = [4, 6, 8, 10, 12]
     for lvl in range(1, 11):
         mat = lvl * HERB[lvl]
-        row = {"mat": mat, "cat_use": CAT_PRICE[lvl] / CAT_STABLE, "sl": P_SL[lvl], "price": P_PRICE[lvl]}
+        floor = normal_brewing_bonus_floor(lvl)
+        row = {"mat": mat, "cat_use": CAT_PRICE[lvl] / CAT_STABLE, "sl": P_SL[lvl], "price": P_PRICE[lvl], "bonus_floor": floor, "bonus_floor_assumption": "Интеллект +0, владение +2, обычная варка"}
         for sale, key in [(0.85, "s85"), (1.0, "s100")]:
             pr = P_PRICE[lvl] * sale
-            row[key] = {str(b): scenario(b, P_SL[lvl], mat, pr, CAT_PRICE[lvl], unstable_fraction(sale), 2, item_kind='potion', level=lvl) for b in BONUSES}
+            row[key] = {str(b): scenario(b, P_SL[lvl], mat, pr, CAT_PRICE[lvl], unstable_fraction(sale), 2, item_kind='potion', level=lvl) for b in BONUSES if b >= floor}
             row[key + "_be"] = breakeven(P_SL[lvl], mat, pr, CAT_PRICE[lvl], unstable_fraction(sale), 2, item_kind='potion', level=lvl)
             row[key + "_be_unst0"] = breakeven(P_SL[lvl], mat, pr, CAT_PRICE[lvl], 0.0, 2, item_kind='potion', level=lvl)
         out["potions"][lvl] = row
         print("potion", lvl, row["s85_be"], {b: round(v["per_try"], 1) for b, v in row["s85"].items()}, flush=True)
 
     for name, (price, herbs, ess, sl, catlvl, hours) in INK.items():
+        if ROM.index(name) >= 6:
+            continue  # VI+ — sim_volume: единичная проверка не моделирует объём работы.
         mat = herbs + ess
         row = {"mat": mat, "sl": sl, "price": price, "hours": hours}
         for sale, key in [(0.85, "s85"), (1.0, "s100")]:

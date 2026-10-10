@@ -8,6 +8,7 @@ import json
 import math
 from pathlib import Path
 from test_economy_audit import model
+from rules_data import unstable_fraction
 
 
 def canonical_exact(n, bonus, dc, mat, price, cat, stop, unstable, *, level):
@@ -35,24 +36,25 @@ def main():
     if args.runs < 2:
         parser.error('--runs должен быть не меньше 2')
     n = model()
+    unstable = unstable_fraction(.85)
     differences = []
     for bonus, level in ((4, 3), (12, 3), (12, 6), (14, 8), (16, 9)):
         dc, mat = n['P_SL'][level], level * n['HERB'][level]
         price, cat = n['P_PRICE'][level] * .85, n['CAT_PRICE'][level]
-        old = n['scenario'](bonus, dc, mat, price, cat, .5, 2, item_kind='potion', level=level)
-        corrected = max((canonical_exact(n, bonus, dc, mat, price, cat, stop, .5, level=level)
+        old = n['scenario'](bonus, dc, mat, price, cat, unstable, 2, item_kind='potion', level=level)
+        corrected = max((canonical_exact(n, bonus, dc, mat, price, cat, stop, unstable, level=level)
                          for stop in range(5, 11)), key=lambda s: s['per_try'])
         row = dict(level=level, bonus=bonus, dc=dc, materials=mat, sale_price=price,
-                   catalyst_price=cat, unstable_fraction=.5, current=old, canonical_nat1=corrected)
+                   catalyst_price=cat, unstable_fraction=unstable, current=old, canonical_nat1=corrected)
         differences.append(row)
         print(f"Зелье {level}.{level}, +{bonus}: {old['per_try']:.4f} → {corrected['per_try']:.4f} зм/попытку")
     controls = []
     for bonus, level in ((6, 4), (8, 6), (10, 8), (12, 6)):
         dc, mat = n['P_SL'][level], level * n['HERB'][level]
         price, cat = n['P_PRICE'][level] * .85, n['CAT_PRICE'][level]
-        old = n['scenario'](bonus, dc, mat, price, cat, .5, 2, item_kind='potion', level=level)
+        old = n['scenario'](bonus, dc, mat, price, cat, unstable, 2, item_kind='potion', level=level)
         n['random'].seed(args.seed)
-        samples = [n['run_catalyst'](bonus, dc, mat, price, cat, old['stop'], .5, item_kind='potion', level=level)
+        samples = [n['run_catalyst'](bonus, dc, mat, price, cat, old['stop'], unstable, item_kind='potion', level=level)
                    for _ in range(args.runs)]
         mean_tries = sum(s[1] for s in samples) / args.runs
         rate = sum(s[0] for s in samples) / sum(s[1] for s in samples)

@@ -2,7 +2,7 @@
 Поверх sim.py, sim_week.py и sim_volume.py; правила не меняются. Заряды и склянки I–V по цене, травам и СЛ
 совпадают с чернилами того же уровня (справочник цен), поэтому доход в час у них один."""
 
-from rules_data import unstable_fraction, CAT_STABLE, ROM, BATCH_T, elixir_batch
+from rules_data import unstable_fraction, CAT_STABLE, ROM, BATCH_T, elixir_batch, WEEK_LAB, normal_brewing_allowed, normal_brewing_requirements
 import random as _random
 from sim_week import TALIS
 import sim_volume as volume
@@ -21,6 +21,11 @@ def batch_p(m, l):
 
 def ink_set(m, k):
     """один годный набор чернил уровня k (I–V) на мастерстве m: часы и золото; нестабильные годятся (−2, 10.4)"""
+    if m not in TALIS or type(k) is not int or not 1 <= k <= 5:
+        raise ValueError('Эта модель набора чернил поддерживает только I–V')
+    _, required_lab = normal_brewing_requirements(k)
+    if WEEK_LAB[m] < required_lab:
+        raise ValueError('Недостаточное место для изготовления чернил')
     price, herbs, ess, sl, cl, h = INK[ROM[k]]
     sl += 5 + k - m if k > m else 0
     ok, un, _ = probs(TALIS[m], sl)
@@ -30,16 +35,20 @@ def ink_set(m, k):
 
 def elixir(m, l):
     """одна доза эликсира-эффекта уровня l ≤ min(m, 5) партией (М − ур.) + 2, не больше 3 (I–II) / 2 (III–V)"""
-    size = elixir_batch(m, l)
+    if m not in TALIS or not 1 <= l <= 5 or not normal_brewing_allowed(l, m, WEEK_LAB[m]):
+        raise ValueError('Нужны мастерство, место и уровень I–V для обычной варки эликсира')
+    size = elixir_batch(m, l, workshop=WEEK_LAB[m] == 5)
     ok, un, _ = probs(TALIS[m], P_SL[l] + 2)
     hours = (2 if l <= 2 else 4) / size / ok
     return hours, (l * HERB[l] + HERB[l] + CAT_PRICE[l] / CAT_STABLE) / ok
 
 
 def potion(m, l):
+    if m not in TALIS or not normal_brewing_allowed(l, m, WEEK_LAB[m]):
+        raise ValueError('Недостаточное мастерство или место для обычной варки зелья')
     ok, un, _ = probs(TALIS[m], P_SL[l])
-    p5, _ = p_bonus(TALIS[m], P_SL[l])
-    return 2 / batch_p(m, l) / ok, (l * HERB[l] * (1 - p5) + CAT_PRICE[l] / CAT_STABLE) / ok
+    p5, p20 = p_bonus(TALIS[m], P_SL[l])
+    return 2 / batch_p(m, l) / ok, (l * HERB[l] * (1 - p5 - p20) + CAT_PRICE[l] / CAT_STABLE) / ok
 
 
 def per_hour(m, *, rng=None):

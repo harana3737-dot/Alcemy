@@ -46,7 +46,7 @@ class ScenarioTests(unittest.TestCase):
 
     def test_invalid(self):
         s=potion(3,5)
-        for opts in ({'stop':11},{'points':-1},{'days':0},{'per_day':0},{'mat':float('nan')},{'unst_value':2},{'points':True}):
+        for opts in ({'stop':11},{'points':-1},{'days':0},{'per_day':0},{'mat':float('nan')},{'unst_value':-1},{'points':True}):
             with self.subTest(opts=opts), self.assertRaises(ValueError):replace(s,**opts)
         with self.assertRaises(ValueError):finite_mc(s,batches=1)
 

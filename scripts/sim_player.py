@@ -48,7 +48,8 @@ def growth(extra=0, guidance=False):
         doses = NEED[m] / per_dose
         batch = BATCH.get(m, 1)
         hours = doses / batch * 2
-        gold = doses * (base_cost(m) - p5 * m * HERB[m])   # на 5+ — экономия трав (7.7)
+        # На 20 выбираем два бонуса, включая экономию трав; рост всё равно +2.
+        gold = doses * (base_cost(m) - (p5 + p20) * m * HERB[m])
         rows.append((m, NEED[m], ok, doses, batch, hours, gold))
     return rows
 

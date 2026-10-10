@@ -45,8 +45,8 @@ class Scenario:
             raise ValueError('Неверные дни, попытки или запас перебросов')
         if any(not math.isfinite(x) or x < 0 for x in (self.mat, self.price, self.cat)):
             raise ValueError('Стоимость должна быть конечной и неотрицательной')
-        if not math.isfinite(self.unst_value) or not 0 <= self.unst_value <= 1:
-            raise ValueError('Доля продажи нестабильного предмета должна быть от 0 до 1')
+        if not math.isfinite(self.unst_value) or self.unst_value < 0:
+            raise ValueError('Отношение нестабильной выручки к обычной должно быть неотрицательным')
 
     @property
     def item(self):
