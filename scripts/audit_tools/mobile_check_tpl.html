@@ -1,0 +1,36 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Проверка помощника на телефоне</title>
+<style>body{font:16px system-ui;margin:16px;max-width:900px}button,input{font:inherit;margin:8px 0;max-width:100%}button{padding:12px}iframe{width:100%;height:450px;border:1px solid #aaa}pre{white-space:pre-wrap;overflow-wrap:anywhere}label{display:block}</style></head><body>
+<h1>Проверка помощника на телефоне</h1>
+<p>Открой этот файл в браузере телефона. Выбери резервную копию помощника или оставь начальные сумки. Нажми «Запустить» и держи страницу открытой до завершения.</p>
+<p>Испытания выполняются в отдельной копии в памяти. Рабочее сохранение и аккаунт не меняются. Сеть отключена внутри копии. В результат входят задержки, число записей и сведения браузера; названия предметов, люди и записи журнала туда не входят.</p>
+<label>Модель телефона (для сравнения результатов) <input id="device" placeholder="Например: модель, браузер"></label>
+<label>Резервная копия помощника (необязательно) <input id="save" type="file" accept=".json,application/json"></label>
+<button id="start" disabled>Запустить проверку</button> <button id="download" disabled>Скачать результаты</button>
+<p id="status" role="status">Готово к запуску. Около минуты; на больших сохранениях дольше.</p>
+<p>Числа включают обработчик и расчёт размеров страницы. Запись в постоянное хранилище и облачную синхронизацию эта копия не измеряет. Отдельно записывается время до двух следующих кадров.</p>
+<iframe id="helper" sandbox="allow-scripts" title="Испытательная копия помощника"></iframe><pre id="out"></pre>
+<script>
+const helper=__HELPER_JSON__,sha='__HELPER_SHA__';let report=null;
+const frame=document.getElementById('helper');frame.onload=()=>{document.getElementById('start').disabled=false};frame.srcdoc=helper;
+document.getElementById('start').onclick=async()=>{
+ document.getElementById('start').disabled=true;document.getElementById('download').disabled=true;report=null;
+ try{const file=document.getElementById('save').files[0];if(file&&file.size>5*1024*1024)throw Error('size');
+ const snapshot=file?JSON.parse(await file.text()):null;
+ document.getElementById('status').textContent='Выполняется…';
+ frame.scrollIntoView({block:'start'});frame.contentWindow.postMessage({type:'alcemy-phone-start',snapshot},'*');
+ }catch(_){document.getElementById('status').textContent='Не удалось прочитать копию JSON до 5 МБ.';document.getElementById('start').disabled=false}
+};
+addEventListener('message',event=>{
+ if(event.source!==frame.contentWindow)return;
+ if(event.data?.type==='alcemy-phone-progress'){document.getElementById('status').textContent=`Выполнено действий: ${event.data.completed} из 5`;return}
+ if(event.data?.type!=='alcemy-phone-result')return;
+ document.getElementById('start').disabled=false;
+ if(!event.data.ok){document.getElementById('status').textContent=event.data.error;return}
+ report={format:'alcemy-phone-check',version:1,helper_sha256:sha,device:document.getElementById('device').value,user_agent:navigator.userAgent,date:new Date().toISOString(),storage:'isolated memory; no cloud',...event.data};
+ document.getElementById('status').textContent='Проверка завершена; отмена действия работает.';
+ document.getElementById('download').disabled=false;
+ const labels={bag_add:'Добавление предмета',undo:'Отмена',journal_open:'Открытие журнала',journal_update:'Обновление состояния в журнале',combat_turn:'Ход в бою'};
+ document.getElementById('out').textContent=report.results.map(r=>`${labels[r.action]}: медиана ${r.median_handler_ms.toFixed(1)} мс, 95-й процентиль ${r.p95_handler_ms.toFixed(1)} мс`).join('\n');
+});
+document.getElementById('download').onclick=()=>{if(!report)return;const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='alcemy-phone-results.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+</script></body></html>

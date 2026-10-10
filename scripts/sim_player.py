@@ -2,7 +2,7 @@
 чернила против покупки у Анариэль, стоимость прокачки мастерства 1 → 10. Правила v0.3.
 «Родной» бонус: Инт +0 (как у Талиса), владение по брекетам, мастерство алхимика, минимальная лаборатория."""
 
-from rules_data import PLAYER_PROF, MB, PLAYER_LAB, HEAL, OWN_BATCH, NEED
+from rules_data import unstable_fraction, CAT_STABLE, PLAYER_PROF, MB, PLAYER_LAB, HEAL, OWN_BATCH, NEED, CAT_DC, CAT_ORDER_PRICE, ROM
 
 import random as _random
 
@@ -22,10 +22,10 @@ BATCH = OWN_BATCH
 
 
 def base_cost(l):
-    return l * HERB[l] + CAT_PRICE[l] / 5
+    return l * HERB[l] + CAT_PRICE[l] / CAT_STABLE
 
 def instab(b, use):
-    return 1 - probs(b, INSTAB[use - 6])[0]
+    return 1 - probs(b, INSTAB[use - CAT_STABLE - 1])[0]
 
 def growth_probs(b, sl, guidance=False):
     """Успех, экономия трав на 5+ и нат. 20 после не более одного переброса провала.
@@ -53,7 +53,7 @@ def growth(extra=0, guidance=False):
 
 def _ink2_day(b):
     price, herbs, ess, sl, cl, h = INK["II"]
-    return scenario(b, sl, herbs + ess, price * .85, CAT_PRICE[cl], .5, h)["per_day"]
+    return scenario(b, sl, herbs + ess, price * .85, CAT_PRICE[cl], unstable_fraction(.85), h, item_kind='ink', level=2)["per_day"]
 
 
 def build_tables(volume_tables=None):
@@ -68,12 +68,12 @@ def build_tables(volume_tables=None):
 
     CAT_ROWS = []
 
-    for order, (sl, lvl, price) in {"I": (11, 3, 70), "II": (17, 6, 350), "III": (21, 8, 1750), "IV": (25, 10, 7500)}.items():
+    for order, (sl, lvl, price) in {ROM[o]: (CAT_DC[o], l, CAT_ORDER_PRICE[o]) for o, l in enumerate((3, 6, 8, 10), 1)}.items():
         b = NATIVE[lvl]
         ok, un, fa = probs(b, sl)
         # 5.3: нат. 20 — 7 стабильных, 5+ — 6, успех — 5, провал 1–4 — 4; ценность ∝ стабильным применениям (5 = цена)
         n20 = 0.05; hi = sum(1 for d in range(2, 20) if d + b >= sl + 5) / 20
-        value = price * ((ok - hi - n20) * 5 + hi * 6 + n20 * 7 + un * 4) / 5
+        value = price * ((ok - hi - n20) * CAT_STABLE + hi * (CAT_STABLE + 1) + n20 * (CAT_STABLE + 2) + un * (CAT_STABLE - 1)) / CAT_STABLE
         CAT_ROWS.append((order, price, sl, b, ok, un, fa, value, price / 2))
 
     INK_SELF = []
@@ -82,14 +82,14 @@ def build_tables(volume_tables=None):
         price, herbs, ess, sl, cl, h = INK[n]
         b = NATIVE[ml]
         ok, un, fa = probs(b, sl)
-        cost = (herbs + ess + CAT_PRICE[cl] / 5) / (1 - fa)      # нестабильные чернила годятся (−2 к Начертанию)
+        cost = (herbs + ess + CAT_PRICE[cl] / CAT_STABLE) / (1 - fa)      # нестабильные чернила годятся (−2 к Начертанию)
         INK_SELF.append((n, b, sl, fa, cost, price))
 
     for l, n in [(6, "VI"), (7, "VII"), (8, "VIII")]:
         price = volume.CHG[l]; mat = price / 3 + volume.ESS[l]
         st = volume.volume_stats(NATIVE[l], l, price, mat, False, 10000, rng=rng)
         ok_u = st["ok"]          # доля годных (успех); нестабильные тоже годятся, но здесь консервативно
-        cost = (mat + volume.CAT_E[l] / 5) / max(ok_u, 1e-9)
+        cost = (mat + volume.CAT_E[l] / CAT_STABLE) / max(ok_u, 1e-9)
         INK_SELF.append((n, NATIVE[l], volume.SL_E[l], 1 - ok_u, cost, price))
 
     GROWTH = {"базовый": growth(), "с помощником (+2)": growth(2), "с «Волшебным указанием»": growth(0, True),

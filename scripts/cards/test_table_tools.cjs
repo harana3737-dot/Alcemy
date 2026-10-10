@@ -57,6 +57,13 @@ const assert=require('node:assert/strict');
  const before=await page.evaluate(()=>JSON.stringify(ST));
  await page.locator('#backupFile').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"version":99}')});
  await page.waitForFunction(()=>document.getElementById('backupStatus').textContent.includes('Не восстановлено'));assert.equal(await page.evaluate(()=>JSON.stringify(ST)),before);
+ const deepSave=await page.evaluate(()=>{const d=snapshot();let x={};for(let i=0;i<100;i++)x={child:x};d.extra=x;return JSON.stringify(d)});
+ await page.locator('#backupFile').setInputFiles({name:'deep.json',mimeType:'application/json',buffer:Buffer.from(deepSave)});
+ await page.waitForFunction(()=>document.getElementById('backupStatus').textContent.includes('слишком вложенный'));
+ assert.equal(await page.evaluate(()=>JSON.stringify(ST)),before);
+ assert.equal(await page.locator('#restoreDialog').evaluate(d=>d.open),false);
+ const depth=await page.evaluate(()=>{const stack=[[snapshot(),0]];let max=0;while(stack.length){const [x,n]=stack.pop();if(x&&typeof x==='object'){max=Math.max(max,n);Object.values(x).forEach(v=>stack.push([v,n+1]))}}return max});
+ assert(depth<10,`normal snapshot depth ${depth}`);
  assert.deepEqual(errors,[]);console.log('PASS: availability, shortages, shared formulas, expired stock, purity, validation, 5.5 progress, export, restore, persistence');
  } finally {await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

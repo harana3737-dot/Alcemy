@@ -51,7 +51,7 @@ class QuietHandler(SimpleHTTPRequestHandler):
         pass
 
 
-def check(root=ROOT, *, slow=False, browser=False):
+def check(root=ROOT, *, slow=False, browser=False, sources=False):
     before = snapshot(root)
     failures = []
     with tempfile.TemporaryDirectory(prefix='alcemy-check-all-') as directory:
@@ -64,8 +64,16 @@ def check(root=ROOT, *, slow=False, browser=False):
         for test_dir in test_dirs:
             run(py+['-m', 'unittest', 'discover', '-s', str(test_dir.relative_to(copy)),
                     '-p', 'test_*.py'], copy, env, failures)
+        run(py+['scripts/check_rule_documents.py'], copy, env, failures)
+        run(py+['scripts/card_rule_lists.py'], copy, env, failures)
+        run(py+['scripts/question_registry.py'], copy, env, failures)
+        run(['node', 'scripts/cards/test_import_snapshot.cjs'], copy, env, failures)
         run(py+['scripts/cards/check.py'], copy, env, failures)
         for script in CHECKS:
+            if sources and script == 'player_book.py':
+                continue  # книга будет собрана после всех зависимых документов
+            if sources:
+                run(py+['scripts/'+script], copy, env, failures)
             run(py+['scripts/'+script, '--check'], copy, env, failures)
         for command in BUILDERS:
             run(py+['scripts/'+command[0], *command[1:]], copy, env, failures)
@@ -75,6 +83,10 @@ def check(root=ROOT, *, slow=False, browser=False):
         for source in paired_html_sources(copy, SPECIAL_HTML):
             run(py+['scripts/master_html.py', source.relative_to(copy).with_suffix('').as_posix()], copy, env, failures)
         run(py+['scripts/player_book.py'], copy, env, failures)
+        if sources:
+            run(py+['scripts/player_book.py', '--check'], copy, env, failures)
+        run(py+['scripts/check_html_budget.py'], copy, env, failures)
+        run(['node', 'scripts/check_javascript.cjs'], copy, env, failures)
         if browser:
             executable = env.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH', '/opt/pw-browsers/chromium')
             env.update(PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=executable, CHROMIUM_PATH=executable)
@@ -100,15 +112,16 @@ def check(root=ROOT, *, slow=False, browser=False):
         return 1
     if failures:
         print(f'Проверок с ошибкой: {len(failures)}')
-    return int(bool(stale or failures))
+    return int(bool((stale and not sources) or failures))
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--slow', action='store_true', help='Также пересчитать экономику')
     parser.add_argument('--browser', action='store_true', help='Также запустить Playwright')
+    parser.add_argument('--sources', action='store_true', help='Проверить исходники и свежую сборку; устаревшие готовые документы сообщить без ошибки')
     args = parser.parse_args()
-    return check(slow=args.slow, browser=args.browser)
+    return check(slow=args.slow, browser=args.browser, sources=args.sources)
 
 
 if __name__ == '__main__':

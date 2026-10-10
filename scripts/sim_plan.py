@@ -2,7 +2,7 @@
 Поверх sim.py, sim_week.py и sim_volume.py; правила не меняются. Заряды и склянки I–V по цене, травам и СЛ
 совпадают с чернилами того же уровня (справочник цен), поэтому доход в час у них один."""
 
-from rules_data import ROM, BATCH_T, elixir_batch
+from rules_data import unstable_fraction, CAT_STABLE, ROM, BATCH_T, elixir_batch
 import random as _random
 from sim_week import TALIS
 import sim_volume as volume
@@ -24,7 +24,7 @@ def ink_set(m, k):
     sl += 5 + k - m if k > m else 0
     ok, un, _ = probs(TALIS[m], sl)
     t = 1 / (ok + un)
-    return t * h, t * (herbs + ess + CAT_PRICE[cl] / 5), ok / (ok + un)
+    return t * h, t * (herbs + ess + CAT_PRICE[cl] / CAT_STABLE), ok / (ok + un)
 
 
 def elixir(m, l):
@@ -32,21 +32,21 @@ def elixir(m, l):
     size = elixir_batch(m, l)
     ok, un, _ = probs(TALIS[m], P_SL[l] + 2)
     hours = (2 if l <= 2 else 4) / size / ok
-    return hours, (l * HERB[l] + HERB[l] + CAT_PRICE[l] / 5) / ok
+    return hours, (l * HERB[l] + HERB[l] + CAT_PRICE[l] / CAT_STABLE) / ok
 
 
 def potion(m, l):
     ok, un, _ = probs(TALIS[m], P_SL[l])
     p5, _ = p_bonus(TALIS[m], P_SL[l])
-    return 2 / batch_p(m, l) / ok, (l * HERB[l] * (1 - p5) + CAT_PRICE[l] / 5) / ok
+    return 2 / batch_p(m, l) / ok, (l * HERB[l] * (1 - p5) + CAT_PRICE[l] / CAT_STABLE) / ok
 
 
 def per_hour(m, *, rng=None):
     b = TALIS[m]
-    pot = max(scenario(b, P_SL[l], l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], .5, 2)["per_try"] * batch_p(m, l) / 2
+    pot = max(scenario(b, P_SL[l], l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], unstable_fraction(.85), 2, item_kind='potion', level=l)["per_try"] * batch_p(m, l) / 2
               for l in range(1, min(m, 10) + 1))
     best_ink = max((scenario(b, INK[ROM[k]][3], INK[ROM[k]][1] + INK[ROM[k]][2], INK[ROM[k]][0] * .85,
-                             CAT_PRICE[INK[ROM[k]][4]], .5, INK[ROM[k]][5])["per_day"] / 8, ROM[k]) for k in range(1, min(m, 5) + 1))
+                             CAT_PRICE[INK[ROM[k]][4]], unstable_fraction(.85), INK[ROM[k]][5], item_kind='ink', level=k)["per_day"] / 8, ROM[k]) for k in range(1, min(m, 5) + 1))
     vol = None
     if m >= 6:
         res = []

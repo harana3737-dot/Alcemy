@@ -19,7 +19,7 @@ function supply(c,q=1){
   const deficits=[], warnings=[], M=+$('m').value||1;
   if(!knows(c))warnings.push('рецепт или ступень формулы не отмечены известными');
   if(c.l>M)warnings.push('выше текущего мастерства');
-  if(c.l>(S.t.lab?10:$('anar').checked?8:5))warnings.push('нужно другое оборудование');
+  if(c.l>(S.t.lab?PLACE_LIMIT[5]:$('anar').checked?PLACE_LIMIT[3]:PLACE_LIMIT[1]))warnings.push('нужно другое оборудование');
   const mat=ST.mat||{herbs:[],ess:[],cat:[],other:[]};
   const kind=c.b==='ядовитая'?'poison':'heal';
   const byValue=['chg','rea','fl','psn','oils'].includes(c.k);
@@ -44,14 +44,14 @@ function supply(c,q=1){
   if(c.l>=3){
     const order=ORD(c.l),cats=mat.cat.filter(x=>x.o===order),remaining=cats.reduce((s,x)=>s+Math.max(0,cmax(x)-x.used),0);
     const stable=cats.reduce((s,x)=>s+Math.max(0,stab(x)-x.used),0);
-    if(remaining<q){const count=Math.ceil((q-remaining)/5);deficits.push({n:'Катализатор '+ROM[order]+' порядка'+(order===4?' — только изготовление из сюжетного сырья':''),q:count,price:order===4?null:[0,70,350,1750][order]*count});}
+    if(remaining<q){const count=Math.ceil((q-remaining)/CAT_STABLE);deficits.push({n:'Катализатор '+ROM[order]+' порядка'+(order===4?' — только изготовление из сюжетного сырья':''),q:count,price:order===4?null:CAT_PRICES[order]*count});}
     else if(stable<q)warnings.push('потребуются проверки нестабильности катализатора');
   }
   if(c.cm){
     const have=mat.other.filter(o=>o.n.toLowerCase().includes(c.cm.k)).reduce((s,o)=>s+o.q,0),lack=Math.max(0,(c.cm.use?q:1)-have);
     if(lack)deficits.push({n:c.cm.t,q:lack,price:lack*c.cm.gp});
   }
-  return {deficits,warnings,ready:knows(c)&&c.l<=M&&c.l<=(S.t.lab?10:$('anar').checked?8:5)&&!deficits.length};
+  return {deficits,warnings,ready:knows(c)&&c.l<=M&&c.l<=(S.t.lab?PLACE_LIMIT[5]:$('anar').checked?PLACE_LIMIT[3]:PLACE_LIMIT[1])&&!deficits.length};
 }
 let AV={mode:'known',selected:'Зелье лечения 1.1',q:1};
 let BASIC_SELECTED=null;
@@ -99,8 +99,17 @@ async function downloadSnapshot(data,prefix='alcemy-save'){
 }
 function validateSnapshot(data){
   const fail=()=>{throw Error('Неверный или повреждённый файл сохранения')};
-  function inspect(x){if(!x||typeof x!=='object')return;for(const k of Object.keys(x)){if(['__proto__','constructor','prototype'].includes(k))fail();inspect(x[k]);}}
-  inspect(data);
+  // Обычное сохранение имеет глубину < 10; запас допускает новые вложенные поля.
+  const pending=[[data,0]],seen=new WeakSet();
+  while(pending.length){
+    const [x,depth]=pending.pop();if(!x||typeof x!=='object')continue;
+    if(depth>32)throw Error('Файл сохранения слишком вложенный (максимум 32 уровня)');
+    if(seen.has(x))fail();seen.add(x);
+    for(const k of Object.keys(x)){
+      if(['__proto__','constructor','prototype'].includes(k))fail();
+      const child=x[k];if(child&&typeof child==='object')pending.push([child,depth+1]);
+    }
+  }
   if(data?.format!=='alcemy-helper'||data.version!==1||data.state?.v!==1||!Array.isArray(data.tracks)||!data.settings)fail();
   const s=data.state;
   if(data.situation&&(typeof data.situation!=='object'||Object.values(data.situation).some(v=>typeof v!=='boolean')))fail();

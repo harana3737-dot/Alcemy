@@ -36,4 +36,7 @@ jobs:
           browser_path=$(NODE_PATH="$browser_env/node_modules" node -e "process.stdout.write(require('playwright').chromium.executablePath())")
           echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$browser_path" >> "$GITHUB_ENV"
       - name: Проверить данные, расчёты, сборку, ссылки и страницы в браузере
-        run: python3 -B scripts/check_all.py --slow --browser
+        run: python3 -B scripts/check_all.py --sources --slow --browser
+
+      - name: Сверить точный расчёт и Монте-Карло на сетке
+        run: python3 -B scripts/scenario_engine.py --grid --runs 10000

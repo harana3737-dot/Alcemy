@@ -50,10 +50,10 @@ assert output.getvalue() == ''
             ((5, 12, 40.5, 102, 0, 4, 5, 5), 55.2525,
              '991a8fd0c01fc7776e022e70a1e53fef336aa53ed8e3f477194dfaedb5690c4b'),
         )
-        for args, expected, stream in cases:
+        for (args, expected, stream), (item_kind, level) in zip(cases, [('potion', 3), ('potion', 6), ('ink', 2)]):
             with self.subTest(args=args):
                 rng = random.Random(123)
-                self.assertEqual(sim_guidance.sim(*args, days=200, rng=rng), expected)
+                self.assertEqual(sim_guidance.sim(*args, days=200, rng=rng, item_kind=item_kind, level=level), expected)
                 self.assertEqual(hashlib.sha256(repr(rng.getstate()).encode()).hexdigest(), stream)
 
     def test_income_estimate_is_reused_without_sampling_again(self):

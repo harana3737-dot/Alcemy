@@ -1,0 +1,202 @@
+{
+  "level": 3,
+  "bonus": 5,
+  "days": 14,
+  "per_day": 4,
+  "points": 2,
+  "assumption": "daily doses; unsold inventory has no cash value or later sales",
+  "rows": [
+    {
+      "stop": 5,
+      "capacity": null,
+      "policy": "historical",
+      "exact_per_try": -0.40687109374999925,
+      "mc": {
+        "per_try": -0.3708339285714284,
+        "se": 0.034292462952883,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 5,
+      "capacity": null,
+      "policy": "optimal",
+      "exact_per_try": -0.40687109374999925,
+      "mc": {
+        "per_try": -0.3708339285714284,
+        "se": 0.034292462952883,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 5,
+      "capacity": 0,
+      "policy": "historical",
+      "exact_per_try": -16.1455078125,
+      "mc": {
+        "per_try": -16.126473214285713,
+        "se": 0.009801602297208462,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 5,
+      "capacity": 0,
+      "policy": "optimal",
+      "exact_per_try": -16.1455078125,
+      "mc": {
+        "per_try": -16.126473214285713,
+        "se": 0.009801602297208462,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 5,
+      "capacity": 2,
+      "policy": "historical",
+      "exact_per_try": -8.405470792968757,
+      "mc": {
+        "per_try": -8.38121428571429,
+        "se": 0.015573817377953802,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 5,
+      "capacity": 2,
+      "policy": "optimal",
+      "exact_per_try": -8.404051847656257,
+      "mc": {
+        "per_try": -8.387047321428575,
+        "se": 0.015194688384665079,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 5,
+      "capacity": 4,
+      "policy": "historical",
+      "exact_per_try": -0.9438130390625006,
+      "mc": {
+        "per_try": -0.921755357142857,
+        "se": 0.025329524936412856,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 5,
+      "capacity": 4,
+      "policy": "optimal",
+      "exact_per_try": -0.9438130390625006,
+      "mc": {
+        "per_try": -0.921755357142857,
+        "se": 0.025329524936412856,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 10,
+      "capacity": null,
+      "policy": "historical",
+      "exact_per_try": 4.6808491125557685,
+      "mc": {
+        "per_try": 4.737058928571424,
+        "se": 0.05658907623874667,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 10,
+      "capacity": null,
+      "policy": "optimal",
+      "exact_per_try": 4.714805256222773,
+      "mc": {
+        "per_try": 4.79380446428571,
+        "se": 0.05662028065267406,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 10,
+      "capacity": 0,
+      "policy": "historical",
+      "exact_per_try": -9.712344648076668,
+      "mc": {
+        "per_try": -9.689508928571428,
+        "se": 0.0340193415201976,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 10,
+      "capacity": 0,
+      "policy": "optimal",
+      "exact_per_try": -9.610075177152291,
+      "mc": {
+        "per_try": -9.563928571428571,
+        "se": 0.03501581129376535,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 10,
+      "capacity": 2,
+      "policy": "historical",
+      "exact_per_try": -2.006899930222527,
+      "mc": {
+        "per_try": -1.9795000000000003,
+        "se": 0.03680119384557266,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 10,
+      "capacity": 2,
+      "policy": "optimal",
+      "exact_per_try": -1.936031407553968,
+      "mc": {
+        "per_try": -1.8899026785714288,
+        "se": 0.03809046795447677,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 10,
+      "capacity": 4,
+      "policy": "historical",
+      "exact_per_try": 4.259521712920615,
+      "mc": {
+        "per_try": 4.304003571428567,
+        "se": 0.051390613947877604,
+        "batches": 400,
+        "seed": 20261010
+      }
+    },
+    {
+      "stop": 10,
+      "capacity": 4,
+      "policy": "optimal",
+      "exact_per_try": 4.297147788613368,
+      "mc": {
+        "per_try": 4.412439285714282,
+        "se": 0.051811327669188244,
+        "batches": 400,
+        "seed": 20261010
+      }
+    }
+  ]
+}
