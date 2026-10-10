@@ -1,5 +1,5 @@
 """Пульт мастера — страница для мастера: вопросы на утверждение с ответами (общая база),
-справка (ядро правил), каталог эликсиров, снимок алхимии Талиса.
+справка (ядро правил), каталог эликсиров, снимок алхимии Талиса, ремёсла Лаэля и Фаэнона.
 Запуск: python3 scripts/cards/master_panel.py → «Пульт мастера.html».
 Источники: «Для мастера — коротко на утверждение.md», «Алхимия Талиса — ядро правил.html»
 (собрать master_html.py), карточки (quality.py), лист персонажа (раздел «Алхимия»),
@@ -147,11 +147,14 @@ def build():
     sample = [x for x in (ROOT / "Образец — кровь шахтёра.md").read_text(encoding="utf-8").splitlines()[1:]
               if not re.fullmatch(r"\s*<!--.*-->\s*", x)]
 
+    from craft_embed import embed_craft
+    crafts = embed_craft(ROOT, "Шпаргалка свитков.html", "master-scroll") + "\n" + embed_craft(ROOT, "Шпаргалка кузнеца.html", "master-smith")
+
     tpl = (HERE / "master_tpl.html").read_text(encoding="utf-8")
     dump = lambda o: json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
     out = (tpl.replace("__GROUPS__", dump(groups)).replace("__EXTRA__", dump(extra)).replace("__NQ__", str(nq))
               .replace("__CARDS__", dump(cards)).replace("__CLS__", dump(CLS)).replace("__ORDER__", dump(ORDER))
-              .replace("__TALIS__", dump(talis)).replace("__ROOT__", dump(root)).replace("__QUICK__", dump(quick)).replace("__SAMPLE__", dump(sample)).replace("__CORE__", core))
+              .replace("__TALIS__", dump(talis)).replace("__ROOT__", dump(root)).replace("__QUICK__", dump(quick)).replace("__SAMPLE__", dump(sample)).replace("__CORE__", core).replace("__CRAFTS__", crafts))
     from generated_files import generated_html
     out = generated_html(out, "scripts/cards/master_panel.py", "scripts/cards/master_tpl.html", version=True)
     (ROOT / "Пульт мастера.html").write_text(out, encoding="utf-8")

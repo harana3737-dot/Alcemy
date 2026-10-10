@@ -119,6 +119,31 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
     assert.match(await page.locator('#cout').innerText(),/\+6\s+бонус проверки варки/);
     await page.reload();await page.locator('#t-ref').click();
     assert.equal(await page.locator('#cin [data-k="help"]').isChecked(),true);
+    for(const width of [360,1280]){
+      await page.setViewportSize({width,height:900});
+      await page.locator('#t-scroll').click();
+      const scroll=page.locator('#master-scroll');
+      assert.equal(await scroll.locator('#o-dc').innerText(),'12');
+      await scroll.locator('#lvl').selectOption('1');
+      await scroll.locator('#when').selectOption('rush');
+      assert.equal(await scroll.locator('#o-dc').innerText(),'17');
+      await scroll.locator('#ink').selectOption('2|4');
+      assert.equal(await scroll.locator('#o-cost').innerText(),'60 зм');
+      await page.locator('#t-smith').click();
+      const smith=page.locator('#master-smith');
+      assert.equal(await smith.locator('#o-p').innerText(),'0/100');
+      await smith.locator('#d20').fill('10');await smith.locator('#add').click();
+      assert.equal(await smith.locator('#o-p').innerText(),'20/100');
+      await page.reload();
+      assert.equal(await page.locator('#p-smith').isVisible(),true,'Вкладка ремесла сохраняется');
+      assert.equal(await smith.locator('#o-p').innerText(),'20/100');
+      await smith.locator('#reset').click();
+      await page.locator('#t-scroll').click();
+      assert.equal(await scroll.locator('#when').inputValue(),'rush');
+      assert.equal(await scroll.locator('#o-cost').innerText(),'60 зм');
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Пульт с ремеслом помещается на экран');
+      await scroll.locator('#lvl').selectOption('1');await scroll.locator('#when').selectOption('2h');
+    }
     assert.deepEqual(errors,[]);await context.close();
     console.log('OK: кузня отдельно и во вкладке, сохранения/миграция/история, свитки, пульт мастера');
   } finally {await browser.close()}
