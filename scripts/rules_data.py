@@ -119,3 +119,10 @@ def elixir_batch_js(lab):
 def volume_js():
     changes = [(l, value) for l, value in WORK_VOLUME.items() if l > 6 and value != WORK_VOLUME[l-1]]
     return 'l=>'+''.join(f'l>={l}?{value}:' for l, value in reversed(changes))+str(WORK_VOLUME[6])
+
+
+def unstable_fraction(sale_fraction):
+    """Доля обычной выручки: нестабильное стоит половину рынка (Ж-109)."""
+    if not 0 < sale_fraction <= 1:
+        raise ValueError('Ставка продажи должна быть больше 0 и не выше 1')
+    return RULES['economy']['unstable_market_fraction'] / sale_fraction

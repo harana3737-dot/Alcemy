@@ -603,5 +603,11 @@
       "section": "6.2",
       "note": "Перенос текущего справочника без изменения значения; статус решения смотреть в источнике."
     }
+  },
+  "economy": {
+    "example_sale_fraction": 0.85,
+    "unstable_market_fraction": 0.5,
+    "sale_fraction_status": "illustrative; actual sale may be 90%, 95% or another negotiated rate",
+    "allow_9_to_10": "only with the game master permission"
   }
 }

@@ -4,7 +4,7 @@
 Завершение — проверка с модификатором (метки − дефекты), от −2 до +2. Помощник: +2 к прогрессу подхода
 и +2 к завершающей проверке."""
 
-from rules_data import CAT_STABLE, VOL, SL_E, ESS, CAT_E, MB, PLAYER_LAB as LAB, INK_PRICES
+from rules_data import unstable_fraction, CAT_STABLE, VOL, SL_E, ESS, CAT_E, MB, PLAYER_LAB as LAB, INK_PRICES
 import random as _random
 from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
 
@@ -39,14 +39,14 @@ def volume_run(bonus, sl, vol, helper, max_approaches=200, *, rng=None):
     return n, roll(bonus + mod + (2 if helper else 0), sl, rng=rng)
 
 
-def volume_stats(bonus, lvl, price, mat, helper=False, runs=20000, *, rng=None):
+def volume_stats(bonus, lvl, price, mat, helper=False, runs=20000, *, rng=None, sale=.85):
     sl, vol = SL_E[lvl], VOL[lvl]
     cat = CAT_E[lvl] / CAT_STABLE                  # пять стабильных применений, без риска
     A = P = OK = 0
     for _ in range(runs):
         n, r = volume_run(bonus, sl, vol, helper, rng=rng)
         A += n
-        P += price * .85 if r == "ok" else price * .85 * .5 if r == "unst" else 0
+        P += price * sale if r == "ok" else price * sale * unstable_fraction(sale) if r == "unst" else 0
         OK += r == "ok"
     apr = A / runs
     profit = P / runs - mat - cat
@@ -83,9 +83,9 @@ def build_tables(*, seed=90, runs=20000):
     for name, b, mast, it in cases:
         cost = 2 if mast - 2 <= 2 else 5 if mast - 2 <= 5 else 15
         if isinstance(it, int):
-            l = it; args = (P_SL[l], l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], .5, 2)
+            l = it; args = (P_SL[l], l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], unstable_fraction(.85), 2)
         else:
-            price, herbs, ess, sl, cl, h = INK[it]; args = (sl, herbs + ess, price * .85, CAT_PRICE[cl], .5, h)
+            price, herbs, ess, sl, cl, h = INK[it]; args = (sl, herbs + ess, price * .85, CAT_PRICE[cl], unstable_fraction(.85), h)
         item_kind, item_level = ('potion', it) if isinstance(it, int) else ('ink', list(INK).index(it) + 1)
         d0 = scenario(b, *args, item_kind=item_kind, level=item_level)["per_day"]; d1 = scenario(b + 2, *args, item_kind=item_kind, level=item_level)["per_day"]
         help_rows.append((name, b, cost, d0, d1, d1 - d0 - cost))

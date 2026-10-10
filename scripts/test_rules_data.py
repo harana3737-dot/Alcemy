@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import random
 import unittest
+from unittest.mock import patch
 
 import sim
 import sim_plan
@@ -25,10 +26,14 @@ class RulesDataTests(unittest.TestCase):
 
     def test_random_results_and_continuation_are_identical(self):
         rng = random.Random(3701)
-        actual = {'rolls': [sim.roll(4,10,with_d=True,rng=rng) for _ in range(100)],
-                  'volumes': [sim_volume.volume_run(12,19,90,False,rng=rng) for _ in range(20)],
-                  'hour': sim_plan.per_hour(6,rng=rng),
-                  'state': hashlib.sha256(repr(rng.getstate()).encode()).hexdigest()}
+        # Снимок до Ж-109: 42,5% рынка за нестабильный предмет.
+        # Проверяем прежнюю последовательность RNG в прежних условиях;
+        # действующую половину рынка проверяет test_market_pricing.py.
+        with patch.dict(data.RULES['economy'], unstable_market_fraction=.425):
+            actual = {'rolls': [sim.roll(4,10,with_d=True,rng=rng) for _ in range(100)],
+                      'volumes': [sim_volume.volume_run(12,19,90,False,rng=rng) for _ in range(20)],
+                      'hour': sim_plan.per_hour(6,rng=rng),
+                      'state': hashlib.sha256(repr(rng.getstate()).encode()).hexdigest()}
         self.assertEqual(json.loads(json.dumps(actual)), BASELINE['stream'])
 
     def test_javascript_uses_same_tables_and_batch_formula(self):

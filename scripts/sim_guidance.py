@@ -1,7 +1,7 @@
 """Талис 5 ур.: «Волшебное указание» (TCE, чародей 5): проваленную проверку характеристики
 можно перебросить за 1 единицу чародейства, новый результат обязателен. 5 единиц на долгий отдых."""
 import random as _random
-from rules_data import CAT_STABLE
+from rules_data import CAT_STABLE, unstable_fraction
 from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
 
 random = _random.Random(5)
@@ -54,7 +54,7 @@ def build_tables(*, seed=5, days=100000):
     for name, sl, mat, price, cat, per_day, item_kind, level in items:
         res = []
         for pts in (0, 2, 5):
-            best = max(sim(B, sl, mat, price, cat, per_day, pts, stop, days=days, item_kind=item_kind, level=level, rng=rng) for stop in ((CAT_STABLE, CAT_STABLE + len(INSTAB)) if cat else (CAT_STABLE,)))
+            best = max(sim(B, sl, mat, price, cat, per_day, pts, stop, days=days, u=unstable_fraction(.85), item_kind=item_kind, level=level, rng=rng) for stop in ((CAT_STABLE, CAT_STABLE + len(INSTAB)) if cat else (CAT_STABLE,)))
             res.append(best)
         rows.append((name, sl, per_day, res))
 

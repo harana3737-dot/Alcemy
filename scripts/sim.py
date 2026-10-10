@@ -1,7 +1,7 @@
 """Монте-Карло экономики зелий и чернил по правилам v0.3 + решение мастера:
 провал тратит травы и применение катализатора; партия — одно применение на дозу."""
 
-from rules_data import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, ROM, CAT_STABLE
+from rules_data import unstable_fraction, HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, ROM, CAT_STABLE
 import random as _random
 import json
 import sys
@@ -134,8 +134,8 @@ def main():
     random.seed(20261002)
     # проверка точного расчёта Монте-Карло
     for (b, l) in [(6, 4), (8, 6), (10, 8)]:
-        a = scenario(b, P_SL[l], l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], .5, 2, item_kind='potion', level=l)
-        m = scenario_mc(b, P_SL[l], l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], .5, 2, item_kind='potion', level=l)
+        a = scenario(b, P_SL[l], l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], unstable_fraction(.85), 2, item_kind='potion', level=l)
+        m = scenario_mc(b, P_SL[l], l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], unstable_fraction(.85), 2, item_kind='potion', level=l)
         print("check", l, b, round(a["per_try"], 2), a["stop"], "MC", round(m["per_try"], 2), m["stop"], flush=True)
     out = {"potions": {}, "inks": {}}
     BONUSES = [4, 6, 8, 10, 12]
@@ -144,8 +144,8 @@ def main():
         row = {"mat": mat, "cat_use": CAT_PRICE[lvl] / CAT_STABLE, "sl": P_SL[lvl], "price": P_PRICE[lvl]}
         for sale, key in [(0.85, "s85"), (1.0, "s100")]:
             pr = P_PRICE[lvl] * sale
-            row[key] = {str(b): scenario(b, P_SL[lvl], mat, pr, CAT_PRICE[lvl], 0.5, 2, item_kind='potion', level=lvl) for b in BONUSES}
-            row[key + "_be"] = breakeven(P_SL[lvl], mat, pr, CAT_PRICE[lvl], 0.5, 2, item_kind='potion', level=lvl)
+            row[key] = {str(b): scenario(b, P_SL[lvl], mat, pr, CAT_PRICE[lvl], unstable_fraction(sale), 2, item_kind='potion', level=lvl) for b in BONUSES}
+            row[key + "_be"] = breakeven(P_SL[lvl], mat, pr, CAT_PRICE[lvl], unstable_fraction(sale), 2, item_kind='potion', level=lvl)
             row[key + "_be_unst0"] = breakeven(P_SL[lvl], mat, pr, CAT_PRICE[lvl], 0.0, 2, item_kind='potion', level=lvl)
         out["potions"][lvl] = row
         print("potion", lvl, row["s85_be"], {b: round(v["per_try"], 1) for b, v in row["s85"].items()}, flush=True)
@@ -155,8 +155,8 @@ def main():
         row = {"mat": mat, "sl": sl, "price": price, "hours": hours}
         for sale, key in [(0.85, "s85"), (1.0, "s100")]:
             pr = price * sale
-            row[key] = {str(b): scenario(b, sl, mat, pr, CAT_PRICE[catlvl], 0.5, hours, item_kind='ink', level=ROM.index(name)) for b in BONUSES}
-            row[key + "_be"] = breakeven(sl, mat, pr, CAT_PRICE[catlvl], 0.5, hours, item_kind='ink', level=ROM.index(name))
+            row[key] = {str(b): scenario(b, sl, mat, pr, CAT_PRICE[catlvl], unstable_fraction(sale), hours, item_kind='ink', level=ROM.index(name)) for b in BONUSES}
+            row[key + "_be"] = breakeven(sl, mat, pr, CAT_PRICE[catlvl], unstable_fraction(sale), hours, item_kind='ink', level=ROM.index(name))
         out["inks"][name] = row
         print("ink", name, row["s85_be"], {b: round(v["per_day"]) for b, v in row["s85"].items()}, flush=True)
 

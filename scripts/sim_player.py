@@ -2,7 +2,7 @@
 чернила против покупки у Анариэль, стоимость прокачки мастерства 1 → 10. Правила v0.3.
 «Родной» бонус: Инт +0 (как у Талиса), владение по брекетам, мастерство алхимика, минимальная лаборатория."""
 
-from rules_data import CAT_STABLE, PLAYER_PROF, MB, PLAYER_LAB, HEAL, OWN_BATCH, NEED, CAT_DC, CAT_ORDER_PRICE, ROM
+from rules_data import unstable_fraction, CAT_STABLE, PLAYER_PROF, MB, PLAYER_LAB, HEAL, OWN_BATCH, NEED, CAT_DC, CAT_ORDER_PRICE, ROM
 
 import random as _random
 
@@ -53,7 +53,7 @@ def growth(extra=0, guidance=False):
 
 def _ink2_day(b):
     price, herbs, ess, sl, cl, h = INK["II"]
-    return scenario(b, sl, herbs + ess, price * .85, CAT_PRICE[cl], .5, h, item_kind='ink', level=2)["per_day"]
+    return scenario(b, sl, herbs + ess, price * .85, CAT_PRICE[cl], unstable_fraction(.85), h, item_kind='ink', level=2)["per_day"]
 
 
 def build_tables(volume_tables=None):

@@ -3,7 +3,7 @@
 Пересчёт поверх sim.py и sim_player.py; правила не меняются."""
 
 import random as _random
-from rules_data import WEEK_PROF, WEEK_LAB
+from rules_data import unstable_fraction, WEEK_PROF, WEEK_LAB
 
 import sim_player as player
 
@@ -41,10 +41,10 @@ def ink_hour(m):
     """Доход в час на чернилах уровня m при бонусе Талиса на этом мастерстве (I–V; выше — как V)."""
     n = ["I", "II", "III", "IV", "V"][min(m, 5) - 1]
     price, herbs, ess, sl, cl, h = INK[n]
-    return scenario(TALIS[m], sl, herbs + ess, price * .85, CAT_PRICE[cl], .5, h, item_kind='ink', level=min(m, 5))["per_day"] / 8
+    return scenario(TALIS[m], sl, herbs + ess, price * .85, CAT_PRICE[cl], unstable_fraction(.85), h, item_kind='ink', level=min(m, 5))["per_day"] / 8
 
 def pot_hour(m):
-    r = scenario(TALIS[m], P_SL[m], m * HERB[m], P_PRICE[m] * .85, CAT_PRICE[m], .5, 2, item_kind='potion', level=m)
+    r = scenario(TALIS[m], P_SL[m], m * HERB[m], P_PRICE[m] * .85, CAT_PRICE[m], unstable_fraction(.85), 2, item_kind='potion', level=m)
     return r["per_try"] * BATCH.get(m, 1) / 2
 
 def mc_ink(need, b, N=40000, *, rng=None):

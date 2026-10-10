@@ -22,12 +22,12 @@ Codex, 09.10.2026. Технический перенос по первому п�
 
 ```python
 from sim import scenario
-from rules_data import P_SL, HERB, P_PRICE, CAT_PRICE
+from rules_data import unstable_fraction, P_SL, HERB, P_PRICE, CAT_PRICE
 
 level = 9
 result = scenario(
     16, P_SL[level], level * HERB[level], P_PRICE[level] * .85,
-    CAT_PRICE[level], .5, 2,
+    CAT_PRICE[level], unstable_fraction(.85), 2,
     item_kind='potion', level=level, allow_up_to_10=True,
 )
 ```

@@ -12,7 +12,7 @@ import math
 import random
 import statistics
 
-from rules_data import CAT_STABLE, INSTAB, HERB, P_SL, P_PRICE, CAT_PRICE
+from rules_data import unstable_fraction, CAT_STABLE, INSTAB, HERB, P_SL, P_PRICE, CAT_PRICE
 from sim import check_success, exact, potion_bonus, probs, run_catalyst
 from sim_guidance import outcome, sim as guidance_mc
 
@@ -30,7 +30,7 @@ class Scenario:
     points: int = 0
     per_day: int = 4
     days: int = 30
-    unst_value: float = .5
+    unst_value: float = unstable_fraction(.85)
     allow_up_to_10: bool = True
 
     def __post_init__(self):
@@ -54,9 +54,10 @@ class Scenario:
                     allow_up_to_10=self.allow_up_to_10)
 
 
-def potion(level, bonus, **options):
+def potion(level, bonus, *, sale=.85, **options):
+    options.setdefault("unst_value", unstable_fraction(sale))
     return Scenario(bonus, P_SL[level], level * HERB[level],
-                    P_PRICE[level] * .85, CAT_PRICE[level], level, **options)
+                    P_PRICE[level] * sale, CAT_PRICE[level], level, **options)
 
 
 def finite_exact(s):
@@ -185,6 +186,7 @@ def main():
     p.add_argument('--grid', action='store_true')
     p.add_argument('--runs', type=int, default=5000)
     p.add_argument('--level', type=int, choices=range(1, 11), default=3)
+    p.add_argument('--sale', type=float, default=.85, help='Примерная ставка обычной продажи, например 0.90')
     p.add_argument('--bonus', type=int, default=5)
     p.add_argument('--days', type=int, default=30)
     p.add_argument('--per-day', type=int, default=4)
@@ -198,9 +200,9 @@ def main():
         rows=[]
         for stop in (CAT_STABLE, CAT_STABLE+len(INSTAB)):
             for points in a.points:
-                s=potion(a.level,a.bonus,stop=stop,points=points,days=a.days,per_day=a.per_day)
+                s=potion(a.level,a.bonus,sale=a.sale,stop=stop,points=points,days=a.days,per_day=a.per_day)
                 rows.append(dict(stop=stop,points=points,exact=finite_exact(s),mc=finite_mc(s,seed=a.seed)))
-        result=dict(level=a.level,bonus=a.bonus,days=a.days,per_day=a.per_day,rows=rows)
+        result=dict(level=a.level,bonus=a.bonus,sale=a.sale,days=a.days,per_day=a.per_day,rows=rows)
     if a.output:
         with open(a.output,'w',encoding='utf-8') as f:
             json.dump(result,f,ensure_ascii=False,indent=2,allow_nan=False);f.write('\n')
