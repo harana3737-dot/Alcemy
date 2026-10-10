@@ -581,8 +581,10 @@ function durMin(d){
 }
 const byName=n=>D.find(c=>c.n===n);
 const CAT_DC=__RULE_CAT_DC__;
-const stab=x=>x.stable||5, cmax=x=>stab(x)+5; // после стабильных — до 5 рискованных (5.2)
-const instDC=(x,n)=>10+2*(n-stab(x)-1); // СЛ проверки нестабильности n-го применения
+const CAT_PRICES=__RULE_CAT_PRICES__,PLACE_LIMIT=__RULE_PLACE_LIMIT__;
+const CAT_STABLE=__RULE_CAT_STABLE__,INSTAB_DCS=__RULE_INSTAB__;
+const stab=x=>x.stable||CAT_STABLE, cmax=x=>stab(x)+INSTAB_DCS.length; // после стабильных — до 5 рискованных (5.2)
+const instDC=(x,n)=>INSTAB_DCS[n-stab(x)-1]; // СЛ проверки нестабильности n-го применения
 const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 let DM={};
 const SEED=JSON.parse($('seed').textContent);
@@ -1303,7 +1305,7 @@ function matInit(){if(ST.dayOff===undefined)ST.dayOff=13;if(!ST.mat||ST.matSeed=
   let ch=false;if(ST.mat.gold===undefined){ST.mat.gold=SEED.mat.gold;ch=true}
   if(ST.dayOff===undefined){ST.dayOff=13;ch=true}
   ST.mat.ess.forEach(e=>{if(e.id==='e4'&&!e.st){e.st='fresh';ch=true}});
-  ST.mat.cat.forEach(x=>{if(!x.stable){x.stable=5;ch=true}});return ch}
+  ST.mat.cat.forEach(x=>{if(!x.stable){x.stable=CAT_STABLE;ch=true}});return ch}
 function essParseAll(c){const parts=String(c.e).split(' + ');const first=essParse({e:parts[0],l:c.l});
   return [first,...parts.slice(1).map(x=>{const p=essParse({e:x,l:first.l});if(!/\s(X|IX|VIII|VII|VI|V|IV|III|II|I)\b/.test(x))p.l=first.l;return p})]}
 function essParse(c){const m=String(c.e).match(/^(.*?)\s+(X|IX|VIII|VII|VI|V|IV|III|II|I)\b/);return m?{type:m[1],l:ROM.indexOf(m[2])}:{type:String(c.e),l:c.l}}
@@ -1423,7 +1425,7 @@ function renderMat(){
     r.querySelectorAll('button')[2].onclick=()=>mutate(()=>{ST.mat.cat=ST.mat.cat.filter(y=>y!==x);logx(`Материалы: катализатор ${ROM[x.o]} убран`)})});
   const fc=document.createElement('div');fc.className='btns';
   fc.innerHTML=[1,2,3,4].map(o=>`<button type="button" class="btn sm" data-o="${o}">+ катализатор ${ROM[o]}</button>`).join('');
-  fc.querySelectorAll('button').forEach(b=>b.onclick=()=>mutate(()=>{ST.mat.cat.push({id:uid(),o:+b.dataset.o,used:0,stable:5});logx(`Материалы: катализатор ${ROM[+b.dataset.o]} порядка`)}));
+  fc.querySelectorAll('button').forEach(b=>b.onclick=()=>mutate(()=>{ST.mat.cat.push({id:uid(),o:+b.dataset.o,used:0,stable:CAT_STABLE});logx(`Материалы: катализатор ${ROM[+b.dataset.o]} порядка`)}));
   box.appendChild(fc);
   sec('Прочее (вручную)');
   ST.mat.other.filter(o=>o.q>0).forEach(o=>row(o.n,o.note,o.q,()=>mutate(()=>{o.q--}),()=>mutate(()=>{o.q++})));
@@ -1700,8 +1702,8 @@ function catForm(box){
   box.querySelectorAll('.cout .chip').forEach(b=>b.onclick=()=>{
     const items=ST.mat.other.filter(o=>o.q>0), it=items[+cr.value];if(!it)return;const o=+co.value, r=b.dataset.o;let res='';
     mutate(()=>{it.q--;
-      if(['n20','hi','ok'].includes(r)){const sb=r==='n20'?7:r==='hi'?6:5;ST.mat.cat.push({id:uid(),o,used:0,stable:sb,...(sb>5?{note:r==='n20'?'отличный (нат. 20)':'качественный (5+)'}:{})});res=`Готов катализатор ${ROM[o]} порядка: ${sb} стабильных применений, всего до ${sb+5}.`}
-      else if(r==='un'){ST.mat.cat.push({id:uid(),o,used:0,stable:4,note:'нестабильный (5.3)'});res=`Нестабильный катализатор ${ROM[o]}: 4 стабильных применения, затем до 5 рискованных (СЛ 10–18), всего до 9.`}
+      if(['n20','hi','ok'].includes(r)){const sb=CAT_STABLE+(r==='n20'?2:r==='hi'?1:0);ST.mat.cat.push({id:uid(),o,used:0,stable:sb,...(sb>5?{note:r==='n20'?'отличный (нат. 20)':'качественный (5+)'}:{})});res=`Готов катализатор ${ROM[o]} порядка: ${sb} стабильных применений, всего до ${sb+5}.`}
+      else if(r==='un'){ST.mat.cat.push({id:uid(),o,used:0,stable:CAT_STABLE-1,note:'нестабильный (5.3)'});res=`Нестабильный катализатор ${ROM[o]}: 4 стабильных применения, затем до 5 рискованных (СЛ 10–18), всего до 9.`}
       else res=r==='n1'?'Сырьё потеряно и осечка (таблица раздела 2).':'Сырьё потеряно.';
       addHours(Math.max(0,+box.querySelector('.ch').value||0),`катализатор ${ROM[o]} из сырья`);
       logx(`Катализатор из «${it.n}»: ${b.textContent}. ${res}`)});

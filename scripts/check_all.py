@@ -64,6 +64,8 @@ def check(root=ROOT, *, slow=False, browser=False):
         for test_dir in test_dirs:
             run(py+['-m', 'unittest', 'discover', '-s', str(test_dir.relative_to(copy)),
                     '-p', 'test_*.py'], copy, env, failures)
+        run(py+['scripts/check_rule_documents.py'], copy, env, failures)
+        run(['node', 'scripts/cards/test_import_snapshot.cjs'], copy, env, failures)
         run(py+['scripts/cards/check.py'], copy, env, failures)
         for script in CHECKS:
             run(py+['scripts/'+script, '--check'], copy, env, failures)

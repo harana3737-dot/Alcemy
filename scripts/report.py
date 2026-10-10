@@ -8,12 +8,11 @@ import sim_guidance
 from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
 
 def main():
-    MB={1:0,2:1,3:1,4:2,5:2,6:3,7:3,8:4,9:4,10:5}; LAB={1:0,2:0,3:0,4:1,5:1,6:3,7:3,8:3,9:5,10:5}
-    ROM=["","I","II","III","IV","V","VI","VII","VIII","IX","X"]
+    from rules_data import MB, PLAYER_LAB as LAB, ROM, CAT_STABLE
     def typ(l): return 7+MB[l]+LAB[l]
-    def be(sl,mat,pr,cat,u,h):
+    def be(sl,mat,pr,cat,u,h, *, item_kind, level):
         for b in range(-2,30):
-            if scenario(b,sl,mat,pr,cat,u,h)["per_try"]>0: return b
+            if scenario(b,sl,mat,pr,cat,u,h, item_kind=item_kind, level=level)["per_try"]>0: return b
     def bb(b): return "любой" if b is not None and b <= -2 else f"{b:+d}".replace("-", "−")
     def f(x): return f"{x:+.1f}".replace("-","−") if abs(x)<100 else f"{x:+,.0f}".replace(",", " ").replace("-","−")
     L=[]
@@ -24,7 +23,7 @@ def main():
     _gb = _p["GROWTH"]["базовый"]; _gg = _p["GROWTH"]["с «Волшебным указанием»"]; _gpg = _p["GROWTH"]["тиара + указание"]
     _tot = lambda rows, k: sum(r[k] for r in rows)
     _top2 = (_gb[7][6] + _gb[8][6]) / _tot(_gb, 6)
-    _ink2 = scenario(4, INK["II"][3], INK["II"][1] + INK["II"][2], INK["II"][0] * .85, 0, .5, 2)["per_day"]
+    _ink2 = scenario(4, INK["II"][3], INK["II"][1] + INK["II"][2], INK["II"][0] * .85, 0, .5, 2, item_kind='ink', level=2)["per_day"]
     _cat = _p["CAT_ROWS"]; _ink = _p["INK_SELF"]
     def _n(x): return f"{x:,.0f}".replace(",", " ")
     def _sav(r): return 1 - r[4] / r[5]
@@ -70,7 +69,7 @@ def main():
     L.append(f"| **Итого 2→10** | | | **{_gh:.0f}** | **{_gh/12:.0f}** | **{_gh/22:.0f}** | **{_gh/30:.0f}** | **{_ghg/12:.0f}** | **{_n(sum(r[6] for r in _GW))}** | **≈{_n(sum(r[7] for r in _GW))}** |")
     L.append(f"""
 - **≈{_gh/12:.0f} недель** от мастерства 2 до 10 при полной занятости алхимией (с «Волшебным указанием» ≈{_ghg/12:.0f} — нижняя граница: переброс любого провала без ограничения единиц), в среднем (22 часа) — ≈{_gh/22:.0f}, в городе (30 часов) — ≈{_gh/30:.0f}. Переходы 2→6 — около 6 недель вместе, каждый переход с 6 — по 6–7 недель: партий там нет.
-- **Каждая неделя на рост — неделя без чернил для Лаэля и без зарядов.** При бонусе Талиса +4 после открытия рецептов чернила II дают ≈{_ink2*1.5:.0f} зм за неделю, зелья 2.2 — ≈{_p['scenario'](4, 10, 1, 4.5*.85, 0, .5, 2)['per_try']*6:.0f} зм. На высоких переходах упущенный доход — десятки тысяч: при цели только заработать модель поощряет чернила вместо роста; полезность новых рецептов для группы здесь не оценена (вопрос мастеру в очереди).
+- **Каждая неделя на рост — неделя без чернил для Лаэля и без зарядов.** При бонусе Талиса +4 после открытия рецептов чернила II дают ≈{_ink2*1.5:.0f} зм за неделю, зелья 2.2 — ≈{_p['scenario'](4, 10, 1, 4.5*.85, 0, .5, 2, item_kind='potion', level=2)['per_try']*6:.0f} зм. На высоких переходах упущенный доход — десятки тысяч: при цели только заработать модель поощряет чернила вместо роста; полезность новых рецептов для группы здесь не оценена (вопрос мастеру в очереди).
 """)
     L.append("### Долгая варка при недельном бюджете\n")
     L.append("Перерыв (6.3): незавершённая варка неделю стабильна, каждая следующая неделя простоя — +1 дефект, через месяц простоя испорчена. Что считать простоем, не уточнено (вопрос мастеру): чтение 1 — неделя с хотя бы одним подходом не простой; чтение 2 (жёсткое) — простоем считается каждая неделя после первой, пока варка не закончена.\n")
@@ -113,21 +112,21 @@ def main():
     L.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
     for l in range(1,11):
         mat=l*HERB[l]; pr=P_PRICE[l]*.85; c=CAT_PRICE[l]; t=typ(l)
-        r=scenario(t,P_SL[l],mat,pr,c,.5,2)
-        b85=be(P_SL[l],mat,pr,c,.5,2); b100=be(P_SL[l],mat,P_PRICE[l],c,.5,2); b0=be(P_SL[l],mat,pr,c,0,2)
-        L.append(f"| {l}.{l} | {P_SL[l]} | {mat:g} | {c/5:g} | {pr:,.1f} | {bb(b85)} / {bb(b100)} / {bb(b0)} | +{t} | {f(r['per_try'])} | {f(r['per_try']*4)} | {f(r['per_try']*6)} | {r['stop'] if c else '—'} |".replace(",", " ").replace("+-","−"))
+        r=scenario(t,P_SL[l],mat,pr,c,.5,2, item_kind='potion', level=l)
+        b85=be(P_SL[l],mat,pr,c,.5,2, item_kind='potion', level=l); b100=be(P_SL[l],mat,P_PRICE[l],c,.5,2, item_kind='potion', level=l); b0=be(P_SL[l],mat,pr,c,0,2, item_kind='potion', level=l)
+        L.append(f"| {l}.{l} | {P_SL[l]} | {mat:g} | {c/CAT_STABLE:g} | {pr:,.1f} | {bb(b85)} / {bb(b100)} / {bb(b0)} | +{t} | {f(r['per_try'])} | {f(r['per_try']*4)} | {f(r['per_try']*6)} | {r['stop'] if c else '—'} |".replace(",", " ").replace("+-","−"))
     L.append("")
     L.append("## Зелья: прибыль на попытку по бонусу (продажа за 85%)\n")
     BS=[4,6,8,10,12,14,16]
     L.append("| Зелье | "+" | ".join(f"+{b}" for b in BS)+" |"); L.append("| --- | "+" | ".join("---" for _ in BS)+" |")
     for l in range(1,11):
         mat=l*HERB[l]; pr=P_PRICE[l]*.85
-        L.append(f"| {l}.{l} | "+" | ".join(f(scenario(b,P_SL[l],mat,pr,CAT_PRICE[l],.5,2)['per_try']) for b in BS)+" |")
+        L.append(f"| {l}.{l} | "+" | ".join(f(scenario(b,P_SL[l],mat,pr,CAT_PRICE[l],.5,2, item_kind='potion', level=l)['per_try']) for b in BS)+" |")
     L.append("")
     L.append("## Партии зелий 3–5.5\n")
     L.append("| Зелье | Типичный бонус | За день без партий (4 попытки) | Партиями своего уровня, 4 дозы (16 попыток) | На уровень проще, 5 доз (20 попыток) | Своего уровня за неделю (24 попытки) |\n| --- | --- | --- | --- | --- | --- |")
     for l in (3,4,5):
-        t=typ(l); r=scenario(t,P_SL[l],l*HERB[l],P_PRICE[l]*.85,CAT_PRICE[l],.5,2)
+        t=typ(l); r=scenario(t,P_SL[l],l*HERB[l],P_PRICE[l]*.85,CAT_PRICE[l],.5,2, item_kind='potion', level=l)
         L.append(f"| {l}.{l} | +{t} | {f(r['per_try']*4)} | {f(r['per_try']*16)} | {f(r['per_try']*20)} | {f(r['per_try']*24)} |")
     L.append("")
     L.append("## Чернила для сравнения\n\nПрибыль за день: торговцам за 85% / гильдии за 75% (минимум). За неделю Талиса (1,5 дня) — ×1,5.\n")
@@ -136,8 +135,8 @@ def main():
     for n,(price,herbs,ess,sl,cl,h) in INK.items():
         if n == "VI": continue
         mat=herbs+ess
-        v=lambda b,s: f(scenario(b,sl,mat,price*s,CAT_PRICE[cl],.5,h)['per_day'])
-        L.append(f"| {n} | {sl} | {h} ч | {bb(be(sl,mat,price*.85,CAT_PRICE[cl],.5,h))} / {bb(be(sl,mat,price*.75,CAT_PRICE[cl],.5,h))} | "+" | ".join(f"{v(b,.85)} / {v(b,.75)}" for b in (6,8,10))+" |")
+        v=lambda b,s: f(scenario(b,sl,mat,price*s,CAT_PRICE[cl],.5,h, item_kind='ink', level=ROM.index(n))['per_day'])
+        L.append(f"| {n} | {sl} | {h} ч | {bb(be(sl,mat,price*.85,CAT_PRICE[cl],.5,h, item_kind='ink', level=ROM.index(n)))} / {bb(be(sl,mat,price*.75,CAT_PRICE[cl],.5,h, item_kind='ink', level=ROM.index(n)))} | "+" | ".join(f"{v(b,.85)} / {v(b,.75)}" for b in (6,8,10))+" |")
     L.append("")
     TB, TM = 4, 2   # Талис: мастерство 2 (+1), рабочее место (+1), владение +2, Инт +0
     L.append("## Талис сейчас: бонус +4, мастерство 2, рабочее место\n")
@@ -145,13 +144,13 @@ def main():
     L.append("| Что | СЛ | Успех | Провал на 1–4 | Прибыль на попытку | За день (4 попытки) | За неделю (12 ч) |\n| --- | --- | --- | --- | --- | --- | --- |")
     for l in range(1, 6):
         sl = P_SL[l] + (5 + l - TM if l > TM else 0)
-        ok, un, _ = probs(TB, sl); r = scenario(TB, sl, l*HERB[l], P_PRICE[l]*.85, CAT_PRICE[l], .5, 2)
+        ok, un, _ = probs(TB, sl); r = scenario(TB, sl, l*HERB[l], P_PRICE[l]*.85, CAT_PRICE[l], .5, 2, item_kind='potion', level=l)
         L.append(f"| зелье {l}.{l}{' (выше мастерства)' if l > TM else ''} | {sl} | {ok:.0%} | {un:.0%} | {f(r['per_try'])} | {f(r['per_try']*4)} | {f(r['per_try']*6)} |")
     for n, ml in [("I", 1), ("II", 2), ("III", 3)]:
         price, herbs, ess, sl, cl, h = INK[n]; sl = sl + (5 + ml - TM if ml > TM else 0)
-        ok, un, _ = probs(TB, sl); r = scenario(TB, sl, herbs+ess, price*.85, CAT_PRICE[cl], .5, h)
+        ok, un, _ = probs(TB, sl); r = scenario(TB, sl, herbs+ess, price*.85, CAT_PRICE[cl], .5, h, item_kind='ink', level=ml)
         L.append(f"| чернила {n}{' (выше мастерства)' if ml > TM else ''} | {sl} | {ok:.0%} | {un:.0%} | {f(r['per_try'])} | {f(r['per_day'])} | {f(r['per_day']*1.5)} |")
-    ok3 = scenario(TB, P_SL[3], 3*HERB[3], P_PRICE[3]*.85, CAT_PRICE[3], .5, 2)["per_try"]
+    ok3 = scenario(TB, P_SL[3], 3*HERB[3], P_PRICE[3]*.85, CAT_PRICE[3], .5, 2, item_kind='potion', level=3)["per_try"]
     L.append(f"""
 - **Рост 2 → 3:** нужно 15 единиц прогресса. Натуральная 20 даёт вторую единицу. При +4 ожидается ≈{_w["QUEUE"][2][1][0]:.1f} часа варки 2.2 партиями по две, до округления партий и превышения цели. Эликсиры II тоже засчитываются в рост.
 

@@ -55,24 +55,24 @@ def main():
     node = next(n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef) and n.name == 'sim')
     text = ast.get_source_segment(source, node)
     # Reconstruct the audited baseline; preserve all RNG calls and their order.
-    text = text.replace('    b5, b20 = potion_bonus(mat, price)\n', '')
+    text = text.replace('    b5, b20 = potion_bonus(mat, price, item_kind=item_kind, level=level, allow_up_to_10=allow_up_to_10)\n', '')
     text = text.replace('                profit += b20 if',
-                        '                b5, b20 = potion_bonus(mat, price)\n                profit += b20 if')
+                        '                b5, b20 = potion_bonus(mat, price, item_kind=item_kind, level=level, allow_up_to_10=allow_up_to_10)\n                profit += b20 if')
     exec(compile(text, '<pre-hoist-baseline>', 'exec'), ns)
     original = ns['sim']
     cases = []
-    for args in [(5, 11, 3, 15.64, 70, 4, 5, 10), (12, 17, 48, 114.92, 350, 4, 2, 10), (5, 12, 40.5, 102, 0, 4, 5, 5)]:
+    for args, item_kind, level in [((5, 11, 3, 15.64, 70, 4, 5, 10), 'potion', 3), ((12, 17, 48, 114.92, 350, 4, 2, 10), 'potion', 6), ((5, 12, 40.5, 102, 0, 4, 5, 5), 'ink', 2)]:
         oldtime = []
         newtime = []
         for i in range(3):
             ns['random'].seed(123 + i)
             start = time.perf_counter()
-            o = original(*args, days=20000)
+            o = original(*args, days=20000, item_kind=item_kind, level=level)
             oldtime.append(time.perf_counter() - start)
             state = ns['random'].getstate()
             ns['random'].seed(123 + i)
             start = time.perf_counter()
-            n = optimized(*args, days=20000)
+            n = optimized(*args, days=20000, item_kind=item_kind, level=level)
             newtime.append(time.perf_counter() - start)
             assert o == n and state == ns['random'].getstate()
         cases.append(dict(args=args, before_s=statistics.median(oldtime), after_s=statistics.median(newtime), identical_profit_and_rng=True))

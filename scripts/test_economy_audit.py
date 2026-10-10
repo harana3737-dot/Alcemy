@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent
 def load_model(name, namespace):
     tree = ast.parse((ROOT / name).read_text(encoding='utf-8'))
     # Берём определения функций и явные таблицы; пропускаем exec, main и генерацию.
-    constants = {'HERB', 'P_SL', 'P_PRICE', 'CAT_PRICE', 'INSTAB', 'INK', 'POT_LVL',
+    constants = {'HERB', 'P_SL', 'P_PRICE', 'CAT_PRICE', 'INSTAB', 'INK',
                  'VOL', 'SL_E', 'ESS', 'CAT_E', 'BATCH_T'}
     for node in tree.body:
         function = isinstance(node, ast.FunctionDef)
@@ -48,26 +48,26 @@ class EconomyAudit(unittest.TestCase):
     def test_five_stable_uses_spend_materials_on_failure(self):
         n = model()
         with patch.object(n['random'], 'randint', return_value=1):
-            self.assertEqual(n['run_catalyst'](4, 10, 3, 10, 70, 5, .5), (-85, 5, 0))
+            self.assertEqual(n['run_catalyst'](4, 10, 3, 10, 70, 5, .5, item_kind='potion', level=3), (-85, 5, 0))
 
     def test_natural_one_breaks_catalyst_even_with_high_bonus(self):
         n = model()
         with patch.object(n['random'], 'randint', side_effect=[10] * 5 + [1, 10]):
-            _, tries, successes = n['run_catalyst'](12, 11, 3, 10, 70, 6, .5)
+            _, tries, successes = n['run_catalyst'](12, 11, 3, 10, 70, 6, .5, item_kind='potion', level=3)
         self.assertEqual(tries, 6)
         self.assertEqual(successes, 5)
 
     def test_natural_twenty_saves_catalyst_with_very_low_bonus(self):
         n = model()
         with patch.object(n['random'], 'randint', return_value=20):
-            _, tries, successes = n['run_catalyst'](-100, 25, 3, 10, 70, 6, .5)
+            _, tries, successes = n['run_catalyst'](-100, 25, 3, 10, 70, 6, .5, item_kind='potion', level=3)
         self.assertEqual((tries, successes), (6, 6))
 
     def test_exact_survival_obeys_natural_one(self):
         n = model()
         bonus, dc, mat, price, cat = 12, 11, 3, 10, 70
         values = []
-        b5, b20 = n['potion_bonus'](mat, price)
+        b5, b20 = n['potion_bonus'](mat, price, item_kind='potion', level=3)
         for d in range(1, 21):
             revenue = 0
             if d == 20 or d != 1 and d + bonus >= dc:
@@ -78,14 +78,14 @@ class EconomyAudit(unittest.TestCase):
         average = sum(values) / 20
         # Перед шестым применением d=1 ломает катализатор и портит только материалы.
         expected = -cat + 5 * average + .95 * average - .05 * mat
-        actual, tries, _ = n['exact'](bonus, dc, mat, price, cat, 6, .5)
+        actual, tries, _ = n['exact'](bonus, dc, mat, price, cat, 6, .5, item_kind='potion', level=3)
         self.assertEqual(tries, 6)
         self.assertAlmostEqual(actual, expected)
 
     def test_guidance_replaces_broken_catalyst(self):
         n = model('sim_guidance.py')
         with patch.object(n['random'], 'randint', return_value=1):
-            profit = n['sim'](12, 12, 0, 0, 70, 1, 0, 10, days=7)
+            profit = n['sim'](12, 12, 0, 0, 70, 1, 0, 10, days=7, item_kind='ink', level=3)
         # Пять стабильных, шестая попытка ломает, на седьмую нужен второй катализатор.
         self.assertAlmostEqual(profit * 7, -140)
 
@@ -94,7 +94,7 @@ class EconomyAudit(unittest.TestCase):
         # Пять варок; шестое применение спасено перебросом 1→20;
         # седьмое ломается на 1 без очков; восьмое покупает новый катализатор.
         with patch.object(n['random'], 'randint', side_effect=[10] * 5 + [1, 20, 10, 1, 10]):
-            profit = n['sim'](12, 11, 0, 0, 70, 8, 1, 10, days=1)
+            profit = n['sim'](12, 11, 0, 0, 70, 8, 1, 10, days=1, item_kind='ink', level=3)
         self.assertAlmostEqual(profit * 8, -140)
 
     def test_unfinished_volume_has_no_final_crafting_roll(self):
