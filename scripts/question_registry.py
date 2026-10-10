@@ -10,24 +10,29 @@ ROOT=Path(__file__).resolve().parent.parent
 QUEUE='Очередь вопросов мастеру.md'
 JOURNAL='Журнал решений.md'
 LEGACY='сводка_проекта_2026-10-01.md'
+LEGACY_APPENDIX='Вопросы v0.2 — Приложение Б.md'
+LEGACY_SOURCES=((LEGACY_APPENDIX,1,8,'Приложение Б'),(LEGACY,9,39,'раздел 4'))
 FIELDS=('id','kind','status','section','date','title','source','source_status')
 
 
 def legacy_rows(root,known):
     result=[]
-    for line in (root/LEGACY).read_text(encoding='utf-8').splitlines():
-        if not re.match(r'^\| \d+ \|',line):continue
-        cells=[v.strip() for v in line.strip('|').split('|')]
-        if len(cells)!=5:raise ValueError('Неверная строка исторического вопроса')
-        number,title,body,links,note=cells
-        if not body or not title:raise ValueError('Пустой исторический вопрос')
-        for qid,_ in references(links):
-            if qid not in known:raise ValueError(f'Исторический вопрос {number}: несуществующий {qid}')
-        result.append(dict(id=f'legacy-{int(number):02}',kind='historical_question',status='recovered',
-                           section='раздел 4',date='',title=title,source=LEGACY,
-                           source_status='исторический вопрос; связь сейчас: '+links))
-    numbers=[int(r['id'].split('-')[-1]) for r in result]
-    if sorted(numbers)!=list(range(9,40)):raise ValueError('Исторические вопросы должны содержать ровно номера 9–39')
+    for filename,first,last,section in LEGACY_SOURCES:
+        numbers=[]
+        for line in (root/filename).read_text(encoding='utf-8').splitlines():
+            if not re.match(r'^\| \d+ \|',line):continue
+            cells=[v.strip() for v in line.strip('|').split('|')]
+            if len(cells)!=5:raise ValueError(f'{filename}: неверная строка исторического вопроса')
+            number,title,body,links,note=cells
+            if not body or not title:raise ValueError('Пустой исторический вопрос')
+            for qid,_ in references(links):
+                if qid not in known:raise ValueError(f'Исторический вопрос {number}: несуществующий {qid}')
+            numbers.append(int(number))
+            result.append(dict(id=f'legacy-{int(number):02}',kind='historical_question',status='recovered',
+                               section=section,date='',title=title,source=filename,
+                               source_status='исторический вопрос; связь сейчас: '+links))
+        if sorted(numbers)!=list(range(first,last+1)):
+            raise ValueError(f'{filename}: должны быть ровно номера {first}–{last}')
     return result
 
 
@@ -70,7 +75,7 @@ Codex, 10.10.2026. Служебный реестр; статусы взяты и
 
 В очереди: {count['open']} открытых, {count['partial']} частично решённых, {count['closed']} закрытых вопросов. В журнале: {decisions} записей решений. «Решение игрока, ждёт мастера» остаётся открытым вопросом; временное применение v0.3 не закрывает всю очередь автоматически.
 
-Старые вопросы 9–39 восстановлены по сводке, переданной игроком 10.10.2026. В `{LEGACY}` сохранена сокращённая выжимка раздела 4 с темами, вариантами и связями с нынешними В-/Ж-ID; это не полная дословная копия сводки. В реестре — 31 строка `legacy-09`…`legacy-39` со статусом `recovered`: содержание найдено, но вопрос этим не объявляется решённым. Эти номера не совпадают с действующими В-ID; вопросы не переоткрывались. Ссылки сопоставления проверяются на существование.
+Старые вопросы 1–39 восстановлены по двум источникам, переданным игроком 10.10.2026. В `{LEGACY_APPENDIX}` сохранены дословные вопросы 1–8 Приложения Б v0.2 и их сопоставление с нынешними решениями. В `{LEGACY}` — сокращённая выжимка вопросов 9–39 раздела 4 сводки; это не полная дословная копия сводки. В реестре — 39 строк `legacy-01`…`legacy-39` со статусом `recovered`: содержание найдено, но вопрос этим не объявляется решённым. Эти номера не совпадают с действующими В-ID; вопросы не переоткрывались. Номера каждого источника и существование связанных В-/Ж-ID проверяются отдельно. Ссылка под номером 9 в Приложении Б не создаёт второй вопрос `legacy-09`.
 
 Пустая дата означает, что источник не сообщает индивидуальную дату вопроса. Для Ж-ID перенесена дата записи; дата сборки очереди не подменяет дату решения.
 
