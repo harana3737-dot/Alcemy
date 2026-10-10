@@ -8,7 +8,8 @@ import random as _random
 
 import sim_volume as volume
 
-from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
+from sim import HERB, P_SL, CAT_PRICE, INSTAB, INK, probs, scenario, p_bonus
+from sim import P_PRICE as P_PRICE  # Public table retained for existing callers.
 
 PROF = PLAYER_PROF
 

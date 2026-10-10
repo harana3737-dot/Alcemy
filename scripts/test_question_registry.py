@@ -1,8 +1,7 @@
-import copy
 from pathlib import Path
 import tempfile
 import unittest
-from question_registry import ROOT, rows, csv_text, status_text, check_references, references, QUEUE, JOURNAL, LEGACY, LEGACY_APPENDIX, LEGACY_SOURCES, legacy_rows
+from question_registry import ROOT, rows, csv_text, status_text, check_references, references, LEGACY, LEGACY_APPENDIX, legacy_rows
 
 
 class RegistryTests(unittest.TestCase):

@@ -2,7 +2,6 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from reading_guides import add_guide
-import re
 from cards_model import (
     CAT,
     CLS,

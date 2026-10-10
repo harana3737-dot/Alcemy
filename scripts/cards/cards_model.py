@@ -14,7 +14,7 @@ import re
 
 from copy import deepcopy
 
-from cards_data import C as RAW_C, CUT_CHARGES
+from cards_data import C as RAW_C, CUT_CHARGES as CUT_CHARGES
 
 
 RAR = CARD_RAR
@@ -117,7 +117,7 @@ def is_charge(c):
 
 from cards_meta import MECH, NOTE_EDIT, OPEN, CHANGED
 
-from tasks import tasks_of, TASKS
+from tasks import tasks_of, TASKS as TASKS
 
 ESS_TYPES = ["Тело", "Разум", "Чувства", "Движение", "Стихия", "Покров", "Вода/дыхание", "Смерть/душа", "Эфир"]
 

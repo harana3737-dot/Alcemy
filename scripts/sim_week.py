@@ -9,7 +9,8 @@ import sim_player as player
 
 from sim_player import MB, NEED, BATCH, base_cost, growth_probs
 
-from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
+from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INK, probs, scenario
+from sim import INSTAB as INSTAB  # Public table retained for existing callers.
 
 random = _random.Random(20261002)
 

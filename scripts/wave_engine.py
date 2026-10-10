@@ -10,7 +10,7 @@ import random
 import re
 
 from bestiary_report import load, save_bonus
-from vordt_engine import Battle, Config, Web, distance, TALIS, LAEL, FAENON
+from vordt_engine import Battle, Config, Web, distance
 
 WAVES = {
     'orcs': [('orc', 8)],

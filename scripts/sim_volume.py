@@ -6,7 +6,8 @@
 
 from rules_data import unstable_fraction, CAT_STABLE, VOL, SL_E, ESS, CAT_E, MB, PLAYER_LAB as LAB, INK_PRICES
 import random as _random
-from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
+from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INK, roll, scenario
+from sim import INSTAB as INSTAB  # Public table retained for existing callers.
 
 random = _random.Random(90)
 

@@ -1,6 +1,6 @@
 import pathlib
 HERE = pathlib.Path(__file__).resolve().parent
-import html, json, re
+import html, re
 from cards_model import (
     CLS,
     CLS_ORDER,
@@ -87,7 +87,7 @@ def main():
     _ess = sorted({t for c in C for t in c['ess_types']}, key=lambda t: (ESS_TYPES.index(t) if t in ESS_TYPES else 99, t))
     ess_opts = "".join(f'<option value="{tx(t)}">{tx(t)}</option>' for t in _ess)
     fam_opts = "".join(f'<option value="{tx(f)}">{tx(f)}</option>' for f in sorted(fams))
-    removed = md_removed = "\n".join(md)[("\n".join(md)).index("| Предмет | Куда |"):("\n".join(md)).index('<a id="found">')]
+    removed = "\n".join(md)[("\n".join(md)).index("| Предмет | Куда |"):("\n".join(md)).index('<a id="found">')]
     found = "\n".join(md)[("\n".join(md)).index("- **Масло стихии"):]
 
 

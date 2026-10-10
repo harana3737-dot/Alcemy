@@ -12,7 +12,7 @@ import sys
 sys.path[:0] = [str(Path(__file__).resolve().parents[1]),
                str(Path(__file__).resolve().parents[1] / 'cards')]
 from rules_data import HEAL_DICE, HEAL_ADD, HEAL_ROUNDS, HEAL, ELIXIR_DC, WORK_VOLUME, HERB, CAT_PRICE
-from sim import check_success, probs
+from sim import probs
 from sim_volume import volume_run
 from cards_data import C
 

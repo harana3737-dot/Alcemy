@@ -6,7 +6,7 @@ import sim_volume
 import sim_player
 import sim_week
 import sim_guidance
-from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, roll, probs, scenario, p_bonus, potion_bonus
+from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INK, probs, scenario
 
 def main():
     from rules_data import MB, PLAYER_LAB as LAB, ROM, CAT_STABLE
@@ -272,7 +272,6 @@ def main():
     print("\n".join(L))
 
     # Версия для мастера: только то, что нужно для решений, без планов Талиса и статусов.
-    import re as _re
     def _sections(md):
         out, cur, buf = {}, None, []
         for ln in md.splitlines():

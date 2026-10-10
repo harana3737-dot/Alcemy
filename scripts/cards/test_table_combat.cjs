@@ -58,6 +58,8 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
     assert.equal(await page.locator('#fHp').innerText(),'6 / 34');
     const corrupt=structuredClone(saved);corrupt.state.talis.sp=6;
     await page.locator('#backupFile').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(corrupt))});
+    // setInputFiles завершается раньше асинхронного чтения и проверки JSON.
+    await page.waitForFunction(()=>/повреждённый/.test(document.getElementById('backupStatus').textContent));
     assert.match(await page.locator('#backupStatus').innerText(),/повреждённый/);
     assert.equal(await page.locator('#restoreDialog').isVisible(),false);
     // Старый файл без новых полей принимается и получает максимумы из сборки.

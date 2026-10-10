@@ -1,9 +1,45 @@
 """HTML-версия «Для мастера — вопросы и изменения.md»: оглавление, светлая и тёмная тема.
 Запуск: python3 scripts/master_html.py [имя файла без .md]"""
 
+import html
+import os
+from pathlib import Path
+import re
+from urllib.parse import quote, unquote, urlsplit, urlunsplit
+
+
+def document_link(target, root, source):
+    """Prefer an existing HTML companion; keep external links and fragments."""
+    parts = urlsplit(target)
+    if parts.scheme or parts.netloc or not parts.path:
+        return target
+    linked = source.parent / unquote(parts.path)
+    if linked.suffix != '.md':
+        return target
+    from document_paths import html_path
+    companion = html_path(root, linked)
+    if not companion.is_file():
+        return target
+    # The page-level rebase below moves all links from SRC.parent to OUT.parent.
+    relative = Path(os.path.relpath(companion, source.parent)).as_posix()
+    return urlunsplit(('', '', quote(relative, safe='/'), parts.query, parts.fragment))
+
+
+def render_inline(text, resolve_link=lambda target: target):
+    text = html.escape(text)
+    text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img src="\2" alt="\1" loading="lazy">', text)
+    pattern = r"\[([^\]]+)\]\(((?:[^()]|\([^()]*\))+)\)"
+    def link(match):
+        target = resolve_link(html.unescape(match.group(2)))
+        return f'<a href="{html.escape(target, quote=True)}">{match.group(1)}</a>'
+    text = re.sub(pattern, link, text)
+    text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
+    text = re.sub(r"<b>⚠ (.+?)</b>", r'<span class="badge">⚠ \1</span>', text)
+    return re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<i>\1</i>", text)
+
 
 def build():
-    import html, re, pathlib
+    import pathlib
 
     ROOT = pathlib.Path(__file__).resolve().parent.parent
     import sys
@@ -15,13 +51,7 @@ def build():
 
 
     def inline(t):
-        t = html.escape(t)
-        t = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img src="\2" alt="\1" loading="lazy">', t)
-        t = re.sub(r"\[([^\]]+)\]\((https?://[^)]+)\)", r'<a href="\2">\1</a>', t)
-        t = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", t)
-        t = re.sub(r"<b>⚠ (.+?)</b>", r'<span class="badge">⚠ \1</span>', t)  # **⚠ …** — плашка-предупреждение
-        t = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<i>\1</i>", t)
-        return t
+        return render_inline(t, lambda target: document_link(target, ROOT, SRC))
 
 
     lines = [line for line in SRC.read_text(encoding="utf-8").splitlines()
@@ -78,7 +108,7 @@ def build():
                         rows.append([c.strip() for c in lines[i].strip().strip("|").split("|")])
                     i += 1
                 head, rest = rows[0], rows[1:]
-                tb = "<div class=\"wrap\"><table><thead><tr>" + "".join(f"<th>{inline(c)}</th>" for c in head) + "</tr></thead><tbody>"
+                tb = "<div class=\"wrap\"><table><thead><tr>" + "".join(f'<th scope="col">{inline(c)}</th>' for c in head) + "</tr></thead><tbody>"
                 # строка с ★ в первой ячейке — рекомендуемый вариант, подсвечивается фоном
                 tb += "".join(("<tr class=\"hl\">" if r[0].startswith("★") else "<tr>") + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in rest) + "</tbody></table></div>"
                 body.append(tb)

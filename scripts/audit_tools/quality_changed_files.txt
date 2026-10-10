@@ -1,0 +1,46 @@
+.gitattributes
+.github/workflows/check.yml
+.gitignore
+ruff.toml
+scripts/alchemy_bestiary/magic-results.csv
+scripts/alchemy_bestiary/magic-results.csv.gz
+scripts/alchemy_bestiary/results.csv
+scripts/alchemy_bestiary/results.csv.gz
+scripts/alchemy_bestiary_report.py
+scripts/alchemy_magic_review.py
+scripts/audit_tools/hypotheses_probe.py
+scripts/audit_tools/maintenance.md
+scripts/audit_tools/quality_changed_files.txt
+scripts/audit_tools/quality_results.json
+scripts/cards/cards_model.py
+scripts/cards/check.py
+scripts/cards/gen.py
+scripts/cards/gen_html.py
+scripts/cards/registry.py
+scripts/cards/test_registry.py
+scripts/cards/test_seed_inventory.py
+scripts/cards/test_table_combat.cjs
+scripts/check_all.py
+scripts/ci/package-lock.json
+scripts/ci/package.json
+scripts/ci/requirements.txt
+scripts/lint_javascript.cjs
+scripts/master_html.py
+scripts/optimization_audit/measure_implementation.py
+scripts/report.py
+scripts/result_archive.py
+scripts/sim_guidance.py
+scripts/sim_plan.py
+scripts/sim_player.py
+scripts/sim_volume.py
+scripts/sim_week.py
+scripts/test_alchemy_magic_review.py
+scripts/test_master_html.py
+scripts/test_question_registry.py
+scripts/test_result_archive.py
+scripts/test_vordt_audit.py
+scripts/wave_engine.py
+Алхимия и магия — проверка на бестиарии.md
+Алхимия — заклинания и метамагия.md
+Аудит — код, репозиторий и читаемость.md
+Для игрока — начни отсюда.md
