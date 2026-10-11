@@ -314,7 +314,7 @@ function renderQs(){
     const c=document.createElement('div');c.className='card';det.appendChild(c);
     g.q.forEach(q=>{const a=A['q'+q.n]||{};if(!shown(a))return;const el=document.createElement('div');el.className='q'+(a.c==='alt'?' alt':a.c==='talk'?' talk':'');el.id='q'+q.n;
       el.innerHTML=`<div class="n">${q.n}</div><div class="t">${md(q.q)}</div>
-        <div class="opt"><b>Играем</b><span>${md(q.y)}</span>${q.a&&q.a!=='—'?`<b>Иначе</b><span>${md(q.a)}</span>`:''}</div>
+        <div class="opt">${q.w?`<b>Суть</b><span>${md(q.w)}</span>`:''}<b>Играем</b><span>${md(q.y)}</span>${q.a&&q.a!=='—'?`<b>Иначе</b><span>${md(q.a)}</span>`:''}</div>
         <div class="ctl"><span class="seg" role="group" aria-label="Ответ на пункт ${q.n}">
           <button type="button" data-c="ok" aria-pressed="${a.c==='ok'}">${LBL.ok}</button><button type="button" data-c="alt" aria-pressed="${a.c==='alt'}">${LBL.alt}</button><button type="button" data-c="talk" aria-pressed="${a.c==='talk'}">${LBL.talk}</button></span>
           ${q.n===PRICE_Q?`<label class="note" for="price">Цена рецепта, зм</label><input id="price" type="number" min="0" step="10" placeholder="500" value="${a.price??''}">`:''}

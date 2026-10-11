@@ -22,9 +22,12 @@ def build():
             if sec != "Не обязательно":
                 cur = dict(t=sec, q=[]); groups.append(cur)
             continue
-        m = re.match(r"\|\s*(\d+)\s*\|(.+?)\|(.+?)\|(.+?)\|\s*$", ln)
-        if m and cur is not None and sec != "Не обязательно":
-            cur["q"].append(dict(n=int(m.group(1)), q=m.group(2).strip(), y=m.group(3).strip(), a=m.group(4).strip()))
+        # | № | Вопрос | Суть | Играем | Иначе | — столбец «Суть» необязателен
+        m = re.match(r"\|\s*(\d+)\s*\|(.+)\|\s*$", ln)
+        cells = [c.strip() for c in m.group(2).split("|")] if m else []
+        if len(cells) in (3, 4) and cur is not None and sec != "Не обязательно":
+            q, *w, y, a = cells
+            cur["q"].append(dict(n=int(m.group(1)), q=q, w=w[0] if w else "", y=y, a=a))
         elif sec == "Не обязательно" and ln.startswith("- "):
             extra.append(ln[2:].strip())
     for g in groups:
