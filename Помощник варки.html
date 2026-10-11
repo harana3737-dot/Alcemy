@@ -439,7 +439,7 @@ const SIT=[
  ["twice","Нужно применить дважды","одной дозой",c=>c.k==='chg'||c.k==='rea'],
  ["hard","Цель с сильным спасброском","поднять СЛ",c=>(['chg','rea','fl','oils'].includes(c.k))&&hasSave(c)],
  ["ally","Союзники попадут в область","",c=>c.k==='fl'&&!!c.ar],
- ["far","Бросать издалека","60 фт вместо 30",c=>c.k==='fl'],
+ ["far","Бросать издалека","до 60 фт без помехи вместо 20/40",c=>c.k==='fl'],
  ["wide","Нужно накрыть больше врагов","",c=>c.k==='fl'&&!!c.ar],
  ["ammo","Масло на стрелы или болты","",c=>c.k==='oilw'],
  ["prep","Нанести заранее","",c=>c.k==='oils'],
@@ -2457,6 +2457,6 @@ const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=BASIC.find(c=>c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
 list();render();renderBelt();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
-<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 6b6da5ffcf70</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
+<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 7cd95391c39e</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
 </body>
 </html>
