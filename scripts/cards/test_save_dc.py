@@ -3,7 +3,7 @@ from cards_model import params, prepare_cards, TAB
 
 
 class MakerSaveDCTest(unittest.TestCase):
-    def test_charges_and_flasks_use_maker_without_changing_attack(self):
+    def test_charges_and_flasks_use_maker_dc_and_attack(self):
         cards = prepare_cards()
         for kind in ('chg', 'fl', 'oils'):
             card = next(c for c in cards if c['cls'] == kind)
@@ -12,8 +12,9 @@ class MakerSaveDCTest(unittest.TestCase):
             self.assertIn('изготовителя', dc)
             self.assertIn('Ж-113', dc)
             if kind == 'chg':
-                self.assertIn(TAB[card['lvl']].split(' / ')[1], dc)
-                self.assertIn('применившего', dc)
+                self.assertIn('атаки', dc)
+                self.assertIn('Ж-123', dc)
+                self.assertNotIn('применившего', dc)
 
     def test_control_poison_is_not_changed_by_elixir_ruling(self):
         card = next(c for c in prepare_cards() if c['cls'] == 'psn')
