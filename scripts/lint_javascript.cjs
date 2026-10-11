@@ -32,7 +32,7 @@ async function main() {
     }
   }
   await visit(path.join(root, 'scripts'));
-  for (const name of ['Помощник варки.html', 'Пульт мастера.html', 'Для игрока — книга алхимии.html']) {
+  for (const name of ['Помощник варки.html', 'Пульт мастера.html', 'Для игрока — книга алхимии.html', 'Для игрока — логи, записки и предыстория.html']) {
     const text = fs.readFileSync(path.join(root, name), 'utf8');
     const scripts = [...text.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)]
       .filter(match => !/\bsrc\s*=|application\//i.test(match[1])).map(match => match[2]);

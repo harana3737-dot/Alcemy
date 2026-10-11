@@ -9,7 +9,7 @@ function visit(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true}))
  else if(entry.isFile()&&/\.(cjs|js)$/.test(file))parse(fs.readFileSync(file,'utf8'),file);
 }}
 visit(path.join(root,'scripts'));
-for(const filename of ['Помощник варки.html','Пульт мастера.html']){
+for(const filename of ['Помощник варки.html','Пульт мастера.html','Для игрока — логи, записки и предыстория.html']){
  const html=fs.readFileSync(path.join(root,filename),'utf8');
  if(/__RULE_[A-Z0-9_]+__/.test(html))throw Error(filename+': остались маркеры правил');
  let index=0;for(const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)){
