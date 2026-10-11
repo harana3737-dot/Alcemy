@@ -14,7 +14,7 @@ class RegistryTests(unittest.TestCase):
         self.assertEqual(by['legacy-01']['source'],LEGACY_APPENDIX)
         self.assertEqual(by['legacy-08']['section'],'Приложение Б')
         self.assertEqual(by['legacy-09']['source'],LEGACY)
-        self.assertEqual(by['В-19']['status'],'closed');self.assertEqual(by['В-05']['status'],'partial')
+        self.assertEqual(by['В-19']['status'],'closed');self.assertEqual(by['В-05']['status'],'closed');self.assertEqual(by['В-09']['status'],'partial')
         self.assertEqual(by['В-33']['status'],'open');self.assertEqual(by['Ж-107']['date'],'08.10.2026')
         self.assertEqual(check_references(ROOT,records),[])
 
