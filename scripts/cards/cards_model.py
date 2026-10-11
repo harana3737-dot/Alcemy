@@ -164,8 +164,8 @@ def area(c):
 
 def params(c):
     l, k = c["lvl"], c["cls"]
-    tab = f"{TAB[l]}, у заклинателя — свои"
-    tab_dc = f"{TAB[l].split(' / ')[0]}, у заклинателя — своя"
+    tab = f"СЛ заклинаний изготовителя (Ж-113); атака {TAB[l].split(' / ')[1]}, у применившего заклинателя — своя"
+    tab_dc = "СЛ заклинаний изготовителя (Ж-113)"
     if k in ("chg", "rea"):
         if k == "rea":
             use = USE["rea"]
@@ -196,6 +196,8 @@ def params(c):
             rows.append(("Применений", "одно существо; одна мазь на существо"))
     else:
         rows = [("Применение", USE_OVR.get(c["name"], USE[k])), ("Длительность", c["dur"]), ("Алхимическая концентрация", c["a89"])]
+    if k == "eff" and saves(c) != "нет" and "атака" not in saves(c):
+        rows.extend([("Спасбросок", saves(c)), ("СЛ", tab_dc)])
     if k not in ("oilw", "salve", "fl", "oils"):
         rows.append(("Токсичность", c["tox"]))
     rows.append(("Цена", c["price"] + " зм"))

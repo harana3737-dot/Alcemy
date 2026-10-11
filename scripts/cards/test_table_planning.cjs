@@ -9,6 +9,31 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
     page.on('pageerror',e=>errors.push(e.message));await page.route('https://**/*',r=>r.fulfill({status:200,body:''}));
     await page.goto(base+'/'+encodeURIComponent('Помощник варки.html'));await page.waitForFunction(()=>JDB&&ST.mat);
     const state=await page.evaluate(()=>JSON.stringify(ST));
+    const rulings=await page.evaluate(()=>{
+      const original=ST,meta=S.t.metamagic;
+      try{
+        const charge=byName('Психическая плеть'),poison=D.find(c=>c.k==='psn'),potion={k:'basic',l:1};
+        S.t.metamagic=false;const plain=planChance(charge,4,false),plainPoison=planChance(poison,4,false),plainPotion=planChance(potion,4,false);
+        S.t.metamagic=true;const enhanced=planChance(charge,4,false);
+        const brewPlain=brew(charge,10,4,{}),brewMeta=brew(charge,10,4,{metamagic:true});
+        ST=JSON.parse(JSON.stringify(ST));ST.ent=[];ST.rests=[];ST.lrs=[];ST.lrN=null;
+        const who=ST.people[0].id;
+        // Старые сохранённые триггеры больше не повышают токсичность.
+        ST.trig=Array.from({length:10},(_,n)=>({who,T:ST.T,n:n+1}));
+        const triggersOnly=toxOfP(who);
+        ST.ent.push({who,k:'eff',t0:ST.T,dur:60,tox:2});
+        const mixed=toxOfP(who);ST.ent=[];renderPeople();
+        const text=document.querySelector('.pcard').textContent;
+        return {planDelta:enhanced.dc-plain.dc,brewDelta:brewMeta.dc-brewPlain.dc,successDrops:enhanced.success<plain.success,
+          poisonDelta:planChance(poison,4,false).dc-plainPoison.dc,potionDelta:planChance(potion,4,false).dc-plainPotion.dc,
+          poisonBrewDelta:brew(poison,10,4,{metamagic:true}).dc-brew(poison,10,4,{}).dc,
+          triggersOnly,mixed,text};
+      }finally{ST=original;S.t.metamagic=meta;renderBelt();renderPeople()}
+    });
+    assert.equal(rulings.planDelta,2);assert.equal(rulings.brewDelta,2);assert.equal(rulings.successDrops,true);
+    assert.equal(rulings.poisonDelta,0);assert.equal(rulings.potionDelta,0);assert.equal(rulings.poisonBrewDelta,0);
+    assert.equal(rulings.triggersOnly,0);assert.equal(rulings.mixed,2);
+    assert.match(rulings.text,/Триггеры зелий: 10, без токсичности/);
     const model=await page.evaluate(()=>{
       const f=masteryForecast(2,4,0,12),finished=masteryForecast(2,4,15,0);
       const one=expectedBatches(1,2,.75),two=expectedBatches(2,2,.75);

@@ -7,7 +7,7 @@ class CampaignLibraryTest(unittest.TestCase):
         items = records()
         self.assertEqual(len({item['id'] for item in items}), len(items))
         self.assertEqual([item['title'] for item in items if item['category'] == 'Логи'],
-                         [f'Сессия {i}' for i in range(1, 14)])
+                         [f'Сессия {i}' for i in range(1, 15)])
         self.assertEqual(sum(item['category'] == 'Опорные диалоги' for item in items), 6)
         for item in items:
             source = (ROOT/item['source']).read_text(encoding='utf-8')

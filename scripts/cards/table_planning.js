@@ -10,7 +10,7 @@ function recipeNeeds(c){
   return Object.entries(map).filter(([,re])=>re.test(text)).map(([n])=>n);
 }
 function planChance(c,bonus,unstable=S.t.ess){
-  const dc=(c.k==='basic'?PLAN_RULES.potionDC[c.l]:DC[c.l-1])+(unstable&&c.k!=='basic'?2:0);
+  const dc=(c.k==='basic'?PLAN_RULES.potionDC[c.l]:DC[c.l-1])+(unstable&&c.k!=='basic'?2:0)+(S.t.metamagic&&!['basic','psn'].includes(c.k)?2:0);
   const p=chancesTxt(dc,bonus+(S.t.help?2:0));
   return {dc,p,success:p.ok+p.hi+p.n20,growth:p.ok+p.hi+2*p.n20};
 }

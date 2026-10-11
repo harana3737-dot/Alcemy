@@ -27,6 +27,15 @@ def battle(*, tactic='паутина', face=10, **settings):
 
 
 class VordtAudit(unittest.TestCase):
+    def test_talis_has_no_expired_cold_resistance(self):
+        b = battle()
+        self.assertNotIn('cold', b.T.resistance)
+        b.hurt(b.T, 12, 'cold')
+        self.assertEqual(b.T.hp, 22)
+        b.T.resistance.add('cold')  # новое действующее сопротивление работает
+        b.hurt(b.T, 12, 'cold')
+        self.assertEqual(b.T.hp, 16)
+
     def test_quickened_allows_only_one_levelled_spell(self):
         b = battle(tactic='урон')
         b.current_actor = TALIS
@@ -102,7 +111,7 @@ class VordtAudit(unittest.TestCase):
         with patch.object(b, 'roll', return_value=20) as roll:
             self.assertTrue(b.breathe([b.T, b.L]))
         roll.assert_called_once_with(10, 6)
-        self.assertEqual(b.T.hp, 29)  # спасбросок, затем сопротивление
+        self.assertEqual(b.T.hp, 24)  # только спасбросок; временное сопротивление закончилось
         self.assertEqual(b.L.hp, 7)
 
     def test_revived_ally_counts_as_a_fall(self):
