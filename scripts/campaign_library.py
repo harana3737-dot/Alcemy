@@ -87,7 +87,8 @@ def records(root=ROOT):
         add(HANDOUTS, 'Найденные документы', title, lines, start, end,
             context if level == 3 else '')
 
-    for filename, title in [('Источники/Сессия 9 — бой с гоблинами и червём.md', 'Сессия 9 — подробный бой'),
+    for filename, title in [('Бой с Вордтом — журнал.md', 'Сессия 14 — подробный бой с Вордтом и расходы'),
+                            ('Источники/Сессия 9 — бой с гоблинами и червём.md', 'Сессия 9 — подробный бой'),
                             ('Источники/Разбор сессий 11–12 с мастером.md', 'Разбор сессий 11–12 с мастером')]:
         lines = (root/filename).read_text(encoding='utf-8').splitlines(keepends=True)
         add(filename, 'Разборы сессий', title, lines, 0, len(lines))
