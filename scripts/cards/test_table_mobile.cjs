@@ -51,7 +51,7 @@ const shots=process.env.TABLE_TOOLS_SCREENSHOTS;
     }
     await page.goto(base+'/'+encodeURIComponent('Пульт мастера.html'));await fits();
     assert.match(await page.locator('#buildInfo summary').innerText(),/^Сборка [0-9a-f]{12}$/);
-    assert.equal(await page.locator('#sumN').innerText(),'0 из 38');
+    assert.equal(await page.locator('#sumN').innerText(),'0 из 37');
     assert.match(await page.locator('.sum').innerText(),/Не отмеченные считаются принятыми/);
     for(const tab of ['ref','el','ta','ok']){
       await page.locator(`[data-t="${tab}"]`).click();await fits();
