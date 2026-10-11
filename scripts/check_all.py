@@ -12,7 +12,7 @@ import threading
 from document_paths import paired_html_sources
 
 ROOT = Path(__file__).resolve().parent.parent
-CHECKS = ('player_book.py', 'bestiary_report.py', 'alchemy_bestiary_report.py', 'alchemy_magic_review.py')
+CHECKS = ('campaign_library.py', 'player_book.py', 'bestiary_report.py', 'alchemy_bestiary_report.py', 'alchemy_magic_review.py')
 BUILDERS = (
     ('rules_html.py',), ('cards/gen.py',), ('cards/gen_html.py',),
     ('cards/quality.py',), ('cards/registry.py',), ('cards/helper.py',),

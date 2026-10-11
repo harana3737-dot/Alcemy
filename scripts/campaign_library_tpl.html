@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Талис — библиотека кампании</title>
+<style>
+:root{color-scheme:light dark;--bg:#f5f1e8;--ink:#272d29;--panel:#fffdf7;--line:#cbcfc4;--muted:#5c6860;--accent:#315d49}
+@media(prefers-color-scheme:dark){:root{--bg:#171c19;--ink:#eceee7;--panel:#222a24;--line:#485348;--muted:#bdc6ba;--accent:#a9d1b2}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:24px 16px 60px}h1{font:600 clamp(26px,5vw,38px)/1.2 Georgia,serif}h2{font-size:19px;line-height:1.3;margin:0}.lead{color:var(--muted)}.warning{border-left:3px solid var(--accent);padding:8px 14px}.filters{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 10px}input,select,button{font:inherit;border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--panel);color:var(--ink)}input{flex:1;min-width:160px}select{max-width:100%}button{cursor:pointer}.copy{white-space:nowrap;color:var(--accent)}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.material{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}.material header{display:flex;gap:16px;justify-content:space-between;align-items:flex-start}.material header>div{min-width:0}.meta{font-size:13px;color:var(--muted);overflow-wrap:anywhere;margin:6px 0 12px}summary{cursor:pointer;color:var(--accent)}.text{overflow-wrap:anywhere}.text h2,.text h3{margin:24px 0 12px}.text p{margin:12px 0}.text blockquote{border-left:2px solid var(--line);padding-left:14px;margin-left:0}.text table{border-collapse:collapse}.text td,.text th{border-bottom:1px solid var(--line);padding:6px}.text .table-wrap,.text .tw,.text .wrap{overflow-x:auto}.text pre{white-space:pre-wrap}.muted{color:var(--muted)}[hidden]{display:none!important}#status{min-height:1.6em;color:var(--accent)}.fallback textarea{width:100%;height:240px;font:14px/1.5 monospace;margin:12px 0}@media(max-width:480px){.material header{flex-wrap:wrap;gap:4px}.material header>div{width:100%}.copy{margin-bottom:12px}}@media print{.filters,.copy,#status,.warning{display:none}.material{break-inside:avoid}}
+</style></head><body><main>
+<h1>Логи, записки и предыстория Талиса</h1>
+<p class="lead">Найди нужный материал и нажми «Скопировать». Каждый лог, записка и разговор копируется отдельно, целиком, в исходном оформлении Markdown. Чтобы прочитать его здесь, раскрой текст.</p>
+<p class="warning">Материалы для игрока. Предыстория и опорные диалоги содержат сведения, которых Талис ещё не знает.</p>
+<noscript><p>Тексты доступны для чтения. Для кнопок копирования и поиска включи JavaScript.</p></noscript>
+<div class="filters"><input type="search" id="search" aria-label="Поиск в названиях и текстах" placeholder="Найти слово, имя или сессию"><select id="category" aria-label="Вид материала"><option value="">Все материалы</option>__OPTIONS__</select></div>
+<p id="count" class="muted"></p><p id="status" role="status" aria-live="polite"></p>
+<div class="fallback" id="fallback" hidden><p>Браузер не разрешил копирование. Текст выделен: скопируй его вручную.</p><textarea id="manual" readonly aria-label="Текст выбранного материала"></textarea><button type="button" id="close">Закрыть</button></div>
+<div id="materials">__CARDS__</div>
+</main><script type="application/json" id="data">__DATA__</script>
+<script>
+'use strict';
+const items=JSON.parse(document.getElementById('data').textContent),byId=new Map(items.map(item=>[item.id,item]));
+const search=document.getElementById('search'),category=document.getElementById('category'),status=document.getElementById('status');
+const cards=[...document.querySelectorAll('.material')];
+function filter(){const query=search.value.trim().toLocaleLowerCase('ru');let count=0;for(const card of cards){const item=byId.get(card.dataset.id);const visible=(!category.value||item.category===category.value)&&(!query||[item.title,item.context,item.text].join(' ').toLocaleLowerCase('ru').includes(query));card.hidden=!visible;if(visible)count++;}document.getElementById('count').textContent=`Показано ${count} из ${items.length}`;}
+search.addEventListener('input',filter);category.addEventListener('change',filter);filter();
+async function copyText(text){if(navigator.clipboard?.writeText){try{await navigator.clipboard.writeText(text);return true;}catch{}}
+const area=document.createElement('textarea');area.value=text;area.setAttribute('aria-label','Копируемый текст');area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';document.body.append(area);area.focus();area.select();area.setSelectionRange(0,text.length);let ok=false;try{ok=document.execCommand('copy');}catch{}finally{area.remove();}return ok;}
+for(const card of cards){const button=card.querySelector('.copy');button.addEventListener('click',async()=>{const item=byId.get(card.dataset.id);button.disabled=true;try{const copied=await copyText(item.text);if(copied){document.getElementById('fallback').hidden=true;status.textContent='Скопировано: '+(item.context?item.context+' — ':'')+item.title;button.textContent='Скопировано';button.focus();}else{status.textContent='Не удалось скопировать автоматически';document.getElementById('fallback').hidden=false;const manual=document.getElementById('manual');manual.value=item.text;manual.focus();manual.select();manual.setSelectionRange(0,item.text.length);}}finally{button.disabled=false;}});}
+document.getElementById('close').addEventListener('click',()=>{document.getElementById('fallback').hidden=true;});
+</script></body></html>
