@@ -5,11 +5,11 @@ from pathlib import Path
 import random
 import re
 
-from rules_data import (MB, HERB, P_SL, P_PRICE, NEED, ELIXIR_DC, CAT_PRICE,
+from rules_data import (INK_PRICES, MB, HERB, P_SL, P_PRICE, NEED, ELIXIR_DC, CAT_PRICE,
                         CAT_STABLE, proficiency, unstable_fraction)
 from sim import INK
 from alchemy_guidance import EXAMPLE_CLASS, budget, chances, quality, sales
-from sim_plan import batch_p, week
+from sim_plan import batch_p, ink_set, week
 from sim_volume import volume_stats, CHG, ESS
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -210,6 +210,15 @@ def sections():
         rows.append((f(cl,m,lab,l,.85),[name,f'{m} (чародей {cl}, +{bonus(cl,m,lab)})',number(f(cl,m,lab,l,.85)),number(f(cl,m,lab,l,.75))]))
     rows.sort(key=lambda r:-r[0])
     out['sell-ladder']=table(['Что продавать','С какого мастерства (пример)','Прибыль/ч: 85%','Прибыль/ч: 75%'],[r for _,r in rows])
+    rows=[]
+    for k,circle in [(1,'I круг'),(2,'II круг'),(3,'III круг: Огненный шар, Молния, Полёт, Контрзаклинание'),
+                     (4,'IV круг, с разрешения мастера'),(5,'V круг, с разрешения мастера')]:
+        h2,g2,_=ink_set(2,k,guidance=True);m=max(k,2);hm,gm,_=ink_set(m,k,guidance=True)
+        rows.append([['','I','II','III','IV','V'][k],circle,number(INK_PRICES[k],0),
+                     f'{number(g2,0)} зм, {number(h2,1)} ч'+(' *' if k>2 else ''),number(INK_PRICES[k]-g2,0),
+                     f'{m}: {number(gm,0)} зм, {number(hm,1)} ч',number(INK_PRICES[k]-gm,0)])
+    out['ink-scrolls']=table(['Чернила','Для свитков Лаэля','Купить набор, зм','Свой сейчас (мастерство 2)','Экономия сейчас, зм',
+                              'Свой с мастерства','Экономия, зм'],rows)
     return out
 
 
@@ -230,8 +239,8 @@ if __name__=='__main__':
     if args.check:
         if BOOK.read_text(encoding='utf-8')!=result:
             raise SystemExit('Таблицы книги экономики устарели; пересоберите --write.')
-        print('PASS: одиннадцать таблиц экономики воспроизводятся из общих правил')
+        print('PASS: двенадцать таблиц экономики воспроизводятся из общих правил')
     elif args.write:
-        BOOK.write_text(result,encoding='utf-8');print('Собраны одиннадцать таблиц книги экономики')
+        BOOK.write_text(result,encoding='utf-8');print('Собраны двенадцать таблиц книги экономики')
     else:
         print(result)
