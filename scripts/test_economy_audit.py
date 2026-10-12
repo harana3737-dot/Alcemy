@@ -21,7 +21,7 @@ def load_model(name, namespace):
         function = isinstance(node, ast.FunctionDef)
         constant = (isinstance(node, ast.Assign) and all(
             isinstance(t, ast.Name) and t.id in constants for t in node.targets))
-        shared = isinstance(node, ast.ImportFrom) and node.module == 'rules_data'
+        shared = isinstance(node, ast.ImportFrom) and node.module in ('rules_data','alchemy_guidance')
         if function or constant or shared:
             exec(compile(ast.Module(body=[node], type_ignores=[]), str(ROOT / name), 'exec'), namespace)
     return namespace

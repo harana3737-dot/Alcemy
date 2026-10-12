@@ -2,11 +2,12 @@
 Поверх sim.py, sim_week.py и sim_volume.py; правила не меняются. Заряды и склянки I–V по цене, травам и СЛ
 совпадают с чернилами того же уровня (справочник цен), поэтому доход в час у них один."""
 
-from rules_data import unstable_fraction, CAT_STABLE, ROM, BATCH_T, elixir_batch, WEEK_LAB, normal_brewing_allowed, normal_brewing_requirements
+from rules_data import unstable_fraction, CAT_STABLE, ROM, BATCH_T, elixir_batch, WEEK_LAB, normal_brewing_allowed, normal_brewing_requirements, proficiency, MB
 import random as _random
+from alchemy_guidance import chances, quality, sales, EXAMPLE_CLASS
 from sim_week import TALIS
 import sim_volume as volume
-from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INK, probs, scenario, p_bonus
+from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INK, probs, scenario
 from sim import INSTAB as INSTAB  # Public table retained for existing callers.
 
 # Доз в партии зелья (6.2): мастерство → (1.1, 2.2, 3.3, 4.4, 5.5); 6.6+ — по одной
@@ -19,7 +20,11 @@ def batch_p(m, l):
     return row[l - 1] if l <= len(row) else 1
 
 
-def ink_set(m, k):
+def player_bonus(m,guidance=False):
+    return proficiency(EXAMPLE_CLASS[m])+MB[m]+WEEK_LAB[m] if guidance else TALIS[m]
+
+
+def ink_set(m, k, *, guidance=False):
     """один годный набор чернил уровня k (I–V) на мастерстве m: часы и золото; нестабильные годятся (−2, 10.4)"""
     if m not in TALIS or type(k) is not int or not 1 <= k <= 5:
         raise ValueError('Эта модель набора чернил поддерживает только I–V')
@@ -28,30 +33,50 @@ def ink_set(m, k):
         raise ValueError('Недостаточное место для изготовления чернил')
     price, herbs, ess, sl, cl, h = INK[ROM[k]]
     sl += 5 + k - m if k > m else 0
-    ok, un, _ = probs(TALIS[m], sl)
+    ok, un, _ = chances(player_bonus(m,guidance),sl,guidance)
+    if guidance:
+        base_ok,base_un,base_fail=probs(player_bonus(m,guidance),sl)
+        ok,un=base_ok*(1+base_fail),base_un*(1+base_fail)
     t = 1 / (ok + un)
     return t * h, t * (herbs + ess + CAT_PRICE[cl] / CAT_STABLE), ok / (ok + un)
 
 
-def elixir(m, l):
+def elixir(m, l, *, guidance=False):
     """одна доза эликсира-эффекта уровня l ≤ min(m, 5) партией (М − ур.) + 2, не больше 3 (I–II) / 2 (III–V)"""
     if m not in TALIS or not 1 <= l <= 5 or not normal_brewing_allowed(l, m, WEEK_LAB[m]):
         raise ValueError('Нужны мастерство, место и уровень I–V для обычной варки эликсира')
     size = elixir_batch(m, l, workshop=WEEK_LAB[m] == 5)
-    ok, un, _ = probs(TALIS[m], P_SL[l] + 2)
+    ok, un, _ = chances(player_bonus(m,guidance),P_SL[l]+2,guidance)
     hours = (2 if l <= 2 else 4) / size / ok
     return hours, (l * HERB[l] + HERB[l] + CAT_PRICE[l] / CAT_STABLE) / ok
 
 
-def potion(m, l):
+def potion(m, l, *, guidance=False):
     if m not in TALIS or not normal_brewing_allowed(l, m, WEEK_LAB[m]):
         raise ValueError('Недостаточное мастерство или место для обычной варки зелья')
-    ok, un, _ = probs(TALIS[m], P_SL[l])
-    p5, p20 = p_bonus(TALIS[m], P_SL[l])
+    ok, un, _ = chances(player_bonus(m,guidance),P_SL[l],guidance)
+    p5, p20 = quality(player_bonus(m,guidance),P_SL[l],guidance)
     return 2 / batch_p(m, l) / ok, (l * HERB[l] * (1 - p5 - p20) + CAT_PRICE[l] / CAT_STABLE) / ok
 
 
-def per_hour(m, *, rng=None):
+def per_hour(m, *, rng=None, guidance=False):
+    if guidance:
+        cl=EXAMPLE_CLASS[m];b=player_bonus(m,True)
+        pot=max(sales(b,P_SL[l],l*HERB[l],P_PRICE[l]*.85,CAT_PRICE[l],unstable_fraction(.85),2,
+                      item_kind='potion',level=l,class_level=cl,batch=batch_p(m,l))['per_hour'] for l in range(1,m+1))
+        ink=max((sales(b,INK[ROM[k]][3],INK[ROM[k]][1]+INK[ROM[k]][2],INK[ROM[k]][0]*.85,
+                       CAT_PRICE[INK[ROM[k]][4]],unstable_fraction(.85),INK[ROM[k]][5],
+                       item_kind='ink',level=k,class_level=cl)['per_hour'],ROM[k]) for k in range(1,min(m,5)+1))
+        vol=None
+        if m>=6:
+            rows=[]
+            for l in range(6,min(m,8)+1):
+                price=volume.CHG[l]
+                st=volume.volume_stats(b,l,price,price/3+volume.ESS[l],runs=6000,rng=rng,guidance=True)
+                rows.append((st['profit']/st['hours'],ROM[l],st['hours']))
+            vol=max(rows)
+        return dict(pot=pot,ink=ink,vol=vol)
+
     b = TALIS[m]
     pot = max(scenario(b, P_SL[l], l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], unstable_fraction(.85), 2, item_kind='potion', level=l)["per_try"] * batch_p(m, l) / 2
               for l in range(1, min(m, 10) + 1))
@@ -70,13 +95,13 @@ def per_hour(m, *, rng=None):
 
 
 
-def week(m, ink_k, kit_l, heal_l, hours, sets=2.5, kit_n=3, heal_n=4, *, income=None):
+def week(m, ink_k, kit_l, heal_l, hours, sets=2.5, kit_n=3, heal_n=4, *, income=None, guidance=False):
     """Ожидаемые затраты заказа; fits_expected_budget не гарантирует срок."""
     if min(hours, sets, kit_n, heal_n) < 0:
         raise ValueError('Часы и количества не могут быть отрицательными')
-    ih, ig, ist = ink_set(m, ink_k); eh, eg = elixir(m, kit_l); ph, pg = potion(m, heal_l)
+    ih, ig, ist = ink_set(m, ink_k,guidance=guidance); eh, eg = elixir(m, kit_l,guidance=guidance); ph, pg = potion(m, heal_l,guidance=guidance)
     fixed = sets * ih + kit_n * eh + heal_n * ph
-    ph_best = per_hour(m) if income is None else income
+    ph_best = per_hour(m,**({"guidance":True} if guidance else {})) if income is None else income
     best = max(ph_best["pot"], ph_best["ink"][0], ph_best["vol"][0] if ph_best["vol"] else 0)
     free = max(0, hours - fixed)
     return dict(ink=(sets * ih, sets * ig, ist), kit=(kit_n * eh, kit_n * eg), heal=(heal_n * ph, heal_n * pg),

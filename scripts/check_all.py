@@ -17,7 +17,7 @@ BUILDERS = (
     ('rules_html.py',), ('cards/gen.py',), ('cards/gen_html.py',),
     ('cards/quality.py',), ('cards/registry.py',), ('cards/helper.py',),
     ('cards/master_panel.py',), ('weekly_economy_report.py', '--write'),
-    ('elixir_catalog_review.py', '--write'),
+    ('elixir_catalog_review.py', '--write'), ('party_kit_report.py', '--write'),
 )
 SPECIAL_HTML = {'Для игрока — книга алхимии', 'Карточки эликсиров',
                 'Алхимия Талиса — правила за столом'}

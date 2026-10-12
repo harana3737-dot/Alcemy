@@ -10,6 +10,7 @@ python3 -B scripts/party_kit_report.py --level 9 --int-mod 1 --lab 3
 from rules_data import HERB as HERB_DATA, MB as MB_DATA, ELIXIR_DC, PLACE_LIMIT, proficiency, elixir_batch
 from functools import lru_cache
 import argparse
+from alchemy_guidance import chances
 from pathlib import Path
 import random
 import re
@@ -62,7 +63,7 @@ def materials(c):
     return base + essence + cat + component
 
 
-def small(c, m, q, level=5, int_mod=0, lab=None):
+def small(c, m, q, level=5, int_mod=0, lab=None, guidance=False):
     """Партия под остаток заказа: никаких лишних доз в последней партии.
 
     Число успехов имеет биномиальное распределение. Рекурсия учитывает
@@ -72,7 +73,7 @@ def small(c, m, q, level=5, int_mod=0, lab=None):
     from math import comb
     check_place(c, m, lab)
     l = c['lvl']
-    p = probability(bonus(m, level, int_mod, lab), DC[l])
+    p = chances(bonus(m, level, int_mod, lab),DC[l],guidance and level>=5)[0]
     workshop = workplace(m, lab) == 5
     batch = 1 if c['cls'] in ('fl', 'chg', 'rea', 'oils') else elixir_batch(m, l, workshop)
     duration = 2 if l <= 2 else 4
@@ -88,7 +89,7 @@ def small(c, m, q, level=5, int_mod=0, lab=None):
     return materials(c) * q / p, duration * batches(q), p
 
 
-def volume(c, m, runs=30000, level=5, int_mod=0, lab=None):
+def volume(c, m, runs=30000, level=5, int_mod=0, lab=None, guidance=False):
     """Только обычные успешные дозы VI–VIII; те же подходы, что в 6.3.
 
     Независимый фиксированный seed; финальный успех усреднён точно по d20.
@@ -96,12 +97,12 @@ def volume(c, m, runs=30000, level=5, int_mod=0, lab=None):
     """
     check_place(c, m, lab)
     l, b = c['lvl'], bonus(m, level, int_mod, lab)
-    hours, p = volume_progress(l, b, runs)
+    hours, p = volume_progress(l,b,runs,guidance and level>=5)
     return materials(c) / p, hours / p, p
 
 
 @lru_cache(None)
-def volume_progress(l, b, runs):
+def volume_progress(l,b,runs,guidance=False):
     rng = random.Random(20261007 + 100 * b + l)
     work = 90 if l <= 7 else 240
     steps = success = 0
@@ -111,6 +112,8 @@ def volume_progress(l, b, runs):
             steps += 1
             d = rng.randint(1, 20)
             t = d + b
+            if guidance and (d==1 or d!=20 and t<DC[l]):
+                d=rng.randint(1,20);t=d+b
             if d == 20:
                 progress += 2 * t
                 marks += 1
@@ -128,17 +131,17 @@ def volume_progress(l, b, runs):
                     hitches = 0
             else:
                 defects += 1
-        success += probability(b + max(-2, min(2, marks - defects)), DC[l])
+        success += chances(b+max(-2,min(2,marks-defects)),DC[l],guidance)[0]
     p = success / runs
     return 2 * steps / runs, p
 
 
-def row(c, m, q=1, level=5, int_mod=0, lab=None):
+def row(c, m, q=1, level=5, int_mod=0, lab=None, guidance=True):
     assert c['lvl'] <= m
-    kwargs = dict(level=level, int_mod=int_mod, lab=lab)
+    kwargs = dict(level=level,int_mod=int_mod,lab=lab)
     if c['lvl'] > PLACE_LIMIT[workplace(m, lab)]:
         return f"| {m} / +{bonus(m, **kwargs)} | {c['name']} ×{q} | {price(c) * q:.2f} | — | — | недоступно: уровень рабочего места |"
-    cost, hours, p = small(c, m, q, **kwargs) if c['lvl'] <= 5 else volume(c, m, **kwargs)
+    cost, hours, p = small(c,m,q,**kwargs,guidance=guidance) if c['lvl']<=5 else volume(c,m,**kwargs,guidance=guidance)
     return f"| {m} / +{bonus(m, **kwargs)} | {c['name']} ×{q} | {price(c) * q:.2f} | {cost * (q if c['lvl'] > 5 else 1):.2f} | {hours * (q if c['lvl'] > 5 else 1):.1f} | {p:.1%} |"
 
 
@@ -231,14 +234,40 @@ def progress():
         print(f'| {events} | '+' | '.join(f'{v:.2f}' for v in nums)+' |')
 
 
+def write_sources():
+    import io
+    from contextlib import redirect_stdout
+    root=Path(__file__).resolve().parent.parent
+    path=root/'Группа — баффы и расходники.md'
+    text=path.read_text(encoding='utf-8')
+    stream=io.StringIO()
+    with redirect_stdout(stream): main()
+    block='Персонаж уровня 5; дни алхимии с указанием, классовые единицы и переработка ячеек.\n\n'+stream.getvalue().strip()
+    text=re.sub(r'(<!-- calculation-table -->).*?(<!-- /calculation-table -->)',
+                lambda m:m[1]+'\n\n'+block+'\n'+m[2],text,flags=re.S)
+    stream=io.StringIO()
+    with redirect_stdout(stream): progress()
+    output=stream.getvalue()
+    heading='### Одно мастерство при разных уровнях Талиса'
+    a=output.index(heading)
+    found=re.search(r'(?m)^\|[^\n]*(?:\n\|[^\n]*)*',output[a:])
+    start=text.index(heading);old=re.search(r'(?m)^\|[^\n]*(?:\n\|[^\n]*)*',text[start:])
+    text=text[:start+old.start()]+found[0]+text[start+old.end():]
+    path.write_text(text,encoding='utf-8')
+    print('Обновлены расчёты запаса группы: указание с уровня чародея 5')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--level', type=int, choices=range(1,21), default=5)
     parser.add_argument('--int-mod', type=int, default=0)
     parser.add_argument('--lab', type=int, choices=(0,1,3,5))
     parser.add_argument('--progress', action='store_true')
+    parser.add_argument('--write', action='store_true')
     args = parser.parse_args()
-    if args.progress:
+    if args.write:
+        write_sources()
+    elif args.progress:
         progress()
     else:
         print(f'Персонаж уровня {args.level}, Инт {args.int_mod:+d}; рабочее место: '+('по сценарию мастерства' if args.lab is None else f'+{args.lab}')+'.\n')

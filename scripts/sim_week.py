@@ -3,10 +3,11 @@
 Пересчёт поверх sim.py и sim_player.py; правила не меняются."""
 
 import random as _random
-from rules_data import unstable_fraction, WEEK_PROF, WEEK_LAB
+from rules_data import unstable_fraction, WEEK_PROF, WEEK_LAB, proficiency
 
 import sim_player as player
 
+from alchemy_guidance import EXAMPLE_CLASS
 from sim_player import MB, NEED, BATCH, base_cost, growth_probs
 
 from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INK, probs, scenario
@@ -30,8 +31,8 @@ def ok_rate(b, sl, guidance=False):
     ok, un, fa = probs(b, sl)
     return ok + (1 - ok) * ok if guidance else ok
 
-def growth_row(m, extra=0, guidance=False):
-    b = TALIS[m] + extra
+def growth_row(m,extra=0,guidance=False,*,class_level=None):
+    b=(proficiency(class_level)+MB[m]+lab(m) if class_level else TALIS[m])+extra
     ok, p5, p20 = growth_probs(b, P_SL[m], guidance)
     per = ok + p20                               # натуральная 20 — второй успех
     doses = NEED[m] / per
@@ -48,13 +49,15 @@ def pot_hour(m):
     r = scenario(TALIS[m], P_SL[m], m * HERB[m], P_PRICE[m] * .85, CAT_PRICE[m], unstable_fraction(.85), 2, item_kind='potion', level=m)
     return r["per_try"] * BATCH.get(m, 1) / 2
 
-def mc_ink(need, b, N=40000, *, rng=None):
+def mc_ink(need,b,N=40000,*,rng=None,guidance=False):
     rng = random if rng is None else rng
     tot = 0
     for _ in range(N):
         p = a = 0
         while p < need:
-            a += 1; p += rng.randint(1, 20) + b
+            a += 1;d=rng.randint(1,20)
+            if guidance and d==1:d=rng.randint(1,20)
+            p += d+b
         tot += a
     return tot / N
 
@@ -109,25 +112,26 @@ def silver_attempts(need, b, guidance=False):
                               for k, p in weights.items() if k)) / (1 - weights.get(0, 0))
     return expected[remaining]
 
-def p_open_in(hours, b=4, N=40000, *, rng=None):
+def p_open_in(hours,b=4,N=40000,*,rng=None,guidance=False):
     rng = random if rng is None else rng
     ok = 0
     for _ in range(N):
         m = t = 0
         while m < 3 and t + 2 <= hours:
-            t += 2; d = rng.randint(1, 20)
+            t += 2;d=rng.randint(1,20)
+            if guidance and (d==1 or d!=20 and d+b+2<12):d=rng.randint(1,20)
             if d == 20: m += 3
             elif d != 1 and d + b + 2 >= 17: m += 2
             elif d != 1 and d + b + 2 >= 12: m += 1
         while m >= 3 and t + 2 <= hours:
             t += 2
-            if rng.random() < ok_rate(b, 14): ok += 1; break
+            if rng.random() < ok_rate(b,14,guidance): ok += 1; break
     return ok / N
 
 NIGHT = 2 * HERB[2] + HERB[2]                   # доза на одну ночь: 2 травы II и эссенция Разум II — ≈1,5 зм
 
 
-def build_tables(player_tables=None):
+def build_tables(player_tables=None, *, day_guidance=False):
     """Continue the player stream; no calculations run during import."""
     if player_tables is None:
         player_tables = player.build_tables()
@@ -136,8 +140,8 @@ def build_tables(player_tables=None):
     GROW = []
 
     for m in range(2, 10):
-        b, doses, h, gold = growth_row(m)
-        _, _, hg, _ = growth_row(m, guidance=True)
+        b,doses,h,gold=growth_row(m,class_level=EXAMPLE_CLASS[m] if day_guidance else None)
+        _,_,hg,_=growth_row(m,guidance=True,class_level=EXAMPLE_CLASS[m] if day_guidance else None)
         # Та же политика, что в росте: пять стабильных применений и
         # экономия трав на 5+/20; продажа не использует другой катализатор.
         ok, un, _ = probs(b, P_SL[m])
@@ -149,14 +153,14 @@ def build_tables(player_tables=None):
 
     for name, fn, h_per in [
         ("рецепт 2.2 по образцу (СЛ 10, +2 за образец, 1 отметка сразу)", lambda b, g: mc_marks(3, b + 2, 10, 1, g, rng=rng), 2),
-        ("исследование чернил: осталось 70 из 100", lambda b, g: mc_ink(70, b, rng=rng), 2),
+        ("исследование чернил: осталось 70 из 100", lambda b, g: mc_ink(70,b,rng=rng,guidance=g), 2),
         ("рост мастерства 2 → 3: 15 успешных зелий 2.2", None, None),
-        ("рецепт масел и мазей: 100 прогресса", lambda b, g: mc_ink(100, b, rng=rng), 2),
+        ("рецепт масел и мазей: 100 прогресса", lambda b, g: mc_ink(100,b,rng=rng,guidance=g), 2),
         ("обычная ступень формулы (СЛ 12, эссенция — подсказка +2) и первая варка", None, None),
         ("Корневая метка, этап I: осталось 16 из 30 (полная лаборатория, +7; подход — 2 часа)", lambda b, g: silver_attempts(16, ROOT_BONUS, g), 2),
     ]:
         row = []
-        for extra, g in [(0, False), (0, True), (2, False)]:
+        for extra, g in [(0, False), (0, True), (2, day_guidance)]:
             b = TALIS[2] + extra
             if name.startswith("рост"):
                 ok, _, p20 = growth_probs(b, 10, g)
@@ -171,7 +175,7 @@ def build_tables(player_tables=None):
 
     OPEN_H = QUEUE[4][1][0]
 
-    P_WEEK = p_open_in(12, rng=rng)
+    P_WEEK=p_open_in(12,b=TALIS[2] if day_guidance else 4,rng=rng,guidance=day_guidance)
 
     QTOT_A = sum(r[1][0] for r in QUEUE)
 
@@ -183,9 +187,9 @@ def build_tables(player_tables=None):
             harsh = "испорчена" if weeks - 1 >= 4 else str(max(0, weeks - 2))
             LONG.append((name, per_week, weeks, "0", harsh))
 
-    CH_OK = ok_rate(4, 12)
+    CH_OK = ok_rate(TALIS[2] if day_guidance else 4,12,day_guidance)
 
-    P22_OK = ok_rate(4, 10)
+    P22_OK = ok_rate(TALIS[2] if day_guidance else 4,10,day_guidance)
 
     SUPPLY = [("только заряды и склянки I–II", 6 * CH_OK, 0), ("только зелья 2.2 партиями по 2", 0, 6 * 2 * P22_OK),
               ("пополам", 3 * CH_OK, 3 * 2 * P22_OK)]
