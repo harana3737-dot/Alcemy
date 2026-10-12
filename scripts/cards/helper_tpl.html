@@ -229,7 +229,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
         <div><label class="f" for="b">Бонус проверки <small>по листу, 5 уровень; если не изменено</small></label><input id="b" type="number" min="-5" max="30" value="5"></div>
       </div>
       <label class="tg" style="margin-top:6px"><input type="checkbox" id="anar"><span><span class="t">Варю у Анариэль</span><small>полная лаборатория +3 вместо рабочего места +1: бонус +2, уровни до 8; на что пускает и сколько берёт — решает мастер</small></span></label>
-      <p class="note">Бонус — с Интеллектом, инструментами, мастерством и местом (у Талиса +4 на рабочем месте, +6 у Анариэль). При смене мастерства и места бонус сдвигается сам и действует на всех вкладках.</p>
+      <p class="note">Бонус — с Интеллектом, инструментами, мастерством и местом (у Талиса +5 на рабочем месте, +7 у Анариэль). При смене мастерства и места бонус сдвигается сам и действует на всех вкладках.</p>
       <div class="sect">Рецепт</div>
       <input id="q" type="search" placeholder="Название, эссенция, формула…" autocomplete="off">
       <div class="chips" id="cls"></div>
@@ -593,7 +593,7 @@ const SEED=JSON.parse($('seed').textContent);
 const TALIS_LIMITS=__COMBAT_LIMITS__;
 const bagCard=b=>byName(b.card||b.n);
 const uid=()=>Math.random().toString(36).slice(2,9);
-const NEW=()=>({v:1,u:0,T:8*60,dayOff:13,people:[{id:'p1',name:'Талис',limit:8,exh:0,intox:false},{id:'pF',name:'Фаэнон',limit:6,exh:0,intox:false},{id:'pL',name:'Лаэль',limit:6,exh:0,intox:false}],allies:1,ent:[],rests:[],r10:[],lrs:[],trig:[],bag:[],log:[]});
+const NEW=()=>({v:1,u:0,T:8*60,dayOff:13,people:[{id:'p1',name:'Талис',limit:8,exh:0,intox:false},{id:'pF',name:'Фаэнон',limit:7,exh:0,intox:false},{id:'pL',name:'Лаэль',limit:7,exh:0,intox:false}],allies:1,ent:[],rests:[],r10:[],lrs:[],trig:[],bag:[],log:[]});
 let ST=NEW(), UNDO=[], OD=null, BAGPICK=null, BAGWHO='p1';
 try{const x=JSON.parse(ls.get('belt')||'null');if(x&&x.v===1)ST=x}catch(e){}
 
@@ -664,7 +664,7 @@ setTimeout(async()=>{
 function migrate(){
   const need=!ST.allies||ST.bag.some(b=>!b.who);if(!need)return;
   mutate(()=>{ST.bag.forEach(b=>{if(!b.who)b.who='p1'});
-    if(!ST.allies){[['pF','Фаэнон'],['pL','Лаэль']].forEach(([id,name])=>{if(!ST.people.some(p=>p.name===name))ST.people.push({id,name,limit:6,exh:0,intox:false})});ST.allies=1;logx('Добавлены Фаэнон и Лаэль (предел 6)')}})}
+    if(!ST.allies){[['pF','Фаэнон'],['pL','Лаэль']].forEach(([id,name])=>{if(!ST.people.some(p=>p.name===name))ST.people.push({id,name,limit:7,exh:0,intox:false})});ST.allies=1;logx('Добавлены Фаэнон и Лаэль (предел 6)')}})}
 const myBag=w=>ST.bag.filter(b=>b.who===w);
 const sk=it=>it.who+'|'+it.n;
 const seedQ=()=>Object.fromEntries(SEED.items.map(it=>[sk(it),it.q]));

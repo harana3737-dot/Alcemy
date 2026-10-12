@@ -438,7 +438,7 @@ $('qtabs').innerHTML=J('d-quick').map((q,i)=>`<details class="qt" id="qt${i}"><s
 // ===== Калькулятор: формулы ядра правил (разделы 1, 4, 5) =====
 {const DCP=[10,10,11,13,15,17,19,21,23,25],TDC=[13,13,15,15,17,17,18,18,19,19],TAT=[5,5,7,7,9,9,10,10,11,11];
   const PLACE=[['tools','инструменты: до III, +0',3,0],['bench','рабочее место: до V, +1',5,1],['lab','лаборатория: до VIII, +3',8,3],['shop','мастерская: до X, +5',10,5]];
-  const DEF={con:3,pb:2,int:0,str:-1,cast:4,m:2,place:'bench',help:false,spell:true}; // Талис: лист персонажа
+  const DEF={con:3,pb:3,int:0,str:-1,cast:4,m:2,place:'bench',help:false,spell:true}; // Талис: лист персонажа
   let V={...DEF};try{V={...DEF,...JSON.parse(ls.get('mcalc')||'{}')}}catch(e){}
   const sg=n=>(n>=0?'+':'')+n;
   const num=(k,t,min,max)=>`<label>${t}<input type="number" data-k="${k}" min="${min}" max="${max}" value="${V[k]}"></label>`;

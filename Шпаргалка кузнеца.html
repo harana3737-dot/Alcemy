@@ -92,8 +92,8 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
       <label for="vol">Объём по выбранной работе<input id="vol" type="number" min="1" value="100"></label>
       <label for="dc">СЛ по выбранной работе<input id="dc" type="number" min="1" value="14"></label>
       <label for="abk">Проверка на<select id="abk"><option value="str">Силу — ковка, правка</option><option value="dex">Ловкость — отделка, рукояти</option><option value="int">Интеллект — чертежи, анализ</option><option value="wis">Мудрость — особые случаи</option></select></label>
-      <label for="ab">Модификатор <small>Фаэнон: по листу, 4 уровень; если не изменено</small><input id="ab" type="number" value="4"></label>
-      <label for="pb">Владение инструментами <small>Фаэнон: по листу, 4 уровень; если не изменено</small><input id="pb" type="number" value="2"></label>
+      <label for="ab">Модификатор <small>Фаэнон: по листу; если не изменено</small><input id="ab" type="number" value="4"></label>
+      <label for="pb">Владение инструментами <small>Фаэнон: 5-й уровень после Гильдии; если не изменено</small><input id="pb" type="number" value="3"></label>
       <label for="ml">Мастерство кузнеца (0–10) <small>По уточнению игрока, 08.10; если не изменено</small><input id="ml" type="number" min="0" max="10" value="2"></label>
       <label for="ws">Рабочее место <small>Кузница Фаэнона, по уточнению игрока; если не изменено</small>
         <select id="ws"><option value="0">Инструменты +0</option><option value="1">Обычная кузница +1</option><option value="3" selected>Хорошая кузница +3 (кузнец Фаэнона)</option><option value="5">Мастерская кузница +5</option></select></label>
@@ -116,7 +116,7 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
     </div>
     <div class="tw"><table id="log"><thead><tr><th class="n">№</th><th class="n">d20</th><th class="n">Итог</th><th>Исход</th><th class="n">+Прогресс</th><th class="n">Всего</th></tr></thead><tbody></tbody></table></div>
     <p id="final" class="ex"></p>
-    <p class="muted">По умолчанию — Фаэнон: Сила +4, Ловкость +3, Интеллект +2, Мудрость +1, владение +2 на 4 уровне («Талис — лист персонажа», раздел «Союзники»). Модификатор каждой характеристики можно поправить, страница запомнит его отдельно. Владение инструментами кузнеца есть, мастерство кузнеца 2 (+1) — со слов игрока Талиса, 08.10.</p>
+    <p class="muted">По умолчанию — Фаэнон: Сила +4, Ловкость +3, Интеллект +2, Мудрость +1, владение +3 на 5-м уровне после Гильдии (Ж-130; на 4-м было +2; характеристики — «Талис — лист персонажа», раздел «Союзники»). Модификатор каждой характеристики можно поправить, страница запомнит его отдельно. Владение инструментами кузнеца есть, мастерство кузнеца 2 (+1) — со слов игрока Талиса, 08.10.</p>
     <p class="muted">Кузница, куда ходит Фаэнон, — уровня лаборатории Анариэль. У Анариэль полная лаборатория (+3), ей в кузнечном деле соответствует хорошая кузница +3; аренды нет.</p>
     <p class="muted">Записи хранятся только в этом браузере. Бонус = характеристика + владение + бонус мастерства кузнеца + место, как в алхимии Талиса (уточнение игрока, 08.10). Половина итога — без округления. Оценка «ещё подходов» — среднее по d20 с текущим бонусом.</p>
   </section>
