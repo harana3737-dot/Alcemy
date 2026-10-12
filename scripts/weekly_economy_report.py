@@ -39,7 +39,7 @@ def build():
     rates = {m: p.per_hour(m, rng=rng) for m in range(2, 11)}
     text = SOURCE.read_text(encoding='utf-8').replace(NOTE + '\n', '')
     text = re.sub(r'^\d{2}\.\d{2}\.\d{4}\.(?: Пересчёт Codex\.)?',
-                  '08.10.2026. Пересчёт Codex.', text, count=1, flags=re.M)
+                  '12.10.2026. Пересчёт Codex.', text, count=1, flags=re.M)
     for heading, fn, headers, last in (
         ('### Набор чернил для Лаэля:', p.ink_set, ['Мастерство Талиса', 'I', 'II', 'III', 'IV', 'V'], 5),
         ('### Эликсир-эффект для себя:', p.elixir, ['Мастерство', 'I', 'II', 'III', 'IV', 'V'], 5),

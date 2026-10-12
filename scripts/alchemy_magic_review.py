@@ -217,16 +217,16 @@ def render(rows,csv_text):
             value=sum(vals)/len(vals)
             return f'{100*value:.1f}%' if metric=='delivery_probability' else f'{value:.2f}'
         text.append(f'| {level} | {scenario} | {labels[metric]} | {rs[0]["mastery_min"]} | {rs[0]["sorcery_points"]} | {fmt("value")} | {fmt("with_lr")} | {fmt("baseline")} |')
-    text += ['', '### Примеры текущего уровня: одна цель', '',
+    text += ['', '### Примеры 5-го уровня: одна цель', '',
              '| Противник | Шанс доставить удержание | С Остротой | Ускоренный Шар после яда | Такой же Шар без яда |',
              '| --- | ---: | ---: | ---: | ---: |']
     names={'goblin':'Гоблин','bandit-captain':'Капитан бандитов','hobgoblin':'Хобгоблин','mage':'Маг'}
     p=a.CONTROL_BY_NAME['Яд: удержание личности']
     for m in b.load():
         if m['index'] not in names:continue
-        delivered=a.control_metrics(m,p,4,attack_bonus=b.pb(4)+2)['delivered']
-        boosted=silvery_poison_probability(m,p,4)
-        value,base,_=same_turn_poison_spell(m,4,p)
+        delivered=a.control_metrics(m,p,5,attack_bonus=b.pb(5)+2)['delivered']
+        boosted=silvery_poison_probability(m,p,5)
+        value,base,_=same_turn_poison_spell(m,5,p)
         text.append(f'| {names[m["index"]]} | {delivered*100:.1f}% | {boosted*100:.1f}% | {value:.2f} | {base:.2f} |')
     text += ['', 'Шар атакует с 5 футов; при неудачном параличе получает помеху. Острота и Ускоренное в этой таблице — альтернативы хода. Шанс доставки включает попадание кинжалом, не только спасбросок. Урон кинжала исключён. Средние по всему диапазону выше включают также негуманоидов и защищённые цели.', '']
     text+=['','«База» имеет тот же горизонт: та же атака заклинанием без паралича; тот же сценарий без Максимальной силы; тот же огненный/холодный шар без соответствующей Метамагии; оружейный ход с маслом без Тензера. В строке «склянка + Ускоренное» база — только собственное заклинание, добавленная склянка расходуется. ЛС — расход на первые провалы, а не обязательное поведение мастера.','',

@@ -31,11 +31,13 @@ class EconomyTests(unittest.TestCase):
     def test_growth_time_and_herb_cost(self):
         self.assertEqual(self.player["growth_probs"](4, 10, True), (.9375, .5625, .0625))
         bonus, doses, hours, gold = self.week["growth_row"](2, guidance=True)
-        self.assertEqual((bonus, doses, hours), (4, 15, 15))
-        self.assertAlmostEqual(gold, 5.625)
+        self.assertEqual(bonus, 5)
+        self.assertAlmostEqual(doses, 15 / 1.02)
+        self.assertAlmostEqual(hours, 15 / 1.02)
+        self.assertAlmostEqual(gold, 5.0)
         row = self.player["growth"](extra=1, guidance=True)[1]  # Родной бонус 3 + 1 = 4.
         self.assertEqual((row[3], row[5]), (15, 15))
-        self.assertAlmostEqual(row[6], gold)
+        self.assertAlmostEqual(row[6], 5.625)  # Исторический сценарий +4 сохранён.
 
     def test_project_result_table_and_boundaries(self):
         # Бонус +6: нат. 1, тяжёлый провал, лёгкий провал,
@@ -61,13 +63,13 @@ class EconomyTests(unittest.TestCase):
         self.assertLess(attempts(16, 6, True), attempts(16, 6))
 
     def test_project_queue_uses_full_lab_without_assistance(self):
-        self.assertEqual(self.week["ROOT_BONUS"], 6)
+        self.assertEqual(self.week["ROOT_BONUS"], 7)
         name, hours = self.week["QUEUE"][-1]
-        self.assertIn("+6", name)
-        self.assertAlmostEqual(hours[0], 3.3155733288633997)
+        self.assertIn("+7", name)
+        self.assertAlmostEqual(hours[0], 3.0742264898643503)
         self.assertEqual(hours[0], hours[2])
         self.assertLess(hours[1], hours[0])
-        self.assertEqual(self.week["QUEUE"][2][1][1], 15)
+        self.assertAlmostEqual(self.week["QUEUE"][2][1][1], 15 / 1.02)
 
 
 if __name__ == "__main__":

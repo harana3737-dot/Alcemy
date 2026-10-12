@@ -69,7 +69,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
     });
     assert.deepEqual(picks.affordable,['Зелье лечения 1.1']);assert.equal(picks.noTime,false);assert.equal(picks.stockOnly,false);
     assert.deepEqual(picks.growth,['Зелье лечения 2.2']);assert.equal(picks.component,false);assert.equal(picks.above,false);
-    await page.locator('[data-tab="brewing-plan"]').click();assert.match(await page.locator('#bpForecast').innerText(),/19,33/);
+    await page.locator('[data-tab="brewing-plan"]').click();assert.match(await page.locator('#bpForecast').innerText(),/18,22/);
     await page.locator('#bpProgress').fill('15');await page.locator('#bpProgress').dispatchEvent('change');assert.match(await page.locator('#bpForecast').innerText(),/0 ч/);
     await page.locator('#bpBudget').fill('0');await page.locator('#bpBudget').dispatchEvent('change');
     assert.equal(await page.evaluate(()=>JSON.stringify(ST)),state);await page.reload();await page.waitForFunction(()=>JDB&&ST.mat);

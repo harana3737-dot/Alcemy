@@ -153,11 +153,11 @@ def build_tables(player_tables=None):
         ("рост мастерства 2 → 3: 15 успешных зелий 2.2", None, None),
         ("рецепт масел и мазей: 100 прогресса", lambda b, g: mc_ink(100, b, rng=rng), 2),
         ("обычная ступень формулы (СЛ 12, эссенция — подсказка +2) и первая варка", None, None),
-        ("Корневая метка, этап I: осталось 16 из 30 (полная лаборатория, +6; подход — 2 часа)", lambda b, g: silver_attempts(16, ROOT_BONUS, g), 2),
+        ("Корневая метка, этап I: осталось 16 из 30 (полная лаборатория, +7; подход — 2 часа)", lambda b, g: silver_attempts(16, ROOT_BONUS, g), 2),
     ]:
         row = []
         for extra, g in [(0, False), (0, True), (2, False)]:
-            b = 4 + extra
+            b = TALIS[2] + extra
             if name.startswith("рост"):
                 ok, _, p20 = growth_probs(b, 10, g)
                 per = ok + p20
