@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from check_all import check, outdated, snapshot
+from check_all import check, needs_code_checks, outdated, snapshot
 
 
 class CheckAllTests(unittest.TestCase):
@@ -45,6 +45,11 @@ class CheckAllTests(unittest.TestCase):
                 return False
             with patch('check_all.run',side_effect=fail):
                 self.assertEqual(check(root,sources=True),1)
+
+    def test_quick_mode_falls_back_for_code_templates_and_unknown_changes(self):
+        self.assertFalse(needs_code_checks({'Журнал решений.md', 'Талис — лист персонажа.md'}))
+        for files in (None, {'scripts/report.py'}, {'Шпаргалка варки.html'}, {'x.json'}):
+            self.assertTrue(needs_code_checks(files))
 
 
 if __name__ == '__main__':
