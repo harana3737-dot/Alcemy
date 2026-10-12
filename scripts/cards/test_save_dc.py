@@ -1,5 +1,5 @@
 import unittest
-from cards_model import params, prepare_cards, TAB
+from cards_model import params, prepare_cards
 
 
 class MakerSaveDCTest(unittest.TestCase):
