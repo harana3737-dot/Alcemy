@@ -125,8 +125,8 @@ class EconomyLogicTests(unittest.TestCase):
             ok = sum(d != 1 and (d == 20 or d + sim_week.TALIS[9] >= P_SL[level] + 2)
                      for d in range(1, 21)) / 20
             self.assertAlmostEqual(sim_plan.elixir(9, level)[0], hours / size / ok)
-        # Зелье 2.2, бонус +4: экономия на 11–20, успех на 6–20.
-        self.assertAlmostEqual(sim_plan.potion(2, 2)[1], .5 / .75)
+        # Зелье 2.2, бонус +5: экономия на 10–20, успех на 5–20.
+        self.assertAlmostEqual(sim_plan.potion(2, 2)[1], .45 / .8)
         for fn in (sim_plan.elixir, sim_plan.potion):
             with self.assertRaises(ValueError):
                 fn(2, 3)

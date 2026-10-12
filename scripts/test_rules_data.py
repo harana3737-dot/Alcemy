@@ -22,7 +22,13 @@ class RulesDataTests(unittest.TestCase):
     def test_all_exported_tables_match_original(self):
         for module in (sim, sim_plan, sim_player, sim_week, sim_volume, party_kit_report, cards_model):
             actual = {name: getattr(module, name) for name in BASELINE['tables'][module.__name__]}
-            self.assertEqual(json.loads(json.dumps(actual)), BASELINE['tables'][module.__name__], module.__name__)
+            expected = json.loads(json.dumps(BASELINE['tables'][module.__name__]))
+            # Сам снимок исторический: меняются только подтверждённые параметры
+            # нынешнего 5-го уровня Талиса в недельной модели.
+            if module in (sim_plan, sim_week):
+                expected['TALIS']['1'] = 4
+                expected['TALIS']['2'] = 5
+            self.assertEqual(json.loads(json.dumps(actual)), expected, module.__name__)
 
     def test_random_results_and_continuation_are_identical(self):
         rng = random.Random(3701)

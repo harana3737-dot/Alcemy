@@ -7,21 +7,22 @@
 def combat_limits(sheet, confirmed):
     """Числа боя из листа; отсутствующие ячейки — явное подтверждение игрока."""
     import re
-    def number(pattern):
-        match = re.search(pattern, sheet)
+    def number(pattern, text=sheet):
+        match = re.search(pattern, text)
         if not match:
             raise ValueError('Ресурсы боя: не найдено однозначное число в листе: ' + pattern)
         return int(match.group(1))
     main = sheet.split('## Основное', 1)[1].split('## Алхимия', 1)[0]
-    level = number(r'Чародей (\d+)')
-    hp = number(r'- Хиты (\d+),')
+    level = number(r'Чародей (\d+)', main)
+    hp = number(r'- Хиты (\d+),', main)
     pools = re.search(r'Единиц чародейства (\d+): (\d+) класса \+ (\d+) от Адепта метамагии', main)
     if not pools or int(pools[1]) != int(pools[2]) + int(pools[3]):
         raise ValueError('Ресурсы боя: неоднозначные запасы единиц чародейства')
     costs = dict((int(a), int(b)) for a,b in re.findall(r'^(\d+)-й уровень — (\d+) единиц', sheet, re.M))
     if set(costs) != set(range(1,6)):
         raise ValueError('Ресурсы боя: неполная стоимость создания ячеек')
-    if confirmed.get('level') != level or set(confirmed.get('slots', {})) != {'1','2'}:
+    expected_slots = {str(n) for n in range(1, min(9, (level + 1) // 2) + 1)}
+    if confirmed.get('level') != level or set(confirmed.get('slots', {})) != expected_slots:
         raise ValueError('Ресурсы боя: максимумы ячеек требуют подтверждения для этого уровня')
     if any(type(n) is not int or n < 0 for n in confirmed['slots'].values()):
         raise ValueError('Ресурсы боя: неверные максимумы ячеек')

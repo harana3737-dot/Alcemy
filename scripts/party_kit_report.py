@@ -34,7 +34,7 @@ def workplace(m, lab=None):
     return place
 
 
-def bonus(m, level=4, int_mod=0, lab=None):
+def bonus(m, level=5, int_mod=0, lab=None):
     return proficiency(level) + MB[m] + workplace(m, lab) + int_mod
 
 
@@ -62,7 +62,7 @@ def materials(c):
     return base + essence + cat + component
 
 
-def small(c, m, q, level=4, int_mod=0, lab=None):
+def small(c, m, q, level=5, int_mod=0, lab=None):
     """Партия под остаток заказа: никаких лишних доз в последней партии.
 
     Число успехов имеет биномиальное распределение. Рекурсия учитывает
@@ -88,7 +88,7 @@ def small(c, m, q, level=4, int_mod=0, lab=None):
     return materials(c) * q / p, duration * batches(q), p
 
 
-def volume(c, m, runs=30000, level=4, int_mod=0, lab=None):
+def volume(c, m, runs=30000, level=5, int_mod=0, lab=None):
     """Только обычные успешные дозы VI–VIII; те же подходы, что в 6.3.
 
     Независимый фиксированный seed; финальный успех усреднён точно по d20.
@@ -133,7 +133,7 @@ def volume_progress(l, b, runs):
     return 2 * steps / runs, p
 
 
-def row(c, m, q=1, level=4, int_mod=0, lab=None):
+def row(c, m, q=1, level=5, int_mod=0, lab=None):
     assert c['lvl'] <= m
     kwargs = dict(level=level, int_mod=int_mod, lab=lab)
     if c['lvl'] > PLACE_LIMIT[workplace(m, lab)]:
@@ -142,7 +142,7 @@ def row(c, m, q=1, level=4, int_mod=0, lab=None):
     return f"| {m} / +{bonus(m, **kwargs)} | {c['name']} ×{q} | {price(c) * q:.2f} | {cost * (q if c['lvl'] > 5 else 1):.2f} | {hours * (q if c['lvl'] > 5 else 1):.1f} | {p:.1%} |"
 
 
-def main(level=4, int_mod=0, lab=None):
+def main(level=5, int_mod=0, lab=None):
     print('| Мастерство / бонус | Предмет | Купить, зм | Сварить, зм | Часы до готового запаса | Успех попытки |')
     print('| --- | --- | ---: | ---: | ---: | ---: |')
     for m in (2, 3, 5, 7, 10):
@@ -233,7 +233,7 @@ def progress():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--level', type=int, choices=range(1,21), default=4)
+    parser.add_argument('--level', type=int, choices=range(1,21), default=5)
     parser.add_argument('--int-mod', type=int, default=0)
     parser.add_argument('--lab', type=int, choices=(0,1,3,5))
     parser.add_argument('--progress', action='store_true')
