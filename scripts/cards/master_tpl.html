@@ -51,14 +51,14 @@ h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
 .bar{height:6px;border-radius:99px;background:var(--chip);overflow:hidden;margin-top:6px}
 .bar i{display:block;height:100%;background:var(--acc)}
 .banner{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--gold-soft);font-size:14px}
-.q{display:grid;grid-template-columns:34px 1fr;gap:4px 10px;padding:12px 0;border-top:1px solid var(--line)}
+.q{display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px 10px;padding:12px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
 .q:first-child{border-top:0}
 .q .n{font:500 13px var(--f-mono);color:var(--acc);padding-top:2px}
 .q .t{font-weight:600}
 .q .opt{grid-column:2;display:grid;grid-template-columns:76px 1fr;gap:2px 8px;font-size:14px}
 .q .opt>b{font-weight:500;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding-top:2px}
 .q .ctl{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .seg button{font:inherit;font-size:13px;background:var(--panel);color:var(--ink);border:0;border-left:1px solid var(--line);padding:5px 11px;cursor:pointer}
 .seg button:first-child{border-left:0}
 .seg button[aria-pressed=true][data-c=ok]{background:var(--acc);color:var(--panel)}
