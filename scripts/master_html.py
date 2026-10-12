@@ -26,7 +26,7 @@ def document_link(target, root, source):
 
 
 def render_inline(text, resolve_link=lambda target: target):
-    text = html.escape(text)
+    text = html.escape(text).replace("\\*", "&#42;")  # \* — буквальная звёздочка
     text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img src="\2" alt="\1" loading="lazy">', text)
     pattern = r"\[([^\]]+)\]\(((?:[^()]|\([^()]*\))+)\)"
     def link(match):

@@ -78,6 +78,7 @@ def inline(text):
     # В каталоге есть явные безопасные якоря; остальной сырой HTML не исполняется.
     text = re.sub(r'<a id="([\w-]+)"></a>', lambda m: keep('<span id="' + m[1] + '"></span>'), text)
     text = re.sub(r'`([^`]+)`', lambda m: keep('<code>' + html.escape(m[1]) + '</code>'), text)
+    text = re.sub(r'\\([\\`*_\[\]])', lambda m: keep(html.escape(m[1])), text)  # \* — буквальная звёздочка
     text = re.sub(r'!\[([^\]]*)\]\(((?:[^()]|\([^()]*\))*)\)', lambda m: keep('<span class="asset-note">Иллюстрация: ' + html.escape(m[1]) + '</span>'), text)
 
     def link(match):
