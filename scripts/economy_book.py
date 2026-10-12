@@ -116,6 +116,11 @@ def growth_attempts(target, check_bonus, dc, guidance=False):
     return expectations[target]
 
 
+def batch_e(m, l):
+    """Партия эликсиров-эффектов (6.2): (мастерство − уровень) + 2, I–II не больше 3, III–V не больше 2."""
+    return max(1, min(m-l+2, 3 if l<=2 else 2))
+
+
 def sections():
     examples = [(3, 1, 1), (5, 2, 1), (6, 3, 1), (9, 5, 1),
                 (11, 7, 3), (13, 8, 3), (17, 9, 5), (20, 10, 5)]
@@ -194,6 +199,9 @@ def sections():
     for name,f,l,state in [('Лечение 1.1',potion_sale,1,'открыт'),('Лечение 2.2',potion_sale,2,'нужен рецепт'),
                            ('Чернила I',ink_sale,1,'нужен рецепт чернил'),('Чернила II',ink_sale,2,'нужен рецепт чернил')]:
         rows.append([name,state,number(f(5,2,1,l,.85)),number(f(5,2,1,l,.75)),number(f(5,2,1,l,.85)*12,0)])
+    def shield(sale):  # Щит веры II: цена 25 зм, травы II и эссенция Тело II — 1,5 зм на дозу, партия 2
+        return sales(5,ELIXIR_DC[2],1.5,25*sale,0,unstable_fraction(sale),2,item_kind='elixir',level=2,batch=batch_e(2,2))['per_hour']
+    rows.insert(2,['Эликсир Щит веры II, партия '+str(batch_e(2,2)),'нужна формула Тела',number(shield(.85)),number(shield(.75)),number(shield(.85)*12,0)])
     out['sell-now']=table(['Что продавать','Рецепт','Прибыль/ч: торговцу 85%','Прибыль/ч: Гильдии 75%','За неделю 12 ч, зм'],rows)
     rows=[]
     items=[(f'Лечение {l}.{l}',potion_sale,l,max(l,2)) for l in range(1,10)]+[(f'Чернила {r}',ink_sale,l,max(l,2)) for l,r in enumerate(['I','II','III','IV','V'],1)]
