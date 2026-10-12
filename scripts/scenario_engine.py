@@ -32,14 +32,15 @@ class Scenario:
     days: int = 30
     unst_value: float = unstable_fraction(.85)
     allow_up_to_10: bool = True
+    stable_uses: int = CAT_STABLE
 
     def __post_init__(self):
         potion_bonus(self.mat, self.price, item_kind=self.item_kind, level=self.level,
                      allow_up_to_10=self.allow_up_to_10)
-        for name in ('bonus', 'sl', 'stop', 'points', 'per_day', 'days'):
+        for name in ('bonus', 'sl', 'stable_uses', 'stop', 'points', 'per_day', 'days'):
             if type(getattr(self, name)) is not int:
                 raise ValueError(f'{name}: требуется целое число')
-        if not 1 <= self.stop <= CAT_STABLE + len(INSTAB):
+        if self.stable_uses<1 or not 1 <= self.stop <= self.stable_uses+len(INSTAB):
             raise ValueError('Остановка вне ресурса катализатора')
         if self.points < 0 or self.per_day < 1 or self.days < 1:
             raise ValueError('Неверные дни, попытки или запас перебросов')
@@ -80,7 +81,7 @@ def finite_exact(s):
     @lru_cache(None)
     def brewing(points):
         # Сумма вероятностей и взвешенной выручки отдельно по остатку очков.
-        rows = defaultdict(lambda: [0., 0.])
+        rows = defaultdict(lambda: [0.,0.,0.,0.])
         for d in range(1, 21):
             r = outcome(d, s.bonus, s.sl)
             retry = points > 0 and (r == 'fail' or r == 'unst' and reroll_unst)
@@ -88,9 +89,13 @@ def finite_exact(s):
                 for second in range(1, 21):
                     rows[points - 1][0] += 1 / 400
                     rows[points - 1][1] += value(second) / 400
+                    rows[points-1][2] += (outcome(second,s.bonus,s.sl)=="ok")/400
+                    rows[points-1][3] += (outcome(second,s.bonus,s.sl)=="unst")/400
             else:
                 rows[points][0] += 1 / 20
                 rows[points][1] += value(d) / 20
+                rows[points][2] += (r=="ok")/20
+                rows[points][3] += (r=="unst")/20
         return rows
 
     @lru_cache(None)
@@ -98,8 +103,8 @@ def finite_exact(s):
         use = used + 1
         cost = -s.mat - (s.cat if used == 0 else 0)
         risks = [(True, points, 1.)]
-        if s.cat and use > CAT_STABLE:
-            p = sum(check_success(d, s.bonus, INSTAB[use-CAT_STABLE-1]) for d in range(1, 21)) / 20
+        if s.cat and use > s.stable_uses:
+            p = sum(check_success(d, s.bonus, INSTAB[use-s.stable_uses-1]) for d in range(1, 21)) / 20
             risks = [(True, points, p)]
             if points:
                 risks += [(True, points-1, (1-p)*p), (False, points-1, (1-p)**2)]
@@ -107,18 +112,20 @@ def finite_exact(s):
                 risks += [(False, points, 1-p)]
         nxt = defaultdict(float)
         reward = cost
+        oks = unstable = 0.
         for success, pts, chance in risks:
             if not success:
                 nxt[0, pts] += chance
                 continue
-            next_use = 0 if use >= s.stop or not s.cat and use >= CAT_STABLE else use
-            for left, (p, revenue) in brewing(pts).items():
+            next_use = 0 if use >= s.stop or not s.cat and use >= s.stable_uses else use
+            for left,(p,revenue,ok_count,un_count) in brewing(pts).items():
                 nxt[next_use, left] += chance * p
                 reward += chance * revenue
-        return dict(nxt), reward
+                oks += chance*ok_count;unstable += chance*un_count
+        return dict(nxt),reward,oks,unstable
 
     states = {(0, s.points): 1.}
-    total = 0.
+    total = spent = oks = unstable = 0.
     for _ in range(s.days):
         reset = defaultdict(float)
         for (used, _pts), probability in states.items():
@@ -127,14 +134,16 @@ def finite_exact(s):
         for _ in range(s.per_day):
             nxt = defaultdict(float)
             for state, probability in states.items():
-                transitions, reward = transition(*state)
+                transitions,reward,ok_count,un_count=transition(*state)
                 total += probability * reward
+                oks+=probability*ok_count;unstable+=probability*un_count
                 for dest, p in transitions.items():
                     nxt[dest] += probability * p
             states = nxt
+        spent += sum(probability*(s.points-pts) for (_used,pts),probability in states.items())
     attempts = s.days * s.per_day
     return dict(profit=total, attempts=attempts, per_try=total / attempts,
-                per_day=total / s.days)
+                per_day=total / s.days, points_per_day=spent / s.days,ok_rate=oks/attempts,un_rate=unstable/attempts)
 
 
 def finite_mc(s, *, seed=20261010, batches=60):
@@ -143,7 +152,7 @@ def finite_mc(s, *, seed=20261010, batches=60):
     rng = random.Random(seed)
     values = [guidance_mc(s.bonus, s.sl, s.mat, s.price, s.cat,
                          s.per_day, s.points, s.stop, days=s.days, u=s.unst_value,
-                         rng=rng, **s.item) for _ in range(batches)]
+                         rng=rng,stable_uses=s.stable_uses, **s.item) for _ in range(batches)]
     return dict(per_try=statistics.mean(values), se=statistics.stdev(values)/math.sqrt(batches),
                 batches=batches, seed=seed)
 

@@ -7,7 +7,8 @@ import re
 
 from rules_data import (MB, HERB, P_SL, NEED, ELIXIR_DC, CAT_PRICE,
                         CAT_STABLE, proficiency, unstable_fraction)
-from sim import INK, probs, scenario, p_bonus
+from sim import INK
+from alchemy_guidance import budget, chances, quality, sales
 from sim_plan import batch_p, week
 from sim_volume import volume_stats, CHG, ESS
 
@@ -31,11 +32,22 @@ def bonus(level, mastery, lab):
 
 def progress_research(remaining, check_bonus, points=0):
     """100 прогресса: один переброс только натуральной 1, итог определяет расход."""
-    trials = [[0.] * (remaining + 1) for _ in range(points + 1)]
-    costs = [[0.] * (remaining + 1) for _ in range(points + 1)]
-    spent = [[0.] * (remaining + 1) for _ in range(points + 1)]
+    if points is None:
+        n=[0.]*(remaining+1);c=n.copy();spent=n.copy()
+        for rem in range(1,remaining+1):
+            for die in range(1,21):
+                probability=(0 if die==1 else .05)+.0025
+                nxt=max(0,rem-die-check_bonus)
+                n[rem]+=probability*(1+n[nxt])
+                c[rem]+=probability*((60 if die==1 else 0 if die==20 else 30)+c[nxt])
+                spent[rem]+=probability*spent[nxt]
+            spent[rem]+=.05
+        return n[-1],c[-1],spent[-1]
+    trials = [[0.] * (remaining + 1) for _ in range((points or 0) + 1)]
+    costs = [[0.] * (remaining + 1) for _ in range((points or 0) + 1)]
+    spent = [[0.] * (remaining + 1) for _ in range((points or 0) + 1)]
     price = lambda die: 60 if die == 1 else 0 if die == 20 else 30
-    for pool in range(points + 1):
+    for pool in range((points or 0) + 1):
         for rem in range(1, remaining + 1):
             for die in range(1, 21):
                 outcomes = [(die, pool, 1 / 20, 0)]
@@ -51,8 +63,8 @@ def progress_research(remaining, check_bonus, points=0):
 
 def formula_research(target, dc, check_bonus, points=0):
     """Отметки: переброс любого провала; доп. последствия осечек не назначаются."""
-    trials = [[0.] * (target + 1) for _ in range(points + 1)]
-    spent = [[0.] * (target + 1) for _ in range(points + 1)]
+    trials = [[0.] * (target + 1) for _ in range((points or 0) + 1)]
+    spent = [[0.] * (target + 1) for _ in range((points or 0) + 1)]
     def marks(die):
         if die == 1:
             return 0
@@ -61,7 +73,19 @@ def formula_research(target, dc, check_bonus, points=0):
         if die + check_bonus >= dc + 5:
             return 2
         return int(die + check_bonus >= dc)
-    for pool in range(points + 1):
+    if points is None:
+        fail=sum(marks(d)==0 for d in range(1,21))/20
+        n=[0.]*(target+1);spent=n.copy()
+        for rem in range(1,target+1):
+            value=1.;used=fail;same=0.
+            for die in range(1,21):
+                weight=(.05 if marks(die) else 0)+fail/20
+                if not marks(die): same+=weight;continue
+                nxt=max(0,rem-marks(die))
+                value+=weight*n[nxt];used+=weight*spent[nxt]
+            n[rem]=value/(1-same);spent[rem]=used/(1-same)
+        return n[-1],spent[-1]
+    for pool in range((points or 0) + 1):
         for rem in range(1, target + 1):
             n, use, same = 1., 0., 0.
             for die in range(1, 21):
@@ -82,12 +106,13 @@ def formula_research(target, dc, check_bonus, points=0):
     return trials[points][target], spent[points][target]
 
 
-def growth_attempts(target, check_bonus, dc):
-    ok, _, _ = probs(check_bonus, dc)
+def growth_attempts(target, check_bonus, dc, guidance=False):
+    ok, _, _ = chances(check_bonus, dc, guidance)
+    crit=quality(check_bonus,dc,guidance)[1]
     expectations = [0.] * (target + 1)
     for rem in range(1, target + 1):
-        expectations[rem] = (1 + (ok - .05) * expectations[rem - 1]
-                             + .05 * expectations[max(0, rem - 2)]) / ok
+        expectations[rem] = (1 + (ok - crit) * expectations[rem - 1]
+                             + crit * expectations[max(0, rem - 2)]) / ok
     return expectations[target]
 
 
@@ -98,17 +123,19 @@ def sections():
     out['bonuses'] = table(['Чародей', 'Алхимия', 'Инструменты', 'Мастерство', 'Место', 'Общий бонус'],
                           [(cl, m, f'+{proficiency(cl)}', f'+{MB[m]}', f'+{lab}', f'+{bonus(cl,m,lab)}')
                            for cl,m,lab in examples])
+    out['resources']=table(['Чародей','Классовые единицы','Из всех ячеек','Всего расхода за день'],
+        [(cl,cl if cl>=5 else 'указание недоступно',budget(cl)-cl if cl>=5 else '—',budget(cl)) for cl in (3,5,6,9,11,13,17,20)])
     brewing = [(3,1,1,1), (5,2,1,1), (5,2,1,2), (6,3,1,3), (9,5,1,5),
                (11,7,3,6), (13,8,3,8), (17,9,5,9), (20,10,5,10)]
     out['brewing'] = table(['Чародей / алхимия', 'Лечение', 'Бонус / СЛ', 'Доз в партии', 'Успех', 'Стабильных доз в среднем'],
         [(f'{cl} / {m}', f'{l}.{l}', f'+{bonus(cl,m,lab)} / {P_SL[l]}', batch_p(m,l),
-          number(probs(bonus(cl,m,lab), P_SL[l])[0]*100,0)+'%',
-          number(batch_p(m,l)*probs(bonus(cl,m,lab),P_SL[l])[0],1)) for cl,m,lab,l in brewing])
+          number(chances(bonus(cl,m,lab), P_SL[l],cl>=5)[0]*100,2)+'%',
+          number(batch_p(m,l)*chances(bonus(cl,m,lab),P_SL[l],cl>=5)[0],2)) for cl,m,lab,l in brewing])
     rows=[]
     for rem,b in [(70,5),(70,7),(100,5)]:
-        for pts in (0,5):
+        for pts in (0,None):
             n,c,s=progress_research(rem,b,pts)
-            rows.append([rem,f'+{b}', 'единицы' if pts else 'нет',number(n*2),number(c),number(s)])
+            rows.append([rem,f'+{b}', 'указание, день алхимии' if pts is None else 'нет',number(n*2),number(c),number(s)])
     out['progress'] = table(['Осталось прогресса', 'Бонус', 'Переброс', 'Часы', 'Травы, зм', 'Единиц в среднем'],rows)
     rows=[]
     for cl,m,lab,l,marks,h in [(5,2,1,2,3,2),(6,3,1,3,4,2),(9,5,1,5,4,2),
@@ -116,13 +143,13 @@ def sections():
                               (13,8,3,8,6,6),(17,9,5,9,6,6)]:
         b=bonus(cl,m,lab)+2
         n0,_=formula_research(marks,ELIXIR_DC[l],b)
-        n,s=formula_research(marks,ELIXIR_DC[l],b,cl)
+        n,s=formula_research(marks,ELIXIR_DC[l],b,None)
         rows.append([f'{cl} / {m}',l,f'+{b} / {ELIXIR_DC[l]}',number(n0*h),number(n*h),number((n0-n)*h),number(s)])
     out['formulas'] = table(['Чародей / алхимия', 'Цель', 'Проверка / СЛ', 'Без указания, ч', 'С указанием, ч', 'Экономия, ч', 'Единиц в среднем'],rows)
     rows=[]
     for cl,m,lab,l in [(5,2,1,2),(6,3,1,3),(9,5,1,5)]:
         b=bonus(cl,m,lab);pr,herb,ess,dc,cat,h=INK[['','I','II','III','IV','V'][l]]
-        results=[scenario(b,dc,herb+ess,pr*sale,CAT_PRICE[cat],unstable_fraction(sale),h,item_kind='ink',level=l)
+        results=[sales(b,dc,herb+ess,pr*sale,CAT_PRICE[cat],unstable_fraction(sale),h,item_kind='ink',level=l,class_level=cl)
                  for sale in (.85,.75)]
         rows.append([f'{cl} / {m}',l,f'+{b}',number(herb+ess),number(CAT_PRICE[cat]),number(results[0]['per_day']/8),number(results[1]['per_day']/8)])
     out['ink-sales'] = table(['Чародей / алхимия', 'Чернила', 'Бонус', 'Материалы попытки, зм', 'Целый катализатор, зм', 'Прибыль/ч: 85%', 'Прибыль/ч: 75%'],rows)
@@ -130,23 +157,23 @@ def sections():
     for cl,m,lab in examples:
         if m>=10:
             continue
-        b=bonus(cl,m,lab);n=growth_attempts(NEED[m],b,P_SL[m]);high,crit=p_bonus(b,P_SL[m])
+        b=bonus(cl,m,lab);n=growth_attempts(NEED[m],b,P_SL[m],cl>=5);high,crit=quality(b,P_SL[m],cl>=5)
         cost=n*(m*HERB[m]*(1-high-crit)+CAT_PRICE[m]/CAT_STABLE)
         rows.append([f'{cl} / {m}',f'{m} → {m+1}',NEED[m],number(n*2/batch_p(m,m),1),number(cost,0)])
     out['growth'] = table(['Чародей / алхимия', 'Переход', 'Практики', 'Часы, примерно', 'Материалы и доля катализатора, зм'],rows)
     rows=[]
     for cl,m,lab,l in [(11,7,3,6),(13,8,3,8)]:
         b=bonus(cl,m,lab);price=CHG[l];mat=price/3+ESS[l]
-        r=volume_stats(b,l,price,mat,runs=20000,rng=random.Random(20261012+l))
+        r=volume_stats(b,l,price,mat,runs=20000,rng=random.Random(20261012+l),guidance=True)
         rows.append([f'{cl} / {m}',l,f'+{b}',number(mat+CAT_PRICE[l]/CAT_STABLE,0),number(r['hours'],1),number(r['ok']*100,0)+'%',number(r['profit']/r['hours'],0)])
     out['long'] = table(['Чародей / алхимия', 'Заряд или чернила', 'Бонус', 'Расход одной варки, зм', 'Часы, примерно', 'Стабильный результат', 'Прибыль/ч при 85%, зм'],rows)
     rows=[]
     price,herb,ess,dc,cat,h=INK['II']
-    hourly=scenario(5,dc,herb+ess,price*.85,CAT_PRICE[cat],unstable_fraction(.85),h,
+    hourly=sales(5,dc,herb+ess,price*.85,CAT_PRICE[cat],unstable_fraction(.85),h,
                     item_kind='ink',level=2)['per_day']/8
     income={'pot':0,'ink':(hourly,'II'),'vol':None}
     for h in (12,22,30):
-        w=week(2,2,2,2,h,income=income)
+        w=week(2,2,2,2,h,income=income,guidance=True)
         cost=fsum(w[k][1] for k in ('ink','kit','heal'))
         rows.append([h,number(w['fixed'],1),number(cost,1),
                      'не хватает '+number(w['shortfall_hours'],1)+' ч' if not w['fits_expected_budget'] else number(w['free'],1)+' ч',
@@ -173,8 +200,8 @@ if __name__=='__main__':
     if args.check:
         if BOOK.read_text(encoding='utf-8')!=result:
             raise SystemExit('Таблицы книги экономики устарели; пересоберите --write.')
-        print('PASS: восемь таблиц экономики воспроизводятся из общих правил')
+        print('PASS: девять таблиц экономики воспроизводятся из общих правил')
     elif args.write:
-        BOOK.write_text(result,encoding='utf-8');print('Собраны восемь таблиц книги экономики')
+        BOOK.write_text(result,encoding='utf-8');print('Собраны девять таблиц книги экономики')
     else:
         print(result)

@@ -36,7 +36,7 @@ def replace_table(text, heading, replacement):
 
 def build():
     rng = random.Random(20261008)
-    rates = {m: p.per_hour(m, rng=rng) for m in range(2, 11)}
+    rates = {m: p.per_hour(m, rng=rng,guidance=True) for m in range(2, 11)}
     text = SOURCE.read_text(encoding='utf-8').replace(NOTE + '\n', '')
     text = re.sub(r'^\d{2}\.\d{2}\.\d{4}\.(?: Пересчёт Codex\.)?',
                   '12.10.2026. Пересчёт Codex.', text, count=1, flags=re.M)
@@ -47,18 +47,18 @@ def build():
     ):
         rows = []
         for m in range(2, 11):
-            row = [str(m) + (' (сейчас)' if m == 2 else '')]
+            row = [str(m) + (' (сейчас)' if m == 2 else '') + f' / чародей {p.EXAMPLE_CLASS[m]}']
             for level in range(1, last + 1):
                 if level > m and fn is not p.ink_set:
                     row.append('—'); continue
-                result = fn(m, level)
+                result = fn(m, level,guidance=True)
                 row.append(number(result[0]) + ' ч / ' + number(result[1], 2) + (' *' if level > m else ''))
             rows.append(row)
         text = replace_table(text, heading, table(headers, rows))
     income = []
     for m, r in rates.items():
         vol = r['vol']
-        income.append([str(m), f"+{p.TALIS[m]}", number(r['pot']) + ' зм/ч',
+        income.append([f'{m} / чародей {p.EXAMPLE_CLASS[m]}', f"+{p.player_bonus(m,True)}", number(r['pot']) + ' зм/ч',
                        number(r['ink'][0]) + ' (' + r['ink'][1] + ')',
                        number(vol[0]) + f' ({vol[1]}, ≈{number(vol[2])} ч)' if vol else '—'])
     text = replace_table(text, '## Что выгодно варить на продажу', table(
@@ -66,7 +66,7 @@ def build():
     rows = []
     configurations = [(2,2,2,2), (3,3,2,3), (4,4,2,4), (5,4,3,5), (6,5,3,5), (7,5,3,5), (8,5,4,5), (9,5,4,5)]
     for m, ink, kit, heal in configurations:
-        choices = [p.week(m, ink, kit, heal, h, income=rates[m]) for h in (12,22,30)]
+        choices = [p.week(m, ink, kit, heal, h, income=rates[m],guidance=True) for h in (12,22,30)]
         r = choices[0]
         gold = sum(r[k][1] for k in ('ink', 'kit', 'heal'))
         result = []
@@ -75,7 +75,7 @@ def build():
                 result.append('не хватает ' + number(w['shortfall_hours']) + ' ч')
             else:
                 result.append('+' + number(w['free']) + ' ч продажи: +' + number(w['sale'], 0) + ' зм')
-        rows.append([f'Мастерство {m}', f"чернила {p.ROM[ink]} ×2,5 + 3 эликсира {p.ROM[kit]} + 4 зелья {heal}.{heal}",
+        rows.append([f'Мастерство {m}, чародей {p.EXAMPLE_CLASS[m]}', f"чернила {p.ROM[ink]} ×2,5 + 3 эликсира {p.ROM[kit]} + 4 зелья {heal}.{heal}",
                      number(r['fixed']), number(gold, 0), *result])
     text = replace_table(text, '## Примеры недели', table(
         ['Ступень', 'Что', 'Часов', 'Золото', '12 ч', '22 ч', '30 ч'], rows))
@@ -87,7 +87,7 @@ def build():
                         'С 6 сравнивай чернила V с объёмом работы VI+ по актуальной таблице; это сценарий доступных рецептов и рабочего места.')
     text = text.replace('в колонке «стандарт» — доля без −2.',
                         'качество набора здесь не превращено в отдельную цену.')
-    notice = ('**Как читать расчёты после пересборки.** Все часы — ожидания, без округления до целых партий. '
+    notice = ('**Как читать расчёты после пересборки.** Основной сценарий — дни алхимии с Волшебным указанием и переводом ячеек в единицы; на чародее 5 доступен расход до 21 единицы за день. Рабочие дни до 8 часов разделяются настоящими долгими отдыхами. Для продаж конечный дневной запас учитывается по состояниям; снабжение использует пять стабильных применений катализатора и спасает провалы нужных доз, пригодные нестабильные чернила сохраняются. Будущие уровни класса — явные примеры из alchemy_guidance.EXAMPLE_CLASS, не автоматический рост от алхимии. Все часы — ожидания, без округления до целых партий. В день с вылазкой из бюджета нужно вычесть оставленные для боя единицы и ячейки; полный дневной расчёт тогда служит сравнением, а не обещанием результата. '
               'Поле fits_expected_budget сравнивает ожидание с бюджетом; shortfall_hours показывает нехватку часов. '
               'Положительный результат не гарантирует завершение конкретной недели. Осечки, ремонт, оборудование и оборотный капитал не вычтены из прибыли. '
               'У зелий на 5+ выбирается экономия трав, на 20 — два бонуса, включая экономию; дополнительный флакон не выбирается. Мастерская повышает потолок партии эликсиров по 6.2. Эликсиры в таблице — стандартный рецепт своего уровня; особые эссенции и расходуемые компоненты проверяй по карточке.\n\n')

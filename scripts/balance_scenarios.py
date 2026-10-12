@@ -61,7 +61,7 @@ def solve(s, *, capacity=None, policy='optimal'):
         values={};brews={};br={};rr={};qp={}
         for used in range(s.stop):
             use=used+1
-            next_use=0 if use>=s.stop or not s.cat and use>=CAT_STABLE else use
+            next_use=0 if use>=s.stop or not s.cat and use>=s.stable_uses else use
             for quota in quotas:
                 for points in range(s.points+1):
                     state=(used,points,quota)
@@ -84,9 +84,9 @@ def solve(s, *, capacity=None, policy='optimal'):
                         total+=retry_mean if retry else accept
                     brew_value=total/20
                     brews[state]=(brew_value,sum(finals)/20);br[state]=flags
-                    risk=bool(s.cat and use>CAT_STABLE)
+                    risk=bool(s.cat and use>s.stable_uses)
                     if risk:
-                        p=sum(check_success(d,s.bonus,INSTAB[use-CAT_STABLE-1]) for d in range(1,21))/20
+                        p=sum(check_success(d,s.bonus,INSTAB[use-s.stable_uses-1]) for d in range(1,21))/20
                         fail_value=future(0,points,quota)
                         retry_value=None if not points else p*brews[used,points-1,quota][0]+(1-p)*future(0,points-1,quota)
                         retry=bool(points and (policy=='historical' or retry_value>fail_value+1e-12))
@@ -108,16 +108,16 @@ def sample(solution, *, seed=20261010, batches=400):
             if used==0:profit-=s.cat
             profit-=s.mat
             state=(used,points,quota);use=used+1
-            if s.cat and use>CAT_STABLE:
-                passed=check_success(rng.randint(1,20),s.bonus,INSTAB[use-CAT_STABLE-1])
+            if s.cat and use>s.stable_uses:
+                passed=check_success(rng.randint(1,20),s.bonus,INSTAB[use-s.stable_uses-1])
                 if not passed and solution.risk_retry[step][state]:
-                    points-=1;passed=check_success(rng.randint(1,20),s.bonus,INSTAB[use-CAT_STABLE-1])
+                    points-=1;passed=check_success(rng.randint(1,20),s.bonus,INSTAB[use-s.stable_uses-1])
                 if not passed:used=0;continue
             d=rng.randint(1,20);r=outcome(d,s.bonus,s.sl)
             if solution.brew_retry[step][used,points,quota].get(r,False):points-=1;d=rng.randint(1,20)
             opts=payouts(s,d,quota);index=solution.quality[step][used,points,quota] if d==20 else 0
             reward,quota=opts[index];profit+=reward
-            used=0 if use>=s.stop or not s.cat and use>=CAT_STABLE else use
+            used=0 if use>=s.stop or not s.cat and use>=s.stable_uses else use
         profits.append(profit/(s.days*s.per_day))
     return dict(per_try=statistics.mean(profits),se=statistics.stdev(profits)/math.sqrt(batches),batches=batches,seed=seed)
 
