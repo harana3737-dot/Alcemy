@@ -5,10 +5,10 @@ from pathlib import Path
 import random
 import re
 
-from rules_data import (MB, HERB, P_SL, NEED, ELIXIR_DC, CAT_PRICE,
+from rules_data import (MB, HERB, P_SL, P_PRICE, NEED, ELIXIR_DC, CAT_PRICE,
                         CAT_STABLE, proficiency, unstable_fraction)
 from sim import INK
-from alchemy_guidance import budget, chances, quality, sales
+from alchemy_guidance import EXAMPLE_CLASS, budget, chances, quality, sales
 from sim_plan import batch_p, week
 from sim_volume import volume_stats, CHG, ESS
 
@@ -153,13 +153,15 @@ def sections():
                  for sale in (.85,.75)]
         rows.append([f'{cl} / {m}',l,f'+{b}',number(herb+ess),number(CAT_PRICE[cat]),number(results[0]['per_day']/8),number(results[1]['per_day']/8)])
     out['ink-sales'] = table(['Чародей / алхимия', 'Чернила', 'Бонус', 'Материалы попытки, зм', 'Целый катализатор, зм', 'Прибыль/ч: 85%', 'Прибыль/ч: 75%'],rows)
-    rows=[]
-    for cl,m,lab in examples:
-        if m>=10:
-            continue
+    rows=[];total_h=total_g=0
+    for m in range(1,10):
+        cl=EXAMPLE_CLASS[m];lab=1 if m<=5 else 3 if m<=8 else 5
         b=bonus(cl,m,lab);n=growth_attempts(NEED[m],b,P_SL[m],cl>=5);high,crit=quality(b,P_SL[m],cl>=5)
-        cost=n*(m*HERB[m]*(1-high-crit)+CAT_PRICE[m]/CAT_STABLE)
-        rows.append([f'{cl} / {m}',f'{m} → {m+1}',NEED[m],number(n*2/batch_p(m,m),1),number(cost,0)])
+        cost=n*(m*HERB[m]*(1-high-crit)+CAT_PRICE[m]/CAT_STABLE);hours=n*2/batch_p(m,m)
+        if m>=2:
+            total_h+=round(hours,1);total_g+=round(cost)
+        rows.append([f'{cl} / {m}',f'{m} → {m+1}',NEED[m],number(hours,1),number(cost,0)])
+    rows.append(['','**Итого 2 → 10**','',f'**{number(total_h,0)}**',f'**{number(total_g,0)}**'])
     out['growth'] = table(['Чародей / алхимия', 'Переход', 'Практики', 'Часы, примерно', 'Материалы и доля катализатора, зм'],rows)
     rows=[]
     for cl,m,lab,l in [(11,7,3,6),(13,8,3,8)]:
@@ -180,6 +182,26 @@ def sections():
                      '—' if not w['fits_expected_budget'] else number(w['sale'],1),
                      '—' if not w['fits_expected_budget'] else number(w['sale']-cost,1)])
     out['weeks'] = table(['Бюджет, ч', 'Снабжение, ч', 'Материалы снабжения, зм', 'Остаток времени', 'Прибыль продаж, зм', 'Изменение кошелька, зм'],rows)
+    def potion_sale(cl,m,lab,l,sale):
+        cat=CAT_PRICE[l] if l>=3 else 0
+        return sales(bonus(cl,m,lab),P_SL[l],l*HERB[l],P_PRICE[l]*sale,cat,unstable_fraction(sale),2,
+                     item_kind='potion',level=l,class_level=cl,batch=batch_p(m,l))['per_hour']
+    def ink_sale(cl,m,lab,l,sale):
+        pr,herb,ess,dc,cat,h=INK[['','I','II','III','IV','V'][l]]
+        return sales(bonus(cl,m,lab),dc,herb+ess,pr*sale,CAT_PRICE[cat],unstable_fraction(sale),h,
+                     item_kind='ink',level=l,class_level=cl)['per_day']/8
+    rows=[]
+    for name,f,l,state in [('Лечение 1.1',potion_sale,1,'открыт'),('Лечение 2.2',potion_sale,2,'нужен рецепт'),
+                           ('Чернила I',ink_sale,1,'нужен рецепт чернил'),('Чернила II',ink_sale,2,'нужен рецепт чернил')]:
+        rows.append([name,state,number(f(5,2,1,l,.85)),number(f(5,2,1,l,.75)),number(f(5,2,1,l,.85)*12,0)])
+    out['sell-now']=table(['Что продавать','Рецепт','Прибыль/ч: торговцу 85%','Прибыль/ч: Гильдии 75%','За неделю 12 ч, зм'],rows)
+    rows=[]
+    items=[(f'Лечение {l}.{l}',potion_sale,l,max(l,2)) for l in range(1,10)]+[(f'Чернила {r}',ink_sale,l,max(l,2)) for l,r in enumerate(['I','II','III','IV','V'],1)]
+    for name,f,l,m in items:
+        cl=EXAMPLE_CLASS[m];lab=1 if m<=5 else 3 if m<=8 else 5
+        rows.append((f(cl,m,lab,l,.85),[name,f'{m} (чародей {cl}, +{bonus(cl,m,lab)})',number(f(cl,m,lab,l,.85)),number(f(cl,m,lab,l,.75))]))
+    rows.sort(key=lambda r:-r[0])
+    out['sell-ladder']=table(['Что продавать','С какого мастерства (пример)','Прибыль/ч: 85%','Прибыль/ч: 75%'],[r for _,r in rows])
     return out
 
 
@@ -200,8 +222,8 @@ if __name__=='__main__':
     if args.check:
         if BOOK.read_text(encoding='utf-8')!=result:
             raise SystemExit('Таблицы книги экономики устарели; пересоберите --write.')
-        print('PASS: девять таблиц экономики воспроизводятся из общих правил')
+        print('PASS: одиннадцать таблиц экономики воспроизводятся из общих правил')
     elif args.write:
-        BOOK.write_text(result,encoding='utf-8');print('Собраны девять таблиц книги экономики')
+        BOOK.write_text(result,encoding='utf-8');print('Собраны одиннадцать таблиц книги экономики')
     else:
         print(result)
