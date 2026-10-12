@@ -193,7 +193,7 @@ def main():
     p.add_argument('--report', action='store_true', help='Собрать только отчёт из завершённого results.json')
     args = p.parse_args()
     if args.report:
-        report(json.loads((args.output/'results.json').read_text()), ROOT/'Волна после Вордта — расчёт.md')
+        report(json.loads((args.output/'results.json').read_text()), ROOT/'Архив/Проверки/Волна после Вордта — расчёт.md')
         return
     if args.workers < 1:
         p.error('--workers положительное')

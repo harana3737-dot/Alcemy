@@ -53,8 +53,8 @@ DOCUMENTS = [
     Document('master-economy', 'Экономика алхимии — для мастера.md', 'Экономика', 'Обоснования экономических моделей. Документ полезен для понимания системы, но гипотетический алхимик может иметь другие бонусы.'),
     Document('decisions', 'Журнал решений.md', 'Альтернативы и проверки', 'Кто и что решил. Рабочее принятие всей v0.3 и персональное утверждение отдельного пункта — разные статусы.'),
     Document('questions', 'Очередь вопросов мастеру.md', 'Альтернативы и проверки', 'Открытые вопросы и варианты ответа. Очередь не заменяет действующие правила.'),
-    Document('exceptions', 'Исключения — что можно сократить.md', 'Альтернативы и проверки', 'Предложения упрощений и принятые решения. Не считать каждую колонку «как свести» уже действующей заменой.'),
-    Document('combinations', 'Сочетания — проверка баланса.md', 'Альтернативы и проверки', 'Проверка крайних сочетаний, а не список обязательных усилений группы.'),
+    Document('exceptions', 'Архив/Проверки/Исключения — что можно сократить.md', 'Альтернативы и проверки', 'Предложения упрощений и принятые решения. Не считать каждую колонку «как свести» уже действующей заменой.'),
+    Document('combinations', 'Архив/Проверки/Сочетания — проверка баланса.md', 'Альтернативы и проверки', 'Проверка крайних сочетаний, а не список обязательных усилений группы.'),
     Document('scenarios', 'Игровые сценарии.md', 'Альтернативы и проверки', 'Гипотетические персонажи и бюджеты для тестирования. Ваши запасы и состав отличаются; для выбора баффов используй обзор группы.'),
     Document('bestiary', 'Заклинания Талиса — проверка на бестиарии.md', 'Альтернативы и проверки', 'Условные сравнения против заданных целей. Статистика не обещает такой же результат в каждом бою.'),
 ]
@@ -255,7 +255,7 @@ def build(root=ROOT):
                 original = (root / doc.filename).read_text(encoding='utf-8')
                 text = namespace_anchors(select_sections(original, doc.sections), 'doc-' + doc.key)
                 content = Renderer('doc-' + doc.key).render(text.splitlines())
-                library.append(f'<details class="source-document" id="doc-{doc.key}" data-search-title="{html.escape(doc.filename[:-3], quote=True)}"><summary>{html.escape(doc.filename[:-3])}</summary><p class="source-note">{html.escape(doc.note)}</p><div class="source-content">{content}</div></details>')
+                library.append(f'<details class="source-document" id="doc-{doc.key}" data-search-title="{html.escape(Path(doc.filename).stem, quote=True)}"><summary>{html.escape(Path(doc.filename).stem)}</summary><p class="source-note">{html.escape(doc.note)}</p><div class="source-content">{content}</div></details>')
         if not primary:
             library.append('</div></details>')
     template = (root / 'scripts/player_book_tpl.html').read_text(encoding='utf-8')

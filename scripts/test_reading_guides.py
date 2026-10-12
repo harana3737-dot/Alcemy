@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 
+from document_paths import markdown_path
 from reading_guides import START, END, GENERATED, GUIDES, add_guide, strip_guide
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,7 +31,7 @@ class ReadingGuidesTests(unittest.TestCase):
     def test_all_generated_documents_have_one_complete_block(self):
         for name in GENERATED:
             with self.subTest(name=name):
-                text = (ROOT / (name + '.md')).read_text(encoding='utf-8')
+                text = markdown_path(ROOT, name).read_text(encoding='utf-8')
                 self.assertEqual(text.count(START), 1)
                 self.assertEqual(text.count(END), 1)
                 self.assertEqual(text.count('## Коротко\n'), 1)
@@ -39,7 +40,7 @@ class ReadingGuidesTests(unittest.TestCase):
     def test_every_insert_is_lossless_and_idempotent(self):
         for name in GUIDES:
             with self.subTest(name=name):
-                original = strip_guide((ROOT / (name + '.md')).read_text(encoding='utf-8'))
+                original = strip_guide(markdown_path(ROOT, name).read_text(encoding='utf-8'))
                 new = add_guide(original, name)
                 self.assertEqual(strip_guide(new), original)
                 self.assertEqual(invariants(strip_guide(new)), invariants(original))

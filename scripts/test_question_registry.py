@@ -22,7 +22,7 @@ class RegistryTests(unittest.TestCase):
         known={r['id'] for r in rows()}
         original=(ROOT/LEGACY).read_text()
         with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory);p=root/LEGACY
+            root=Path(directory);p=root/LEGACY;p.parent.mkdir(parents=True,exist_ok=True)
             (root/LEGACY_APPENDIX).write_text((ROOT/LEGACY_APPENDIX).read_text())
             for bad in (original.replace('| 9 |','| 10 |',1),
                         original.replace('В-04, В-11','В-999, В-11',1),
@@ -34,7 +34,7 @@ class RegistryTests(unittest.TestCase):
         known={r['id'] for r in rows()}
         original=(ROOT/LEGACY_APPENDIX).read_text()
         with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory);p=root/LEGACY_APPENDIX
+            root=Path(directory);p=root/LEGACY_APPENDIX;p.parent.mkdir(parents=True,exist_ok=True)
             (root/LEGACY).write_text((ROOT/LEGACY).read_text())
             for bad in (original.replace('| 1 |','| 2 |',1),
                         original.replace('В-28, Ж-75','В-999, Ж-75',1),

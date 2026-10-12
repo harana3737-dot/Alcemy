@@ -13,7 +13,7 @@ def build():
 
     lines = [line for line in SRC.read_text(encoding="utf-8").splitlines()
              if not line.lstrip().startswith("<!--")]
-    JOURNAL = ROOT / "Журнал решений.md"
+    JOURNAL = ROOT / "Архив/Журнал решений — полный текст.md"
     chg_lines = JOURNAL.read_text(encoding="utf-8").splitlines()   # таблица изменений относительно v0.2
 
     # ---------- id заголовков ----------

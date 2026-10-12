@@ -9,8 +9,8 @@ import re
 ROOT=Path(__file__).resolve().parent.parent
 QUEUE='Очередь вопросов мастеру.md'
 JOURNAL='Журнал решений.md'
-LEGACY='сводка_проекта_2026-10-01.md'
-LEGACY_APPENDIX='Вопросы v0.2 — Приложение Б.md'
+LEGACY='Архив/Проверки/сводка_проекта_2026-10-01.md'
+LEGACY_APPENDIX='Архив/Проверки/Вопросы v0.2 — Приложение Б.md'
 LEGACY_SOURCES=((LEGACY_APPENDIX,1,8,'Приложение Б'),(LEGACY,9,39,'раздел 4'))
 FIELDS=('id','kind','status','section','date','title','source','source_status')
 

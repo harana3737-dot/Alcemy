@@ -4,6 +4,7 @@ import re
 import unittest
 
 from generated_files import generated_html, marker
+from document_paths import markdown_path
 from reading_guides import BUILD_SOURCES, PARTIAL, START, END, add_guide, strip_guide
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -24,7 +25,7 @@ class GeneratedFilesTests(unittest.TestCase):
     def test_generated_guides_preserve_body_and_partial_scope(self):
         for name, (builder, source) in BUILD_SOURCES.items():
             with self.subTest(name=name):
-                original = strip_guide((ROOT / (name + '.md')).read_text(encoding='utf-8'))
+                original = strip_guide(markdown_path(ROOT, name).read_text(encoding='utf-8'))
                 result = add_guide(original, name)
                 note = marker(builder, source, partial=name in PARTIAL)
                 self.assertIn(note, result)
