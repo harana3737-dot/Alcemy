@@ -119,6 +119,10 @@ def build():
         it["who"] = "p1"
     # Союзники — по строке «Зелья союзников» в листе
     ALLY = [dict(n="Зелье подводного дыхания", q=1, note="", card="Водное дыхание", who=w) for w in ("pF", "pL")]
+    restored = re.search(r'Зелье лечения 6\.6 ×(\d+) у Лаэля', sheet)
+    if restored and int(restored[1]) > 0:
+        ALLY.append(dict(n="Зелье лечения 6.6", q=int(restored[1]),
+                         note="восстановились после Вордта", who="pL"))
     seed += ALLY
     validate_seed(sheet, seed)
     # Материалы Талиса — по блоку «Ингредиенты» листа (сверено 05.10.2026)
