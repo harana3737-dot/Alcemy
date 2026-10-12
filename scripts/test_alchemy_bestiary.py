@@ -29,10 +29,11 @@ class AlchemyTests(unittest.TestCase):
         self.assertEqual(a.control_metrics(target(), p, 20)['on_hit'], .6)
         self.assertEqual(a.control_metrics(target(), p, 20, quality=2)['on_hit'], .7)
 
-    def test_poison_resistance_not_advantage(self):
+    def test_poison_resistance_advantage_master_ruling(self):
         p = a.CONTROL_BY_NAME['Яд: удержание личности']
         m = target(damage_resistances=['poison'])
-        self.assertEqual(a.control_failure(m, p, 13), .6)
+        self.assertEqual(a.control_failure(m, p, 13), .36)
+        # Два источника преимущества не складываются.
         m['special_abilities'] = [{'name': 'Dwarven Resilience', 'desc': 'advantage on saving throws against poison'}]
         self.assertEqual(a.control_failure(m, p, 13), .36)
 

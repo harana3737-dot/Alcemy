@@ -23,8 +23,8 @@ def poison_immunity(m):
 
 
 def poison_advantage(m):
-    # Само сопротивление урону ядом преимущества НЕ даёт (8.6).
-    return any('advantage on saving throws against poison' in a.get('desc', '').lower()
+    # Сопротивление яду даёт преимущество на спасбросок (мастер, Ж-116).
+    return 'poison' in m.get('damage_resistances', []) or any('advantage on saving throws against poison' in a.get('desc', '').lower()
                for a in m.get('special_abilities', []))
 
 
