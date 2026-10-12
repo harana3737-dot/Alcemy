@@ -32,11 +32,18 @@ async function main() {
     }
   }
   await visit(path.join(root, 'scripts'));
-  for (const name of ['Помощник варки.html', 'Пульт мастера.html', 'Для игрока — книга алхимии.html', 'Для игрока — логи, записки и предыстория.html']) {
-    const text = fs.readFileSync(path.join(root, name), 'utf8');
+  function htmlFiles(directory) {
+    return fs.readdirSync(directory, {withFileTypes: true}).flatMap(entry => {
+      const file = path.join(directory, entry.name);
+      if (entry.isDirectory()) return ['.git', 'node_modules', '__pycache__', '.ruff_cache'].includes(entry.name) ? [] : htmlFiles(file);
+      return entry.isFile() && entry.name.endsWith('.html') && !entry.name.endsWith('_tpl.html') ? [file] : [];
+    });
+  }
+  for (const name of htmlFiles(root)) {
+    const text = fs.readFileSync(name, 'utf8');
     const scripts = [...text.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)]
       .filter(match => !/\bsrc\s*=|application\//i.test(match[1])).map(match => match[2]);
-    if (!scripts.length) throw Error(`${name}: нет исполняемого JavaScript`);
+    if (!scripts.length) continue;
     await check(pages, scripts.join('\n'), name);
   }
   if (failures) process.exitCode = 1;

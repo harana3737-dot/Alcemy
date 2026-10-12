@@ -69,6 +69,7 @@ def check(root=ROOT, *, slow=False, browser=False, sources=False):
         run(py+['scripts/question_registry.py'], copy, env, failures)
         run(['node', 'scripts/cards/test_import_snapshot.cjs'], copy, env, failures)
         run(py+['scripts/cards/check.py'], copy, env, failures)
+        run(py+['scripts/economy_book.py', '--check'], copy, env, failures)
         for script in CHECKS:
             if sources and script == 'player_book.py':
                 continue  # книга будет собрана после всех зависимых документов
