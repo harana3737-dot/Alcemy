@@ -104,6 +104,11 @@ def records(root=ROOT):
         add(HANDOUTS, 'Найденные документы', title, lines, start, end,
             context if level == 3 else '')
 
+    filename = 'Источники/Пакт Покорителя Звенящего Собора (текст).txt'
+    lines = (root/filename).read_text(encoding='utf-8').splitlines(keepends=True)
+    add(filename, 'Найденные документы', 'Пакт Покорителя Звенящего Собора',
+        lines, 0, len(lines))
+
     for filename, title in [('Источники/Сессия 9 — бой с гоблинами и червём.md', 'Сессия 9 — подробный бой'),
                             ('Источники/Разбор сессий 11–12 с мастером.md', 'Разбор сессий 11–12 с мастером'),
                             ('Бой с Вордтом — журнал.md', 'Сессия 14 — подробный бой с Вордтом и расходы')]:
