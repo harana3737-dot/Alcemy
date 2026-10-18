@@ -5,6 +5,7 @@ import html
 import json
 from pathlib import Path
 import re
+from urllib.parse import quote
 from player_book import Renderer
 from generated_files import generated_html
 
@@ -111,7 +112,8 @@ def records(root=ROOT):
 
     for filename, title in [('Источники/Сессия 9 — бой с гоблинами и червём.md', 'Сессия 9 — подробный бой'),
                             ('Источники/Разбор сессий 11–12 с мастером.md', 'Разбор сессий 11–12 с мастером'),
-                            ('Бой с Вордтом — журнал.md', 'Сессия 14 — подробный бой с Вордтом и расходы')]:
+                            ('Бой с Вордтом — журнал.md', 'Сессия 14 — подробный бой с Вордтом и расходы'),
+                            ('Источники/Сессия 1 — бой с бандитами.md', 'Сессия 1 — подробный бой с бандитами')]:
         lines = (root/filename).read_text(encoding='utf-8').splitlines(keepends=True)
         add(filename, 'Разборы сессий', title, lines, 0, len(lines))
     return annotate(result, root)
@@ -141,7 +143,14 @@ def render(items, root=ROOT):
     cards = []
     for item in items:
         title = (item['context']+' — ' if item['context'] else '')+item['title']
-        body = Renderer('material-'+item['id']).render(item['text'].splitlines())
+        text = item['text']
+        # Встроенные протоколы открываются внутри HTML; копирование хранит исходник.
+        for linked in items:
+            if (linked['category'] == 'Разборы сессий'
+                    and Path(linked['source']).parent == Path(item['source']).parent):
+                target = quote(Path(linked['source']).name)
+                text = text.replace(f']({target})', f'](#{linked["label"]})')
+        body = Renderer('material-'+item['id']).render(text.splitlines())
         meta = [item['category'], Path(item['source']).name] + ([item['day']] if item.get('day') else [])
         extra = ''.join(f'<p class="{name}">{escape(item[name])}</p>' for name in ('summary', 'note') if item.get(name))
         cards.append(f'<article class="material" id="material-{item["id"]}" data-id="{item["id"]}" data-label="{escape(item["label"])}">'
