@@ -68,9 +68,10 @@ def records(root=ROOT):
         add(LOGS, 'Логи' if level == 2 else 'Записки Талиса', title,
             lines, start, end, '' if level == 2 else session)
 
-    filename = 'Источники/Сессия 14 — Вордт, баррикады и Ренгамар.md'
-    lines = (root/filename).read_text(encoding='utf-8').splitlines(keepends=True)
-    add(filename, 'Логи', 'Сессия 14', lines, 0, len(lines))
+    for filename, title in [('Источники/Сессия 14 — Вордт, баррикады и Ренгамар.md', 'Сессия 14'),
+                            ('Источники/Сессия 15 — туман, Гильдия и статуя богини.md', 'Сессия 15')]:
+        lines = (root/filename).read_text(encoding='utf-8').splitlines(keepends=True)
+        add(filename, 'Логи', title, lines, 0, len(lines))
 
     lines, heads = sections((root/STORY).read_text(encoding='utf-8'))
     selected = [h for h in heads if h[1] in (2, 3)]
