@@ -120,6 +120,9 @@ def build():
         it["who"] = "p1"
     # Союзники — по строке «Зелья союзников» в листе
     ALLY = [dict(n="Зелье подводного дыхания", q=1, note="", card="Водное дыхание", who=w) for w in ("pF", "pL")]
+    given = re.search(r'Зелье лечения 1\.1 ×(\d+) у Фаэнона', sheet)
+    if given and int(given[1]) > 0:
+        ALLY.append(dict(n="Зелье лечения 1.1", q=int(given[1]), note="от Талиса", who="pF"))
     restored = re.search(r'Зелье лечения 6\.6 ×(\d+) у Лаэля', sheet)
     if restored and int(restored[1]) > 0:
         ALLY.append(dict(n="Зелье лечения 6.6", q=int(restored[1]),
