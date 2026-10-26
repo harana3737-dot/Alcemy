@@ -30,7 +30,7 @@ def render_inline(text, resolve_link=lambda target: target):
     text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img src="\2" alt="\1" loading="lazy">', text)
     pattern = r"\[([^\]]+)\]\(((?:[^()]|\([^()]*\))+)\)"
     def link(match):
-        target = resolve_link(html.unescape(match.group(2)))
+        target = resolve_link(html.unescape(match.group(2)).strip().strip('<>'))
         return f'<a href="{html.escape(target, quote=True)}">{match.group(1)}</a>'
     text = re.sub(pattern, link, text)
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
