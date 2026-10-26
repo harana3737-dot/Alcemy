@@ -35,6 +35,16 @@ class DocumentLinkTests(unittest.TestCase):
         self.assertIn('href="a&quot;b.md"', render_inline('[текст](a"b.md)'))
         self.assertIn('<b>важное</b>', render_inline('**важное**'))
 
+    def test_angle_wrapped_destination_resolves_companion(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'Лист персонажа.html').write_text('page')
+            out = render_inline('[лист](<Лист персонажа.md>)',
+                                lambda target: document_link(target, root, root / 'index.md'))
+            self.assertIn('.html"', out)
+            self.assertNotIn('&lt;', out)
+            self.assertNotIn('&gt;', out)
+
     def test_built_table_and_relocated_page_links(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory);(root / 'scripts').mkdir()
