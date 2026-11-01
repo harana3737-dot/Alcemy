@@ -243,7 +243,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <div class="card" id="sit" style="margin-top:16px"></div>
   </div>
 </div>
-<div id="tab-belt" hidden><div class="card"><b>После сессии 15 и продолжительного отдыха</b><p>Вся группа — 5-го уровня. Талис: 42 / 42 ХП, без временных; ячейки I–III — 4 / 3 / 2; единицы чародейства — 5 классовых + 2 только на метамагию; опыт 7 670. Фаэнон: 53 / 53 ХП, опыт 7 944. Лаэль: 33 / 33 ХП, опыт 7 475. Гильдия отбита. Деньги Талиса после продажи доспеха, одного арбалета и 12 стрел — 240,68 зм. Это исходные сведения перед следующей сессией; текущие остатки, время и прогресс — в счётчиках и журнале ниже.</p></div><div class="card clock">
+<div id="tab-belt" hidden><div class="card"><b>Конец сессии 16 — подтверждено игроком</b><p>Вся группа — 5-го уровня. Талис: 37 / 42 ХП; ячейки I–III — 2 / 3 / 1; единицы чародейства — 4 классовых + 2 только на метамагию; опыт 7 710; деньги 108,18 зм. Фаэнон: максимум 53 ХП, опыт 7 944. Лаэль: максимум 33 ХП, опыт 7 475; текущие ресурсы союзников не уточнены. Чернила освоены, рост алхимии 4/15; метка: этап I завершён, II — 38/45, III — 0/60. Группа остановилась у четырёх саркофагов; ожидается опыт за тень и двух полтергейстов. Отдых перед походом уже учтён. Это подтверждённый срез, а не автоматическая замена сохранённых счётчиков: сверь их с ним. JSON от начала 01.11.2026 относится к состоянию до этой сессии; точное время конца пока неизвестно.</p></div><div class="card clock">
   <div class="ctop"><div><div class="k">Время в игре</div><div class="now" id="now"></div></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="savest" id="savest"></div>
     <button type="button" class="btn" id="beltView" aria-pressed="false" title="Прячет материалы, добавление пьющих и пояснения. Включается само, когда начат бой">Только бой</button></div></div>
@@ -2458,6 +2458,6 @@ const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=BASIC.find(c=>c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
 list();render();renderBelt();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
-<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 0496b4c466de</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
+<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 8661ce28bb89</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
 </body>
 </html>
