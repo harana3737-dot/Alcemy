@@ -16,6 +16,8 @@ const assert=require('node:assert/strict');
  assert.match(await page.locator('#avShopping').innerText(),/1.*0,1 зм/);
  const logic=await page.evaluate(()=>{
   const old=JSON.stringify(ST);ST.knownRecipes=[recipeKey(D.find(c=>c.n==='Подмога'))];
+  // Для проверки двойного расхода нужна одна единица, независимо от настоящего запаса игрока.
+  ST.mat.ess.find(e=>e.id==='e4').q=1;
   const aid=D.find(c=>c.n==='Подмога');const first=supply(aid,1);ST.mat.herbs.push({k:'heal',l:2,q:2});
   const ready=supply(aid,1);ST.mat.ess.find(e=>e.id==='e4').exp=ST.T-1;const expired=supply(aid,1);
   const before=JSON.stringify(ST);supply(aid,2);supply(D.find(c=>c.k==='fl'),1);const pure=before===JSON.stringify(ST);
