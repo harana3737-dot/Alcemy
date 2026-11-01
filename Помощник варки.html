@@ -2078,7 +2078,7 @@ $('restoreApply').onclick=async()=>{
     ST=restored;TR=next.tracks;S.t={...(next.situation||{})};UNDO=[];UNDOJ={};
     if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));BP={...next.plans.brewing};ls.set('combo',JSON.stringify(COMBO));ls.set('brewing-plan',JSON.stringify(BP))}
     for(const [key,value] of Object.entries(next.settings))if(['m','b','anar','sel','tab','theme'].includes(key)){if(value==null)localStorage.removeItem(key);else ls.set(key,String(value))}
-    $('m').value=ls.get('m')||2;lastM=+$('m').value;$('b').value=ls.get('b')||4;$('anar').checked=ls.get('anar')==='1';
+    $('m').value=ls.get('m')||2;lastM=+$('m').value;$('b').value=ls.get('b')||5;$('anar').checked=ls.get('anar')==='1';
     if(ls.get('theme'))document.documentElement.dataset.theme=ls.get('theme');
     S.sel=D.findIndex(c=>c.n===ls.get('sel'));if(S.sel<0)S.sel=null;
     renderBelt();renderJournal();list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
@@ -2458,6 +2458,6 @@ const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=BASIC.find(c=>c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
 list();render();renderBelt();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
-<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка c56d6fa8e74c</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
+<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 6c5974cc8f4a</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
 </body>
 </html>
