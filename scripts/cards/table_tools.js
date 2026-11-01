@@ -179,7 +179,7 @@ $('restoreApply').onclick=async()=>{
     ST=restored;TR=next.tracks;S.t={...(next.situation||{})};UNDO=[];UNDOJ={};
     if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));BP={...next.plans.brewing};ls.set('combo',JSON.stringify(COMBO));ls.set('brewing-plan',JSON.stringify(BP))}
     for(const [key,value] of Object.entries(next.settings))if(['m','b','anar','sel','tab','theme'].includes(key)){if(value==null)localStorage.removeItem(key);else ls.set(key,String(value))}
-    $('m').value=ls.get('m')||2;lastM=+$('m').value;$('b').value=ls.get('b')||4;$('anar').checked=ls.get('anar')==='1';
+    $('m').value=ls.get('m')||2;lastM=+$('m').value;$('b').value=ls.get('b')||5;$('anar').checked=ls.get('anar')==='1';
     if(ls.get('theme'))document.documentElement.dataset.theme=ls.get('theme');
     S.sel=D.findIndex(c=>c.n===ls.get('sel'));if(S.sel<0)S.sel=null;
     renderBelt();renderJournal();list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');

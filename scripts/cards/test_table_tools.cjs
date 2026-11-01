@@ -41,10 +41,11 @@ const assert=require('node:assert/strict');
  await card.getByRole('button',{name:'Добавить',exact:true}).click();
  await page.waitForFunction(()=>TR.find(t=>t.id==='test-root').current===5.5);
  const download=page.waitForEvent('download');await page.locator('#backupExport').click();const file=await download;const exported=JSON.parse(require('node:fs').readFileSync(await file.path(),'utf8'));assert.equal(exported.format,'alcemy-helper');assert.equal(exported.tracks.find(t=>t.id==='test-root').current,5.5);
- save.state.mat.gold=77.25;save.settings.m='2';
+ save.state.mat.gold=77.25;save.settings.m='2';save.settings.b=null;
  await page.locator('#backupFile').setInputFiles({name:'restore.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(save))});
  await page.locator('#restoreApply').click();await page.waitForFunction(()=>ST.mat.gold===77.25&&TR.find(t=>t.id==='test-root').current===0);
- await page.reload();await page.waitForFunction(()=>JDB&&ST.mat);assert.equal(await page.evaluate(()=>ST.mat.gold),77.25);
+ assert.equal(await page.locator('#b').inputValue(),'5','старое сохранение без бонуса: текущее значение +5');
+ await page.reload();await page.waitForFunction(()=>JDB&&ST.mat);assert.equal(await page.evaluate(()=>ST.mat.gold),77.25);assert.equal(await page.locator('#b').inputValue(),'5');
  const rollback=await page.evaluate(()=>{
   const s=snapshot();s.state.mat.gold=22;window.oldJDB=JDB;let fail=true;
   JDB={collection:()=>({doc:id=>{
