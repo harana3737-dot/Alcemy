@@ -69,7 +69,8 @@ def records(root=ROOT):
             lines, start, end, '' if level == 2 else session)
 
     for filename, title in [('Источники/Сессия 14 — Вордт, баррикады и Ренгамар.md', 'Сессия 14'),
-                            ('Источники/Сессия 15 — туман, Гильдия и статуя богини.md', 'Сессия 15')]:
+                            ('Источники/Сессия 15 — туман, Гильдия и статуя богини.md', 'Сессия 15'),
+                            ('Источники/Сессия 16 — отчёт Гильдии, алхимия и призраки Собора.md', 'Сессия 16')]:
         lines = (root/filename).read_text(encoding='utf-8').splitlines(keepends=True)
         add(filename, 'Логи', title, lines, 0, len(lines))
 
