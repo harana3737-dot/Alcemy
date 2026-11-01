@@ -182,7 +182,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 .brow select{flex:1;min-width:150px;width:auto;padding:6px}
 .brow .two{display:flex;gap:6px;flex:1 1 100%}
 .brow .two[hidden]{display:none!important}
-.resb{font-size:13px;display:grid;gap:6px;background:var(--bg);border-radius:10px;padding:8px 10px}
+.resb{font-size:13px;display:grid;grid-template-columns:minmax(0,1fr);gap:6px;background:var(--bg);border-radius:10px;padding:8px 10px}
 .resb select{width:auto;max-width:100%;padding:4px 6px;font-size:13px}
 .resb .bad{color:var(--bad);font-weight:600}.resb .wr{color:var(--warn)}.resb small{color:var(--muted)}
 .sugg{display:grid;gap:2px;margin-top:4px;max-height:44vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px}
@@ -2458,6 +2458,6 @@ const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=BASIC.find(c=>c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
 list();render();renderBelt();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
-<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 44986a688722</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
+<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 26a12347d3dc</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
 </body>
 </html>
