@@ -77,7 +77,7 @@ function renderAvailability(){
   const c=RECIPES.find(c=>c.n===AV.selected)||RECIPES[0],check=supply(c,AV.q),ink=c.k==='ink';
   box.innerHTML=`<h2>Что могу сварить</h2><div class="row"><div><label class="f">Показать</label><select id="avMode"><option value="known">Известные рецепты</option><option value="ready">Есть материалы на одну попытку</option><option value="all">Все рецепты</option></select></div><div><label class="f">Рецепт</label><select id="avRecipe">${filtered.map(x=>`<option value="${esc(x.n)}">${esc(x.n)} · ${x.k==='ink'?'общая формула':ROM[x.l]}</option>`).join('')}</select></div><div><label class="f">Доз / попыток</label><input id="avQty" type="number" min="1" max="100" value="${AV.q}"></div></div>
   <p class="note">Отметь известные рецепты или ступени формул здесь — названия записей журнала могут быть произвольными. Материалы считаются на каждую попытку, без предполагаемой экономии на удачных бросках. Освоенные чернила берутся из завершённого исследования в журнале.</p>
-  ${!filtered.length?'<p class="note">Подходящих рецептов нет. Выбери «Все рецепты», чтобы отметить освоенное.</p>':''}
+  ${!filtered.length?'<p class="note">Подходящих рецептов нет. Можно вернуть отметку «Известно» у выбранного рецепта или показать все рецепты.</p><button id="avShowAll" type="button" class="btn soft">Показать все рецепты</button>':''}
   <label class="tg"><input id="avKnown" type="checkbox" ${knows(c)?'checked':''}><span>Известно: ${esc(recipeKey(c))}</span></label>
   <p id="avWarnings" class="note">${check.warnings.map(esc).join(' · ')||'Мастерство и оборудование подходят.'}</p>
   <div id="avShopping">${ink?'Расход материалов проверяется в форме варки после выбора уровня набора.':check.deficits.length?'<b>Докупить:</b><ul>'+check.deficits.map(d=>`<li>${esc(d.n)} — ${fmtZ(d.q)}${d.value?' зм сырья':' шт.'}; ${d.price==null?'цена у мастера':fmtZ(d.price)+' зм'}</li>`).join('')+'</ul>':'Материалов хватает; списаний не было.'}</div>
@@ -85,9 +85,11 @@ function renderAvailability(){
   <div class="btns"><button id="avCopy" type="button" class="btn soft">Скопировать докупку</button><button id="avOpen" type="button" class="btn">Перейти к варке</button></div>`;
   if(ink){$('avQty').disabled=true;$('avShopping').nextElementSibling.hidden=true;$('avCopy').disabled=true;$('avOpen').textContent='Перейти к варке чернил';}
   $('avMode').value=AV.mode;
-  if(filtered.some(x=>x.n===c.n))$('avRecipe').value=c.n;
-  $('avKnown').disabled=ink||!filtered.length||(knows(c)&&!knownRecipes().includes(recipeKey(c)));$('avOpen').disabled=!filtered.length;
+  if(!filtered.length){const option=document.createElement('option');option.value=c.n;option.textContent=c.n+' — не входит в фильтр';$('avRecipe').appendChild(option)}
+  $('avRecipe').value=c.n;
+  $('avKnown').disabled=ink||(knows(c)&&!knownRecipes().includes(recipeKey(c)));$('avOpen').disabled=!filtered.length;
   $('avMode').onchange=e=>{AV.mode=e.target.value;renderAvailability();if($('avRecipe').value)chooseAvailableRecipe(RECIPES.find(c=>c.n===$('avRecipe').value))};
+  if($('avShowAll'))$('avShowAll').onclick=()=>{$('avMode').value='all';$('avMode').dispatchEvent(new Event('change'))};
   $('avRecipe').onchange=e=>chooseAvailableRecipe(RECIPES.find(c=>c.n===e.target.value));
   $('avQty').onchange=e=>{AV.q=Math.max(1,Math.min(100,+e.target.value||1));renderAvailability()};
   $('avKnown').onchange=e=>{const on=e.target.checked;mutate(()=>{const keys=knownRecipes().filter(k=>k!==recipeKey(c));if(on)keys.push(recipeKey(c));ST.knownRecipes=keys;logx('Известные рецепты: '+recipeKey(c)+' — '+(on?'да':'нет'))})};
