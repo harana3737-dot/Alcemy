@@ -243,7 +243,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <div class="card" id="sit" style="margin-top:16px"></div>
   </div>
 </div>
-<div id="tab-belt" hidden><div class="card"><b>Конец сессии 16 — подтверждено игроком</b><p>Игровой день 16, около 14:00. Вся группа — 5-го уровня. Талис: 37 / 42 ХП; ячейки I–III — 2 / 3 / 1; единицы чародейства — 4 классовых + 2 только на метамагию; опыт 7 710; деньги 108,18 зм. Фаэнон: максимум 53 ХП, опыт 7 944. Лаэль: максимум 33 ХП, опыт 7 475; текущие ресурсы союзников не уточнены. Остаток трав для чернил: лечебные на 15 зм и ядовитые на 15 зм; учтены для I уровня, точный уровень ещё не уточнён. Чернила освоены, рост алхимии 4/15; метка: этап I завершён, II — 38/45, III — 0/60. Группа остановилась у четырёх саркофагов; ожидается опыт за тень и двух полтергейстов. Отдых перед походом уже учтён. Это подтверждённый срез, а не автоматическая замена сохранённых счётчиков: сверь их с ним. JSON от начала 01.11.2026 относится к состоянию до этой сессии; время конца сессии уточнено игроком: день 16, около 14:00.</p></div><div class="card clock">
+<div id="tab-belt" hidden><div class="card"><b>Конец сессии 16 — подтверждено игроком</b><p>Игровой день 16, около 14:00. Вся группа — 5-го уровня. Талис: 37 / 42 ХП; ячейки I–III — 2 / 3 / 1; единицы чародейства — 6 всего (4 классовых + 2 от черты, общий пул по разрешению мастера); опыт 7 710; деньги 108,18 зм. Фаэнон: максимум 53 ХП, опыт 7 944. Лаэль: максимум 33 ХП, опыт 7 475; текущие ресурсы союзников не уточнены. Остаток трав для чернил: лечебные на 15 зм и ядовитые на 15 зм; учтены для I уровня, точный уровень ещё не уточнён. Чернила освоены, рост алхимии 4/15; метка: этап I завершён, II — 38/45, III — 0/60. Группа остановилась у четырёх саркофагов; ожидается опыт за тень и двух полтергейстов. Отдых перед походом уже учтён. Это подтверждённый срез, а не автоматическая замена сохранённых счётчиков: сверь их с ним. JSON от начала 01.11.2026 относится к состоянию до этой сессии; время конца сессии уточнено игроком: день 16, около 14:00.</p></div><div class="card clock">
   <div class="ctop"><div><div class="k">Время в игре</div><div class="now" id="now"></div></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="savest" id="savest"></div>
     <button type="button" class="btn" id="beltView" aria-pressed="false" title="Прячет материалы, добавление пьющих и пояснения. Включается само, когда начат бой">Только бой</button></div></div>
@@ -890,6 +890,16 @@ function talis(){
     for(const l of Object.keys(TALIS_LIMITS.slots))if(ST.talis.slots[l]===undefined)ST.talis.slots[l]=0}
   return ST.talis;
 }
+// Ж-145: обе части запаса доступны для любых расходов чародейства.
+function sorceryTotal(){const r=talis();return r.sp+r.meta;}
+function spendSorcery(n){
+  const r=talis();if(!Number.isSafeInteger(n)||n<0||n>sorceryTotal())return false;
+  const main=Math.min(r.sp,n);r.sp-=main;r.meta-=n-main;return true;
+}
+function gainSorcery(n){
+  const r=talis();if(!Number.isSafeInteger(n)||n<0||sorceryTotal()+n>TALIS_LIMITS.sp+TALIS_LIMITS.meta)return false;
+  const main=Math.min(TALIS_LIMITS.sp-r.sp,n);r.sp+=main;r.meta+=n-main;return true;
+}
 function damageTalis(n){const r=talis(),used=Math.min(r.temp,n);r.temp-=used;r.hp=Math.max(0,r.hp-(n-used));
   r.lastDamage=n;r.dc=n>0&&r.concentration?Math.max(10,Math.floor(n/2)):null;
   if(r.hp===0)r.concentration='';
@@ -900,11 +910,11 @@ function renderTalis(){const box=$('talis');if(!box)return;const r=talis(),L=TAL
     <div class="fresources"><div><b id="fHp">${r.hp} / ${L.hp}</b><div>Хиты</div></div><div><b id="fTemp">${r.temp}</b><div>Временные хиты</div></div></div>
     <div class="btns"><label for="fAmount">Урон после сопротивлений / лечение<input type="number" id="fAmount" min="0" step="1" placeholder="Число, в том числе бросок зелья"></label><button type="button" class="btn soft" id="fDamage">−урон</button><button type="button" class="btn soft" id="fHeal">+лечение</button></div>
     <div class="btns"><label for="fTempAmount">Новые временные хиты<input type="number" id="fTempAmount" min="0" step="1" placeholder="Не складываются"></label><button type="button" class="btn ghost" id="fSetTemp">Оставить большие</button><button type="button" class="btn ghost" id="fClearTemp">Убрать временные</button></div>
-    <div class="fresources">${Object.keys(L.slots).map(Number).map(l=>`<div><b id="fSlot${l}">${r.slots[l]} / ${L.slots[l]}</b><div>Ячейки ${ROM[l]} · базовый максимум</div><div class="btns"><button type="button" class="btn sm" data-slot="${l}" ${r.slots[l]>0?'':'disabled'}>Потратить ${ROM[l]}</button><button type="button" class="btn sm ghost" data-to-sp="${l}" ${r.slots[l]>0&&r.sp+l<=L.sp?'':'disabled'}>${ROM[l]} → ${l} ед.</button><button type="button" class="btn sm ghost" data-from-sp="${l}" ${r.sp>=L.costs[l]?'':'disabled'}>${L.costs[l]} ед. → ${ROM[l]}</button></div></div>`).join('')}</div>
-    <div class="fresources"><div><b id="fSp">${r.sp} / ${L.sp}</b><div>Классовые единицы</div></div><div><b id="fMeta">${r.meta} / ${L.meta}</b><div>Только для метамагии</div></div></div>
-    <div class="btns"><label for="fSpAmount">Сколько единиц<input type="number" id="fSpAmount" min="1" step="1" value="1"></label><button type="button" class="btn sm soft" id="fSpendSp">Потратить классовые</button><button type="button" class="btn sm soft" id="fSpendMeta">Потратить метамагию</button></div>
-    <p class="note">Волшебное указание: 1 классовая единица за переброс проваленной проверки характеристики; новый результат обязателен. Спасброски и атаки не перебрасывает.</p>
-    <p class="note">Преобразование — бонусное действие в свой ход. Две единицы Адепта ячейку не создают. Созданные ячейки могут превышать базовый запас; при долгом отдыхе исчезают. Здесь отдых не выполняется.</p>
+    <div class="fresources">${Object.keys(L.slots).map(Number).map(l=>`<div><b id="fSlot${l}">${r.slots[l]} / ${L.slots[l]}</b><div>Ячейки ${ROM[l]} · базовый максимум</div><div class="btns"><button type="button" class="btn sm" data-slot="${l}" ${r.slots[l]>0?'':'disabled'}>Потратить ${ROM[l]}</button><button type="button" class="btn sm ghost" data-to-sp="${l}" ${r.slots[l]>0&&sorceryTotal()+l<=L.sp+L.meta?'':'disabled'}>${ROM[l]} → ${l} ед.</button><button type="button" class="btn sm ghost" data-from-sp="${l}" ${sorceryTotal()>=L.costs[l]?'':'disabled'}>${L.costs[l]} ед. → ${ROM[l]}</button></div></div>`).join('')}</div>
+    <p><b id="fSpTotal">${sorceryTotal()} / ${L.sp+L.meta}</b> единиц чародейства в общем пуле.</p><div class="fresources"><div><b id="fSp">${r.sp} / ${L.sp}</b><div>Классовые единицы</div></div><div><b id="fMeta">${r.meta} / ${L.meta}</b><div>От черты, доступны для любых расходов</div></div></div>
+    <div class="btns"><label for="fSpAmount">Сколько единиц<input type="number" id="fSpAmount" min="1" step="1" value="1"></label><button type="button" class="btn sm soft" id="fSpendSp">Потратить из общего пула</button><button type="button" class="btn sm soft" id="fSpendMeta">Потратить из запаса черты</button></div>
+    <p class="note">Волшебное указание: 1 единица из общего пула за переброс проваленной проверки характеристики; новый результат обязателен. Спасброски и атаки не перебрасывает.</p>
+    <p class="note">Преобразование — бонусное действие в свой ход. По разрешению мастера две единицы от черты можно тратить на создание ячеек и Волшебное указание. Общий максимум — 7. Можно списывать из общего пула или сначала использовать запас черты. Созданные ячейки могут превышать базовый запас; при долгом отдыхе исчезают. Здесь отдых не выполняется.</p>
     <label class="f" for="fConcentration">Концентрация на заклинании (отдельно от алхимической)</label><input type="search" id="fConcentration" placeholder="Например, Паутина" value="${esc(r.concentration)}">
     <div class="btns"><button type="button" class="btn sm ghost" id="fStopConcentration">Концентрация прекращена</button><button type="button" class="btn sm soft" id="fReaction" ${r.reaction?'disabled':''}>${r.reaction?'Реакция потрачена до начала моего хода':'Потратить реакцию (Щит)'}</button></div>
     <p class="note" id="fConcentrationDC" aria-live="polite">${r.dc?`Урон ${r.lastDamage}: СЛ концентрации ${r.dc}. Проверь спасбросок; при провале прекрати концентрацию.`:'При уроне: СЛ 10 или половина урона после сопротивлений, что больше; половина округляется вниз.'}${r.hp===0?' Хиты 0: концентрация прекращена. Спасброски от смерти веди отдельно.':''}</p>
@@ -915,9 +925,10 @@ function renderTalis(){const box=$('talis');if(!box)return;const r=talis(),L=TAL
   $('fSetTemp').onclick=()=>{const n=amount('fTempAmount');if(n!==null)mutate(()=>{r.temp=Math.max(r.temp,n);logx(`Талис: временные хиты ${r.temp}`)})};
   $('fClearTemp').onclick=()=>mutate(()=>{r.temp=0;logx('Талис: временные хиты убраны')});
   box.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>mutate(()=>{const l=+b.dataset.slot;if(r.slots[l]>0){r.slots[l]--;logx(`Талис: потрачена ячейка ${ROM[l]}`)}}));
-  box.querySelectorAll('[data-to-sp]').forEach(b=>b.onclick=()=>mutate(()=>{const l=+b.dataset.toSp;if(r.slots[l]>0&&r.sp+l<=L.sp){r.slots[l]--;r.sp+=l;logx(`Талис: ячейка ${ROM[l]} → ${l} классовых единиц (бонусное действие)`)} }));
-  box.querySelectorAll('[data-from-sp]').forEach(b=>b.onclick=()=>mutate(()=>{const l=+b.dataset.fromSp;if(r.sp>=L.costs[l]){r.sp-=L.costs[l];r.slots[l]++;logx(`Талис: ${L.costs[l]} классовых единиц → ячейка ${ROM[l]} (бонусное действие)`)} }));
-  for(const [id,key] of [['fSpendSp','sp'],['fSpendMeta','meta']])$(id).onclick=()=>{const n=amount('fSpAmount');if(n!==null&&n>0&&n<=r[key])mutate(()=>{r[key]-=n;logx(`Талис: потрачено ${n} ${key==='sp'?'классовых единиц':'единиц только для метамагии'}`)})};
+  box.querySelectorAll('[data-to-sp]').forEach(b=>b.onclick=()=>mutate(()=>{const l=+b.dataset.toSp;if(r.slots[l]>0&&sorceryTotal()+l<=L.sp+L.meta){r.slots[l]--;gainSorcery(l);logx(`Талис: ячейка ${ROM[l]} → ${l} единиц общего пула (бонусное действие)`)} }));
+  box.querySelectorAll('[data-from-sp]').forEach(b=>b.onclick=()=>mutate(()=>{const l=+b.dataset.fromSp;if(sorceryTotal()>=L.costs[l]){spendSorcery(L.costs[l]);r.slots[l]++;logx(`Талис: ${L.costs[l]} единиц общего пула → ячейка ${ROM[l]} (бонусное действие)`)} }));
+  $('fSpendSp').onclick=()=>{const n=amount('fSpAmount');if(n!==null&&n>0&&n<=sorceryTotal())mutate(()=>{spendSorcery(n);logx(`Талис: потрачено ${n} единиц из общего пула`)})};
+  $('fSpendMeta').onclick=()=>{const n=amount('fSpAmount');if(n!==null&&n>0&&n<=r.meta)mutate(()=>{r.meta-=n;logx(`Талис: потрачено ${n} единиц от черты на разрешённый расход общего пула`)})};
   $('fConcentration').onchange=e=>{const value=e.target.value.trim();mutate(()=>{r.concentration=r.hp>0?value:'';r.dc=null;logx('Талис: концентрация '+(r.concentration||'прекращена'))})};
   $('fStopConcentration').onclick=()=>mutate(()=>{r.concentration='';r.dc=null;logx('Талис: концентрация прекращена')});
   $('fReaction').onclick=()=>mutate(()=>{r.reaction=true;logx('Талис: реакция потрачена')});
@@ -2470,6 +2481,6 @@ const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=RECIPES.find(c=>['basic','ink'].includes(c.k)&&c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
 list();render();renderBelt();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
-<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 463603b14b84</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
+<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка cc96b7dae840</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
 </body>
 </html>
