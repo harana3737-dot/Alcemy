@@ -197,7 +197,7 @@ def sections():
                      item_kind='ink',level=l,class_level=cl)['per_day']/8
     rows=[]
     for name,f,l,state in [('Лечение 1.1',potion_sale,1,'открыт'),('Лечение 2.2',potion_sale,2,'нужен рецепт'),
-                           ('Чернила I',ink_sale,1,'нужен рецепт чернил'),('Чернила II',ink_sale,2,'нужен рецепт чернил')]:
+                           ('Чернила I',ink_sale,1,'открыт'),('Чернила II',ink_sale,2,'открыт')]:
         rows.append([name,state,number(f(5,2,1,l,.85)),number(f(5,2,1,l,.75)),number(f(5,2,1,l,.85)*12,0)])
     def shield(sale):  # Щит веры II: цена 25 зм, травы II и эссенция Тело II — 1,5 зм на дозу, партия 2
         return sales(5,ELIXIR_DC[2],1.5,25*sale,0,unstable_fraction(sale),2,item_kind='elixir',level=2,batch=batch_e(2,2))['per_hour']
