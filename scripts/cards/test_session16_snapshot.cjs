@@ -10,7 +10,7 @@ const path=require('node:path');
   await page.route('https://**/*',r=>r.abort());
   await page.goto((process.env.ALCEMY_URL||'http://127.0.0.1:8770')+'/'+encodeURIComponent('Помощник варки.html'));
   await page.waitForFunction(()=>JDB&&ST.mat);
-  const file=path.resolve(__dirname,'../../Источники/Сохранения/alcemy-save-2026-11-02-session16.json');
+  let file=path.resolve(__dirname,'../../Источники/Сохранения/alcemy-save-2026-11-02-session16.json');
   async function restore(){
    await page.locator('#backupFile').setInputFiles(file);
    await page.locator('#restoreDialog').waitFor({state:'visible'});
@@ -65,6 +65,9 @@ const path=require('node:path');
    assert(bounds.y>=-1&&bounds.y<844,'projects shortcut must bring the section onto the phone screen: '+JSON.stringify(bounds));
   }
   await restore();await check();
+  file=path.resolve(__dirname,'../../Источники/Сохранения/alcemy-save-2026-11-02-recovered.json');
+  await restore();await check();
+  assert.equal(await page.evaluate(()=>knows(BASIC[0])),true,'recovery snapshot restores known healing 1.1');
   await page.reload();await page.waitForFunction(()=>JDB&&ST.mat&&TR.length);await check();
   await restore();await check();
   assert.deepEqual(errors,[]);
