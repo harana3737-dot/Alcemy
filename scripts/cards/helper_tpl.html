@@ -387,7 +387,7 @@ const DC=__RULE_DC__;
 const MB=__RULE_MB__;
 const $=id=>document.getElementById(id);
 const S={sel:null,cls:"all",t:{}};
-const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v);return true}catch(e){const s=$('savest');if(s)s.textContent='Не сохранено в браузере. Не закрывай страницу; скачай сохранение.';return false}}};
 
 // тема
 (function(){const t=ls.get('theme');if(t)document.documentElement.dataset.theme=t;
@@ -636,10 +636,10 @@ function tidy(){
 let DOC=null,saveT=null;
 const setSave=t=>{$('savest').textContent=t};
 function save(){
-  ls.set('belt',JSON.stringify(ST));
-  if(!DOC)return;
+  const local=ls.set('belt',JSON.stringify(ST));
+  if(!DOC){if(local)setSave('сохранено в этом браузере');return}
   clearTimeout(saveT);
-  saveT=setTimeout(async()=>{try{await DOC.set({s:JSON.stringify(ST),u:ST.u});setSave('сохранено в аккаунте')}catch(e){setSave('в аккаунт не сохранилось, осталось в этом браузере')}},700);
+  saveT=setTimeout(async()=>{try{await DOC.set({s:JSON.stringify(ST),u:ST.u});setSave(local?'сохранено в аккаунте':'Сохранено в аккаунте; в браузере не сохранилось.')}catch(e){setSave(local?'в аккаунт не сохранилось, осталось в этом браузере':'Не сохранено ни в аккаунте, ни в браузере. Не закрывай страницу; скачай сохранение.')}},700);
 }
 setTimeout(async()=>{
   setSave('сохраняется в этом браузере');
@@ -936,17 +936,17 @@ function renderTalis(){const box=$('talis');if(!box)return;const r=talis(),L=TAL
 
 // раунды, которые сейчас приходят у последовательности: сдвоенная — первые два сразу
 function healTick(h,first){const out=[];const n=first&&h.md.twin?2:1;for(let j=0;j<n&&h.i<HEAL_R[h.lv];j++){out.push(healRound(h.lv,h.i,h.md));h.i++}
-  const who=P(h.who)?P(h.who).name:'';return `${esc(who)}: «${esc(h.n)}» — бросить <b>${out.join(' и ')}</b> (раунд ${h.i} из ${HEAL_R[h.lv]})`}
+  const who=P(h.who)?P(h.who).name:'';return `${who}: «${h.n}» — бросить ${out.join(' и ')} (раунд ${h.i} из ${HEAL_R[h.lv]})`}
 function startHeal(who,n,lv,md){const F=fight(),h={id:uid(),who,n,lv,md,i:0};
-  if(md.slow){F.now=[`${P(who)?P(who).name:''}: «${esc(n)}» медленное — лечение с начала следующего хода`];h.wait=true}else F.now=[healTick(h,true)];
+  if(md.slow){F.now=[`${P(who)?P(who).name:''}: «${n}» медленное — лечение с начала следующего хода`];h.wait=true}else F.now=[healTick(h,true)];
   if(h.i<HEAL_R[lv]||h.wait)F.heals.push(h);logx(`Бой: ${P(who)?P(who).name+' — ':''}«${n}», лечение по раундам`)}
 function myTurn(pid){const F=fight(),out=[];
   if(pid==='p1'){talis().reaction=false;if(F.turned){F.round++;F.sub++;if(F.sub>=10){F.sub=0;ST.T+=1}}F.turned=true;F.ctl=false}
   F.heals.filter(h=>h.who===pid).forEach(h=>{if(h.wait){h.wait=false;out.push(healTick(h,true))}else out.push(healTick(h,false))});
   F.heals=F.heals.filter(h=>h.wait||h.i<HEAL_R[h.lv]);
-  if(pid==='p1'){ST.ent.filter(e=>e.who==='p1'&&isActive(e)).forEach(e=>{const r=Math.max(0,Math.round((endOf(e)-ST.T)*10-F.sub));if(r<=1)out.push(`«${esc(e.n)}» кончается${r?' в этом раунде':''} — проверь`)});
+  if(pid==='p1'){ST.ent.filter(e=>e.who==='p1'&&isActive(e)).forEach(e=>{const r=Math.max(0,Math.round((endOf(e)-ST.T)*10-F.sub));if(r<=1)out.push(`«${e.n}» кончается${r?' в этом раунде':''} — проверь`)});
     const tx=toxOfP('p1'),t=P('p1');if(tx)out.push(`Токсичность ${fmtZ(tx)} из ${t.limit}${tx>t.limit?' — выше предела':''}`);
-    F.coats.filter(c=>c.who==='p1').forEach(c=>out.push(`На оружии «${esc(c.n)}»: ${c.ctl?'контрольный, до попадания':'атак осталось '+c.left}`))}
+    F.coats.filter(c=>c.who==='p1').forEach(c=>out.push(`На оружии «${c.n}»: ${c.ctl?'контрольный, до попадания':'атак осталось '+c.left}`))}
   F.now=out.length?out:['Ничего не срабатывает'];logx(`Бой: ${pid==='p1'?'раунд '+F.round+', ход Талиса':'ход '+(P(pid)?P(pid).name:'')}`)}
 // вид пояса: auto — «Только бой», пока идёт бой; ручной выбор держится до начала или конца боя
 let BV=['auto','all','combat'].includes(ls.get('beltView'))?ls.get('beltView'):'auto', lastOn=null;
@@ -965,7 +965,7 @@ function renderFight(){const box=$('fight');if(!box)return;const F=fight();
     ${others.map(p=>`<button type="button" class="btn soft" data-ot="${p.id}">Ход: ${esc(p.name)}</button>`).join('')}
     <button type="button" class="btn ghost" id="fEnd">Конец боя</button></div>
     <section class="talis" id="talis" aria-label="Ресурсы Талиса"></section>
-    <div class="fnow">${F.now.map(t=>`<div>${t}</div>`).join('')}</div>
+    <div class="fnow">${F.now.map(t=>`<div>${esc(t)}</div>`).join('')}</div>
     <div class="fgrid"><div><div class="sect">Лечение по раундам</div><div id="fHeals"></div>
       <div class="row" style="flex-wrap:wrap;margin-top:6px"><div style="flex:0 0 90px"><select id="fhL" aria-label="Уровень зелья">${[1,2,3,4,5,6,7,8,9,10].map(l=>`<option value="${l}">${l}.${l}</option>`).join('')}</select></div>
         <div style="flex:1 1 100px"><select id="fhW" aria-label="Кто выпил">${ST.people.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></div>
@@ -984,11 +984,11 @@ function renderFight(){const box=$('fight');if(!box)return;const F=fight();
     r.innerHTML=`<span class="nm"></span><button type="button" class="btn sm" data-h="1">Попал</button><button type="button" class="btn sm soft" data-h="0">Мимо</button><button type="button" class="btn sm ghost" aria-label="Снять">×</button>`;
     r.querySelector('.nm').innerHTML=`${esc(c.n)}<small>${esc(P(c.who)?P(c.who).name:'')} · ${c.ctl?(c.who==='p1'&&F.ctl?'попытка в этом раунде уже была':'контрольный, до первого попадания'):'атак осталось '+c.left}</small>`;
     const b=r.querySelectorAll('button');
-    b[0].onclick=()=>mutate(()=>{if(!c.ctl){c.left--;F.now=[`«${esc(c.n)}»: попадание — яд действует (урон и спасбросок — у мастера). Атак осталось ${c.left}`]}
-      else if(c.who==='p1'&&F.ctl){F.now=[`«${esc(c.n)}»: попытка в этом раунде уже была — лишнее попадание дозу не тратит. Если яд на цели уже действует — доза тратится: сними её ×`]}
-      else{c.left=0;if(c.who==='p1')F.ctl=true;F.now=[`«${esc(c.n)}»: попадание — цель делает спасбросок (если он есть); доза потрачена`]}
+    b[0].onclick=()=>mutate(()=>{if(!c.ctl){c.left--;F.now=[`«${c.n}»: попадание — яд действует (урон и спасбросок — у мастера). Атак осталось ${c.left}`]}
+      else if(c.who==='p1'&&F.ctl){F.now=[`«${c.n}»: попытка в этом раунде уже была — лишнее попадание дозу не тратит. Если яд на цели уже действует — доза тратится: сними её ×`]}
+      else{c.left=0;if(c.who==='p1')F.ctl=true;F.now=[`«${c.n}»: попадание — цель делает спасбросок (если он есть); доза потрачена`]}
       logx(`Бой: «${c.n}» — попадание`);F.coats=F.coats.filter(x=>x.left>0)});
-    b[1].onclick=()=>mutate(()=>{if(!c.ctl)c.left--;F.now=[`«${esc(c.n)}»: промах${c.ctl?' — доза остаётся':` — атака потрачена, осталось ${c.left}`}`];F.coats=F.coats.filter(x=>x.left>0)});
+    b[1].onclick=()=>mutate(()=>{if(!c.ctl)c.left--;F.now=[`«${c.n}»: промах${c.ctl?' — доза остаётся':` — атака потрачена, осталось ${c.left}`}`];F.coats=F.coats.filter(x=>x.left>0)});
     b[2].onclick=()=>mutate(()=>{F.coats=F.coats.filter(x=>x!==c)});CB.appendChild(r)});
   $('fTurn').onclick=()=>mutate(()=>myTurn('p1'));
   box.querySelectorAll('[data-ot]').forEach(b=>b.onclick=()=>mutate(()=>myTurn(b.dataset.ot)));
@@ -997,7 +997,7 @@ function renderFight(){const box=$('fight');if(!box)return;const F=fight();
     F.now=[];F.coats=F.coats.filter(c=>!c.ctl||c.left>0)});
   $('fhAdd').onclick=()=>mutate(()=>{const lv=+$('fhL').value;startHeal($('fhW').value,`Зелье лечения ${lv}.${lv}`+($('fhM').value?` (${$('fhM').value})`:''),lv,healMods($('fhM').value))});
   $('fcAdd').onclick=()=>{const b=bagPs[+$('fcB').value];if(!b)return;mutate(()=>{const c=bagCard(b),ctl=!!(c&&c.k==='psn'),t=(b.note||'')+' '+b.n;
-    b.q--;F.coats.push({id:uid(),who:b.who,n:b.n,ctl,left:ctl?1:/долг/i.test(t)?6:/Коротк/i.test(t)?3:5});logx(`Бой: ${P(b.who)?P(b.who).name:''} наносит «${b.n}»`);F.now=[`«${esc(b.n)}» нанесён (действие; с чертой «Отравитель» — бонусное)`]})};
+    b.q--;F.coats.push({id:uid(),who:b.who,n:b.n,ctl,left:ctl?1:/долг/i.test(t)?6:/Коротк/i.test(t)?3:5});logx(`Бой: ${P(b.who)?P(b.who).name:''} наносит «${b.n}»`);F.now=[`«${b.n}» нанесён (действие; с чертой «Отравитель» — бонусное)`]})};
 }
 
 // ===== Вылазка: что есть, что заказано и что хотим; цена, время, кому; без автосписаний =====
@@ -1064,7 +1064,7 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset
 let JDB=null, TR=[], JBUSY=new Set(), JDEL=null;
 // запасной журнал, если страница открыта не на claude.ai: тот же интерфейс, хранение в localStorage
 function localDB(){const rd=()=>{try{return JSON.parse(ls.get('tracks')||'{}')}catch(e){return{}}};let cb=null;
-  const wr=o=>{ls.set('tracks',JSON.stringify(o));if(cb)cb()};
+  const wr=o=>{localStorage.setItem('tracks',JSON.stringify(o));if(cb)cb()};
   const col={doc:id=>({get:async()=>{const o=rd();return{exists:!!o[id],data:()=>o[id]}},set:async d=>{const o=rd();o[id]=d;wr(o)},update:async p=>{const o=rd();o[id]={...o[id],...p};wr(o)},delete:async()=>{const o=rd();delete o[id];wr(o)}}),
     add:async d=>col.doc(uid()).set(d),onSnapshot:f=>{cb=()=>{const o=rd();f({docs:Object.entries(o).map(([id,v])=>({id,data:()=>v}))})};cb()}};
   return {collection:()=>col}}
@@ -1076,13 +1076,14 @@ const fmtDay=t=>{try{return new Date(t).toLocaleDateString('ru-RU',{day:'2-digit
 async function jUpdate(id,patch){
   if(!JDB||JBUSY.has(id))return false;JBUSY.add(id);renderJournal();
   try{await JDB.collection('tracks').doc(id).update(patch);jstat('Сохранено');return true}
-  catch(e){jstat(e&&e.code==='quota_exceeded'?'Хранилище переполнено: удали старые записи.':'Не сохранилось, попробуй ещё раз.',true);return false}
+  catch(e){jstat(e&&(e.code==='quota_exceeded'||e.name==='QuotaExceededError')?'Не сохранено: хранилище переполнено. Скачай сохранение перед освобождением места.':'Не сохранилось, попробуй ещё раз.',true);return false}
   finally{JBUSY.delete(id);renderJournal()}
 }
-function jAdd(t,d,note){
-  if(d&&UNDO.length&&Date.now()-LASTMUT<5000&&!String(note||'').startsWith('отмена')){const k=UNDO.length-1;(UNDOJ[k]=UNDOJ[k]||[]).push({id:t.id,d})}
+async function jAdd(t,d,note){
+  const k=d&&UNDO.length&&Date.now()-LASTMUT<5000&&!String(note||'').startsWith('отмена')?UNDO.length-1:-1,entry=UNDO[k];
   const cur=(+t.current||0)+d, log=(Array.isArray(t.log)?t.log:[]).concat([{t:Date.now(),d,note}]).slice(-30);
-  const patch={current:cur,log};if(cur>=(+t.target||1))patch.done=true;return jUpdate(t.id,patch);
+  const patch={current:cur,log};if(cur>=(+t.target||1))patch.done=true;const ok=await jUpdate(t.id,patch);
+  if(ok&&k>=0&&UNDO[k]===entry)(UNDOJ[k]=UNDOJ[k]||[]).push({id:t.id,d});return ok;
 }
 async function masteryTrack(M){
   const name=`Мастерство ${M} → ${M+1}`;let t=TR.find(x=>x.group==='mastery'&&x.name===name);

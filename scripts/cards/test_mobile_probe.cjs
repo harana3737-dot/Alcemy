@@ -11,12 +11,16 @@ const {execFileSync}=require('node:child_process');
   await page.goto(`http://127.0.0.1:${server.address().port}`);
   const child=page.frames().find(f=>f.parentFrame());await child.waitForFunction(()=>JDB&&ST.mat);
   const data=await child.evaluate(()=>{const data=snapshot();data.state.people[0].name='PRIVATE_TEST_PERSON';data.state.log.push({T:ST.T,t:'PRIVATE_TEST_LOG'});return data});
-  await page.evaluate(()=>localStorage.setItem('belt','PRIVATE_ORIGINAL_STATE'));
+  const keys=['belt','tracks','smith-log-5','scroll-calc-3'];
+  await page.evaluate(keys=>keys.forEach(k=>localStorage.setItem(k,'PRIVATE_ORIGINAL_STATE')),keys);
+  await child.evaluate(keys=>{keys.forEach(k=>localStorage.setItem('isolation-'+k,'PRIVATE_COPY'));localStorage.removeItem('isolation-belt')},keys);
   await page.locator('#save').setInputFiles({name:'working.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
   await page.locator('#start').click();await page.waitForFunction(()=>report||document.getElementById('status').textContent.includes('не выполнена'),null,{timeout:90000});
   const result=await page.evaluate(()=>report);assert(result,await page.locator('#status').innerText());assert.equal(result.results.length,5);
   assert.equal(result.ok,true);assert(result.results.every(r=>r.samples.length===15));
-  assert(!JSON.stringify(result).includes('PRIVATE_TEST'));assert.equal(await page.evaluate(()=>localStorage.getItem('belt')),'PRIVATE_ORIGINAL_STATE');
+  assert(!JSON.stringify(result).includes('PRIVATE_TEST'));
+  assert.deepEqual(await page.evaluate(keys=>keys.map(k=>localStorage.getItem(k)),keys),keys.map(()=>'PRIVATE_ORIGINAL_STATE'));
+  assert.deepEqual(await page.evaluate(keys=>keys.map(k=>localStorage.getItem('isolation-'+k)),keys),keys.map(()=>null));
   const download=page.waitForEvent('download');await page.locator('#download').click();const item=await download;assert.equal(JSON.parse(fs.readFileSync(await item.path())).format,'alcemy-phone-check');
   assert.deepEqual(errors,[]);console.log('PASS: isolated working snapshot, five phone actions, undo, private data absent from report, original storage preserved');
  }finally{await browser.close();await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:true,force:true})}

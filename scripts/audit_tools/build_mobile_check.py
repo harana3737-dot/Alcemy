@@ -9,10 +9,12 @@ ROOT=Path(__file__).resolve().parents[2]
 def build(root, output):
     helper=(root/'Помощник варки.html').read_text(encoding='utf-8')
     # Хранилище испытательной копии живёт в памяти. Исходное сохранение не записывается.
-    old="const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};"
-    new="const testStorage=new Map();const ls={get:k=>testStorage.get(k)??null,set:(k,v)=>testStorage.set(k,String(v))};"
-    if helper.count(old)!=1:raise ValueError('Не найден единственный адаптер хранилища помощника')
-    helper=helper.replace(old,new)
+    marker='<script>\nconst D='
+    storage=("const testStorage=new Map();const localStorage={getItem:k=>testStorage.get(k)??null,"
+             "setItem:(k,v)=>{testStorage.set(k,String(v))},removeItem:k=>{testStorage.delete(k)}};\n")
+    if helper.count(marker)!=1:raise ValueError('Не найден единственный основной скрипт помощника')
+    # Подменяем и прямые обращения журнала/ремёсел, сохраняя штатную обработку ошибок ls.
+    helper=helper.replace(marker,'<script>\n'+storage+'const D=',1)
     helper=helper.replace('<head>','<head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'unsafe-inline\'; style-src \'unsafe-inline\'; frame-src about:; img-src data:">',1)
     agent=(Path(__file__).parent/'mobile_probe.js').read_text(encoding='utf-8')
     helper=helper.replace('</body>','<script>'+agent+'</script></body>')

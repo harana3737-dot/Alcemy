@@ -309,8 +309,11 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
   job.value=8;
   let st={rolls:[],sample:false,mods:{str:4,dex:3,int:2,wis:1}};
   const F=['job','vol','dc','abk','ab','pb','ml','ws'];
-  function load(){try{const s=JSON.parse(localStorage.getItem('smith-log-5')||'null');if(s){F.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});st.rolls=s.rolls||[];st.sample=s.sample===true;if(s.mods)st.mods=s.mods;}}catch(e){}}
-  function save(){try{const s={rolls:st.rolls,sample:st.sample,mods:st.mods};F.forEach(k=>s[k]=$(k).value);localStorage.setItem('smith-log-5',JSON.stringify(s));}catch(e){}}
+  const defaults=Object.fromEntries(F.map(k=>[k,$(k).value]));
+  const storageStatus=document.createElement('p');storageStatus.className='muted';storageStatus.setAttribute('role','status');R.querySelector('.calc').appendChild(storageStatus);
+  function load(value){try{const s=value===undefined?JSON.parse(localStorage.getItem('smith-log-5')||'null'):value;if(s){F.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});st.rolls=s.rolls||[];st.sample=s.sample===true;if(s.mods)st.mods=s.mods;}}catch(e){}}
+  function snapshot(){const s={rolls:st.rolls,sample:st.sample,mods:st.mods};F.forEach(k=>s[k]=$(k).value);return s;}
+  function save(){try{localStorage.setItem('smith-log-5',JSON.stringify(snapshot()));storageStatus.textContent=''}catch(e){storageStatus.textContent='Не удалось сохранить кузню в браузере. Не закрывай страницу до переноса записей.'}}
   const mlb=l=>l<=1?0:l<=3?1:l<=5?2:l<=7?3:l<=9?4:5;
   const bonus=()=>(+$('ab').value||0)+(+$('pb').value||0)+mlb(+$('ml').value||0)+(+$('ws').value||0);
   const fmt=x=>(Math.round(x*10)/10).toLocaleString('ru-RU');
@@ -369,6 +372,8 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
   $('reset').addEventListener('click',()=>{st.sample=false;st.rolls=[];render();});
   load();
   $('sample').addEventListener('click',()=>{if(st.rolls.length&&!st.sample&&!confirm('Заменить текущую работу примером?'))return;st.rolls=[{d:11},{d:16},{d:8},{d:20}];st.sample=true;render();});
+  document.addEventListener('alcemy-craft-snapshot',e=>{e.detail.smith=snapshot()});
+  document.addEventListener('alcemy-crafts-restored',e=>{F.forEach(k=>$(k).value=defaults[k]);st={rolls:[],sample:false,mods:{str:4,dex:3,int:2,wis:1}};load(e.detail.smith);render();});
   render();
 })(document);
 </script>

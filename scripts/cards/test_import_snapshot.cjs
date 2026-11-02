@@ -9,6 +9,12 @@ const valid={format:'alcemy-helper',version:1,settings:{},tracks:[],state:{v:1,T
  mat:{gold:1,herbs:[],ess:[],cat:[],other:[]}}};
 const validate=data=>{context.data=data;return vm.runInContext('validateSnapshot(data)',context)};
 assert.equal(validate(valid),valid);
+const crafts={...valid,crafts:{version:1,smith:{rolls:[{d:10,b:7,dc:14}],mods:{str:4},sample:false},scroll:{lvl:'1',when:'rush','c-more':true}}};
+assert.equal(validate(crafts),crafts);
+assert.doesNotThrow(()=>validate({...valid,crafts:{version:1,smith:null,scroll:null}}));
+for(const value of [{version:2,smith:null,scroll:null},{version:1,smith:{rolls:[{d:'<img>'}]},scroll:{}},{version:1,smith:null,scroll:{lvl:{}}}]){
+ assert.throws(()=>validate({...valid,crafts:value}),/Неверный/);
+}
 const nested=depth=>{let value={};for(let i=0;i<depth;i++)value={child:value};return value};
 assert.doesNotThrow(()=>validate({...valid,extra:nested(31)})); // root 0, extra 1 → 32
 assert.throws(()=>validate({...valid,extra:nested(32)}),/слишком вложенный/);
@@ -19,4 +25,4 @@ for(const key of ['__proto__','constructor','prototype']){
  assert.throws(()=>validate(bad),/Неверный/);
 }
 assert.equal(validate(valid),valid);
-console.log('PASS: valid snapshot, depth boundary, deep input, unsafe keys');
+console.log('PASS: valid snapshot, legacy and craft data, invalid crafts, depth boundary, deep input, unsafe keys');

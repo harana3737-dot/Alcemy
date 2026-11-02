@@ -296,10 +296,13 @@ select,input[type=number]{font:inherit;color:var(--ink);background:var(--bg);bor
   const MAT={0:15,1:30,2:120,3:300,4:1200,5:2500};
   const $=id=>R.getElementById(id);
   const ids=['lvl','when','nth','base','ink','place'];
-  function load(){try{const s=JSON.parse(localStorage.getItem('scroll-calc-3')||'{}');
+  const fields=[...R.querySelectorAll('.calc select,.calc input')],defaults=fields.map(el=>el.type==='checkbox'?el.checked:el.value);
+  const storageStatus=document.createElement('p');storageStatus.className='muted';storageStatus.setAttribute('role','status');R.querySelector('.calc').appendChild(storageStatus);
+  function load(value){try{const s=value===undefined?JSON.parse(localStorage.getItem('scroll-calc-3')||'{}'):value;
+    if(!s)return;
     for(const k in s){const el=$(k);if(!el)continue;if(el.type==='checkbox')el.checked=s[k];else el.value=s[k];}}catch(e){}}
-  function save(){try{const s={};R.querySelectorAll('.calc select,.calc input').forEach(el=>{s[el.id]=el.type==='checkbox'?el.checked:el.value});
-    localStorage.setItem('scroll-calc-3',JSON.stringify(s));}catch(e){}}
+  function snapshot(){const s={};fields.forEach(el=>{s[el.id]=el.type==='checkbox'?el.checked:el.value});return s;}
+  function save(){try{localStorage.setItem('scroll-calc-3',JSON.stringify(snapshot()));storageStatus.textContent=''}catch(e){storageStatus.textContent='Не удалось сохранить свитки в браузере. Не закрывай страницу до переноса записей.'}}
   function pFace(k,dis){return dis?((21-k)**2-(20-k)**2)/400:1/20}
   function calc(){
     const lvl=+$('lvl').value, when=$('when').value;
@@ -333,6 +336,8 @@ select,input[type=number]{font:inherit;color:var(--ink);background:var(--bg);bor
   }
   load();
   R.querySelectorAll('.calc select,.calc input').forEach(el=>el.addEventListener('input',calc));
+  document.addEventListener('alcemy-craft-snapshot',e=>{e.detail.scroll=snapshot()});
+  document.addEventListener('alcemy-crafts-restored',e=>{fields.forEach((el,i)=>{if(el.type==='checkbox')el.checked=defaults[i];else el.value=defaults[i]});load(e.detail.scroll);calc();});
   calc();
 })(document);
 </script>

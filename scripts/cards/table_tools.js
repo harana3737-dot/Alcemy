@@ -96,8 +96,26 @@ function renderAvailability(){
 }
 ['m','anar'].forEach(id=>$(id).addEventListener('change',renderAvailability));
 
+const CRAFT_KEYS={smith:'smith-log-5',scroll:'scroll-calc-3'};
+const SAVE_SETTINGS=['m','b','anar','sel','tab','theme'];
+function craftSnapshot(){
+  const crafts={version:1};document.dispatchEvent(new CustomEvent('alcemy-craft-snapshot',{detail:crafts}));
+  for(const [name,key] of Object.entries(CRAFT_KEYS))if(!Object.hasOwn(crafts,name))crafts[name]=JSON.parse(localStorage.getItem(key)||'null');
+  return JSON.parse(JSON.stringify(crafts)); // Включая текущие подходы, если запись в браузер не удалась.
+}
+function writeCrafts(crafts){
+  if(!crafts)return; // Старый JSON не заменяет текущие ремёсла.
+  for(const [name,key] of Object.entries(CRAFT_KEYS)){if(crafts[name]===null)localStorage.removeItem(key);else localStorage.setItem(key,JSON.stringify(crafts[name]))}
+}
+function refreshRestoredUI(crafts){
+  $('m').value=ls.get('m')||2;lastM=+$('m').value;$('b').value=ls.get('b')||5;$('anar').checked=ls.get('anar')==='1';
+  if(ls.get('theme'))document.documentElement.dataset.theme=ls.get('theme');else delete document.documentElement.dataset.theme;
+  S.sel=D.findIndex(c=>c.n===ls.get('sel'));if(S.sel<0)S.sel=null;
+  if(crafts)document.dispatchEvent(new CustomEvent('alcemy-crafts-restored',{detail:crafts}));
+  renderBelt();renderJournal();list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+}
 function snapshot(){
-  return {plans:{combo:JSON.parse(JSON.stringify(COMBO)),brewing:{...BP}},format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(['m','b','anar','sel','tab','theme'].map(k=>[k,ls.get(k)]))};
+  return {crafts:craftSnapshot(),plans:{combo:JSON.parse(JSON.stringify(COMBO)),brewing:{...BP}},format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(SAVE_SETTINGS.map(k=>[k,ls.get(k)]))};
 }
 let DL;  // в опубликованном помощнике — capability downloads; вне Claude — обычная ссылка
 async function downloadSnapshot(data,prefix='alcemy-save'){
@@ -134,7 +152,12 @@ function validateSnapshot(data){
   if(s.trig.some(t=>!t||!ids.has(t.who)||!Number.isFinite(t.T)))fail();
   if(s.plan&&(!Array.isArray(s.plan.items)||s.plan.items.some(i=>typeof i.n!=='string'||!ids.has(i.who)||!Number.isFinite(i.q)||i.q<0)))fail();
   if(s.hrs&&(!Number.isFinite(s.hrs.total)||!Array.isArray(s.hrs.log)||s.hrs.log.some(l=>typeof l.w!=='string'||!Number.isFinite(l.T)||!Number.isFinite(l.h))))fail();
-  if(s.fight&&(!Array.isArray(s.fight.heals)||!Array.isArray(s.fight.coats)||!Array.isArray(s.fight.now)))fail();
+  if(s.fight){const f=s.fight,integer=(v,min,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
+    if(typeof f.on!=='boolean'||!integer(f.round,0)||!Array.isArray(f.heals)||!Array.isArray(f.coats)||!Array.isArray(f.now)||f.now.some(t=>typeof t!=='string'))fail();
+    if(f.sub!=null&&!integer(f.sub,0,9)||f.turned!=null&&typeof f.turned!=='boolean'||f.ctl!=null&&typeof f.ctl!=='boolean')fail();
+    for(const h of f.heals)if(!h||!ids.has(h.who)||typeof h.n!=='string'||!integer(h.lv,1,10)||!integer(h.i,0)||!h.md||typeof h.md!=='object'||Array.isArray(h.md)||Object.values(h.md).some(v=>typeof v!=='boolean')||h.wait!=null&&typeof h.wait!=='boolean')fail();
+    for(const c of f.coats)if(!c||!ids.has(c.who)||typeof c.n!=='string'||typeof c.ctl!=='boolean'||!integer(c.left,0))fail();
+  }
   if(s.talis){const r=s.talis,n=x=>Number.isSafeInteger(x)&&x>=0;
     if(!n(r.hp)||r.hp>TALIS_LIMITS.hp||!n(r.temp)||!n(r.sp)||r.sp>TALIS_LIMITS.sp||!n(r.meta)||r.meta>TALIS_LIMITS.meta||
       !r.slots||![1,2].every(l=>n(r.slots[l]))||Object.keys(r.slots).some(l=>!Object.hasOwn(TALIS_LIMITS.slots,l)||!n(r.slots[l]))||typeof r.concentration!=='string'||typeof r.reaction!=='boolean'||
@@ -158,6 +181,17 @@ function validateSnapshot(data){
     for(const key of ['budget','hours','week','progress'])if(b[key]!=null&&(!Number.isFinite(b[key])||b[key]<0))fail();
     if(typeof b.search!=='string'||typeof b.stockOnly!=='boolean'||!['',...PLAN_NEEDS].includes(b.need))fail();
   }
+  if(data.crafts!=null){
+    const c=data.crafts,obj=x=>x&&typeof x==='object'&&!Array.isArray(x),scalar=x=>typeof x==='string'||typeof x==='number'&&Number.isFinite(x);
+    if(!obj(c)||c.version!==1||!Object.hasOwn(c,'smith')||!Object.hasOwn(c,'scroll'))fail();
+    if(c.smith!==null){const s=c.smith;
+      if(!obj(s)||!Array.isArray(s.rolls)||s.sample!=null&&typeof s.sample!=='boolean')fail();
+      for(const r of s.rolls)if(!obj(r)||!Number.isInteger(r.d)||r.d<1||r.d>20||['b','dc','sub'].some(k=>r[k]!=null&&(!Number.isFinite(r[k])||(k==='sub'&&(!Number.isInteger(r[k])||r[k]<1||r[k]>20)))))fail();
+      if(s.mods!=null&&(!obj(s.mods)||Object.entries(s.mods).some(([k,v])=>!['str','dex','int','wis'].includes(k)||!Number.isFinite(v))))fail();
+      if(['job','vol','dc','abk','ab','pb','ml','ws'].some(k=>s[k]!=null&&!scalar(s[k])))fail();
+    }
+    if(c.scroll!==null&&(!obj(c.scroll)||Object.values(c.scroll).some(v=>!scalar(v)&&typeof v!=='boolean')))fail();
+  }
   for(const k of ['m','b','anar','sel','tab','theme'])if(data.settings[k]!=null&&typeof data.settings[k]!=='string')fail();
   if(data.settings.m!=null&&(!Number.isInteger(+data.settings.m)||+data.settings.m<1||+data.settings.m>10))fail();
   if(data.settings.b!=null&&(!Number.isFinite(+data.settings.b)||+data.settings.b< -5||+data.settings.b>30))fail();
@@ -165,18 +199,20 @@ function validateSnapshot(data){
   return data;
 }
 let PENDING_SAVE=null;
-$('backupExport').onclick=async()=>{if(!JDB||JBUSY.size){$('backupStatus').textContent='Дождись загрузки и сохранения журнала.';return}$('backupStatus').textContent=await downloadSnapshot(snapshot())?'Сохранение скачано: сумки, материалы, журнал и настройки.':'Файл не сохранён.'};
+$('backupExport').onclick=async()=>{if(!JDB||JBUSY.size){$('backupStatus').textContent='Дождись загрузки и сохранения журнала.';return}try{$('backupStatus').textContent=await downloadSnapshot(snapshot())?'Сохранение скачано: сумки, материалы, журнал, кузня, свитки и настройки.':'Файл не сохранён.'}catch(err){$('backupStatus').textContent='Файл не сохранён: '+err.message}};
 $('backupImport').onclick=()=>{$('backupFile').value='';$('backupFile').click()};
 $('backupFile').onchange=async e=>{
   try{const file=e.target.files[0];if(!file)return;if(file.size>5*1024*1024)throw Error('Файл больше 5 МБ');PENDING_SAVE=validateSnapshot(JSON.parse(await file.text()));
-    const d=PENDING_SAVE;$('restoreSummary').textContent=`В файле: ${d.state.bag.length} позиций в сумках, ${d.tracks.length} записей журнала, ${fmtZ(d.state.mat.gold)} зм. ${DOC?'Обновится и общая база помощника.':'Восстановление в этом браузере.'}`;$('restoreDialog').showModal();
+    const d=PENDING_SAVE;$('restoreSummary').textContent=`В файле: ${d.state.bag.length} позиций в сумках, ${d.tracks.length} записей журнала, ${fmtZ(d.state.mat.gold)} зм. ${d.crafts?'Кузня и свитки будут восстановлены из файла.':'В старом файле нет кузни и свитков — текущие записи останутся.'} ${DOC?'Обновится и общая база помощника.':'Восстановление в этом браузере.'}`;$('restoreDialog').showModal();
   }catch(err){PENDING_SAVE=null;$('backupStatus').textContent='Не восстановлено: '+err.message}
 };
 $('restoreCancel').onclick=()=>{PENDING_SAVE=null;$('restoreDialog').close()};
 $('restoreDialog').oncancel=e=>{if($('restoreApply').disabled)e.preventDefault();else PENDING_SAVE=null};
 $('restoreApply').onclick=async()=>{
   if(!PENDING_SAVE||!JDB||JBUSY.size){$('restoreSummary').textContent='Дождись загрузки и сохранения журнала.';return}
-  const next=PENDING_SAVE,old=snapshot(),col=JDB.collection('tracks');$('restoreApply').disabled=true;$('restoreCancel').disabled=true;
+  const next=PENDING_SAVE,col=JDB.collection('tracks');let old,stored;
+  try{old=snapshot();stored=Object.fromEntries(['belt','combo','brewing-plan',...SAVE_SETTINGS,...Object.values(CRAFT_KEYS)].map(k=>[k,localStorage.getItem(k)]))}catch(err){$('restoreSummary').textContent='Не удалось прочитать текущее сохранение: '+err.message;return}
+  const undo=UNDO,undoJ=UNDOJ;$('restoreApply').disabled=true;$('restoreCancel').disabled=true;
   clearTimeout(saveT);
   if(!await downloadSnapshot(old,'alcemy-before-restore')){$('restoreSummary').textContent='Копия текущего состояния не сохранена — восстановление отменено.';$('restoreApply').disabled=false;$('restoreCancel').disabled=false;return}
   try{
@@ -185,17 +221,22 @@ $('restoreApply').onclick=async()=>{
     const restored=JSON.parse(JSON.stringify(next.state));restored.u=Date.now();
     // Сначала проверить запись браузера; только затем заменять общее состояние.
     localStorage.setItem('belt',JSON.stringify(restored));
+    writeCrafts(next.crafts);
+    if(next.plans){localStorage.setItem('combo',JSON.stringify(next.plans.combo));localStorage.setItem('brewing-plan',JSON.stringify(next.plans.brewing))}
+    for(const key of SAVE_SETTINGS)if(Object.hasOwn(next.settings,key)){const value=next.settings[key];if(value==null)localStorage.removeItem(key);else localStorage.setItem(key,String(value))}
     if(DOC){clearTimeout(saveT);await DOC.set({s:JSON.stringify(restored),u:restored.u})}
     ST=restored;TR=next.tracks;S.t={...(next.situation||{})};UNDO=[];UNDOJ={};
-    if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));BP={...next.plans.brewing};ls.set('combo',JSON.stringify(COMBO));ls.set('brewing-plan',JSON.stringify(BP))}
-    for(const [key,value] of Object.entries(next.settings))if(['m','b','anar','sel','tab','theme'].includes(key)){if(value==null)localStorage.removeItem(key);else ls.set(key,String(value))}
-    $('m').value=ls.get('m')||2;lastM=+$('m').value;$('b').value=ls.get('b')||5;$('anar').checked=ls.get('anar')==='1';
-    if(ls.get('theme'))document.documentElement.dataset.theme=ls.get('theme');
-    S.sel=D.findIndex(c=>c.n===ls.get('sel'));if(S.sel<0)S.sel=null;
-    renderBelt();renderJournal();list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+    if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));BP={...next.plans.brewing}}
+    refreshRestoredUI(next.crafts);
     PENDING_SAVE=null;$('restoreDialog').close();$('backupStatus').textContent='Сохранение восстановлено.';
   }catch(err){
-    let rolled=true;try{for(const t of old.tracks){const {id,...data}=t;await col.doc(id).set(data)}for(const t of next.tracks)if(!old.tracks.some(o=>o.id===t.id))await col.doc(t.id).delete();ST=old.state;TR=old.tracks;S.t={...old.situation};if(old.plans){COMBO=old.plans.combo;BP=old.plans.brewing;ls.set('combo',JSON.stringify(COMBO));ls.set('brewing-plan',JSON.stringify(BP))}localStorage.setItem('belt',JSON.stringify(ST));if(DOC)await DOC.set({s:JSON.stringify(ST),u:Date.now()});renderBelt();renderJournal()}catch(e){rolled=false}
+    let rolled=true;
+    for(const t of old.tracks){try{const {id,...data}=t;await col.doc(id).set(data)}catch(e){rolled=false}}
+    for(const t of next.tracks)if(!old.tracks.some(o=>o.id===t.id)){try{await col.doc(t.id).delete()}catch(e){rolled=false}}
+    for(const [key,value] of Object.entries(stored)){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value)}catch(e){rolled=false}}
+    ST=old.state;TR=old.tracks;S.t={...old.situation};COMBO=old.plans.combo;BP=old.plans.brewing;UNDO=undo;UNDOJ=undoJ;
+    if(DOC){try{await DOC.set({s:JSON.stringify(ST),u:Date.now()})}catch(e){rolled=false}}
+    try{refreshRestoredUI(old.crafts)}catch(e){rolled=false}
     $('restoreSummary').textContent='Не восстановлено: '+err.message+(rolled?'. Предыдущее состояние возвращено.':'. Откат не завершён: восстанови скачанную копию после восстановления связи.');
   }finally{$('restoreApply').disabled=false;$('restoreCancel').disabled=false}
 };
