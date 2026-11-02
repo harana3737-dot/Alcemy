@@ -53,7 +53,7 @@ function masteryForecast(M,B,progress,week){
 function recommendBrews(config){
   const M=Math.max(1,Math.min(10,+$('m').value||1)),B=+$('b').value||0,budget=Math.max(0,+config.budget||0),hours=Math.max(0,+config.hours||0),result=[];
   for(const c of RECIPES){
-    if(!knows(c)||c.l>M||c.l>(S.t.lab?10:$('anar').checked?8:5))continue;
+    if(c.k==='ink'||!knows(c)||c.l>M||c.l>(S.t.lab?10:$('anar').checked?8:5))continue;
     if(config.search&&!c.n.toLowerCase().includes(String(config.search).toLowerCase()))continue;
     const needs=recipeNeeds(c),growth=c.l===M;
     if(config.need==='Рост мастерства'?!growth:config.need&&!needs.includes(config.need))continue;

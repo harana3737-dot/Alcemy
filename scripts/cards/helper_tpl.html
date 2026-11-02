@@ -204,7 +204,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
   <div id="headerDetails">
   <p>Выбери рецепт из __N__ и отметь условия варки. Страница посчитает шансы и подскажет бонусы качества. Наличие карточки ещё не означает известный рецепт.</p>
   <p>«Пояс» — сумка, бой, токсичность и отдых. «Журнал» — мастерство, рецепты и запись варок. «План варки» — прогноз роста и подбор под бюджет. «Сочетания» — проверка комплектов. «Вылазка» — заказы и запасы группы. Правила v0.3; материал игрока.</p>
-<div class="btns"><button type="button" class="btn soft" id="backupExport">Скачать сохранение</button><button type="button" class="btn ghost" id="backupImport">Восстановить из файла</button><button type="button" class="btn ghost" id="lssOpen">Блоки для LSS</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p class="note" id="backupStatus" aria-live="polite"></p>
+<div class="btns"><button type="button" class="btn soft" id="backupExport">Скачать сохранение</button><button type="button" class="btn ghost" id="backupImport">Восстановить из файла</button><button type="button" class="btn ghost" id="lssOpen">Блоки для LSS</button><button type="button" class="btn ghost" id="projectsOpen">Мои проекты</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p class="note" id="backupStatus" aria-live="polite"></p>
 </div>
 <dialog id="restoreDialog"><h2>Восстановление сохранения</h2><p id="restoreSummary"></p><p class="note">Заменит сумки, материалы, деньги, журнал и настройки. Перед заменой скачивается копия текущего состояния.</p><div class="btns"><button type="button" class="btn" id="restoreApply">Восстановить</button><button type="button" class="btn ghost" id="restoreCancel" autofocus>Отмена</button></div></dialog>
 <dialog id="lssDialog" aria-labelledby="lssH"><h2 id="lssH">Блоки для листа LSS</h2><p class="note">Текст собран из сумки, материалов и журнала помощника. Скопируй блок и вставь в указанный раздел листа. Порядок разделов и журнал переносов — в «Талис — карта листа LSS».</p><div id="lssBody"></div><div class="btns"><button type="button" class="btn ghost" id="lssClose" autofocus>Закрыть</button></div></dialog>
@@ -1083,6 +1083,7 @@ async function masteryTrack(M){
 }
 function renderJournal(){
   renderAvailability();
+  if(BASIC_SELECTED?.k==='ink'&&!$('tab-brew').hidden)renderBasicRecipe(BASIC_SELECTED);
   const keepJ={};document.querySelectorAll('#jgroups .jc[data-id]').forEach(c=>{keepJ[c.dataset.id]=[...c.querySelectorAll('input,select')].map(x=>x.type==='checkbox'?x.checked:x.value)});
   setTimeout(()=>document.querySelectorAll('#jgroups .jc[data-id]').forEach(c=>{const k=keepJ[c.dataset.id];if(!k)return;[...c.querySelectorAll('input,select')].forEach((x,i)=>{if(k[i]===undefined)return;if(x.type==='checkbox')x.checked=k[i];else if(k[i]!=='')x.value=k[i]})}),0);
   renderVol();renderHours();
@@ -1093,10 +1094,11 @@ function renderJournal(){
   JG.forEach(([g,label])=>{
     const items=TR.filter(t=>(t.group||'recipe')===g).sort((a,b)=>(!!a.done-!!b.done)||((a.order??99)-(b.order??99)));
     if(!items.length)return;
-    const sec=document.createElement('div');sec.innerHTML=`<div class="sect">${label} · ${items.length}</div>`;
+    const sec=document.createElement('div');sec.id='journal-'+g;sec.innerHTML=`<div class="sect">${label} · ${items.length}</div>`;
     items.forEach(t=>sec.appendChild(jCard(t)));root.appendChild(sec)});
 }
 // ожидание по исследованию при нынешнем бонусе и месте (рабочее место +1 или Анариэль +3)
+$('projectsOpen').onclick=()=>{tab('jour');const target=$('journal-project')||$('jgroups');target.scrollIntoView({block:'start'});};
 function jExpect(t){
   const c=t.cost;if(!c)return '';
   const B=+$('b').value||0, an=$('anar').checked, place=an?'у Анариэль':'на рабочем месте', left=Math.max(0,(+t.target||1)-(+t.current||0));
@@ -1905,7 +1907,7 @@ __TABLE_PLANNING__
 __CRAFTS__
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
-if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=BASIC.find(c=>c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
+if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=RECIPES.find(c=>['basic','ink'].includes(c.k)&&c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
 list();render();renderBelt();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
 </body>
