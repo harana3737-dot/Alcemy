@@ -12,6 +12,19 @@ const assert=require('node:assert/strict');
  assert.equal(await page.locator('#avRecipe option').count(),1);
  assert.match(await page.locator('#out').innerText(),/Зелье лечения 1.1/);
  assert.doesNotMatch(await page.locator('#out').innerText(),/Выбери рецепт слева/);
+ // Последнюю снятую отметку можно вернуть, не меняя фильтр и игровые ресурсы.
+ const resources=await page.evaluate(()=>JSON.stringify({mat:ST.mat,bag:ST.bag,T:ST.T}));
+ await page.locator('#avKnown').uncheck();
+ assert.equal(await page.locator('#avKnown').isEnabled(),true);
+ assert.equal(await page.locator('#avRecipe').inputValue(),'Зелье лечения 1.1');
+ await page.locator('#avKnown').check();
+ assert.equal(await page.locator('#avRecipe option').count(),1);
+ await page.reload();await page.waitForFunction(()=>JDB&&ST.mat);
+ assert.equal(await page.locator('#avKnown').isChecked(),true);
+ assert.equal(await page.evaluate(()=>JSON.stringify({mat:ST.mat,bag:ST.bag,T:ST.T})),resources);
+ await page.locator('#avKnown').uncheck();await page.locator('#avShowAll').click();
+ assert.equal(await page.locator('#avMode').inputValue(),'all');
+ await page.locator('#avKnown').check();await page.locator('#avMode').selectOption('known');
  await page.locator('#avQty').fill('6');await page.locator('#avQty').dispatchEvent('change');
  assert.match(await page.locator('#avShopping').innerText(),/1.*0,1 зм/);
  const logic=await page.evaluate(()=>{
