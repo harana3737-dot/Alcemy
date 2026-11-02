@@ -42,12 +42,21 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
     assert.match(await page.locator('#fConcentrationDC').innerText(),/СЛ концентрации 10/);
     await page.locator('#fAmount').fill('29');await page.locator('#fDamage').click();
     assert.equal(await page.locator('#fHp').innerText(),'14 / 42');assert.match(await page.locator('#fConcentrationDC').innerText(),/СЛ концентрации 14/);
-    // Конверсия не расходует ограниченный запас Адепта; созданные ячейки сверх базового запаса разрешены.
+    // Ж-145: общий расход и создание ячеек используют и две единицы от черты.
     await page.locator('[data-from-sp="2"]').click();
     assert.equal(await page.locator('#fSlot2').innerText(),'4 / 3');assert.equal(await page.locator('#fSp').innerText(),'2 / 5');
-    assert.equal(await page.locator('#fMeta').innerText(),'2 / 2');assert.equal(await page.locator('[data-from-sp="2"]').isDisabled(),true);
-    await page.locator('[data-to-sp="2"]').click();assert.equal(await page.locator('#fSp').innerText(),'4 / 5');
-    assert.equal(await page.locator('[data-to-sp="2"]').isDisabled(),true);
+    assert.equal(await page.locator('#fMeta').innerText(),'2 / 2');assert.equal(await page.locator('[data-from-sp="2"]').isEnabled(),true);
+    await page.locator('[data-from-sp="2"]').click();
+    assert.equal(await page.locator('#fSp').innerText(),'0 / 5');assert.equal(await page.locator('#fMeta').innerText(),'1 / 2');
+    // Волшебное указание можно оплатить при пустом классовом счётчике.
+    await page.locator('#fSpAmount').fill('1');await page.locator('#fSpendSp').click();
+    assert.equal(await page.locator('#fSpTotal').innerText(),'0 / 7');assert.equal(await page.locator('#fMeta').innerText(),'0 / 2');
+    await page.locator('[data-to-sp="2"]').click();assert.equal(await page.locator('#fSp').innerText(),'2 / 5');
+    await page.locator('[data-to-sp="3"]').click();assert.equal(await page.locator('#fSpTotal').innerText(),'5 / 7');
+    await page.locator('[data-to-sp="2"]').click();
+    assert.equal(await page.locator('#fSp').innerText(),'5 / 5');assert.equal(await page.locator('#fMeta').innerText(),'2 / 2');
+    assert.equal(await page.locator('#fSpTotal').innerText(),'7 / 7');assert.equal(await page.locator('[data-to-sp="2"]').isDisabled(),true);
+    const full=await page.evaluate(()=>{const before=JSON.stringify(talis());return !gainSorcery(1)&&before===JSON.stringify(talis())});assert(full);
     await page.locator('#fSpAmount').fill('2');await page.locator('#fSpendMeta').click();assert.equal(await page.locator('#fMeta').innerText(),'0 / 2');
     await page.reload();await page.locator('[data-tab="belt"]').click();assert.equal(await page.locator('#fHp').innerText(),'14 / 42');
     // Файл действительно скачивается, затем восстанавливается через интерфейс.
