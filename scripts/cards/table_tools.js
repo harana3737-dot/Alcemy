@@ -2,7 +2,8 @@
 const BASIC = ['heal','poison'].flatMap(kind=>Array.from({length:10},(_,i)=>({
   n:(kind==='heal'?'Зелье лечения ':'Яд ')+(i+1)+'.'+(i+1),l:i+1,k:'basic',b:kind==='heal'?'лечебная':'ядовитая',e:'',f:''
 })));
-const RECIPES = [...BASIC,...D];
+const INK_RECIPE = {n:'Чернила',k:'ink',l:1,f:''};
+const RECIPES = [...BASIC,...D,INK_RECIPE];
 const tier=l=>l<=2?2:l<=5?5:l<=7?7:9;
 function recipeKey(c){
   if(c.k==='basic'||!c.f||c.l===10)return c.n;
@@ -11,11 +12,13 @@ function recipeKey(c){
 }
 function knownRecipes(){return ST.knownRecipes||['Зелье лечения 1.1']}
 function knows(c){
+  if(c.k==='ink')return TR.some(t=>t.id==='research-ink'&&t.done);
   if(knownRecipes().includes(recipeKey(c)))return true;
   if(c.k==='eff'&&c.f&&c.l<10)return [2,5,7,9].filter(l=>l>tier(c.l)).some(l=>knownRecipes().includes(recipeKey({...c,l})));
   return false;
 }
 function supply(c,q=1){
+  if(c.k==='ink')return {deficits:[],warnings:['Уровень, резонанс и материалы выбери в форме варки чернил.'],ready:false};
   const deficits=[], warnings=[], M=+$('m').value||1;
   if(!knows(c))warnings.push('рецепт или ступень формулы не отмечены известными');
   if(c.l>M)warnings.push('выше текущего мастерства');
@@ -55,8 +58,14 @@ function supply(c,q=1){
 }
 let AV={mode:'known',selected:'Зелье лечения 1.1',q:1};
 let BASIC_SELECTED=null;
-function chooseAvailableRecipe(c){if(!c)return;AV.selected=c.n;BASIC_SELECTED=c.k==='basic'?c:null;S.sel=c.k==='basic'?null:D.indexOf(c);ls.set('sel',c.n);list();render();}
+function chooseAvailableRecipe(c){if(!c)return;AV.selected=c.n;const separate=['basic','ink'].includes(c.k);BASIC_SELECTED=separate?c:null;S.sel=separate?null:D.indexOf(c);ls.set('sel',c.n);list();render();}
+function openInkRecipe(){tab('jour');$('jink').scrollIntoView({block:'start'});$('jink').querySelector('.il').focus({preventScroll:true});}
 function renderBasicRecipe(c){
+  if(c.k==='ink'){
+    sitList(null);
+    $('out').innerHTML=`<div class="title"><h2>Чернила</h2><span class="badge">Общая формула</span></div><p>${knows(c)?'Рецепт освоен.':'Рецепт ещё не исследован.'} Уровень набора и резонанс выбираются при варке; материалы и СЛ зависят от уровня.</p><button type="button" class="btn" id="inkRecipeOpen">Перейти к варке чернил</button>`;
+    $('inkRecipeOpen').onclick=openInkRecipe;return;
+  }
   sitList(null);const batch=batchInfo(c.n,c.l,null,Math.max(1,Math.min(10,+$('m').value||1)),S.t.lab);
   $('out').innerHTML=`<div class="title"><h2>${esc(c.n)}</h2><span class="badge">${ROM[c.l]} · ${c.b} основа</span></div><p class="note">Выбранный рецепт. ${esc(batch.why)}; ${batch.t} ч на подход. Записывай фактические исходы ниже; выбор рецепта материалы не тратит.</p><div id="basicRec"></div>`;
   recForm($('basicRec'),{name:c.n,lvl:c.l});
@@ -65,24 +74,25 @@ function renderAvailability(){
   const box=$('availability');if(!box||!ST.mat||$('tab-brew').hidden)return;
   const filtered=RECIPES.filter(c=>AV.mode==='all'||AV.mode==='known'&&knows(c)||AV.mode==='ready'&&supply(c).ready);
   if(filtered.length&&!filtered.some(c=>c.n===AV.selected))AV.selected=filtered[0].n;
-  const c=RECIPES.find(c=>c.n===AV.selected)||RECIPES[0],check=supply(c,AV.q);
-  box.innerHTML=`<h2>Что могу сварить</h2><div class="row"><div><label class="f">Показать</label><select id="avMode"><option value="known">Известные рецепты</option><option value="ready">Есть материалы на одну попытку</option><option value="all">Все рецепты</option></select></div><div><label class="f">Рецепт</label><select id="avRecipe">${filtered.map(x=>`<option value="${esc(x.n)}">${esc(x.n)} · ${ROM[x.l]}</option>`).join('')}</select></div><div><label class="f">Доз / попыток</label><input id="avQty" type="number" min="1" max="100" value="${AV.q}"></div></div>
-  <p class="note">Отметь известные рецепты или ступени формул здесь — названия записей журнала могут быть произвольными. Материалы считаются на каждую попытку, без предполагаемой экономии на удачных бросках.</p>
+  const c=RECIPES.find(c=>c.n===AV.selected)||RECIPES[0],check=supply(c,AV.q),ink=c.k==='ink';
+  box.innerHTML=`<h2>Что могу сварить</h2><div class="row"><div><label class="f">Показать</label><select id="avMode"><option value="known">Известные рецепты</option><option value="ready">Есть материалы на одну попытку</option><option value="all">Все рецепты</option></select></div><div><label class="f">Рецепт</label><select id="avRecipe">${filtered.map(x=>`<option value="${esc(x.n)}">${esc(x.n)} · ${x.k==='ink'?'общая формула':ROM[x.l]}</option>`).join('')}</select></div><div><label class="f">Доз / попыток</label><input id="avQty" type="number" min="1" max="100" value="${AV.q}"></div></div>
+  <p class="note">Отметь известные рецепты или ступени формул здесь — названия записей журнала могут быть произвольными. Материалы считаются на каждую попытку, без предполагаемой экономии на удачных бросках. Освоенные чернила берутся из завершённого исследования в журнале.</p>
   ${!filtered.length?'<p class="note">Подходящих рецептов нет. Выбери «Все рецепты», чтобы отметить освоенное.</p>':''}
   <label class="tg"><input id="avKnown" type="checkbox" ${knows(c)?'checked':''}><span>Известно: ${esc(recipeKey(c))}</span></label>
   <p id="avWarnings" class="note">${check.warnings.map(esc).join(' · ')||'Мастерство и оборудование подходят.'}</p>
-  <div id="avShopping">${check.deficits.length?'<b>Докупить:</b><ul>'+check.deficits.map(d=>`<li>${esc(d.n)} — ${fmtZ(d.q)}${d.value?' зм сырья':' шт.'}; ${d.price==null?'цена у мастера':fmtZ(d.price)+' зм'}</li>`).join('')+'</ul>':'Материалов хватает; списаний не было.'}</div>
+  <div id="avShopping">${ink?'Расход материалов проверяется в форме варки после выбора уровня набора.':check.deficits.length?'<b>Докупить:</b><ul>'+check.deficits.map(d=>`<li>${esc(d.n)} — ${fmtZ(d.q)}${d.value?' зм сырья':' шт.'}; ${d.price==null?'цена у мастера':fmtZ(d.price)+' зм'}</li>`).join('')+'</ul>':'Материалов хватает; списаний не было.'}</div>
   <p class="note">Докупка: <b>${fmtZ(check.deficits.reduce((s,d)=>s+(d.price||0),0))} зм</b>${check.deficits.some(d=>d.price==null)?' + позиции с ценой у мастера':''}; на руках ${fmtZ(ST.mat.gold||0)} зм. Цены справочные, наличие у продавца уточни.</p>
   <div class="btns"><button id="avCopy" type="button" class="btn soft">Скопировать докупку</button><button id="avOpen" type="button" class="btn">Перейти к варке</button></div>`;
+  if(ink){$('avQty').disabled=true;$('avShopping').nextElementSibling.hidden=true;$('avCopy').disabled=true;$('avOpen').textContent='Перейти к варке чернил';}
   $('avMode').value=AV.mode;
   if(filtered.some(x=>x.n===c.n))$('avRecipe').value=c.n;
-  $('avKnown').disabled=!filtered.length||(knows(c)&&!knownRecipes().includes(recipeKey(c)));$('avOpen').disabled=!filtered.length;
+  $('avKnown').disabled=ink||!filtered.length||(knows(c)&&!knownRecipes().includes(recipeKey(c)));$('avOpen').disabled=!filtered.length;
   $('avMode').onchange=e=>{AV.mode=e.target.value;renderAvailability();if($('avRecipe').value)chooseAvailableRecipe(RECIPES.find(c=>c.n===$('avRecipe').value))};
   $('avRecipe').onchange=e=>chooseAvailableRecipe(RECIPES.find(c=>c.n===e.target.value));
   $('avQty').onchange=e=>{AV.q=Math.max(1,Math.min(100,+e.target.value||1));renderAvailability()};
   $('avKnown').onchange=e=>{const on=e.target.checked;mutate(()=>{const keys=knownRecipes().filter(k=>k!==recipeKey(c));if(on)keys.push(recipeKey(c));ST.knownRecipes=keys;logx('Известные рецепты: '+recipeKey(c)+' — '+(on?'да':'нет'))})};
   $('avCopy').onclick=async()=>{try{await navigator.clipboard.writeText('Докупка для '+c.n+' ×'+AV.q+'\n'+check.deficits.map(d=>`${d.n}: ${fmtZ(d.q)}${d.price==null?' — цена у мастера':' — '+fmtZ(d.price)+' зм'}`).join('\n'));$('avCopy').textContent='Скопировано'}catch(e){$('avCopy').textContent='Не скопировалось'}};
-  $('avOpen').onclick=()=>{if(c.k==='basic'){tab('jour');const el=$('jrec');el.querySelector('.rn').value=c.n;el.querySelector('.rn').dispatchEvent(new Event('input'));el.scrollIntoView({block:'center'})}else{S.sel=D.indexOf(c);render();$('out').scrollIntoView({block:'center'})}};
+  $('avOpen').onclick=()=>{if(ink){openInkRecipe();return}if(c.k==='basic'){tab('jour');const el=$('jrec');el.querySelector('.rn').value=c.n;el.querySelector('.rn').dispatchEvent(new Event('input'));el.scrollIntoView({block:'center'})}else{S.sel=D.indexOf(c);render();$('out').scrollIntoView({block:'center'})}};
 }
 ['m','anar'].forEach(id=>$(id).addEventListener('change',renderAvailability));
 
