@@ -1,4 +1,8 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Руны Шаэрры</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -158,19 +162,58 @@ details.more[open] { display: grid; gap: 10px; }
 #numErr { margin: -14px 0 0; color: var(--beda); }
 #numErr:empty, #logNote:empty { display: none; }
 .flow .spent-line::before { content: "✓ "; }
-</style>
 
+.session-tools,.journal-tools {display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.session-tools a {color:var(--silver)}
+.prophecy-box {display:grid;gap:8px;margin:12px 0}
+input[type="search"],input[type="text"],select {max-width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--stone-2);color:var(--silver);padding:10px;font:inherit}
+.journal-tools input {flex:1 1 220px}
+.journal-tools select {flex:1 1 180px}
+.log li {overflow-wrap:anywhere}
+.editor {display:grid;gap:9px;padding:12px;border:1px solid var(--line);border-radius:12px}
+body.compact .draw {margin:8px 0}
+body.compact .stone {font-size:2.5rem;width:52px;height:58px}
+body.compact .flow>.quote,body.compact .flow>.note,body.compact .flow>.to,body.compact #stones>p,body.compact .bag .sub {display:none}
+body.compact .wrap>header p {display:none}
+body.compact {padding-top:8px}
+body.compact .wrap {gap:12px}
+body.compact header h1 {font-size:1.5rem}
+body.compact h2 {margin:4px 0;font-size:1.2rem}
+body.compact .flow {padding:8px}
+body.compact .flow h3 {margin:0 0 6px}
+body.compact .prophecy-box {margin:4px 0}
+body.compact .bag {padding:6px;gap:6px}
+body.compact .bag .role span {display:none}
+body.compact .session-tools {font-size:.85rem;margin:4px 0}
+body.compact .session-tools .btn {font-size:.85rem;padding:8px}
+body.compact section {margin-top:4px}
+body.compact #stones .stones {grid-template-columns:1fr 1fr}
+body.compact .flow .act {display:grid;gap:6px}
+body.compact .flow input[type=text] {width:100%}
+body.compact .flow .spent-line {font-size:.85rem;margin:6px 0}
+body.compact .flow h3 {font-size:.9rem}
+body.compact section {margin-top:4px}
+body.compact .stones {gap:10px}
+[hidden] {display:none!important}
+</style>
+</head>
+<body>
+<main>
 <div class="wrap">
   <header>
     <h1>Тетрадь Шаэрры</h1>
     <p>Утром по одной руне из каждого мешочка. Первая — Течение: то, что уже движется. Вторая — Воля: что с этим можно сделать. Вечером — запись о том, почему одно оказалось вероятнее другого.</p>
   </header>
 
+  <div class="session-tools">
+    <button type="button" class="btn" id="compact" aria-pressed="false">За столом</button>
+    <a href="#evening">Вечер</a><a href="#journal">Дневник</a><a href="#backup">Перенос</a>
+  </div>
   <p class="banner" id="banner" hidden></p>
   <p class="banner warn" id="storeWarn" hidden>Браузер не даёт сохранять: записи живут, пока открыта страница. Скопируйте тетрадь в «Резервной копии» внизу.</p>
   <div class="draw">
     <div class="bag" id="bag1">
-      <div class="role">Первый мешочек · <b>Течение</b></div>
+      <div class="role"><span>Первый мешочек · </span><b>Течение</b></div>
       <div class="stone" id="stone1"></div>
       <div class="name" id="name1"></div>
       <div class="sub" id="sub1"></div>
@@ -191,7 +234,7 @@ details.more[open] { display: grid; gap: 10px; }
       </div>
     </div>
     <div class="bag" id="bag2">
-      <div class="role">Второй мешочек · <b>Воля</b></div>
+      <div class="role"><span>Второй мешочек · </span><b>Воля</b></div>
       <div class="stone" id="stone2"></div>
       <div class="name" id="name2"></div>
       <div class="sub" id="sub2"></div>
@@ -206,10 +249,17 @@ details.more[open] { display: grid; gap: 10px; }
 
   <section>
     <h2>Утренняя запись</h2>
-    <div class="entry" id="omen"></div>
+    <div class="prophecy-box">
+      <label for="prophecy">Моё предсказание</label>
+      <textarea id="prophecy" class="short" placeholder="Можно переписать предложенную фразу своим голосом"></textarea>
+      <div class="row"><button type="button" class="btn" id="suggest">Вернуть предложенную фразу</button></div>
+      <details id="dayMeta" open><summary>Дата и название дня</summary><label for="gameDate">Дата внутри игры / название дня</label>
+      <input type="text" id="gameDate" placeholder="Необязательно: дата, день пути, название сессии"></details>
+    </div>
+    <details id="interpretation"><summary>Толкование и поля трактата</summary><div class="entry" id="omen"></div></details>
   </section>
 
-  <section>
+  <section id="stones">
     <h2>Камни дня</h2>
     <p class="note" style="margin:0 0 10px">Утренние камни Шаэрра носит при себе. Когда она тратит руну, камень теплеет в пальцах, и она возвращает его в мешочек.</p>
     <div class="stones" id="flows"></div>
@@ -230,7 +280,7 @@ details.more[open] { display: grid; gap: 10px; }
     </div>
   </section>
 
-  <section class="evening">
+  <section class="evening" id="evening">
     <h2>Вечер</h2>
     <label class="note" for="evExp">Что я ждала утром?</label>
     <textarea id="evExp" class="short" placeholder="Например: ярость у врага и случай, когда нужно будет прикрыть своих."></textarea>
@@ -245,11 +295,29 @@ details.more[open] { display: grid; gap: 10px; }
   </section>
 
   <details class="table" id="tbl">
-    <summary>За столом</summary>
+    <summary>Памятка по Знамению</summary>
     <div class="grid" id="day"></div>
   </details>
 
-  <section class="log">
+  <section class="log" id="journal">
+    <div class="journal-tools">
+      <input type="search" id="logSearch" placeholder="Найти имя, фразу или дату" aria-label="Поиск в дневнике">
+      <select id="logRune" aria-label="Фильтр по руне"><option value="">Все руны</option></select>
+    </div>
+    <p class="note" id="logCount" aria-live="polite"></p>
+    <form class="editor" id="logEditor" hidden>
+      <h3>Дополнить прошлую запись</h3>
+      <label for="editStamp">Дата и время записи</label><input type="text" id="editStamp">
+      <label for="editGameDate">Дата внутри игры / название дня</label><input type="text" id="editGameDate">
+      <label for="editProphecy">Предсказание, которое прозвучало</label><textarea id="editProphecy"></textarea>
+      <label for="editS1">Первый камень — на кого или на что</label><input type="text" id="editS1">
+      <label for="editS2">Второй камень — на кого или на что</label><input type="text" id="editS2">
+      <label for="editExp">Что я ждала</label><textarea id="editExp" class="short"></textarea>
+      <label for="editEv">Что произошло / позднейшее дополнение</label><textarea id="editEv"></textarea>
+      <label for="editFal">Что опровергло бы прочтение</label><textarea id="editFal" class="short"></textarea>
+      <div class="row"><button type="submit" class="btn main">Сохранить запись</button><button type="button" class="btn" id="cancelEdit">Отмена</button></div>
+      <p class="note" id="editMsg" role="status"></p>
+    </form>
     <h2>Прошлые страницы</h2>
     <p class="note" id="logNote" role="status"></p>
     <ol id="log"></ol>
@@ -257,15 +325,19 @@ details.more[open] { display: grid; gap: 10px; }
       <summary>Резервная копия</summary>
       <div class="grid">
         <p class="note">Тетрадь хранится только в этом браузере. Скопируйте её текстом и сохраните где-нибудь у себя; на другом устройстве вставьте этот текст и нажмите «Добавить».</p>
-        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn" id="exp">Скопировать тетрадь</button><span class="note" id="expMsg" aria-live="polite"></span></div>
+        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn" id="exp">Скопировать тетрадь</button><button type="button" class="btn" id="download">Скачать JSON</button><span class="note" id="expMsg" aria-live="polite"></span></div>
+        <label for="importFile">Открыть сохранение JSON</label><input type="file" id="importFile" accept=".json,application/json">
         <label class="note" for="impText">Текст тетради</label>
         <textarea id="impText" class="short"></textarea>
-        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn" id="imp">Добавить в тетрадь</button><span class="note" id="impMsg" aria-live="polite"></span></div>
+        <label for="importMode">Что перенести</label>
+        <select id="importMode"><option value="merge">Добавить историю, оставить мой день</option><option value="restore">Восстановить всю тетрадь и текущий день</option></select>
+        <p class="note">Полное восстановление заменяет историю и день. Сначала скачайте свою тетрадь; предыдущая версия также сохраняется для отмены переноса.</p>
+        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn" id="imp">Перенести</button><button type="button" class="btn" id="undoImport">Отменить последний перенос</button><span class="note" id="impMsg" aria-live="polite"></span></div>
       </div>
     </details>
   </section>
 </div>
-
+</main>
 <script>
 const R = {
   1:{n:"Хагалаз",t:"Град",g:"ᚺ",m:"Полный крах, разрушение планов вдребезги. Ультимативная единица на кубах.",sees:"Крах. Разрушение планов.",use:"Ты сегодня выбрал не ту дорогу. Я вижу, что твой мир сейчас рухнет. Я просто позволю этому случиться."},
@@ -564,6 +636,7 @@ let A = 1, B = 20;
 let SPENT = {1:"", 2:""};
 let TG = {1:"", 2:""};        // черновики целей камней, чтобы не терялись при перерисовке
 let MODE = "example";         // example — пример до первого действия; day — свой день; preview — пара из ссылки
+let CUSTOM = false;
 let CLOSED = false;           // день уже записан в тетрадь
 const EVF = ["evExp", "ev", "evFal"];
 const isD20 = v => Number.isInteger(v) && v >= 1 && v <= 20;
@@ -624,6 +697,7 @@ function render(animate) {
       ${r.extra.length ? `<div class="extra">${r.extra.map(x => `<p class="note">${esc(x)}</p>`).join("")}</div>` : ""}
       <div class="margin"><p>На полях трактата (песни северян Тиллонрии, изречения Фланесса и пометки Шаэрры):</p>${poems}</div>
     </details>`;
+  if (!CUSTOM) $("prophecy").value = morningLine(A, B);
   renderFlows();
   $("day").innerHTML = dayPlan(A, B);
   renderSB();
@@ -688,27 +762,43 @@ function trySet(key, val) { try { localStorage.setItem(key, val); return true; }
 function warnStore(ok) {
   $("storeWarn").hidden = ok;
 }
+function currentDay() {
+  const st = {v:3, a:A, b:B, spent:{...SPENT}, tg:{...TG}, closed:CLOSED,
+    prophecy:$("prophecy").value, custom:CUSTOM, gameDate:$("gameDate").value};
+  EVF.forEach(k => st[k] = $(k).value);
+  return st;
+}
 function store() {
   if (MODE !== "day") return true;
-  const st = {v:2, a:A, b:B, spent:SPENT, tg:TG, closed:CLOSED};
-  EVF.forEach(k => st[k] = $(k).value);
-  const ok = trySet("shaerra-day", JSON.stringify(st));
-  warnStore(ok);
-  return ok;
+  const ok = trySet("shaerra-day", JSON.stringify(currentDay())); warnStore(ok); return ok;
 }
-// Любое действие игрока в режиме примера начинает его собственный день
 function touch() { if (MODE === "example") MODE = "day"; }
-function dayHasWork() { return !!(SPENT[1] || SPENT[2] || EVF.some(k => $(k).value.trim())); }
-function newDay() { SPENT = {1:"", 2:""}; TG = {1:"", 2:""}; EVF.forEach(k => $(k).value = ""); }
+function dayHasWork() { return !!(CUSTOM || $("gameDate").value.trim() || SPENT[1] || SPENT[2] || TG[1] || TG[2] || EVF.some(k => $(k).value.trim())); }
+function newDay() {
+  SPENT = {1:"", 2:""}; TG = {1:"", 2:""}; CUSTOM = false;
+  $("prophecy").value = ""; $("gameDate").value = ""; EVF.forEach(k => $(k).value = "");
+}
+function currentProphecy() { return $("prophecy").value.trim() || morningLine(A, B); }
+$("prophecy").addEventListener("input", () => { if (MODE === "preview") return; touch(); CUSTOM = true; CLOSED = false; store(); renderBanner(); });
+$("gameDate").addEventListener("input", () => { if (MODE === "preview") return; touch(); CLOSED = false; store(); renderBanner(); });
+$("suggest").addEventListener("click", () => { if (MODE === "preview") return; touch(); CUSTOM = false; $("prophecy").value = morningLine(A, B); store(); });
+$("compact").addEventListener("click", () => {
+  const on = document.body.classList.toggle("compact");
+  $("compact").setAttribute("aria-pressed", String(on)); $("compact").textContent = on ? "Полный вид" : "За столом";
+  $("interpretation").open = !on; $("dayMeta").open = !on;
+  trySet("shaerra-view", on ? "compact" : "full");
+});
 
+function clearPairLink() { if(location.hash) { try { history.replaceState(null,"",location.pathname+location.search); } catch(e) { /* Storage and notebook remain intact. */ } } }
 function renderBanner() {
+  $("prophecy").readOnly = MODE === "preview"; $("gameDate").readOnly = MODE === "preview"; $("suggest").disabled = MODE === "preview";
   const b = $("banner");
   if (MODE === "example") { b.hidden = false; b.innerHTML = `Это пример. Вытяните руны или впишите свои числа, и начнётся ваш день.`; }
   else if (MODE === "preview") { b.hidden = false; b.innerHTML = `Просмотр пары из ссылки: ваш день не тронут, здесь ничего не сохраняется. <button type="button" class="btn" id="backDay">Вернуться к своему дню</button>`; }
   else if (CLOSED) { b.hidden = false; b.innerHTML = `Этот день записан в тетрадь. Утром вытяните новые руны.`; }
   else b.hidden = true;
 }
-$("banner").addEventListener("click", e => { if (e.target.id === "backDay") { loadDay(); render(false); } });
+$("banner").addEventListener("click", e => { if (e.target.id === "backDay") { clearPairLink(); loadDay(); render(false); } });
 
 $("flows").addEventListener("click", e => {
   const t = e.target;
@@ -719,88 +809,144 @@ $("flows").addEventListener("input", e => { const m = /^tg([12])$/.exec(e.target
 EVF.forEach(k => $(k).addEventListener("input", () => { touch(); CLOSED = false; store(); renderBanner(); }));
 
 // Тетрадь — только в этом браузере; повреждённые данные не стираем, а откладываем в резервный ключ
-const okEntry = x => x && typeof x === "object" && isD20(x.a) && isD20(x.b);
-let LOG = [];
-let LOAD_NOTE = "";
+const textOf = v => typeof v === "string" ? v : "";
+const okEntry = x => x && typeof x === "object" && isD20(x.a) && isD20(x.b) && ["d","id","gameDate","prophecy","s1","s2",...EVF].every(k=>x[k]===undefined || typeof x[k]==="string");
+const entryKey = x => textOf(x.id) || `legacy:${textOf(x.d)}|${x.a}|${x.b}`;
+function normalizeEntry(x) {
+  const e = {id:entryKey(x), a:x.a, b:x.b, d:textOf(x.d), gameDate:textOf(x.gameDate),
+    prophecy:typeof x.prophecy === "string" ? x.prophecy : morningLine(x.a,x.b), s1:textOf(x.s1), s2:textOf(x.s2)};
+  EVF.forEach(k => e[k] = textOf(x[k])); return e;
+}
+let LOG = [], LOAD_NOTE = "", EDIT_ID = null;
 (function loadLog() {
-  let raw = null;
-  try { raw = localStorage.getItem("shaerra-log"); } catch (e) { LOAD_NOTE = "Браузер не даёт читать сохранённую тетрадь."; return; }
+  let raw;
+  try { raw = localStorage.getItem("shaerra-log"); } catch (e) { LOAD_NOTE = "Браузер не даёт читать тетрадь."; return; }
   if (!raw) return;
   let data;
-  try { data = JSON.parse(raw); } catch (e) { data = undefined; }
-  const list = Array.isArray(data) ? data : (data && Array.isArray(data.log) ? data.log : null);
-  if (!list) { trySet(`shaerra-log-broken-${Date.now()}`, raw); LOAD_NOTE = "Сохранённая тетрадь повреждена; её копия отложена в браузере, начата новая."; return; }
-  LOG = list.filter(okEntry);
-  const bad = list.length - LOG.length;
-  if (bad) { trySet(`shaerra-log-broken-${Date.now()}`, raw); LOAD_NOTE = `Пропущено повреждённых записей: ${bad}; исходный текст отложен в браузере.`; }
+  try { data = JSON.parse(raw); } catch (e) { data = null; }
+  const list = Array.isArray(data) ? data : data && Array.isArray(data.log) ? data.log : null;
+  if (!list) { trySet(`shaerra-log-broken-${Date.now()}`, raw); LOAD_NOTE = "Повреждённый журнал отложен копией в браузере. Импортируйте резервную копию."; return; }
+  LOG = list.filter(okEntry).map(normalizeEntry);
+  if (LOG.length !== list.length) { trySet(`shaerra-log-broken-${Date.now()}`,raw); LOAD_NOTE = `Пропущено повреждённых записей: ${list.length-LOG.length}. Исходник отложен копией.`; }
 })();
+for (let n=1;n<=20;n++) { const o=document.createElement("option"); o.value=String(n); o.textContent=label(n); $("logRune").append(o); }
 function renderLog() {
-  const ol = $("log");
   $("logNote").textContent = LOAD_NOTE;
-  if (!LOG.length) { ol.innerHTML = `<li class="empty">Пока пусто. Закройте день, и запись появится здесь. Тетрадь хранится только в этом браузере.</li>`; return; }
-  ol.innerHTML = LOG.map(x => {
-    const sp = [x.s1 && `${R[x.a].n}: ${x.s1}`, x.s2 && `${R[x.b].n}: ${x.s2}`].filter(Boolean).join("; ");
-    const lines = [
-      `<span class="note">«${esc(morningLine(x.a, x.b))}»</span>`,
-      sp && `<span class="note">Камни: ${esc(sp)}</span>`,
-      x.evExp && `<span class="ev">Ждала: ${esc(x.evExp)}</span>`,
-      x.ev && `<span class="ev">${esc(x.ev)}</span>`,
-      x.evFal && `<span class="ev">Опровергло бы: ${esc(x.evFal)}</span>`
-    ].filter(Boolean).join("");
-    return `<li><span><time>${esc(x.d || "")}</time> <b>${esc(label(x.a))} → ${esc(label(x.b))}</b></span>${lines}</li>`;
-  }).join("");
+  const query = $("logSearch").value.trim().toLocaleLowerCase("ru"), rune = Number($("logRune").value);
+  const list = LOG.filter(x => (!rune || x.a===rune || x.b===rune) &&
+    (!query || [label(x.a),label(x.b),x.d,x.gameDate,x.prophecy,x.s1,x.s2,...EVF.map(k=>x[k])].join(" ").toLocaleLowerCase("ru").includes(query)));
+  $("logCount").textContent = `Записей: ${list.length} из ${LOG.length}`;
+  $("log").innerHTML = list.length ? list.map(x => {
+    const sp = [x.s1 && `${R[x.a].n}: ${x.s1}`,x.s2 && `${R[x.b].n}: ${x.s2}`].filter(Boolean).join("; ");
+    const lines = [`<span class="note">«${esc(x.prophecy)}»</span>`, x.gameDate && `<span class="note">В игре: ${esc(x.gameDate)}</span>`,
+      sp && `<span class="note">Камни: ${esc(sp)}</span>`,x.evExp && `<span class="ev">Ждала: ${esc(x.evExp)}</span>`,
+      x.ev && `<span class="ev">${esc(x.ev)}</span>`,x.evFal && `<span class="ev">Опровергло бы: ${esc(x.evFal)}</span>`].filter(Boolean).join("");
+    return `<li><span><time>${esc(x.d)}</time> <b>${esc(label(x.a))} → ${esc(label(x.b))}</b></span>${lines}<button type="button" class="btn" data-edit="${esc(x.id)}">Дополнить запись</button></li>`;
+  }).join("") : `<li class="empty">${LOG.length ? "По этому запросу записей нет." : "Пока пусто. Закройте день, и запись появится здесь."}</li>`;
 }
-function saveLog() { const ok = trySet("shaerra-log", JSON.stringify(LOG)); warnStore(ok); return ok; }
-function flash(id, msg, ms) { $(id).textContent = msg; if (ms) setTimeout(() => { if ($(id).textContent === msg) $(id).textContent = ""; }, ms); }
-
-$("save").addEventListener("click", () => {
-  if (MODE === "preview") { flash("saved", "Это просмотр пары из ссылки. Вернитесь к своему дню, чтобы записать его.", 5000); return; }
-  if (CLOSED) { flash("saved", "Этот день уже записан. Утром вытяните новые руны.", 4000); return; }
+function saveLog() { const ok=trySet("shaerra-log",JSON.stringify(LOG)); warnStore(ok); return ok; }
+function flash(id,msg,ms) { $(id).textContent=msg; if(ms) setTimeout(()=>{if($(id).textContent===msg) $(id).textContent="";},ms); }
+$("logSearch").addEventListener("input",renderLog); $("logRune").addEventListener("change",renderLog);
+const editFields = {editStamp:"d",editGameDate:"gameDate",editProphecy:"prophecy",editS1:"s1",editS2:"s2",editExp:"evExp",editEv:"ev",editFal:"evFal"};
+$("log").addEventListener("click",e=>{
+  const button=e.target.closest("[data-edit]"); if(!button) return;
+  const entry=LOG.find(x=>x.id===button.dataset.edit); if(!entry) return;
+  EDIT_ID=entry.id; Object.entries(editFields).forEach(([field,key])=>$(field).value=entry[key] || "");
+  $("editMsg").textContent=""; $("logEditor").hidden=false; $("editEv").focus();
+});
+$("cancelEdit").addEventListener("click",()=>{EDIT_ID=null; $("logEditor").hidden=true;});
+$("logEditor").addEventListener("submit",e=>{
+  e.preventDefault(); const index=LOG.findIndex(x=>x.id===EDIT_ID); if(index<0) return;
+  const old=LOG[index], entry={...old}; Object.entries(editFields).forEach(([field,key])=>entry[key]=$(field).value.trim());
+  LOG[index]=entry;
+  if(!saveLog()) { LOG[index]=old; flash("editMsg","Не удалось сохранить. Дополнение осталось в форме; скопируйте его перед закрытием страницы."); return; }
+  EDIT_ID=null; $("logEditor").hidden=true; renderLog();
+});
+$("save").addEventListener("click",()=>{
+  if(MODE==="preview") {flash("saved","Это просмотр пары. Вернитесь к своему дню."); return;}
+  if(MODE==="example") {flash("saved","Сначала выберите свои руны или запишите предсказание. Это пока пример.");return;}
+  if(CLOSED) {flash("saved","Этот день уже записан."); return;}
   touch();
-  const d = new Date().toLocaleString("ru-RU", {day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit"});
-  const entry = {id:`${Date.now()}-${Math.floor(Math.random() * 1e6)}`, a:A, b:B, d, s1:SPENT[1], s2:SPENT[2]};
-  EVF.forEach(k => entry[k] = $(k).value.trim());
-  LOG.unshift(entry);
-  if (!saveLog()) {
-    LOG.shift();
-    flash("saved", "Не удалось сохранить: браузер не даёт записывать. Записи остались на странице; скопируйте тетрадь в «Резервной копии».");
-    return;
-  }
-  newDay(); CLOSED = true; renderFlows(); store(); renderLog(); renderBanner();
-  flash("saved", "День закрыт и записан. Утром вытяните новые руны.", 4000);
+  const d=new Date().toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  const entry={id:`${Date.now()}-${Math.floor(Math.random()*1e9)}`,a:A,b:B,d,gameDate:$("gameDate").value.trim(),
+    prophecy:currentProphecy(),s1:SPENT[1],s2:SPENT[2]}; EVF.forEach(k=>entry[k]=$(k).value.trim());
+  const day={...currentDay(),closed:true,custom:false,prophecy:morningLine(A,B),spent:{1:"",2:""},tg:{1:"",2:""},gameDate:""};
+  EVF.forEach(k=>day[k]="");
+  if(!writeBundle({log:[entry,...LOG],day},false)) {flash("saved","Не удалось сохранить день. Поля остались на странице; скачайте тетрадь.");return;}
+  flash("saved","День закрыт и записан.");
 });
-
-function exportText() {
-  const day = {a:A, b:B, spent:SPENT, closed:CLOSED};
-  EVF.forEach(k => day[k] = $(k).value);
-  return JSON.stringify({v:2, log:LOG, day: MODE === "day" ? day : null});
+function snapshot() {
+  let day=MODE==="day" ? currentDay() : null;
+  if(MODE==="preview") { try {const x=JSON.parse(localStorage.getItem("shaerra-day"));if(x && isD20(x.a) && isD20(x.b)) day=x;} catch(e) { /* No saved day. */ } }
+  return {v:3,log:LOG,day};
 }
-$("exp").addEventListener("click", () => {
-  const txt = exportText();
-  $("impText").value = txt;
-  const fail = () => { $("impText").select(); flash("expMsg", "Не удалось скопировать: текст выделен в поле ниже, скопируйте его вручную."); };
-  try { navigator.clipboard.writeText(txt).then(() => flash("expMsg", `Скопировано записей: ${LOG.length}.`), fail); } catch (e) { fail(); }
+function exportText() { return JSON.stringify(snapshot(),null,2); }
+function downloadText(txt,name) {
+  const url=URL.createObjectURL(new Blob([txt],{type:"application/json;charset=utf-8"})),a=document.createElement("a");
+  a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$("download").addEventListener("click",()=>downloadText(exportText(),"shaerra-save.json"));
+$("exp").addEventListener("click",()=>{
+  const txt=exportText();$("impText").value=txt;
+  const fail=()=>{ $("impText").focus();$("impText").select();flash("expMsg","Текст выделен ниже: скопируйте вручную или скачайте JSON.");};
+  try {navigator.clipboard.writeText(txt).then(()=>flash("expMsg",`Скопировано записей: ${LOG.length}.`),fail);} catch(e) {fail();}
 });
-$("imp").addEventListener("click", () => {
-  let data;
-  try { data = JSON.parse($("impText").value); } catch (e) { flash("impMsg", "Это не похоже на текст тетради: вставьте то, что скопировала кнопка «Скопировать тетрадь»."); return; }
-  const list = Array.isArray(data) ? data : (data && Array.isArray(data.log) ? data.log : null);
-  if (!list) { flash("impMsg", "Это не похоже на текст тетради."); return; }
-  const key = x => x.id || `${x.d}|${x.a}|${x.b}`;
-  const have = new Set(LOG.map(key));
-  const good = list.filter(okEntry);
-  const fresh = good.filter(x => !have.has(key(x))).map(x => {
-    const e = {a:x.a, b:x.b, d:String(x.d || ""), s1:String(x.s1 || ""), s2:String(x.s2 || "")};
-    if (x.id) e.id = String(x.id);
-    EVF.forEach(k => e[k] = String(x[k] || ""));
-    return e;
-  });
-  const before = LOG;
-  LOG = LOG.concat(fresh);
-  if (!saveLog()) { LOG = before; flash("impMsg", "Не удалось сохранить: браузер не даёт записывать."); return; }
-  renderLog();
-  const skipped = list.length - good.length;
-  flash("impMsg", `Добавлено записей: ${fresh.length}.${skipped ? ` Пропущено повреждённых: ${skipped}.` : ""}`);
+$("importFile").addEventListener("change",async()=>{
+  const f=$("importFile").files[0];if(!f)return;
+  try {$("impText").value=await f.text();flash("impMsg","Файл открыт. Выберите, что перенести.");} catch(e) {flash("impMsg","Не удалось прочитать файл.");}
+});
+function readBundle(raw,full) {
+  const data=JSON.parse(raw);
+  if(data && data.v!==undefined && ![1,2,3].includes(data.v)) throw Error("Версия сохранения не поддерживается.");
+  const list=Array.isArray(data) ? data : data && data.log;
+  if(!Array.isArray(list)) throw Error("В файле нет истории тетради.");
+  if(full && (Array.isArray(data) || !Object.hasOwn(data,"day"))) throw Error("В этом старом файле только история. Выберите добавление истории.");
+  if(full && !list.every(okEntry)) throw Error("История содержит повреждённые записи. Полное восстановление отменено.");
+  const day=full ? data.day : null;
+  if(full && day!==null && (!day || !isD20(day.a) || !isD20(day.b) ||
+     (day.closed!==undefined && typeof day.closed!=="boolean") || (day.custom!==undefined && typeof day.custom!=="boolean") ||
+     ["prophecy","gameDate",...EVF].some(k=>day[k]!==undefined && typeof day[k]!=="string") ||
+     ["spent","tg"].some(k=>day[k]!==undefined && (!day[k] || typeof day[k]!=="object" || Array.isArray(day[k]) || [1,2].some(i=>day[k][i]!==undefined && typeof day[k][i]!=="string")))))
+    throw Error("Повреждён текущий день. Восстановление отменено.");
+  const seen=new Set(),log=[];
+  list.filter(okEntry).map(normalizeEntry).forEach(x=>{if(!seen.has(x.id)){seen.add(x.id);log.push(x);}});
+  return {v:3,log,day,skipped:list.filter(x=>!okEntry(x)).length};
+}
+function writeBundle(bundle,backup) {
+  let oldLog,oldDay;
+  try {
+    oldLog=localStorage.getItem("shaerra-log");oldDay=localStorage.getItem("shaerra-day");
+    if(backup) localStorage.setItem("shaerra-before-import",exportText());
+    localStorage.setItem("shaerra-log",JSON.stringify(bundle.log));
+    if(bundle.day===null) localStorage.removeItem("shaerra-day"); else localStorage.setItem("shaerra-day",JSON.stringify(bundle.day));
+  } catch(e) {
+    let rolledBack=true;
+    if(oldLog!==undefined) {try {if(oldLog===null)localStorage.removeItem("shaerra-log");else localStorage.setItem("shaerra-log",oldLog);
+      if(oldDay===null)localStorage.removeItem("shaerra-day");else localStorage.setItem("shaerra-day",oldDay);} catch(error) {rolledBack=false;}}
+    warnStore(false);flash("impMsg",rolledBack ? "Не удалось сохранить. Перенос отменён; текущая тетрадь осталась на странице." : "Запись в браузер прервалась, откат не завершён. Текущая тетрадь на странице: скачайте JSON перед перезагрузкой.");return false;
+  }
+  clearPairLink();
+  LOG=bundle.log; applyDay(bundle.day); LOAD_NOTE="";EDIT_ID=null;$("logEditor").hidden=true;
+  render(false);renderLog();warnStore(true);return true;
+}
+$("imp").addEventListener("click",()=>{
+  try {
+    const full=$("importMode").value==="restore",bundle=readBundle($("impText").value,full);
+    if(full) {if(writeBundle(bundle,true))flash("impMsg",`Восстановлена тетрадь: ${LOG.length} записей${bundle.day ? " и текущий день" : ", без текущего дня"}.`);}
+    else {
+      const have=new Set(LOG.map(entryKey)),fresh=bundle.log.filter(x=>!have.has(x.id)),before=LOG;
+      const oldSnapshot=exportText();
+      if(!trySet("shaerra-before-import",oldSnapshot)){flash("impMsg","Не удалось сохранить копию перед переносом. История не изменена.");return;}
+      LOG=LOG.concat(fresh);
+      if(!saveLog()){LOG=before;flash("impMsg","Не удалось сохранить. История не изменена.");return;}
+      renderLog();flash("impMsg",`Добавлено: ${fresh.length}. Пропущено повреждённых: ${bundle.skipped}. Текущий день сохранён.`);
+    }
+  } catch(e) {flash("impMsg",e instanceof SyntaxError ? "Не удалось прочитать JSON. Тетрадь не изменена." : e.message);}
+});
+$("undoImport").addEventListener("click",()=>{
+  try {const raw=localStorage.getItem("shaerra-before-import");if(!raw){flash("impMsg","Пока нет переноса для отмены.");return;}
+    const bundle=readBundle(raw,true);if(writeBundle(bundle,false))flash("impMsg","Восстановлена тетрадь до последнего переноса.");
+  } catch(e) {flash("impMsg","Не удалось прочитать копию до переноса. Тетрадь не изменена.");}
 });
 
 // Числа: только целые 1–20; правка числа не стирает день
@@ -834,24 +980,36 @@ $("confirmYes").addEventListener("click", castNow);
 $("confirmNo").addEventListener("click", () => { $("confirm").hidden = true; $("cast").focus(); });
 $("swap").addEventListener("click", () => { touch(); [A, B] = [B, A]; [SPENT[1], SPENT[2]] = [SPENT[2], SPENT[1]]; [TG[1], TG[2]] = [TG[2], TG[1]]; render(true); store(); });
 
-function loadDay() {
+function applyDay(st) {
   MODE = "example"; A = 1; B = 20; newDay(); CLOSED = false;
-  let l = null;
-  try { l = JSON.parse(localStorage.getItem("shaerra-day")); } catch (e) { l = null; }
-  if (l && typeof l === "object" && isD20(l.a) && isD20(l.b)) {
-    MODE = "day"; A = l.a; B = l.b; CLOSED = !!l.closed;
-    const sp = l.spent || {}, tg = l.tg || {};
-    SPENT = {1:String(sp[1] || ""), 2:String(sp[2] || "")};
-    TG = {1:String(tg[1] || ""), 2:String(tg[2] || "")};
-    EVF.forEach(k => $(k).value = typeof l[k] === "string" ? l[k] : "");
-  }
+  if (!st) return;
+  MODE = "day"; A = st.a; B = st.b; CLOSED = !!st.closed;
+  const sp = st.spent || {}, tg = st.tg || {};
+  SPENT = {1:textOf(sp[1]), 2:textOf(sp[2])}; TG = {1:textOf(tg[1]), 2:textOf(tg[2])};
+  CUSTOM = typeof st.prophecy === "string" && st.custom !== false;
+  $("prophecy").value = textOf(st.prophecy); $("gameDate").value = textOf(st.gameDate);
+  EVF.forEach(k => $(k).value = textOf(st[k]));
+}
+function loadDay() {
+  let st = null;
+  try { st = JSON.parse(localStorage.getItem("shaerra-day")); } catch (e) { st = null; }
+  applyDay(st && isD20(st.a) && isD20(st.b) ? st : null);
 }
 
-const h = /^#(\d{1,2})-(\d{1,2})$/.exec(location.hash);
-if (h && isD20(Number(h[1])) && isD20(Number(h[2]))) { MODE = "preview"; A = Number(h[1]); B = Number(h[2]); }
-else loadDay();
-render(false);
+function navigatePair() {
+  const h = /^#(\d{1,2})-(\d{1,2})$/.exec(location.hash);
+  if (h && isD20(Number(h[1])) && isD20(Number(h[2]))) { newDay(); MODE = "preview"; A = Number(h[1]); B = Number(h[2]); }
+  else loadDay();
+  render(false);
+}
+window.addEventListener("hashchange", () => {
+  if (/^#\d{1,2}-\d{1,2}$/.test(location.hash) || MODE === "preview") navigatePair();
+});
+navigatePair();
 renderLog();
+try { if (localStorage.getItem("shaerra-view") === "compact") $("compact").click(); } catch (e) { /* Full view remains usable. */ }
+$("interpretation").open = !document.body.classList.contains("compact");
+$("dayMeta").open = !document.body.classList.contains("compact");
 </script>
-
-</body></html>
+</body>
+</html>
