@@ -1,0 +1,857 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Руны Шаэрры</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,600;1,400&family=Alegreya+SC:wght@500;700&family=Noto+Sans+Runic&display=swap">
+<style>
+/* Раскладка: два мешочка рядом (Течение → Воля), под ними прочтение и что делать Шаэрре; тёмный камень Подземья, один вид для обеих тем. */
+:root {
+  color-scheme: dark;
+  --stone: #16141c;
+  --stone-2: #1f1c27;
+  --stone-3: #2a2634;
+  --line: #3a3546;
+  --silver: #dcd8e4;
+  --dim: #a29cb0;
+  --beda: #d0705f;
+  --beda-bg: #2e1a1c;
+  --tuman: #8fb3b5;
+  --tuman-bg: #18252a;
+  --proryv: #e3c46f;
+  --proryv-bg: #2c2618;
+  --focus: #b9a6ff;
+  --paper: #e9e2d0;
+  --ink: #2a2430;
+  --ink-dim: #5d5468;
+  --ink-accent: #7a4a2a;
+  --ink-line: #b9ad95;
+  --f-display: "Alegreya SC", "Palatino Linotype", Georgia, serif;
+  --f-body: "Alegreya", "Palatino Linotype", Georgia, serif;
+  --f-rune: "Noto Sans Runic", "Segoe UI Historic", "Segoe UI Symbol", sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--stone);
+  color: var(--silver);
+  font-family: var(--f-body);
+  font-size: 17px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 48px;
+}
+.wrap { max-width: 860px; margin: 0 auto; display: grid; gap: 28px; }
+header h1 { font-family: var(--f-display); font-weight: 700; font-size: 2rem; margin: 0; letter-spacing: .02em; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--dim); max-width: 62ch; }
+
+.draw { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; }
+.bag { background: var(--stone-2); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 10px; justify-items: center; text-align: center; min-width: 0; }
+.bag .role { font-family: var(--f-display); font-size: .85rem; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+.bag .role b { color: var(--silver); font-weight: 700; }
+.stone { width: 112px; height: 128px; border-radius: 48% 52% 46% 54% / 55% 50% 50% 45%; background: radial-gradient(ellipse at 35% 30%, var(--stone-3), var(--stone) 80%); border: 1px solid var(--line); display: grid; place-items: center; font-family: var(--f-rune); font-size: 64px; line-height: 1; color: var(--sp, var(--silver)); text-shadow: 0 0 18px color-mix(in srgb, var(--sp, var(--silver)) 45%, transparent); }
+.stone span { display: inline-block; }
+.stone .inv { transform: rotate(180deg); }
+.bag .name { font-family: var(--f-display); font-size: 1.25rem; font-weight: 700; color: var(--sp); }
+.bag .sub { font-size: .9rem; color: var(--dim); margin-top: -8px; }
+.num { display: flex; gap: 6px; align-items: center; }
+.num button, .num input { height: 40px; border-radius: 8px; border: 1px solid var(--line); background: var(--stone); color: var(--silver); font: 600 1.1rem var(--f-body); }
+.num button { width: 40px; cursor: pointer; }
+.num input { width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
+.mid { display: grid; align-content: center; gap: 10px; justify-items: center; }
+.btn { font: 600 .95rem var(--f-body); color: var(--silver); background: var(--stone-3); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; cursor: pointer; white-space: nowrap; }
+.btn.main { background: var(--silver); color: var(--stone); border-color: var(--silver); }
+.btn:hover { border-color: var(--dim); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.arrow { font-size: 1.6rem; color: var(--dim); }
+
+.sp-beda { --sp: var(--beda); --spbg: var(--beda-bg); }
+.sp-tuman { --sp: var(--tuman); --spbg: var(--tuman-bg); }
+.sp-proryv { --sp: var(--proryv); --spbg: var(--proryv-bg); }
+.chip { display: inline-block; font-size: .8rem; letter-spacing: .06em; padding: 2px 10px; border-radius: 999px; color: var(--sp); background: var(--spbg); border: 1px solid color-mix(in srgb, var(--sp) 40%, transparent); }
+
+section h2 { font-family: var(--f-display); font-size: 1.05rem; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 0 0 10px; font-weight: 500; }
+.omen { background: var(--stone-2); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 12px; }
+.kind { font-size: .85rem; color: var(--dim); letter-spacing: .04em; }
+.sign { font-family: var(--f-display); font-size: 1.5rem; line-height: 1.3; margin: 0; text-wrap: balance; }
+.sign-name { color: var(--proryv); font-size: 1rem; letter-spacing: .08em; }
+.quote { font-style: italic; font-size: 1.15rem; margin: 0; }
+.flowline { display: grid; grid-template-columns: 6.5em 1fr; gap: 4px 12px; margin: 0; }
+.flowline dt { font-family: var(--f-display); color: var(--dim); letter-spacing: .06em; }
+.flowline dd { margin: 0; min-width: 0; }
+.note { color: var(--dim); font-size: .95rem; margin: 0; }
+.extra { border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 6px; }
+.extra p { margin: 0; }
+
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.flow { background: var(--spbg); border: 1px solid color-mix(in srgb, var(--sp) 35%, transparent); border-radius: 12px; padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.flow h3 { margin: 0; font-family: var(--f-display); font-size: 1.1rem; color: var(--sp); }
+.flow .to { font-weight: 600; }
+.flow p { margin: 0; }
+.flow .sees { color: var(--dim); }
+.day { margin-top: 14px; background: var(--stone-2); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 8px; }
+.day p { margin: 0; }
+.warn { font-style: italic; color: var(--dim); }
+
+.log ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.log li { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; font-size: .95rem; }
+.log li button { background: none; border: 0; color: var(--silver); font: inherit; cursor: pointer; padding: 0; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+.log time { color: var(--dim); font-variant-numeric: tabular-nums; min-width: 9.5em; }
+.log .empty { color: var(--dim); }
+.log .clear { margin-top: 8px; }
+
+@media (max-width: 640px) {
+  .draw { grid-template-columns: 1fr 1fr; }
+  .mid { grid-column: 1 / -1; grid-row: 2; grid-template-columns: auto auto; }
+  .arrow { display: none; }
+  .two { grid-template-columns: 1fr; }
+  .stone { width: 92px; height: 104px; font-size: 52px; }
+  .flowline { grid-template-columns: 1fr; }
+  .flowline dt { margin-top: 6px; }
+  .num button { width: 34px; }
+  .num input { width: 50px; }
+  .bag { padding: 14px 10px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .stone.cast { animation: cast .5s ease-out; }
+  @keyframes cast { from { transform: rotate(-12deg) scale(.85); opacity: .4; } to { transform: none; opacity: 1; } }
+}
+.entry { background: var(--paper); color: var(--ink); border-radius: 6px 14px 14px 6px; padding: 22px 22px 22px 26px; display: grid; gap: 10px; border-left: 3px double var(--ink-dim); }
+.entry .hand { font-family: var(--f-body); font-style: italic; font-size: 1.08rem; margin: 0; }
+.entry .sign { color: var(--ink); }
+.entry .kind, .entry .note { color: var(--ink-dim); }
+.entry .sign-name { color: var(--ink-accent); }
+.entry .flowline dt { color: var(--ink-dim); }
+.entry .extra { border-top-color: var(--ink-line); }
+.margin { border-top: 1px dashed var(--ink-line); padding-top: 10px; display: grid; gap: 6px; }
+.margin p { margin: 0; font-size: .95rem; color: var(--ink-dim); }
+.margin b { color: var(--ink); font-weight: 600; }
+.stones { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.flow.spent { opacity: .55; }
+.flow .act { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.flow input[type=text] { flex: 1 1 10em; min-width: 0; height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--stone); color: var(--silver); font: 1rem var(--f-body); padding: 0 10px; }
+.flow .spent-line { font-style: italic; }
+textarea.short { min-height: 56px; }
+textarea { width: 100%; min-height: 90px; border-radius: 10px; border: 1px solid var(--line); background: var(--stone-2); color: var(--silver); font: 1rem/1.5 var(--f-body); padding: 10px 12px; resize: vertical; }
+textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.evening { display: grid; gap: 10px; }
+.evening .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+details.table { background: var(--stone-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+details.table summary { cursor: pointer; font-family: var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+details.table[open] summary { margin-bottom: 12px; }
+details.table .grid { display: grid; gap: 8px; }
+details.table p { margin: 0; }
+.log li { display: grid; gap: 2px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.log .ev { color: var(--dim); font-size: .92rem; font-style: italic; white-space: pre-wrap; }
+@media (max-width: 640px) { .stones { grid-template-columns: 1fr; } }
+.sbrow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.sbrow select { height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--stone); color: var(--silver); font: 1rem var(--f-body); padding: 0 8px; }
+.sbsay { font-family: var(--f-display); font-size: 1.25rem; }
+.sbsay .w-beda { color: var(--beda); }
+.sbsay .w-proryv { color: var(--proryv); }
+.banner { margin: 0; padding: 10px 14px; border-radius: 10px; background: var(--stone-2); border: 1px dashed var(--line); color: var(--dim); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.banner.warn { border-color: var(--beda); color: var(--silver); }
+.confirm { display: grid; gap: 6px; justify-items: center; text-align: center; max-width: 16em; }
+.confirm .note { margin: 0; }
+details.more summary { cursor: pointer; color: var(--ink-dim); }
+details.more[open] { display: grid; gap: 10px; }
+#numErr { margin: -14px 0 0; color: var(--beda); }
+#numErr:empty, #logNote:empty { display: none; }
+.flow .spent-line::before { content: "✓ "; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Тетрадь Шаэрры</h1>
+    <p>Утром по одной руне из каждого мешочка. Первая — Течение: то, что уже движется. Вторая — Воля: что с этим можно сделать. Вечером — запись о том, почему одно оказалось вероятнее другого.</p>
+  </header>
+
+  <p class="banner" id="banner" hidden></p>
+  <p class="banner warn" id="storeWarn" hidden>Браузер не даёт сохранять: записи живут, пока открыта страница. Скопируйте тетрадь в «Резервной копии» внизу.</p>
+  <div class="draw">
+    <div class="bag" id="bag1">
+      <div class="role">Первый мешочек · <b>Течение</b></div>
+      <div class="stone" id="stone1"></div>
+      <div class="name" id="name1"></div>
+      <div class="sub" id="sub1"></div>
+      <div class="num">
+        <button type="button" id="dec1" aria-label="Уменьшить Течение">−</button>
+        <input id="d1" type="number" min="1" max="20" step="1" inputmode="numeric" aria-label="Течение, d20">
+        <button type="button" id="inc1" aria-label="Увеличить Течение">+</button>
+      </div>
+    </div>
+    <div class="mid">
+      <span class="arrow" aria-hidden="true">→</span>
+      <button type="button" class="btn main" id="cast">Вытянуть руны</button>
+      <button type="button" class="btn" id="swap">Поменять местами</button>
+      <div class="confirm" id="confirm" hidden>
+        <p class="note">День не записан в тетрадь. Начать новый? Камни и вечер очистятся.</p>
+        <button type="button" class="btn main" id="confirmYes">Начать новый день</button>
+        <button type="button" class="btn" id="confirmNo">Отмена</button>
+      </div>
+    </div>
+    <div class="bag" id="bag2">
+      <div class="role">Второй мешочек · <b>Воля</b></div>
+      <div class="stone" id="stone2"></div>
+      <div class="name" id="name2"></div>
+      <div class="sub" id="sub2"></div>
+      <div class="num">
+        <button type="button" id="dec2" aria-label="Уменьшить Волю">−</button>
+        <input id="d2" type="number" min="1" max="20" step="1" inputmode="numeric" aria-label="Воля, d20">
+        <button type="button" id="inc2" aria-label="Увеличить Волю">+</button>
+      </div>
+    </div>
+  </div>
+  <p class="note" id="numErr" role="alert"></p>
+
+  <section>
+    <h2>Утренняя запись</h2>
+    <div class="entry" id="omen"></div>
+  </section>
+
+  <section>
+    <h2>Камни дня</h2>
+    <p class="note" style="margin:0 0 10px">Утренние камни Шаэрра носит при себе. Когда она тратит руну, камень теплеет в пальцах, и она возвращает его в мешочек.</p>
+    <div class="stones" id="flows"></div>
+  </section>
+
+  <section>
+    <h2>Серебряные колкости</h2>
+    <div class="day sb">
+      <p class="note">Реакция на чужой успех. Шаэрра тянет руну из мешочка — это переброс — и произносит вслух предсказание из двух рун, в прошедшем времени, как уже сбывшееся: «для тебя мог… но…». Это и есть словесный компонент. Бросок врага — Течение, вытянутая руна — Воля. Враг берёт меньшее из двух. Руны — только оформление: условия заклинания (реакция, 60 футов, ячейка I круга) не меняются.</p>
+      <div class="sbrow">
+        <label for="sbO">Бросок врага</label>
+        <input id="sbO" type="number" min="1" max="20" inputmode="numeric" placeholder="d20" style="width:64px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--stone);color:var(--silver);font:600 1rem var(--f-body);text-align:center">
+        <label for="sbR">Руна из мешочка</label>
+        <input id="sbR" type="number" min="1" max="20" inputmode="numeric" placeholder="d20" style="width:64px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--stone);color:var(--silver);font:600 1rem var(--f-body);text-align:center">
+      </div>
+      <p class="sbsay" id="sbOut"></p>
+      <p id="sbAns"></p>
+    </div>
+  </section>
+
+  <section class="evening">
+    <h2>Вечер</h2>
+    <label class="note" for="evExp">Что я ждала утром?</label>
+    <textarea id="evExp" class="short" placeholder="Например: ярость у врага и случай, когда нужно будет прикрыть своих."></textarea>
+    <label class="note" for="ev">Что случилось на самом деле и почему одно оказалось вероятнее другого?</label>
+    <textarea id="ev" placeholder="Например: Турисаз ушёл в огра у моста. Тот сорвался в ярость и промахнулся… хотя, может, он промахнулся бы и так."></textarea>
+    <label class="note" for="evFal">Что доказало бы, что я прочла знак неверно?</label>
+    <textarea id="evFal" class="short" placeholder="Например: если бы огр бил хладнокровно, а ярость вспыхнула у кого-то из своих."></textarea>
+    <div class="row">
+      <button type="button" class="btn main" id="save">Закрыть день и записать</button>
+      <span class="note" id="saved" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <details class="table" id="tbl">
+    <summary>За столом</summary>
+    <div class="grid" id="day"></div>
+  </details>
+
+  <section class="log">
+    <h2>Прошлые страницы</h2>
+    <p class="note" id="logNote" role="status"></p>
+    <ol id="log"></ol>
+    <details class="table" id="backup" style="margin-top:12px">
+      <summary>Резервная копия</summary>
+      <div class="grid">
+        <p class="note">Тетрадь хранится только в этом браузере. Скопируйте её текстом и сохраните где-нибудь у себя; на другом устройстве вставьте этот текст и нажмите «Добавить».</p>
+        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn" id="exp">Скопировать тетрадь</button><span class="note" id="expMsg" aria-live="polite"></span></div>
+        <label class="note" for="impText">Текст тетради</label>
+        <textarea id="impText" class="short"></textarea>
+        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn" id="imp">Добавить в тетрадь</button><span class="note" id="impMsg" aria-live="polite"></span></div>
+      </div>
+    </details>
+  </section>
+</div>
+
+<script>
+const R = {
+  1:{n:"Хагалаз",t:"Град",g:"ᚺ",m:"Полный крах, разрушение планов вдребезги. Ультимативная единица на кубах.",sees:"Крах. Разрушение планов.",use:"Ты сегодня выбрал не ту дорогу. Я вижу, что твой мир сейчас рухнет. Я просто позволю этому случиться."},
+  2:{n:"Наутиз",t:"Нужда",g:"ᚾ",m:"Скованность, жёсткие ограничения, невозможность пошевелиться. Идеально для удержания врага.",sees:"Скованность. Застревание.",use:"Ты рвёшься вперёд? А я вижу, что сегодня твои ноги тебя не слушаются. Остановись, пока не поздно."},
+  3:{n:"Перт",inv:1,t:"Скрытый рок",g:"ᛈ",m:"Ситуация выходит из-под контроля и обнажает скрытый изъян или ошибку. Чьё-то действие ломается из-за внезапного фактора.",sees:"Тайна станет явной.",use:"Ты прячешь что-то? Сегодня это выйдет наружу. И я не буду тебе мешать."},
+  4:{n:"Турисаз",t:"Шип",g:"ᚦ",m:"Слепая, хаотичная ярость, разрушительный импульс. Враг поддаётся эмоциям и совершает глупость.",sees:"Слепая ярость.",use:"Ты злишься? Хорошо. Злись. Чем больше ты злишься, тем глупее твой удар."},
+  5:{n:"Отал",inv:1,t:"Потеря опоры",g:"ᛟ",m:"Разрушение структуры, потеря стабильности, дезориентация. Паника на поле боя.",sees:"Потеря опоры.",use:"Твой мир сейчас пошатнётся. Я не буду его толкать. Просто отойду в сторону."},
+  6:{n:"Уруз",inv:1,t:"Бессилие",g:"ᚢ",m:"Физическая слабость, промах. Тяжёлое оружие улетает в пустоту, потому что мышцы подвели.",sees:"Бессилие.",use:"Сегодня ты не сможешь поднять меч. Я вижу это. Ты тоже это видишь — просто не хочешь признавать."},
+  7:{n:"Райдо",t:"Дорога",g:"ᚱ",m:"Монотонное, привычное движение вперёд шаг за шагом. Дорожная пыль.",sees:"Движение без сюрпризов.",use:"Сегодня никто не получит преимущества. Иди — но знай, что я тоже иду."},
+  8:{n:"Иса",t:"Лёд",g:"ᛁ",m:"Временная пауза, застой, задержка. «Узел» или передышка, когда процесс замер, но не сломался.",sees:"Пауза. Застой.",use:"Сегодня никто не сдвинется. Если враг остановится — я остановлюсь. Если союзник — я подожду."},
+  9:{n:"Эйваз",t:"Тис",g:"ᛇ",m:"Оборона, требующая бдительности. Ощущение чужого взгляда или скрытого напряжения.",sees:"Напряжение. Чей-то взгляд.",use:"Сегодня кто-то наблюдает. Я не знаю кто. Значит, никто не получит преимущества."},
+  10:{n:"Кано",t:"Факел",g:"ᚲ",m:"Крошечный огонёк ясности, свеча во тьме. Ровно столько, чтобы не споткнуться.",sees:"Маленький свет. Ровно столько, чтобы не споткнуться.",use:"Сегодня я дам свет тому, кому он нужнее. Врагу — чтобы он видел ловушку. Союзнику — чтобы он нашёл путь."},
+  11:{n:"Гебо",t:"Дар",g:"ᚷ",m:"Честный обмен, равновесие, маленькая житейская удача.",sees:"Честный обмен.",use:"Сегодня я отдам что-то, чтобы получить что-то. Вопрос — кому я отдам и что получу взамен."},
+  12:{n:"Йера",t:"Урожай",g:"ᛃ",m:"Цикличность, весы, получение заслуженных плодов. Абсолютный нейтралитет.",sees:"Урожай. Завершение цикла.",use:"Сегодня кто-то пожнёт то, что посеял. Если это враг — я позабочусь, чтобы он пожал пустоту. Если союзник — я помогу собрать."},
+  13:{n:"Феху",t:"Богатство",g:"ᚠ",m:"Случайный грош: найти монетку в грязи или услышать полезный слух.",sees:"Маленький дар.",use:"Сегодня кто-то найдёт монету. Если союзник — я укажу ему, где искать. Если враг — укажу на пустую ловушку."},
+  14:{n:"Беркана",t:"Берёза",g:"ᛒ",m:"Исцеление, тихий час, безопасность перед новым рывком.",sees:"Безопасность. Исцеление.",use:"Сегодня кто-то может выдохнуть. Если союзник — я дам ему этот миг. Если враг — сделаю так, чтобы он не успел выдохнуть."},
+  15:{n:"Вуньо",t:"Радость",g:"ᚹ",m:"Счастливый исход, удачный финт, принёсший искреннее облегчение.",sees:"Радость. Счастливый исход.",use:"Сегодня я улыбнусь. И мои союзники улыбнутся вместе со мной."},
+  16:{n:"Ансуз",t:"Мудрость",g:"ᚨ",m:"Открытая дверь, внезапное откровение, замеченная слабость врага.",sees:"Откровение. Истина становится ясной.",use:"Сегодня я увижу ответ. И мои союзники увидят его вместе со мной."},
+  17:{n:"Тейваз",t:"Воин",g:"ᛏ",m:"Вспышка идеальной точности, триумф направленной воли и разума.",sees:"Идеальная точность.",use:"Сегодня я нанесу идеальный удар. Или сделаю так, чтобы его нанёс мой союзник."},
+  18:{n:"Соулу",t:"Солнце",g:"ᛊ",m:"Попутный ветер, чистая энергия успеха, сжигающая препятствия.",sees:"Выход на свет.",use:"Сегодня мы выйдем на свет. Никто не спрячется от нас."},
+  19:{n:"Альгиз",t:"Защита",g:"ᛉ",m:"Птичье крыло, спасение в самый последний миг, когда беда была на волоске.",sees:"Защита. Птичье крыло.",use:"Сегодня я прикрою себя. И я прикрою тех, кто рядом со мной."},
+  20:{n:"Дагаз",t:"День",g:"ᛞ",m:"Солнце над Поверхностью. Символ её мечты и свободы. Абсолютный критический успех.",sees:"Рассвет. Новая жизнь.",use:"Сегодня мы начнём новый день. Этот день — наш."}
+};
+
+const SP = {
+  beda:{name:"Беда",cls:"sp-beda",flow:"Неудача",to:"Врагам. Всегда.",why:"Я не желаю им зла. Но я не обязана защищать их от того, что идёт к ним.",
+    same:"Проблема не в одном событии. Само направление мира стало неблагоприятным. Обычные решения не сработают.",sameName:"давление судьбы"},
+  tuman:{name:"Туман",cls:"sp-tuman",flow:"Равновесие",to:"Туда, где нужно уравновесить шансы.",why:"Если союзник слабее — я дам ему удачу. Если враг сильнее — я дам ему неудачу. Я — весы.",
+    same:"Мир ещё не решил исход. Именно поэтому выбор имеет значение.",sameName:"точка выбора"},
+  proryv:{name:"Прорыв",cls:"sp-proryv",flow:"Удача",to:"Себе и союзникам. Всегда.",why:"Я не жадная. Но я знаю, кто заслужил этот поток.",
+    same:"Мир не гарантирует успех, но сейчас сопротивление минимально: проще склонить чашу весов.",sameName:"окно возможности"}
+};
+const spOf = n => n <= 6 ? "beda" : n <= 14 ? "tuman" : "proryv";
+const edgeOf = n => (n === 7 || n === 8) ? "cold" : (n === 13 || n === 14) ? "warm" : (n >= 9 && n <= 12) ? "heart" : null;
+const EDGE = {
+  cold:"Холодный край Тумана: «почти не повезло». Беды ещё нет, но мир не помогает. Такое число Шаэрра охотнее отдаёт врагу, которому нужно чуть помешать.",
+  warm:"Тёплый край Тумана: «почти повезло». Это ещё не триумф, а маленькая житейская удача. Такое число Шаэрра охотнее отдаёт союзнику, которому не хватает самой малости.",
+  heart:"Сердце Тумана: чистые весы. Кто чего заслужил, тот то и получит."
+};
+
+const DOUBLE = {
+  1:["Сегодня что-то будет уничтожено. Не трогай этот поток. Выбери лишь, что именно должно пасть.","Действует решительно, не цепляется за старые планы, легко рискует, если это разрушит что-то опасное."],
+  2:["Сегодня никто не вырвется из своих цепей. Не проламывай стену — заставь врага упереться в неё.","Не форсирует, выбирает контроль, удержание и защиту, чаще отступает, чем идёт напролом."],
+  3:["Сегодня всё тайное станет явным. Любая ложь найдёт своего свидетеля.","Внимательно наблюдает за людьми, чаще задаёт вопросы, ждёт, что раскроется чей-то секрет."],
+  4:["Сегодня ярость победит разум. Лишь направь чужой гнев туда, где он принесёт пользу.","Следит за своим гневом, провоцирует противников, старается не спорить с союзниками."],
+  5:["Сегодня чей-то дом рухнет. Не обязательно из камня.","Меняет планы, ищет нестандартные решения, не доверяет «безопасным» местам."],
+  6:["Сегодня сила покинет сильного.","Делает ставку на истощение врага, не меряется силой, ждёт ошибки."],
+  7:["Сегодня путь важнее цели.","Не спешит, доверяет процессу, спокойно относится к задержкам."],
+  8:["Сегодня мир задержал дыхание.","Говорит меньше, не начинает конфликтов, откладывает необратимые решения. Может отказаться начинать драку."],
+  9:["Сегодня всё зависит от терпения.","Чаще проверяет ловушки, держится ближе к своим, никому не доверяет полностью."],
+  10:["Сегодня ты увидишь ровно столько, сколько должна увидеть.","Исследует, читает, ищет подсказки вместо силовых решений."],
+  11:["Сегодня всё имеет цену.","Не принимает подарков без подозрения, охотно предлагает обмен, думает о последствиях сделки."],
+  12:["Сегодня приходит время жатвы.","Терпелива, даёт другим закончить начатое, не вмешивается без нужды."],
+  13:["Сегодня маленькая возможность станет началом большого пути.","Осматривает окружение, поднимает находки, ловит случайные слова."],
+  14:["Сегодня можно позволить себе выдохнуть.","Заботится о других, чаще лечит и помогает, позволяет себе отдых."],
+  15:["Сегодня удача хочет, чтобы ты улыбнулась.","Чаще улыбается, подбадривает спутников, празднует маленькие победы."],
+  16:["Сегодня истина сама найдёт тебя.","Больше расспрашивает, чем говорит, прислушивается к советам, доверяет интуиции."],
+  17:["Сегодня невозможно промахнуться, если сердце не дрогнет.","Решает быстро, действует уверенно, не отступает от выбора."],
+  18:["Сегодня тьма проиграет.","Берёт инициативу, вдохновляет союзников, не даёт страху решать."],
+  19:["Сегодня смерть пройдёт мимо.","Следит за состоянием группы, бережёт защитные заклинания, смелее рискует собой ради других."],
+  20:["Сегодня откроется дверь, которая больше никогда не откроется вновь. Не бойся переступить порог.","Принимает судьбоносные решения, не откладывает перемены. Если группа хочет ждать до завтра, она предупреждает: «Завтра этой двери уже не будет»."]
+};
+const DOUBLE_SPEND = {
+  1:"После двух Хагалаз её тянет устроить разрушение врагу.",
+  20:"После двух Дагаз ей жаль тратить двадцатку на пустяк."
+};
+const MEMORY = {
+  "1-1":"Две Хагалаз выпали в утро турнира, когда Шаэрра прилюдно победила Зелизан. «Две Хагалаз изменили мою судьбу».",
+  "20-20":"Две Дагаз выпали, когда она бежала из Дома мимо всех патрулей. «Две Дагаз дали мне новую».",
+  "19-15":"Альгиз и Вуньо — её первое чудо: сёстры поджидали её, чтобы избить, но удара удалось избежать."
+};
+
+// Особые сочетания: [первая, вторая в записях, название, знак, примечание]
+const SPECIAL = [
+  [1,20,"Разрушение ради рассвета","Чтобы появилось новое, старое должно перестать существовать.","Вся её жизнь в двух рунах."],
+  [5,7,"Покинутый дом","Наследие остаётся позади. Дорога принадлежит тебе."],
+  [8,20,"Последний миг перед переменой","Мир неподвижен не потому, что ничего не происходит, а потому, что что-то готовится."],
+  [2,6,"Испытание слабого","Когда сила недоступна, остаётся найти другой путь.","Её детство."],
+  [2,15,"Радость после испытания","Не всякая боль была наказанием. Иногда она была путём."],
+  [3,10,"Тайна открывается","Ответ существует. Нужно лишь увидеть правильный вопрос."],
+  [16,3,"Голос из тени","Кто-то говорит. Вопрос лишь в том, стоит ли слушать."],
+  [10,16,"Истина через понимание","Знание приходит не через поиск, а через готовность услышать."],
+  [13,7,"Возможность в пути","Шанс появляется у того, кто движется."],
+  [19,15,"То, что стоит сохранить","Удача дана не для обладания, а для защиты."],
+  [4,17,"Испытание воина","Препятствие требует не силы, а решимости."],
+  [11,3,"Цена тайны","Ответ будет получен. Но что придётся отдать?"],
+  [11,1,"Сломанный договор","То, что связывало людей, больше не удерживает их."]
+];
+// Обратный порядок особых сочетаний — черновики на правку игроку (ключ: течение-воля)
+const REV = {
+  "20-1":["Рассвет, который надо отстоять","Новое уже пришло. Чтобы оно выжило, что-то старое придётся сломать своими руками."],
+  "7-5":["Дорога без возврата","Путь уже уводит от дома. Держаться за прошлое — значит потерять опору."],
+  "20-8":["Замерший рассвет","Дверь уже открыта, но шагать рано. Новому нужно время, прежде чем взять его в руки."],
+  "6-2":["Бессилие в цепях","Сила уже ушла, и нужда скоро свяжет руки. Не рвись: ищи, кто разомкнёт цепь."],
+  "15-2":["Испытание после радости","Радость уже пришла, но за неё ещё придётся заплатить. Не всякая удача бесплатна."],
+  "10-3":["Свет, что обнажает","Огонёк уже горит, и в его свете видна трещина. Смотри внимательно: увиденное может не понравиться."],
+  "3-16":["Тень обретает голос","Скрытое уже пробивается наружу. Если вслушаться, правда прозвучит сама."],
+  "16-10":["Ответ при свече","Ответ уже прозвучал. Света хватит ровно на то, чтобы его разобрать, и не больше."],
+  "7-13":["Грош на обочине","Дорога идёт сама. Шанс лежит под ногами у того, кто смотрит вниз."],
+  "15-19":["Радость под крылом","Удача уже пришла. Теперь её нужно прикрыть, иначе её отнимут."],
+  "17-4":["Ярость точного","Удар уже точен, но воля горячится. Не дай гневу сбить руку."],
+  "3-11":["Плата за открытое","Скрытое уже выходит наружу. Чтобы оно досталось тебе, придётся что-то отдать."],
+  "1-11":["Договор на руинах","Всё уже рушится. Честный обмен ещё может связать тех, кто остался."]
+};
+// Пары одного спектра из записей
+const NEIGH = [
+  [1,2,"Разрушение через необходимость: старое больше нельзя удерживать."],
+  [2,3,"Тайна из нужды: решение есть, но спрятано."],
+  [3,4,"Опасное открытие: правда вызовет конфликт."],
+  [4,5,"Война с наследием: прошлое не уступит без боя."],
+  [5,6,"Ослабление корней: опора больше не защищает."],
+  [7,8,"Путь найден, но время не пришло."],
+  [8,9,"Стоишь у двери, ключа ещё нет."],
+  [9,10,"Чтобы пройти дальше, нужно увидеть больше."],
+  [10,11,"Истина открывает и путь, и долг."],
+  [11,12,"Посеянное даёт результат."],
+  [12,13,"Труд прошлого создал шанс."],
+  [13,14,"Малое начало станет большим."],
+  [15,19,"Хороший исход требует заботы."],
+  [19,20,"Новое начало нужно удержать."],
+  [20,18,"Один шаг изменит больше, чем ожидалось."],
+  [18,17,"Решительность изменит исход."]
+];
+// Разные спектры: Течение (что уже движется) → Воля (как его использовать, изменить или пережить)
+const CROSS = {
+  "beda-tuman":"К событию уже движется беда, а воля стоит на весах: беду не отменить, но можно уравновесить.",
+  "beda-proryv":"К событию уже движется беда, а у воли есть прорыв: этим течением можно воспользоваться и выйти из него с удачей.",
+  "tuman-beda":"День движется обыденно, а воля несёт беду: её есть куда направить, если найдётся враг.",
+  "tuman-proryv":"День движется обыденно, а воля несёт прорыв: окно откроется тому, кто решится.",
+  "proryv-beda":"К событию уже движется удача, а воля обращена к беде: удачу легко упустить, если ошибиться с выбором.",
+  "proryv-tuman":"К событию уже движется удача, а воля стоит на весах: её нужно разделить честно."
+};
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const label = n => `${R[n].n}${R[n].inv ? " перевёрнутая" : ""}`;
+const glyph = n => `<span aria-hidden="true" class="${R[n].inv ? "inv" : ""}">${R[n].g}</span>`;
+const chip = n => `<span class="chip ${SP[spOf(n)].cls}">${SP[spOf(n)].name} · ${n}</span>`;
+
+function findPair(list, a, b) {
+  for (const p of list) {
+    if (p[0] === a && p[1] === b) return {p, reversed:false};
+    if (p[0] === b && p[1] === a) return {p, reversed:true};
+  }
+  return null;
+}
+
+function read(a, b) {
+  const sa = spOf(a), sb = spOf(b);
+  const out = {kind:"", name:"", sign:"", body:[], extra:[]};
+  const special = a !== b ? findPair(SPECIAL, a, b) : null;
+  // Пары одного спектра направлены: обратный порядок без своей записи читается по общему смыслу спектра
+  const nd = a !== b && sa === sb ? NEIGH.find(p => p[0] === a && p[1] === b) : null;
+  const neigh = nd ? {p:nd, reversed:false} : null;
+
+  if (a === b) {
+    out.src = "double";
+    out.kind = "Две одинаковые руны — возможность стала почти неизбежной";
+    out.sign = DOUBLE[a][0];
+    out.body.push("Одиночная руна говорит о ветре. Две одинаковые говорят о шторме. Это сильнейшее предупреждение, но не приказ.");
+  } else if (special) {
+    const rv = special.reversed ? REV[`${a}-${b}`] : null;
+    if (rv && neigh) {
+      // Утверждённая пара спектра главнее черновика обратного сочетания
+      out.src = "neigh";
+      out.kind = `Две руны одного спектра · ${SP[sa].name}, ${SP[sa].sameName}`;
+      out.sign = neigh.p[2];
+      out.extra.push(`Черновик обратного особого сочетания «${rv[0]}»: «${rv[1]}»`);
+      out.extra.push(`В прямом порядке, ${R[b].n} → ${R[a].n}, это «${special.p[2]}»: «${special.p[3]}»`);
+    } else if (rv) {
+      out.src = "special"; out.draft = true;
+      out.kind = "Особое сочетание, обратный порядок · черновик";
+      out.name = rv[0];
+      out.sign = rv[1];
+      out.extra.push(`В прямом порядке, ${R[b].n} → ${R[a].n}, это «${special.p[2]}»: «${special.p[3]}»`);
+    } else {
+      out.src = "special";
+      out.kind = "Особое сочетание";
+      out.name = special.p[2];
+      out.sign = special.p[3];
+      if (special.p[4]) out.body.push(special.p[4]);
+    }
+  } else if (neigh) {
+    out.src = "neigh";
+    out.kind = `Две руны одного спектра · ${SP[sa].name}, ${SP[sa].sameName}`;
+    out.sign = neigh.p[2];
+  } else if (sa === sb) {
+    out.src = "same";
+    out.kind = `Две руны одного спектра · ${SP[sa].name}, ${SP[sa].sameName}`;
+    out.sign = SP[sa].same;
+  } else {
+    out.src = "cross";
+    out.kind = `Руны разных спектров · ${SP[sa].name} → ${SP[sb].name}`;
+    out.sign = "Будущее спорит само с собой, и выбор здесь весит больше всего.";
+    out.body.push(CROSS[`${sa}-${sb}`]);
+  }
+  // Общий смысл спектра, если сверху стоит особое сочетание или пара из записей
+  if (a !== b && sa === sb && (special || neigh)) {
+    out.extra.push(`Весь спектр — ${SP[sa].sameName}: «${SP[sa].same}» Ищи не событие, а направление давления.`);
+  } else if (a !== b && sa === sb) {
+    out.body.push("Мир склоняется в одну сторону. Ищи не событие, а направление давления.");
+  } else if (special && sa !== sb) {
+    out.extra.push(`Спектры разные (${SP[sa].name} → ${SP[sb].name}): будущее спорит само с собой, и выбор здесь весит больше всего.`);
+  }
+  if (sa !== sb && Math.abs(a - b) === 1) out.extra.push("Пара стоит на границе спектров и читается как руны разных спектров.");
+  const mem = MEMORY[`${a}-${b}`];
+  if (mem) out.extra.push(mem);
+  return out;
+}
+
+// Строки старых рунических поэм — «пометки на полях трактата» (переводы с английских переводов Диккинса, 1915)
+const AS = "старая песнь рун", NO = "песнь северных берегов", IS = "песнь ледяных островов", HV = n => `«Речи Странника», ${n}`, SAY = "поговорка северян";
+const POEM = {
+  1:[["Град — белейшее из зёрен. Он кружится с небесной выси, его гонят порывы ветра, а после он обращается в воду.",AS],["Град — холоднейшее из зёрен.",NO],["Град — холодное зерно, мокрый снег и хворь змей.",IS],["Гибнут стада, родня умирает, и сам ты смертен. Но слава не умирает, если добыта достойно.",HV(76)],["Братья начнут биться друг с другом, родичи станут убийцами.", "«Песнь провидицы»"],["Редко волна приходит одна.", SAY],["Ралишаз не наказывает. Он просто бросает кости.", "говорят в игорных домах Фланесса"]],
+  2:[["Нужда стесняет грудь. И всё же часто она становится помощью и спасением, если внять ей вовремя.",AS],["Нужда оставляет мало выбора. Нагой мёрзнет на морозе.",NO],["Нужда — горе рабыни, тяжкая доля и изнурительный труд.",IS],["Хромой ездит верхом, безрукий пасёт стадо, глухой храбро бьётся. Мёртвый ни на что не годен.",HV(71)],["На роге их режь, на тыльной стороне руки, а на ногте начертай Нужду.", "«Наставления валькирии»"],["Когда выбора нет, Ралишаз уже сделал ход. Твой — следующий.", "говорят в игорных домах Фланесса"]],
+  3:[["Перт — забава и смех для знатных там, где воины беспечно сидят вместе в пиршественном зале.",AS],["Пусть каждый будет умён в меру, не слишком. Кто не знает своей судьбы заранее, у того душа беззаботнее.",HV(56)],["Оттуда девы, многое знающие, три пряхи судьбы. Резали руны, судьбы судили, жизнь выбирали детям людей.", "«Песнь провидицы»"],["Тайна, которую знают двое, уже наполовину чужая.", "приписывают Вексне"]],
+  4:[["Шип очень остёр. Схватиться за него — беда для любого воина, и безмерно жесток он к тому, кто ляжет среди шипов.",AS],["Великан — мука для женщин. Мало кто радуется беде.",NO],["Великан — мука для женщин, житель скал.",IS],["В поле не отходи от оружия ни на шаг: не знаешь, когда в пути понадобится копьё.",HV(38)],["Я, мастер рун, скрыл здесь руны силы. Неустанно гоним злобой, обречён на коварную смерть тот, кто разрушит это.", "камень-проклятие у северной дороги"]],
+  5:[["Родовое владение дорого каждому, если там, в своём доме, он может по праву и в достатке пользоваться тем, что ему положено.",AS],["Одно я знаю, что не умирает никогда: суд над каждым умершим.",HV(77)],["Гюда велит тебе идти домой.", "щепка из торгового порта"],["Ви Джас помнит всех, даже тех, кого забыл их Дом.", "изречение служителей Ви Джас"]],
+  6:[["Тур горд и рогат, свирепый зверь, что бьётся рогами. Он бродит по болотам, и это отважное создание.",AS],["Шлак — от дурного железа. Часто олень бежит по насту.",NO],["Морось — плач облаков, погибель сена и ненависть пастуха.",IS],["Лежащий волк не добудет кости, спящий не добудет победы.",HV(58)],["Многие сильны, хоть и малы.", SAY],["Сила, которую никто не испытал, — только слух.", "говорят последователи Корда"]],
+  7:[["Езда кажется лёгкой каждому воину, пока он в чертоге, и тяжела тому, кто долгие мили сидит на могучем коне.",AS],["Езда, говорят, хуже всего для коней.",NO],["Езда — радость сидящего, быстрый путь и труд коня.",IS],["Разум нужен тому, кто странствует далеко. Дома всё просто.",HV(5)],["Каждая дорога кончается новым горизонтом.", "изречение странников Фарлангна"]],
+  8:[["Лёд очень холоден и безмерно скользок. Он блестит, прозрачный, как стекло, похожий на самоцветы: пол, сотворённый морозом, прекрасный на вид.",AS],["Лёд мы зовём широким мостом. Слепого нужно вести.",NO],["Лёд — кора рек, кровля волн и погибель обречённых.",IS],["Хвали день вечером, меч — после пробы, лёд — когда перейдёшь.",HV(81)],["Камень не тронут солнцем и не резан железом.", "надгробный камень с побережья"],["Ни одна чаша весов не должна перевешивать навсегда.", "приписывают Мордекайнену"]],
+  9:[["Тис — дерево с грубой корой, крепко держится за землю, страж огня, подпёртый корнями.",AS],["Тис зеленее всех деревьев зимой. Когда горит, он трещит.",NO],["Тис — натянутый лук и ломкое железо.",IS],["Знаю, висел я в ветвях на ветру девять долгих ночей, пронзённый копьём.",HV(138)],["В лесу часто кто-то слушает рядом.", SAY]],
+  10:[["Факел знаком всякому живому по бледному, ясному пламени. Чаще всего он горит там, где отдыхают знатные.",AS],["Язва — проклятие детей. Горе делает человека бледным.",`${NO}; приписка на полях: «Не та руна»`],["Не режь руны, если не умеешь их прочесть: многих сбивала с толку тёмная буква.", "сага о скальде-рунознатце"],["Обжёгшийся ребёнок сторонится огня.", SAY],["Знание не бывает добрым или злым. Злой бывает спешка.", "поговорка мудрецов Бокоба"]],
+  11:[["Щедрость приносит честь и служит опорой достоинству. А всякому изгнаннику, у которого нет ничего иного, — милость и пропитание.",AS],["Лучше не просить, чем приносить слишком много: дар всегда ищет ответа.",HV(145)],["Другу своему будь другом, на дар отвечай даром.",HV(42)],["Ни одна нить не рвётся. Её только перевязывают.", "изречение служителей Истус"]],
+  12:[["Год — надежда людей, когда земля дарит яркие плоды и богатым, и нуждающимся.",AS],["Урожай — благо для людей.",NO],["Урожай — благо для людей, доброе лето и поле, заросшее до края.",IS],["Дети лучше всего растут на разной пище.", SAY],["Каждая нить в паутине тянет за собой другую.", "изречение служителей Истус"]],
+  13:[["Богатство — утешение каждому, но каждый должен щедро делиться им, если хочет снискать славу.",AS],["Богатство — причина раздоров между родичами. Волк растёт в лесу.",NO],["Богатство — раздор родичей, огонь моря и путь змея.",IS],["На северо-западе спрятано большое богатство.", "надпись в разграбленном кургане"],["Норебо любит тех, кто ставит, а не тех, кто считает.", "говорят в игорных домах Фланесса"]],
+  14:[["Берёза не даёт плодов и всё же пускает побеги. Она прекрасна ветвями, высока кроной, полна листвы и касается неба.",AS],["У берёзы самые зелёные листья из всех кустов.",NO],["Берёза — ветвь в листве, малое дерево и юная поросль.",IS],["Сохнет сосна на голом холме, не укроют её ни кора, ни хвоя. Так и человек, которого никто не любит.",HV(50)],["Лес вырастает и над руинами.", "изречение друидов Обад-Хая"]],
+  15:[["Радость знает тот, кто не ведает страдания, печали и тревоги, у кого есть удача, достаток и крепкие стены.",AS],["Молод я был, шёл один и сбился с пути. Богатым я стал, встретив другого: человек человеку радость.",HV(47)],["Пей, пока рог полон: завтра его наполнит другая рука.", "застольная поговорка северян"]],
+  16:[["Уста — начало всякой речи, опора мудрости и утешение мудрых, благо и надежда каждому.",AS],["Устье — путь большинства странствий, а ножны — для мечей.",NO],["Ас — древний отец богов, князь Исгарда и вождь чертога павших.",IS],["Вниз я глядел, поднял я руны, с криком поднял — и с дерева рухнул.",HV(139)],["Эти руны вырезал самый сведущий в рунах человек к западу от моря.", "надпись в разграбленном кургане"]],
+  17:[["Тир — путеводный знак. Он хранит верность знатным, всегда на своём пути над ночными туманами и никогда не подводит.",AS],["Тейваз — знак бога доблести. Часто кузнецу приходится раздувать мехи.",NO],["Знай руны победы, если хочешь победить. Режь их на рукояти меча и дважды назови Корда.", "«Наставления валькирии»"],["Доблесть и тирания — родные братья, потому и бьются насмерть.", "говорят наёмники Фланесса"]],
+  18:[["Солнце — всегда надежда для мореходов, когда они плывут над купальней рыб, пока морской конь не вынесет их к земле.",AS],["Солнце — свет земель.",NO],["Солнце — щит облаков, сияющий луч и вечная скорбь льда.",IS],["Солнце светит и праведным, и глупцам. Разница в том, что они видят.", "изречение жрецов Пелора"]],
+  19:[["Осока растёт в болоте, в воде. Она жестоко ранит и обагряет кровью любого, кто попытается её схватить.",AS],["Трус думает, что будет жить вечно, если станет беречься битвы. Но старость не пощадит его, даже если пощадят копья.",HV(16)],["Уступает тот, у кого больше ума.", SAY],["Десятифутовый шест ещё никого не подвёл.", "поговорка искателей приключений"]],
+  20:[["День — вестник владыки, дорог людям, славный свет. Надежда и радость для богатых и бедных, полезен всем.",AS],["Прежде чем пройти в дверь, оглядись и осмотрись: не знаешь, где в доме сидит враг.",HV(1)],["Начатое — наполовину сделано.", SAY],["Кто первым входит в гробницу, тот первым её и покидает. Вопрос — как.", "поговорка искателей приключений"]]
+};
+
+// Пометки самой Шаэрры в тетради наблюдений: [текст, номер записи]
+const NOTE = {"1": ["В дни Хагалаз рушится то, что держалось на одной опоре. Проверить, рушится ли то, что держалось на двух.", 14], "2": ["Нужда сужает выбор, но не убирает его. В девяти случаях из одиннадцати оставался ход, которого я не видела утром.", 31], "3": ["Перт выпадает не чаще прочих. Мне только кажется, что чаще. Записывать каждый раз: память лжёт.", 58], "4": ["Чужой гнев — тоже вероятность. Он ищет выход, и выход можно подставить.", 77], "5": ["Дом — не стены, а то, что за них держит. Что держит меня? Не отвечено.", 90], "6": ["Сила сильного предсказуема. Поэтому её проще всего обмануть.", 103], "7": ["Дорога не обещает конца, только следующий шаг. Проверено многократно, к сожалению.", 119], "8": ["В дни Исы ничего не происходит. Это тоже результат, и его тоже нужно записать.", 126], "9": ["Когда кажется, что на меня смотрят, на меня смотрят в шести случаях из десяти. В остальных четырёх это я сама.", 141], "10": ["Свет не создаёт вещей, он показывает те, что уже есть. Руны, видимо, тоже. Видимо.", 155], "11": ["Каждый обмен меняет обоих. Цену я узнаю позже, чем товар.", 168], "12": ["Урожай приходит не вовремя, а когда созрел. Не путать.", 172], "13": ["Большая удача — это сотня мелких, которые я не пропустила.", 186], "14": ["Передышка — не потерянный день. Вероятности тоже копятся.", 193], "15": ["Радость — самое ненадёжное из наблюдений: в хорошие дни я хуже записываю.", 204], "16": ["Ответ обычно звучит раньше, чем я задаю вопрос. Слушать до, а не после.", 217], "17": ["Точный удар — не удача, а отсутствие неудачи. Разница существенна.", 229], "18": ["Попутный ветер дует всем. Плывёт тот, кто поднял парус.", 236], "19": ["Защита ценнее, когда о ней не знают. Сёстры так и не поняли, что их остановило. Я тоже.", 62], "20": ["Порог видно только с одной стороны. Назад ведёт уже другая дверь.", 250]};
+
+// Утреннее предсказание: Течение — образ того, что придёт; Воля — чего это требует от Шаэрры
+const FLOW_T = {1:"Буря придёт.",2:"Цепи сомкнутся.",3:"Скрытое выйдет наружу.",4:"Чья-то ярость вспыхнет.",5:"Опора пошатнётся.",6:"Сила изменит сильному.",7:"Дорога потянется дальше.",8:"Мир замрёт.",9:"Кто-то будет смотреть в спину.",10:"Во тьме вспыхнет огонёк.",11:"Придёт время обмена.",12:"Посеянное взойдёт.",13:"В грязи блеснёт монета.",14:"Наступит тихий час.",15:"Придёт радость.",16:"Откроется дверь.",17:"Выпадет миг идеальной точности.",18:"Подует попутный ветер.",19:"Беда пройдёт на волосок.",20:"Взойдёт рассвет."};
+const WILL_T = {1:"От меня потребуется выбрать, что должно пасть.",2:"От меня потребуется не ломать стену, а подвести к ней врага.",3:"От меня потребуется смотреть, чья ложь найдёт свидетеля.",4:"От меня потребуется направить чужой гнев туда, где он принесёт пользу.",5:"От меня потребуется отойти в сторону, пока чей-то мир шатается.",6:"От меня потребуется не меряться силой, а дождаться ошибки.",7:"От меня потребуется просто сделать следующий шаг.",8:"От меня потребуется не торопить события.",9:"От меня потребуется держаться ближе к своим.",10:"От меня потребуется отдать свет тому, кому он нужнее.",11:"От меня потребуется помнить, что у всего есть цена.",12:"От меня потребуется дать каждому собрать своё.",13:"От меня потребуется смотреть под ноги.",14:"От меня потребуется дать своим выдохнуть.",15:"Можно будет позволить себе улыбнуться.",16:"От меня потребуется слушать.",17:"От меня потребуется бить без сомнений.",18:"От меня потребуется вести за собой.",19:"От меня потребуется прикрыть тех, кто рядом.",20:"От меня потребуется переступить порог, а не ждать завтра."};
+function morningLine(a, b) {
+  if (a === b) return DOUBLE[a][0];
+  return `${FLOW_T[a]} ${WILL_T[b]}`;
+}
+function adviceLine(a, b) {
+  if (a === b) return `<b>Весь день:</b> ${esc(DOUBLE[a][1])}`;
+  return `<b>Воля подсказывает:</b> ${esc(DOUBLE[b][1])}`;
+}
+function hedge(kind) {
+  if (kind === "double") return "Две одинаковые. Это громче обычного, и стоит прислушаться.";
+  if (kind === "special") return "Это сочетание я уже встречала.";
+  if (kind === "same") return "Обе руны тянут в одну сторону. Если трактат прав, искать нужно не событие, а направление.";
+  return "Руны спорят друг с другом. Вероятнее всего, исход решит чей-то выбор.";
+}
+
+function flowCard(n, role, i) {
+  const s = SP[spOf(n)], e = edgeOf(n), sp = SPENT[i];
+  return `<div class="flow ${s.cls}${sp ? " spent" : ""}">
+    <h3>${role} · ${esc(label(n))}</h3>
+    <p class="to">Поток «${s.flow}»: ${esc(s.to)}</p>
+    <p class="quote">«${esc(R[n].use)}»</p>
+    ${e ? `<p class="note">${esc(EDGE[e])}</p>` : ""}
+    ${sp
+      ? `<p class="spent-line">Камень потеплел: ${esc(sp)}. Вернулся в мешочек.</p><div class="act"><button type="button" class="btn" data-undo="${i}">Ещё не тратила</button></div>`
+      : `<div class="act"><input type="text" id="tg${i}" value="${esc(TG[i])}" placeholder="на кого или на что" aria-label="Цель: ${role}"><button type="button" class="btn" data-spend="${i}">Камень потеплел</button></div>`}
+  </div>`;
+}
+
+function dayPlan(a, b) {
+  const sa = spOf(a), sb = spOf(b);
+  const p = [];
+  const where = n => {
+    const s = spOf(n), e = edgeOf(n);
+    if (s === "beda") return "врагу";
+    if (s === "proryv") return "себе или союзнику";
+    if (e === "cold") return "на весы, охотнее врагу, которому нужно чуть помешать";
+    if (e === "warm") return "на весы, охотнее союзнику, которому не хватает самой малости";
+    return "на весы: тому, кто это заслужил";
+  };
+  p.push(`<p><b>Числа Знамения:</b> ${a} (Течение) — ${where(a)}; ${b} (Воля) — ${where(b)}.</p>`);
+  if (a === b) {
+    p.push(`<p><b>Весь день:</b> ${esc(DOUBLE[a][1])}</p>`);
+    p.push(`<p>Её тянет потратить число ${a} «по смыслу», но это не обязательство. ${esc(DOUBLE_SPEND[a] || "")}</p>`);
+  } else if (sa === sb) {
+    p.push(`<p>Оба числа из одного потока: «${esc(SP[sa].why)}»</p>`);
+  } else {
+    p.push(`<p>Потоки разные, и решение, когда активировать каждую руну, весит больше всего.</p>`);
+  }
+  p.push(`<p class="note">Знамение: заменить бросок атаки, спасбросок или проверку характеристики (свою или существа, которое она видит) записанным числом. Решить до броска, не чаще раза в ход, каждое число один раз; неистраченные сгорают на следующем продолжительном отдыхе. С 14-го уровня — три кости.</p>`);
+  p.push(`<p class="note">Привычка (по желанию): камень Течения тратить в ответ, когда событие уже случается; камень Воли — по своему почину.</p>`);
+  return p.join("");
+}
+
+const $ = id => document.getElementById(id);
+let A = 1, B = 20;
+let SPENT = {1:"", 2:""};
+let TG = {1:"", 2:""};        // черновики целей камней, чтобы не терялись при перерисовке
+let MODE = "example";         // example — пример до первого действия; day — свой день; preview — пара из ссылки
+let CLOSED = false;           // день уже записан в тетрадь
+const EVF = ["evExp", "ev", "evFal"];
+const isD20 = v => Number.isInteger(v) && v >= 1 && v <= 20;
+const parseD20 = s => { const t = String(s).trim(); return /^\d{1,2}$/.test(t) && isD20(Number(t)) ? Number(t) : null; };
+// Равномерный d20: отбрасываем хвост 2^32, который не делится на 20
+function d20() {
+  const buf = new Uint32Array(1);
+  for (;;) { crypto.getRandomValues(buf); if (buf[0] < 4294967280) return 1 + buf[0] % 20; }
+}
+
+function paintBag(i, n, animate) {
+  const s = SP[spOf(n)];
+  $(`bag${i}`).className = `bag ${s.cls}`;
+  const st = $(`stone${i}`);
+  st.innerHTML = glyph(n);
+  st.classList.remove("cast");
+  if (animate) { void st.offsetWidth; st.classList.add("cast"); }
+  $(`name${i}`).textContent = label(n);
+  $(`sub${i}`).innerHTML = `${esc(R[n].t)} · ${chip(n)}`;
+  $(`d${i}`).value = n;
+}
+
+function kindOf(a, b) {
+  if (a === b) return "double";
+  if (findPair(SPECIAL, a, b)) return "special";
+  return spOf(a) === spOf(b) ? "same" : "cross";
+}
+
+function renderFlows() {
+  const pre = A === B ? ["Первый камень · ", "Второй камень · "] : ["", ""];
+  $("flows").innerHTML = flowCard(A, pre[0] + "Течение", 1) + flowCard(B, pre[1] + "Воля", 2);
+}
+
+function render(animate) {
+  paintBag(1, A, animate); paintBag(2, B, animate);
+  const r = read(A, B);
+  const ids = A === B ? [A] : [A, B];
+  const pick = n => (A * 31 + B * 17 + n) % POEM[n].length;
+  const line = (n, q) => `«${esc(q[0].replace(/\.$/, ""))}» <span>— ${esc(q[1])}</span>`;
+  const poems = ids.map(n => `<p><b>${esc(R[n].n)}.</b> ${line(n, POEM[n][pick(n)])}</p>`).join("")
+    + ids.map(n => `<p class="hand"><b>${esc(R[n].n)}.</b> ${esc(NOTE[n][0])} <span>— рука Шаэрры, запись ${NOTE[n][1]}</span></p>`).join("")
+    + `<details class="more"><summary>Ещё на полях</summary>${ids.map(n => POEM[n].filter((q, k) => k !== pick(n)).map(q => `<p><b>${esc(R[n].n)}.</b> ${line(n, q)}</p>`).join("")).join("")}</details>`;
+  const main = morningLine(A, B);
+  const showSign = r.sign !== main;
+  $("omen").innerHTML = `
+    <p class="hand">Первый мешочек — ${esc(label(A))}. Второй — ${esc(label(B))}. ${esc(hedge(kindOf(A, B)))}</p>
+    <p class="sign" style="font-size:1.3rem">«${esc(main)}»</p>
+    <p class="note" style="color:var(--ink)">${adviceLine(A, B)}</p>
+    ${r.name ? `<div class="sign-name">${esc(r.name)}${r.draft ? " · черновик" : ""}</div>` : ""}
+    ${showSign ? `<p class="sign" style="font-size:1.1rem">«${esc(r.sign)}»</p>` : ""}
+    <details class="more"><summary>Подробнее о знаке</summary>
+      <div class="kind">${esc(r.kind)}</div>
+      ${r.body.map(x => `<p class="note">${esc(x)}</p>`).join("")}
+      <dl class="flowline">
+        <dt>Течение</dt><dd>«${esc(R[A].sees)}» ${esc(R[A].m)}</dd>
+        <dt>Воля</dt><dd>«${esc(R[B].sees)}» ${esc(R[B].m)}</dd>
+      </dl>
+      ${r.extra.length ? `<div class="extra">${r.extra.map(x => `<p class="note">${esc(x)}</p>`).join("")}</div>` : ""}
+      <div class="margin"><p>На полях трактата (песни северян Тиллонрии, изречения Фланесса и пометки Шаэрры):</p>${poems}</div>
+    </details>`;
+  renderFlows();
+  $("day").innerHTML = dayPlan(A, B);
+  renderSB();
+  renderBanner();
+}
+
+// Колкости: фраза вслух из двух рун в прошедшем времени — предсказание, сбывшееся в тот же миг
+const COULD = {1:"мог рухнуть весь замысел",2:"могли сомкнуться цепи",3:"могла вскрыться тайна",4:"могла вспыхнуть слепая ярость",5:"могла уйти земля из-под ног",6:"могли подвести мышцы",7:"могла лечь ровная дорога",8:"мог наступить миг передышки",9:"мог устоять твой рубеж",10:"мог зажечься огонёк ясности",11:"мог сложиться честный обмен",12:"мог созреть урожай",13:"могла блеснуть монета в грязи",14:"мог настать тихий час",15:"могла прийти радость",16:"могла открыться дверь к ответу",17:"мог выйти идеальный удар",18:"мог подуть попутный ветер",19:"могло раскрыться птичье крыло",20:"мог наступить новый рассвет"};
+const WILL = {1:"рухнул весь замысел",2:"сомкнулись цепи",3:"вскрылся скрытый изъян",4:"ярость ослепила тебя",5:"земля ушла из-под ног",6:"подвели мышцы",7:"осталась лишь дорожная пыль",8:"всё замерло",9:"пришлось лишь обороняться",10:"света хватило, только чтобы не споткнуться",11:"за всё пришлось заплатить",12:"взошло лишь посеянное",13:"достался лишь грош",14:"вышла лишь передышка",15:"досталась лишь радость",16:"открылась лишь дверь",17:"вышел лишь точный удар",18:"подул лишь попутный ветер",19:"осталось лишь крыло"};
+const STAY = {1:"среди обломков своих планов",2:"в своих цепях",3:"со своим скрытым изъяном",4:"в своей слепой ярости",5:"без опоры",6:"в своём бессилии",7:"на своей пыльной дороге",8:"во льду",9:"настороже",10:"при своей свече",11:"со своей сделкой",12:"со своим урожаем",13:"со своим грошом",14:"под своей берёзой",15:"со своей радостью",16:"со своим откровением",17:"со своим точным ударом",18:"под своим солнцем",19:"под своим крылом",20:"в своём рассвете"};
+function sbLine(o, r) {
+  if (r < o) return `Для тебя ${COULD[o]}, но ${WILL[r]}.`;
+  if (r > o) return `Для тебя ${COULD[r]}, но всё осталось как было: ты по-прежнему ${STAY[o]}.`;
+  return `Ты ${STAY[o]}, и так было суждено. С этим не спорят.`;
+}
+// Чтение колкости — образ того, как сдвинулось число; исход действия (с модификаторами) решает стол
+const SB_FALL = {
+  "proryv-beda":"Триумф врага сорвался в беду: колкость ударила в самую вершину удачи.",
+  "proryv-tuman":"Триумф врага сполз в обыденность.",
+  "tuman-beda":"Обычное течение обернулось бедой.",
+  "same":"Удача врага сползла, но не сменила сторону."
+};
+function renderSB() {
+  const so = $("sbO").value, sr = $("sbR").value;
+  const o = parseD20(so), r = parseD20(sr);
+  if (o === null || r === null) {
+    $("sbOut").innerHTML = "";
+    const bad = (so.trim() && o === null) || (sr.trim() && r === null);
+    $("sbAns").innerHTML = `<span class="note">${bad ? "Нужны целые числа от 1 до 20." : "Впишите бросок врага и вытянутую руну: колкость читается как пара, Течение и Воля."}</span>`;
+    return;
+  }
+  $("sbOut").innerHTML = `«${esc(sbLine(o, r))}»`;
+  const q = read(o, r);
+  const kept = Math.min(o, r);
+  const mech = r < o ? `Было ${o}, переброс ${r}: используется ${kept}. Число снизилось.`
+    : r === o ? `Было ${o}, переброс ${r}: используется ${kept}. Число не изменилось.`
+    : `Было ${o}, переброс ${r}: используется ${kept}. Более высокий переброс не применяется.`;
+  const rank = {beda:0, tuman:1, proryv:2};
+  let res;
+  if (r < o) res = "Удача отступила от врага.";
+  else if (r === o) res = "Та же руна дважды: Шаэрра читает это так, что этому было суждено случиться, и запоминает, что спорила с сильным знаком.";
+  else if (rank[spOf(r)] > rank[spOf(o)]) res = `Воля обернулась удачей для врага: переброс поднялся из ${({beda:"Беды", tuman:"Тумана"})[spOf(o)]} в ${({tuman:"Туман", proryv:"Прорыв"})[spOf(r)]}. Она верно увидела знак, но неверно поняла, к чему он.`;
+  else res = "Мир не услышал: переброс выше, но в том же спектре. Течение оказалось сильнее Воли.";
+  const fall = spOf(o) === spOf(r) ? SB_FALL.same : SB_FALL[`${spOf(o)}-${spOf(r)}`];
+  const recorded = q.src === "double" || q.src === "special" || q.src === "neigh";
+  const pairLine = recorded
+    ? `${q.name ? `<b>${esc(q.name)}${q.draft ? " · черновик" : ""}.</b> ` : ""}«${esc(q.sign)}»`
+    : (r < o ? esc(fall) : "");
+  $("sbAns").innerHTML = `
+    <span class="kind">Течение — ${esc(label(o))} (${o}), Воля — ${esc(label(r))} (${r}) · ${esc(q.kind)}</span><br>
+    <span class="note">Было: ${esc(R[o].m)}</span><br>
+    <span class="note">${r < o ? "Стало" : "Могло стать"}: ${esc(R[r].m)}</span><br>
+    ${pairLine ? pairLine + "<br>" : ""}
+    <span class="note">Как читает Шаэрра: ${esc(res)}</span><br>
+    <span class="note"><b>За столом:</b> ${esc(mech)} Удался ли бросок с модификаторами, решает стол. Преимущество своему уходит в любом случае. Камни Знамения колкость не тратит.</span>`;
+}
+$("sbR").addEventListener("input", renderSB);
+$("sbO").addEventListener("input", renderSB);
+
+// Хранение: render ничего не пишет; запись — только по действию игрока, и об отказе браузера говорим честно
+function trySet(key, val) { try { localStorage.setItem(key, val); return true; } catch (e) { return false; } }
+function warnStore(ok) {
+  $("storeWarn").hidden = ok;
+}
+function store() {
+  if (MODE !== "day") return true;
+  const st = {v:2, a:A, b:B, spent:SPENT, tg:TG, closed:CLOSED};
+  EVF.forEach(k => st[k] = $(k).value);
+  const ok = trySet("shaerra-day", JSON.stringify(st));
+  warnStore(ok);
+  return ok;
+}
+// Любое действие игрока в режиме примера начинает его собственный день
+function touch() { if (MODE === "example") MODE = "day"; }
+function dayHasWork() { return !!(SPENT[1] || SPENT[2] || EVF.some(k => $(k).value.trim())); }
+function newDay() { SPENT = {1:"", 2:""}; TG = {1:"", 2:""}; EVF.forEach(k => $(k).value = ""); }
+
+function renderBanner() {
+  const b = $("banner");
+  if (MODE === "example") { b.hidden = false; b.innerHTML = `Это пример. Вытяните руны или впишите свои числа, и начнётся ваш день.`; }
+  else if (MODE === "preview") { b.hidden = false; b.innerHTML = `Просмотр пары из ссылки: ваш день не тронут, здесь ничего не сохраняется. <button type="button" class="btn" id="backDay">Вернуться к своему дню</button>`; }
+  else if (CLOSED) { b.hidden = false; b.innerHTML = `Этот день записан в тетрадь. Утром вытяните новые руны.`; }
+  else b.hidden = true;
+}
+$("banner").addEventListener("click", e => { if (e.target.id === "backDay") { loadDay(); render(false); } });
+
+$("flows").addEventListener("click", e => {
+  const t = e.target;
+  if (t.dataset.spend) { const i = t.dataset.spend; touch(); CLOSED = false; SPENT[i] = TG[i].trim() || "без записи, на кого"; TG[i] = ""; renderFlows(); store(); renderBanner(); const u = document.querySelector(`[data-undo="${i}"]`); if (u) u.focus(); }
+  if (t.dataset.undo) { const i = t.dataset.undo; SPENT[i] = ""; renderFlows(); store(); const f = $(`tg${i}`); if (f) f.focus(); }
+});
+$("flows").addEventListener("input", e => { const m = /^tg([12])$/.exec(e.target.id); if (m) { TG[m[1]] = e.target.value; store(); } });
+EVF.forEach(k => $(k).addEventListener("input", () => { touch(); CLOSED = false; store(); renderBanner(); }));
+
+// Тетрадь — только в этом браузере; повреждённые данные не стираем, а откладываем в резервный ключ
+const okEntry = x => x && typeof x === "object" && isD20(x.a) && isD20(x.b);
+let LOG = [];
+let LOAD_NOTE = "";
+(function loadLog() {
+  let raw = null;
+  try { raw = localStorage.getItem("shaerra-log"); } catch (e) { LOAD_NOTE = "Браузер не даёт читать сохранённую тетрадь."; return; }
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch (e) { data = undefined; }
+  const list = Array.isArray(data) ? data : (data && Array.isArray(data.log) ? data.log : null);
+  if (!list) { trySet(`shaerra-log-broken-${Date.now()}`, raw); LOAD_NOTE = "Сохранённая тетрадь повреждена; её копия отложена в браузере, начата новая."; return; }
+  LOG = list.filter(okEntry);
+  const bad = list.length - LOG.length;
+  if (bad) { trySet(`shaerra-log-broken-${Date.now()}`, raw); LOAD_NOTE = `Пропущено повреждённых записей: ${bad}; исходный текст отложен в браузере.`; }
+})();
+function renderLog() {
+  const ol = $("log");
+  $("logNote").textContent = LOAD_NOTE;
+  if (!LOG.length) { ol.innerHTML = `<li class="empty">Пока пусто. Закройте день, и запись появится здесь. Тетрадь хранится только в этом браузере.</li>`; return; }
+  ol.innerHTML = LOG.map(x => {
+    const sp = [x.s1 && `${R[x.a].n}: ${x.s1}`, x.s2 && `${R[x.b].n}: ${x.s2}`].filter(Boolean).join("; ");
+    const lines = [
+      `<span class="note">«${esc(morningLine(x.a, x.b))}»</span>`,
+      sp && `<span class="note">Камни: ${esc(sp)}</span>`,
+      x.evExp && `<span class="ev">Ждала: ${esc(x.evExp)}</span>`,
+      x.ev && `<span class="ev">${esc(x.ev)}</span>`,
+      x.evFal && `<span class="ev">Опровергло бы: ${esc(x.evFal)}</span>`
+    ].filter(Boolean).join("");
+    return `<li><span><time>${esc(x.d || "")}</time> <b>${esc(label(x.a))} → ${esc(label(x.b))}</b></span>${lines}</li>`;
+  }).join("");
+}
+function saveLog() { const ok = trySet("shaerra-log", JSON.stringify(LOG)); warnStore(ok); return ok; }
+function flash(id, msg, ms) { $(id).textContent = msg; if (ms) setTimeout(() => { if ($(id).textContent === msg) $(id).textContent = ""; }, ms); }
+
+$("save").addEventListener("click", () => {
+  if (MODE === "preview") { flash("saved", "Это просмотр пары из ссылки. Вернитесь к своему дню, чтобы записать его.", 5000); return; }
+  if (CLOSED) { flash("saved", "Этот день уже записан. Утром вытяните новые руны.", 4000); return; }
+  touch();
+  const d = new Date().toLocaleString("ru-RU", {day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit"});
+  const entry = {id:`${Date.now()}-${Math.floor(Math.random() * 1e6)}`, a:A, b:B, d, s1:SPENT[1], s2:SPENT[2]};
+  EVF.forEach(k => entry[k] = $(k).value.trim());
+  LOG.unshift(entry);
+  if (!saveLog()) {
+    LOG.shift();
+    flash("saved", "Не удалось сохранить: браузер не даёт записывать. Записи остались на странице; скопируйте тетрадь в «Резервной копии».");
+    return;
+  }
+  newDay(); CLOSED = true; renderFlows(); store(); renderLog(); renderBanner();
+  flash("saved", "День закрыт и записан. Утром вытяните новые руны.", 4000);
+});
+
+function exportText() {
+  const day = {a:A, b:B, spent:SPENT, closed:CLOSED};
+  EVF.forEach(k => day[k] = $(k).value);
+  return JSON.stringify({v:2, log:LOG, day: MODE === "day" ? day : null});
+}
+$("exp").addEventListener("click", () => {
+  const txt = exportText();
+  $("impText").value = txt;
+  const fail = () => { $("impText").select(); flash("expMsg", "Не удалось скопировать: текст выделен в поле ниже, скопируйте его вручную."); };
+  try { navigator.clipboard.writeText(txt).then(() => flash("expMsg", `Скопировано записей: ${LOG.length}.`), fail); } catch (e) { fail(); }
+});
+$("imp").addEventListener("click", () => {
+  let data;
+  try { data = JSON.parse($("impText").value); } catch (e) { flash("impMsg", "Это не похоже на текст тетради: вставьте то, что скопировала кнопка «Скопировать тетрадь»."); return; }
+  const list = Array.isArray(data) ? data : (data && Array.isArray(data.log) ? data.log : null);
+  if (!list) { flash("impMsg", "Это не похоже на текст тетради."); return; }
+  const key = x => x.id || `${x.d}|${x.a}|${x.b}`;
+  const have = new Set(LOG.map(key));
+  const good = list.filter(okEntry);
+  const fresh = good.filter(x => !have.has(key(x))).map(x => {
+    const e = {a:x.a, b:x.b, d:String(x.d || ""), s1:String(x.s1 || ""), s2:String(x.s2 || "")};
+    if (x.id) e.id = String(x.id);
+    EVF.forEach(k => e[k] = String(x[k] || ""));
+    return e;
+  });
+  const before = LOG;
+  LOG = LOG.concat(fresh);
+  if (!saveLog()) { LOG = before; flash("impMsg", "Не удалось сохранить: браузер не даёт записывать."); return; }
+  renderLog();
+  const skipped = list.length - good.length;
+  flash("impMsg", `Добавлено записей: ${fresh.length}.${skipped ? ` Пропущено повреждённых: ${skipped}.` : ""}`);
+});
+
+// Числа: только целые 1–20; правка числа не стирает день
+for (const i of [1, 2]) {
+  const name = i === 1 ? "Течение" : "Воля";
+  const set = n => {
+    $("numErr").textContent = "";
+    if (n === (i === 1 ? A : B)) return;
+    touch(); CLOSED = false;
+    if (i === 1) A = n; else B = n;
+    render(true); store();
+  };
+  $(`d${i}`).addEventListener("change", e => {
+    const n = parseD20(e.target.value);
+    if (n === null) { $("numErr").textContent = `${name}: нужно целое число от 1 до 20.`; e.target.value = i === 1 ? A : B; return; }
+    set(n);
+  });
+  $(`dec${i}`).addEventListener("click", () => { const v = i === 1 ? A : B; if (v > 1) set(v - 1); });
+  $(`inc${i}`).addEventListener("click", () => { const v = i === 1 ? A : B; if (v < 20) set(v + 1); });
+}
+function castNow() {
+  $("confirm").hidden = true; $("numErr").textContent = "";
+  touch(); CLOSED = false;
+  newDay(); A = d20(); B = d20(); render(true); store();
+}
+$("cast").addEventListener("click", () => {
+  if (MODE === "day" && !CLOSED && dayHasWork()) { $("confirm").hidden = false; $("confirmYes").focus(); return; }
+  castNow();
+});
+$("confirmYes").addEventListener("click", castNow);
+$("confirmNo").addEventListener("click", () => { $("confirm").hidden = true; $("cast").focus(); });
+$("swap").addEventListener("click", () => { touch(); [A, B] = [B, A]; [SPENT[1], SPENT[2]] = [SPENT[2], SPENT[1]]; [TG[1], TG[2]] = [TG[2], TG[1]]; render(true); store(); });
+
+function loadDay() {
+  MODE = "example"; A = 1; B = 20; newDay(); CLOSED = false;
+  let l = null;
+  try { l = JSON.parse(localStorage.getItem("shaerra-day")); } catch (e) { l = null; }
+  if (l && typeof l === "object" && isD20(l.a) && isD20(l.b)) {
+    MODE = "day"; A = l.a; B = l.b; CLOSED = !!l.closed;
+    const sp = l.spent || {}, tg = l.tg || {};
+    SPENT = {1:String(sp[1] || ""), 2:String(sp[2] || "")};
+    TG = {1:String(tg[1] || ""), 2:String(tg[2] || "")};
+    EVF.forEach(k => $(k).value = typeof l[k] === "string" ? l[k] : "");
+  }
+}
+
+const h = /^#(\d{1,2})-(\d{1,2})$/.exec(location.hash);
+if (h && isD20(Number(h[1])) && isD20(Number(h[2]))) { MODE = "preview"; A = Number(h[1]); B = Number(h[2]); }
+else loadDay();
+render(false);
+renderLog();
+</script>
+
+</body></html>
