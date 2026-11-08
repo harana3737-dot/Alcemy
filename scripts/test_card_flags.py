@@ -17,7 +17,7 @@ class CardFlagTests(unittest.TestCase):
         self.assertFalse(by['Левитация']['soft']);self.assertFalse(by['Левитация']['stacks_8_9'])
         self.assertTrue(by['Полёт']['stacks_8_9']);self.assertTrue(by['Паук']['soft'])
         self.assertEqual(by['Сноровка: характеристика']['soft_variants'],{'Телосложение':False})
-        self.assertEqual(by['Бутилированное дыхание']['soft_variants'],{'Задержать':True})
+        self.assertEqual(by['Бутилированное дыхание']['soft_variants'],{'Задержать':False})
 
     def test_sync_and_mutation(self):
         text=(ROOT/RULES).read_text();self.assertEqual(text,replace_blocks(text))
