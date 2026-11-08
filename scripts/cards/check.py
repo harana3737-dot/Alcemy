@@ -18,6 +18,10 @@ def main():
     MOVE_OK = {"Поспешное отступление", "Кинетический рывок", "Левитация"}   # передвижение — вне 8.9 по правилу (Левитация — Ж-107)
     PRICE_BY_SPELL_EXC = {"Молниевый выдох", "Склянка стихии: большая"}   # уровень поднят за урон, цена по заклинанию (8.8)
 
+    # Ж-148 отменяет надбавку уровня, но не даёт новых цен; проверяем сохранённые суммы точно.
+    KEPT_PRICES = {"Теневой клинок": 45, "Далёкий шаг": 250, "Контроль разума: чудовище": 2500}
+    TOX_EXCEPTIONS = {"Любовный напиток": 1}  # Ж-148, №18
+
     err, warn = [], []
     E = lambda c, m: err.append(f"{c['name']} ({ROM[c['lvl']]}): {m}")
     W = lambda c, m: warn.append(f"{c['name']} ({ROM[c['lvl']]}): {m}")
@@ -41,13 +45,16 @@ def main():
         elif k in ("fl", "oils", "oilw", "salve"):
             if not t.startswith("0"):
                 E(c, f"токсичность {t}, а склянки, масла и мази её не дают")
-        elif t.isdigit() and int(t) not in (0, TOX[rar]):
-            E(c, f"токсичность {t}, по редкости «{rar}» должна быть {TOX[rar]} (или 0 у мягких)")
+        elif t.isdigit() and int(t) not in (0, TOX_EXCEPTIONS.get(c["name"], TOX[rar])):
+            E(c, f"токсичность {t}, по редкости «{rar}» должна быть {TOX_EXCEPTIONS.get(c['name'], TOX[rar])} (или 0 у мягких)")
         elif t == "0" and "мягк" not in c["tox"]:
             W(c, "токсичность 0 без пометки «мягкий»")
         # цена
         p = num(c["price"])
-        if k in ("chg", "psn", "rea", "fl", "oils"):
+        if c["name"] in KEPT_PRICES:
+            if p != KEPT_PRICES[c["name"]]:
+                E(c, f"цена {p} не равна сохранённой цене {KEPT_PRICES[c['name']]} (Ж-148)")
+        elif k in ("chg", "psn", "rea", "fl", "oils"):
             sm = re.search(r"(\d) ур\.", c["src_raw"])
             if sm:
                 exp = INK[int(sm.group(1))]

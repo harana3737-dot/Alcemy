@@ -50,7 +50,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
     assert.equal(model.finished.hours,0);assert.equal(model.finished.gold,0);assert.equal(model.finished.weeks,null);assert.equal(model.highest,null);
     assert.ok(Math.abs(model.one-1/.9375)<1e-10);assert.ok(Math.abs(model.two-(1+.35/.9375)/.9375)<1e-10);
     assert.ok(model.f.attempts>15/.8,'Последняя полная партия учитывает избыток прогресса');
-    assert.equal(model.variants.added,1);assert.equal(model.long.duration,540);assert.equal(model.doubled.duration,480);
+    assert.equal(model.variants.added,2);assert.equal(model.long.duration,540);assert.equal(model.doubled.duration,480);
     assert.equal(model.doubled.clean,true);assert.equal(model.charge.duration,240);assert.equal(model.charge.uses,2);
     assert.ok(Math.abs(model.volume-model.simulated)<model.volume*.04,JSON.stringify({volume:model.volume,simulation:model.simulated}));
     const picks=await page.evaluate(()=>{

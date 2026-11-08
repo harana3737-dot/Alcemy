@@ -433,7 +433,8 @@ def validate_sources():
     for name, (level, token) in expected.items():
         if CARDS[name]['lvl'] != level or token not in CARDS[name]['eff']:
             raise ValueError('Изменился источник сценария: ' + name)
-    if len(CONTROLS) != len([c for c in C if c['cls'] == 'psn']):
+    # Модель охватывает яды I–VIII; чудовище IX (Ж-148) без согласованного срока вне расчёта.
+    if len(CONTROLS) != len([c for c in C if c['cls'] == 'psn' and c['lvl'] <= 8]):
         raise ValueError('Изменилось число контрольных ядов')
 
 

@@ -425,7 +425,7 @@ const HERB_HALF=["chg","psn","rea","fl","oils"];
 const SIT=[
  ["sale","На продажу","экономия трав и лишний флакон выгоднее любого баффа",()=>true],
  ["first","Рецепт ещё не освоен","СЛ +2 на каждую попытку до первой удачной варки (8.4, Ж-104); партии — только для освоенного рецепта",()=>true],
- ["metamagic","Метамагия при варке","СЛ варки +2 (Ж-115); вариант укажи в пометке готовой дозы, расходы уточни у мастера",c=>!['basic','psn'].includes(c.k)],
+ ["metamagic","Метамагия при варке","СЛ варки +2 (Ж-115); вариант укажи в пометке готовой дозы, Усиленное, Продлённое или Максимизированное; параметры Максимизированного уточни у мастера",c=>!['basic','psn'].includes(c.k)],
  ["ess","Эссенция нестабильна","СЛ +2 (9.3)",()=>true],
  ["help","Есть помощник","+2 к проверке; мастерство помощника не ниже твоего − 2",()=>true],
  ["lab","Мастерская лаборатория","партия эликсиров на 1 дозу больше",()=>true],
@@ -1293,7 +1293,7 @@ function recForm(box,opts){
     box.querySelectorAll('.b5s').forEach(s=>doses.push({n,note:KEEP_OFF.has(s.value)?'':s.value}));
     box.querySelectorAll('.b20s').forEach(s=>{const v=s.value;
       if(v==='Ещё одно'||v==='Ещё одна доза'){doses.push({n,note:''},{n,note:''})}
-      else if(v==='Выше уровнем'){doses.push({n:n.replace(/(\d+)\.\1\b/,`${lvl+1}.${lvl+1}`),note:''})}
+      else if(v==='Выше уровнем'){doses.push({n:n.replace(/(\d+)\.\1\b/,`${lvl+1}.${lvl+1}`),note:`Триггеры: фактический катализатор ${ROM[box._plan?.cat?.o||ORD(lvl)]||"не нужен"} (варка ${lvl}.${lvl})`})}
       else if(v==='Два бонуса'){const row=s.parentNode;const a=row.querySelector('.tw1').value,b=row.querySelector('.tw2').value;
         doses.push({n,note:[...new Set([a,b])].filter(x=>x&&!KEEP_OFF.has(x)).join(' + ')})}
       else doses.push({n,note:v})});
