@@ -53,7 +53,7 @@ const shots=process.env.TABLE_TOOLS_SCREENSHOTS;
     // В CI резервный DejaVu Sans шире локального системного шрифта.
     await page.locator('body').evaluate(el=>el.style.fontFamily='"DejaVu Sans", sans-serif');await fits();
     assert.match(await page.locator('#buildInfo summary').innerText(),/^Сборка [0-9a-f]{12}$/);
-    assert.equal(await page.locator('#sumN').innerText(),'0 из 9');
+    assert.equal(await page.locator('#sumN').innerText(),'0 из 6');
     assert.match(await page.locator('.sum').innerText(),/Не отмеченные считаются принятыми/);
     for(const tab of ['ref','el','ta','ok']){
       await page.locator(`[data-t="${tab}"]`).click();await fits();
