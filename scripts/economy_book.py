@@ -11,6 +11,7 @@ from sim import INK
 from alchemy_guidance import EXAMPLE_CLASS, budget, chances, quality, sales
 from sim_plan import batch_p, ink_set, week
 from sim_volume import volume_stats, CHG, ESS
+from party_kit_report import CARDS
 
 ROOT = Path(__file__).resolve().parent.parent
 BOOK = ROOT / 'Для игрока — книга экономики.md'
@@ -199,9 +200,12 @@ def sections():
     for name,f,l,state in [('Лечение 1.1',potion_sale,1,'открыт'),('Лечение 2.2',potion_sale,2,'нужен рецепт'),
                            ('Чернила I',ink_sale,1,'открыт'),('Чернила II',ink_sale,2,'открыт')]:
         rows.append([name,state,number(f(5,2,1,l,.85)),number(f(5,2,1,l,.75)),number(f(5,2,1,l,.85)*12,0)])
-    def shield(sale):  # Щит веры I (Ж-148): цена 25 зм; трава I и эссенция Тело I
-        return sales(5,ELIXIR_DC[1],2*HERB[1],25*sale,0,unstable_fraction(sale),2,item_kind='elixir',level=1,batch=batch_e(2,1))['per_hour']
-    rows.insert(2,['Эликсир Щит веры I, партия '+str(batch_e(2,1)),'нужна формула Тела',number(shield(.85)),number(shield(.75)),number(shield(.85)*12,0)])
+    shield_card = CARDS['Щит веры']; shield_level = shield_card['lvl']
+    shield_price = float(shield_card['price'].replace(' ', ''))
+    def shield(sale):
+        l = shield_level
+        return sales(5,ELIXIR_DC[l],(l+1)*HERB[l],shield_price*sale,0,unstable_fraction(sale),2,item_kind='elixir',level=l,batch=batch_e(2,l))['per_hour']
+    rows.insert(2,['Эликсир Щит веры '+['','I','II'][shield_level]+', партия '+str(batch_e(2,shield_level)),'нужна формула Тела',number(shield(.85)),number(shield(.75)),number(shield(.85)*12,0)])
     out['sell-now']=table(['Что продавать','Рецепт','Прибыль/ч: торговцу 85%','Прибыль/ч: Гильдии 75%','За неделю 12 ч, зм'],rows)
     rows=[]
     items=[(f'Лечение {l}.{l}',potion_sale,l,max(l,2)) for l in range(1,10)]+[(f'Чернила {r}',ink_sale,l,max(l,2)) for l,r in enumerate(['I','II','III','IV','V'],1)]
@@ -222,6 +226,25 @@ def sections():
     return out
 
 
+def formula_example_data():
+    level = CARDS['Щит веры']['lvl']
+    if level not in (1, 2):
+        raise ValueError('Этот пример требует обычной ступени Тела; измени условия примера после нового решения')
+    probes, _ = formula_research(3, ELIXIR_DC[level], bonus(5,2,1)+2, None)
+    material = probes*(level*HERB[level]/4 + HERB[level] + 5)
+    price, herb, ess, dc, cat, h = INK['II']
+    rate = sales(5,dc,herb+ess,price*.85,CAT_PRICE[cat],unstable_fraction(.85),h,item_kind='ink',level=2)['per_day']/8
+    return dict(level=level, cost=material, hours=2*probes, overpay=50-material, revenue=2*probes*rate)
+
+
+def formula_example_text():
+    x = formula_example_data()
+    roman = ['', 'I', 'II'][x['level']]
+    return (f"> **Пример.** Обычная ступень формулы стоит при покупке 50 зм. Исследование Тела через Щит веры {roman} с одной подсказкой и указанием требует около {number(x['cost'])} зм материалов проб и {number(x['hours'])} часа. "
+            f"Переплата за покупку — примерно {number(x['overpay'])} зм. Если эти часы после покупки действительно можно отдать продаже чернил II, они приносят около {number(x['revenue'],0)} зм прибыли. "
+            'Если чернила ещё не открыты или времени всё равно нет, такой заработок подставлять нельзя.')
+
+
 def build():
     text=BOOK.read_text(encoding='utf-8')
     for key,value in sections().items():
@@ -229,6 +252,10 @@ def build():
         text,n=re.subn(pattern,lambda m:m[1]+'\n'+value+'\n'+m[2],text,flags=re.S)
         if n!=1:
             raise ValueError('Не найден единственный блок таблицы: '+key)
+    pattern = r'(<!-- economy-example:formula:start -->).*?(<!-- economy-example:formula:end -->)'
+    text,n = re.subn(pattern,lambda m:m[1]+'\n'+formula_example_text()+'\n'+m[2],text,flags=re.S)
+    if n != 1:
+        raise ValueError('Не найден единственный пример исследования формулы')
     return text
 
 

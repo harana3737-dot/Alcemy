@@ -117,6 +117,7 @@ def check(root=ROOT, *, slow=False, browser=False, sources=False, quick=False, j
                     '-p', 'test_*.py'], copy, env, failures)
         run(py+['scripts/check_rule_documents.py'], copy, env, failures)
         run(py+['scripts/card_rule_lists.py'], copy, env, failures)
+        run(py+['scripts/check_master_rulings.py'], copy, env, failures)
         run(py+['scripts/question_registry.py'], copy, env, failures)
         run(['node', 'scripts/cards/test_import_snapshot.cjs'], copy, env, failures)
         run(py+['scripts/cards/check.py'], copy, env, failures)

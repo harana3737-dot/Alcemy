@@ -9,6 +9,10 @@ import re
 import random
 import sim_plan as p
 from generated_files import marker
+import party_kit_report as named
+from collections import Counter
+from rules_data import ROM
+from dur import DUR
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / 'Недельная варка — план и бюджет.md'
@@ -34,10 +38,50 @@ def replace_table(text, heading, replacement):
     return text[:a] + NOTE + '\n' + replacement + text[b:]
 
 
+NAMED_NOTE = marker('scripts/weekly_economy_report.py', 'scripts/party_kit_report.py; scripts/cards/cards_data.py', partial=True)
+
+
+def named_buff_stock():
+    result = {}
+    for key, mastery, level, items in (
+        ('now', 2, 5, [('Подмога', 6), ('Щит веры', 6)]),
+        ('mastery3', 3, 6, [('Подмога', 6), ('Щит веры', 6)]),
+        ('mastery5', 5, 9, [('Защита от смерти', 6), ('Каменная кожа', 2), ('Героизм', 2)]),
+    ):
+        trials = [named.small(named.CARDS[n], mastery, q, level=level, guidance=True) for n, q in items]
+        result[key] = dict(materials=sum(x[0] for x in trials), hours=sum(x[1] for x in trials),
+                           buy=sum(named.price(named.CARDS[n])*q for n,q in items),
+                           mastery=mastery, level=level, items=items)
+    return result
+
+
+def named_buff_text():
+    stock = named_buff_stock()
+    now, higher, future = (stock[k] for k in ('now', 'mastery3', 'mastery5'))
+    label = lambda n: n + ' ' + ROM[named.CARDS[n]['lvl']]
+    def counts(key):
+        values = Counter()
+        for n,q in stock[key]['items']:
+            values[named.CARDS[n]['lvl']] += q
+        return ' и '.join(f'{q} доз {ROM[l]}' for l,q in sorted(values.items()))
+    return NAMED_NOTE + f"""
+**Сейчас (мастерство 2):** расчётный пример двух дней вылазок при чародее 5: {label("Подмога")} на троих в каждый день ({DUR["Подмога"]}) и по одной дозе {label("Щит веры")} каждому ({DUR["Щит веры"]}). Вместо Щита может быть {label("Благословение")} ({DUR["Благословение"]}), те же цена и состав по стоимости. За неделю {counts("now")}; это сравнение снабжения, не назначенный игроку план.
+
+- **Варит Талис:** ≈{number(now['materials'],2)} зм материалов и ≈{number(now['hours'])} часа с указанием, по карточкам и с неполной последней партией. При мастерстве 3 / чародее 6 — ≈{number(higher['hours'])} часа. Успехи варки I не растят мастерство 2 → 3.
+- **Купить:** {number(now['buy'],0)} зм по каталогу. Реальные торговые цены могут отличаться.
+
+**Мастерство 5:** пример двух дней вылазок при чародее 9: {label("Защита от смерти")} на троих в каждый день, {label("Каменная кожа")} Фаэнону и {label("Героизм")} одному из магов. Одному существу Каменная кожа и Героизм одновременно не подходят: оба занимают алхимическую концентрацию. За неделю {counts("mastery5")}.
+
+- **Варит Талис:** ≈{number(future['materials'],2)} зм материалов и ≈{number(future['hours'])} часа с указанием. Учтены расходуемая алмазная пыль Каменной кожи и обе эссенции Героизма. В 12/22 часа ожидание не помещается; в 30 часов помещается до чернил и исследований. Успехи IV не растят мастерство 5 → 6.
+- **Купить:** {number(future['buy'],0)} зм по сохранённым ценам каталога. Это ожидания производства уже освоенных рецептов; исследования и плата помощнику не включены.
+
+"""
+
+
 def build():
     rng = random.Random(20261008)
     rates = {m: p.per_hour(m, rng=rng,guidance=True) for m in range(2, 11)}
-    text = SOURCE.read_text(encoding='utf-8').replace(NOTE + '\n', '')
+    text = SOURCE.read_text(encoding='utf-8').replace(NOTE + '\n', '').replace(NAMED_NOTE + '\n', '')
     text = re.sub(r'^\d{2}\.\d{2}\.\d{4}\.(?: Пересчёт Codex\.)?',
                   '12.10.2026. Пересчёт Codex.', text, count=1, flags=re.M)
     for heading, fn, headers, last in (
@@ -95,6 +139,9 @@ def build():
         text = re.sub(r'\*\*Как читать расчёты после пересборки\.\*\*[^\n]*\n\n', notice, text, count=1)
     else:
         text = text.replace('## Коротко\n\n', '## Коротко\n\n' + notice, 1)
+    a = text.index('**Сейчас (мастерство 2):**')
+    b = text.index('**Итог:**', a)
+    text = text[:a] + named_buff_text() + text[b:]
     return text
 
 
