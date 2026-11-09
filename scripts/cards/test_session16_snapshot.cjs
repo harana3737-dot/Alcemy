@@ -2,6 +2,7 @@
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 const path=require('node:path');
+const fs=require('node:fs');
 (async()=>{
  const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
  try{
@@ -18,6 +19,7 @@ const path=require('node:path');
    await page.locator('#restoreApply').click();await backup;
    await page.locator('#restoreDialog').waitFor({state:'hidden'});
   }
+  // Импорт сохраняет метку материалов снимка: новый лист не заменяет старые запасы.
   async function check(){
    const actual=await page.evaluate(()=>({day:dayOf(ST.T),time:ST.T%1440,gold:ST.mat.gold,
     hp:talis().hp,sp:talis().sp,meta:talis().meta,slots:talis().slots,
@@ -32,10 +34,10 @@ const path=require('node:path');
     higherHeal:herbValue('heal',2),higherPoison:herbValue('poison',2),
     powder:ST.mat.ess.some(e=>e.n==='Костяная пыль'),
     mixedOther:ST.mat.other.some(o=>o.n==='Смешанные лечебные и ядовитые травы'),
-    seed:ST.matSeed===SEED.mid,healing:ST.bag.find(b=>b.who==='p1'&&b.n==='Зелье 3.3').q}));
+    seed:ST.matSeed,healing:ST.bag.find(b=>b.who==='p1'&&b.n==='Зелье 3.3').q}));
    assert.deepEqual(actual,{day:16,time:840,gold:108.18,hp:37,sp:4,meta:2,slots:{1:2,2:3,3:1},
     mastery:4,ink:true,root1:true,root2:38,tough:34,war:6,hours:10,today:0,
-    heal:15.5,poison:15.4,higherHeal:0,higherPoison:0,powder:false,mixedOther:false,seed:true,healing:3});
+    heal:15.5,poison:15.4,higherHeal:0,higherPoison:0,powder:false,mixedOther:false,seed:JSON.parse(fs.readFileSync(file,'utf8')).state.matSeed,healing:3});
    await page.locator('[data-tab="jour"]').click();
    assert.match(await page.locator('#jhrs').innerText(),/День 16.*14:00/);
    assert.equal(await page.locator('.jc[data-id="project-serebryanka-1"]').getByRole('button',{name:/Завершить этап/}).count(),0);

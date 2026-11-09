@@ -143,6 +143,21 @@ def build():
     bar_items = [(t, hid) for lv, t, hid in toc if lv == 2]
     if nav and len(bar_items) >= 3:
         nav = '<div class="bar">' + "".join(f'<a href="#{hid}">{inline(re.split(r"[:(]", t)[0].strip())}</a>' for t, hid in bar_items) + "</div>" + nav
+    if NAME == 'Для игрока — книга экономики' and nav:
+        nav = re.sub(r'<nav>(.*?)</nav>', r'<details class="book-contents"><summary>Содержание книги</summary><nav>\1</nav></details>', nav, flags=re.S)
+    reading_css = ""
+    if NAME == 'Для игрока — книга экономики':
+        reading_css = """
+body{font-size:18px;line-height:1.75}main{max-width:1040px;padding:24px 24px 72px}
+main>p,main>ul,main>ol,main>blockquote{max-width:72ch}main>p{margin:1em 0}
+h2{margin-top:2.6em;line-height:1.35}h3{line-height:1.4}
+nav{margin:24px 0;padding:18px 22px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.book-contents{margin:18px 0}.book-contents>summary{cursor:pointer;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-weight:650}nav ul{columns:2;column-gap:30px}nav li{break-inside:avoid;padding:4px 0}
+.wrap{border:1px solid var(--line);border-radius:10px;margin:22px 0}table{font-size:16px;line-height:1.55}
+th,td{padding:12px 14px;min-width:100px}th{background:var(--accbg);color:var(--fg)}tbody tr:nth-child(even){background:var(--card)}
+@media(max-width:650px){main{padding:16px 16px 48px}nav ul{columns:1}body{font-size:17px}th,td{padding:10px;min-width:110px}}
+@media print{body{font-size:11pt}main{max-width:none}.wrap{overflow:visible}th,td{min-width:0;padding:6px}h2,h3{break-after:avoid}}
+"""
     page = f"""<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{TITLE}</title>
@@ -164,7 +179,7 @@ tr.hl td{{background:var(--accbg)}}.badge{{display:inline-block;padding:0 7px;bo
 .bar a{{flex:none;padding:3px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);text-decoration:none;font-size:.88rem;white-space:nowrap}}
 th,td{{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}}th{{color:var(--mut);font-weight:600}}
 @media print{{:root:not(#print){{--bg:#fff;--fg:#111;--mut:#555;--card:#fff;--line:#bbb;--accbg:#eee;color-scheme:light}}nav,.bar{{display:none}}h4{{break-after:avoid}}}}
-</style></head><body><main>
+{reading_css}</style></head><body><main>
 {body[0]}
 {nav}
 {"".join(body[1:])}
