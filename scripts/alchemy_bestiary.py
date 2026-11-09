@@ -433,9 +433,11 @@ def validate_sources():
     for name, (level, token) in expected.items():
         if CARDS[name]['lvl'] != level or token not in CARDS[name]['eff']:
             raise ValueError('Изменился источник сценария: ' + name)
-    # Модель охватывает яды I–VIII; чудовище IX (Ж-148) без согласованного срока вне расчёта.
-    if len(CONTROLS) != len([c for c in C if c['cls'] == 'psn' and c['lvl'] <= 8]):
-        raise ValueError('Изменилось число контрольных ядов')
+    # Прогон описывает 12 сохранённых сценариев; два рецепта пока вне его области.
+    outside = {'Контроль разума: чудовище', 'Яд: усыпление'}
+    catalog = {c['name'] for c in C if c['cls'] == 'psn'}
+    if catalog != set(CONTROL_BY_NAME) | outside:
+        raise ValueError('Изменился состав контрольных ядов; требуется явная модель или граница расчёта')
 
 
 def mental_telekinesis(m, level, spend_lr=False, role=None):

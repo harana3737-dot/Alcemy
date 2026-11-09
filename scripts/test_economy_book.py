@@ -1,10 +1,22 @@
 """Независимые границы и имитация исследований для чисел книги."""
 import random
 import unittest
-from economy_book import progress_research, formula_research
+from economy_book import progress_research, formula_research, formula_example_data, CARDS
+from unittest.mock import patch
+import copy
 
 
 class EconomyBookTests(unittest.TestCase):
+    def test_named_research_follows_catalogue_level(self):
+        current = formula_example_data()
+        old_card = copy.deepcopy(CARDS['Щит веры'])
+        old_card['lvl'] = 2
+        with patch.dict(CARDS, {'Щит веры': old_card}):
+            previous = formula_example_data()
+        self.assertGreater(previous['cost'], current['cost'])
+        self.assertAlmostEqual(previous['hours'], current['hours'])
+        self.assertAlmostEqual(current['overpay'] + current['cost'], 50)
+
     def test_single_progress_probe_has_no_extra_material_charge_for_reroll(self):
         for actual,expected in zip(progress_research(1,5,0),(1.,30.,0.)):
             self.assertAlmostEqual(actual,expected)

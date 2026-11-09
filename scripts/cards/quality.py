@@ -22,6 +22,8 @@ def quality(c):
     k, eff, dur, up = c["cls"], c["eff"], c["dur"], UPCAST.get(c["name"], "none")
     dice = "dice" in up
     has_save = saves(c) not in ("нет", "") and c["name"] not in NO_SAVE
+    if k == "psn" and not has_save:
+        return "Незаметное; для запаса — Экономия трав (половина основы)", "Ещё одна доза"
     if k == "psn":
         return "Сильная привязка (+1 к СЛ: у яда она всегда табличная); подливать — Незаметное", "Крепкая привязка (+2 к СЛ)"
     if k in ("chg", "rea"):

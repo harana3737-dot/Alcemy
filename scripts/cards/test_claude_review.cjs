@@ -68,7 +68,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
           const known=brew(p,2,4,{}),unknown=brew(p,2,4,{first:true});
           return {count:D.length,poisons:D.filter(c=>c.k==='psn').length,tox:c.t,a89:c.a,dcDifference:unknown.dc-known.dc,batch:unknown.n,knownBatch:known.n};
         });
-        assert.equal(catalog.count,184);assert.equal(catalog.poisons,13);
+        assert.equal(catalog.count,185);assert.equal(catalog.poisons,14);
         assert.match(catalog.tox,/^1\b/);assert.equal(catalog.a89,false);
         assert.equal(catalog.dcDifference,2);assert.equal(catalog.batch,1);assert.equal(catalog.knownBatch,2);
         const lss=await page.evaluate(()=>{
