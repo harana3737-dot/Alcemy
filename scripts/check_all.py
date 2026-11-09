@@ -14,7 +14,7 @@ import time
 from document_paths import paired_html_sources
 
 ROOT = Path(__file__).resolve().parent.parent
-CHECKS = ('campaign_library.py', 'player_book.py', 'bestiary_report.py', 'alchemy_bestiary_report.py', 'alchemy_magic_review.py', 'downtime_day.py')
+CHECKS = ('economy_conditions.py', 'campaign_library.py', 'player_book.py', 'bestiary_report.py', 'alchemy_bestiary_report.py', 'alchemy_magic_review.py', 'downtime_day.py')
 BUILDERS = (
     ('rules_html.py',), ('cards/gen.py',), ('cards/gen_html.py',),
     ('cards/quality.py',), ('cards/registry.py',), ('cards/helper.py',),

@@ -1,0 +1,94 @@
+{
+  "verified": "09.11.2026",
+  "snapshot": "Источники/Сохранения/alcemy-save-2026-11-09-session17-essences.json",
+  "current": {
+    "level": 5,
+    "mastery": 2,
+    "bonus": 5,
+    "workplace": 1,
+    "root_bonus": 7,
+    "sorcery": 3,
+    "slot_conversion": 3,
+    "maximum_current_spending": 6,
+    "gold": 108.18
+  },
+  "rested": {
+    "pool": 7,
+    "slots": 16,
+    "total": 23
+  },
+  "catalyst_stable": 5,
+  "ink2_profit_per_hour": 27.96000000000046,
+  "potion10_profit_per_hour": 645.3755151658058,
+  "models": [
+    {
+      "model": "Рынок без указания",
+      "source": "scripts/sim.py",
+      "sha256": "1b65310ab8d48dee4d5dcd49556ae2bacde8e0560f06d3e793cfc77d097ac59a",
+      "conditions": "Уровни I–X; минимальные мастерство и место; бонус — отдельная ось; без классовых ресурсов. Контрольная модель, не текущий Талис."
+    },
+    {
+      "model": "Продажа с конечным пулом",
+      "source": "scripts/scenario_engine.py",
+      "sha256": "4642e5925608681ba3edadf3d8a33de2073f43b369549c3954e2889a661cbe2e",
+      "conditions": "Целый катализатор оплачивается при покупке, остаток переносится; дневной пул и число доз конечны. 30 рабочих дней с реальными отдыхами."
+    },
+    {
+      "model": "Указание: сравнительный сценарий",
+      "source": "scripts/sim_guidance.py",
+      "sha256": "ca20ed2a631da312d0576fde0300df4be6f2157aa19b06ef9b1164aa10167fee",
+      "conditions": "Чародей 5, мастерство 3, бонус +5; 0 / 7 / 23 расхода. Это условный следующий этап, не текущее мастерство 2."
+    },
+    {
+      "model": "Длинная варка",
+      "source": "scripts/sim_volume.py",
+      "sha256": "0c4b267d22e6daa448f648bd8e62320079e22f88eeda35793fce6f0267dc04a8",
+      "conditions": "VI–VII: объём 90, VIII: 240; лаборатория как условие будущего сценария; цена и уровень названных эффектов сверены с каталогом."
+    },
+    {
+      "model": "Рост и собственные чернила",
+      "source": "scripts/sim_player.py",
+      "sha256": "2bb0904d6824ee1c1340795dd5c933d9667192ef7cf187ab1cdfe8fad66794c5",
+      "conditions": "Интеллект +0; полные переходы с нуля. Историческая шкала владения без указания отделена от EXAMPLE_CLASS в личных строках с указанием."
+    },
+    {
+      "model": "Время и исследования",
+      "source": "scripts/sim_week.py",
+      "sha256": "bc50aaeda1f4f4d28aeec83840be6ac7b3feca6a02348096fc766da90ef93c1a",
+      "conditions": "Мастерство 2, рабочее место +1; только метка: лаборатория +3. Чернила 100/100, метка II 38/45 и обязательный успешный подход с холодной магией; зачёты открытий условного набора учтены до добора практики."
+    },
+    {
+      "model": "Недельный запас",
+      "source": "scripts/sim_plan.py",
+      "sha256": "c684f3ab1e0d9c14eb6d3ef78e0ec0d29b6338ad96f7f159edbfb40f9d9975fa",
+      "conditions": "Чернила по одному; эликсиры партиями по 6.2; лечение по BATCH_T. Средние часы до годного запаса; будущие оборудование и уровни класса явно заданы."
+    },
+    {
+      "model": "Именные запасы группы",
+      "source": "scripts/party_kit_report.py",
+      "sha256": "89a8fe241ffa32a20b5f1d54052e564d044caf200cc09b1c63d1c8b0068b5147",
+      "conditions": "Точный размер последней партии; уровни и цены из каталога, компоненты Каменной кожи и две эссенции Героизма учтены. После M5 оборудование — условное."
+    },
+    {
+      "model": "Таблицы книги экономики",
+      "source": "scripts/economy_book.py",
+      "sha256": "8525920e5a0a0df36cbad11f1517636c29973261763845474e1f53cc10750cec",
+      "conditions": "12 таблиц: продажи, полный рост, ресурсы, исследования, снабжение. Бонус Интеллекта 0, помощника нет; текущий бонус +5."
+    },
+    {
+      "model": "Исторический простой",
+      "source": "scripts/downtime_day.py",
+      "sha256": "e50275423b5c15fe0656ccd2da93ae1fbe58a6619363a43999b2808b153c3de0",
+      "conditions": "Архивный снимок 01.11.2026, чернила 30/100. Не обновляется до текущего состояния; лабораторная колонка — сравнение, а не доступ для чернил."
+    }
+  ],
+  "source_hashes": {
+    "scripts/rules.json": "3fc008d193c1c5e2d9c17f5c960b3f51a5123610503ec32587dd36ec04ebce9a",
+    "scripts/alchemy_guidance.py": "085cba4d81e286de8fe8ee0b8c08593e8650f80c982dc928262a8413703520e3",
+    "scripts/cards/cards_data.py": "2f758e53150c0ada0fe71f6d5a2687bcf7e031a10199fff5fa1a5b9699f992fb",
+    "scripts/report.py": "656c7c678eda16e974cab6c37e74b423a872e42717b4258ed955345d77576c02",
+    "scripts/weekly_economy_report.py": "650b1f4cb2b4b45e9b4c2819d963e4916b67cb8f6694012580f7a14c52b7d0e4",
+    "Алхимия Талиса — правила за столом.md": "8805c90ea96c6c54b024b3f6f7f96a4f7d1540e7a17206c4796aa53cb3912ccb",
+    "Источники/Сохранения/alcemy-save-2026-11-09-session17-essences.json": "70acd65d4ace87b5acc9a8fa8ecd1cb56b937623245cae910d8fccc9df2ce873"
+  }
+}

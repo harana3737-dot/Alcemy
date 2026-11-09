@@ -66,10 +66,13 @@ class EconomyTests(unittest.TestCase):
         self.assertEqual(self.week["ROOT_BONUS"], 7)
         name, hours = self.week["QUEUE"][-1]
         self.assertIn("+7", name)
-        self.assertAlmostEqual(hours[0], 3.0742264898643503)
+        self.assertIn("этап II", name)
+        self.assertIn("СЛ 16", name)
+        self.assertAlmostEqual(hours[0], 2 / .6)
         self.assertEqual(hours[0], hours[2])
         self.assertLess(hours[1], hours[0])
-        self.assertAlmostEqual(self.week["QUEUE"][2][1][1], 15 / 1.02)
+        self.assertAlmostEqual(hours[1], 2 / .84)
+        self.assertAlmostEqual(self.week["QUEUE"][2][1][1], 6 / 1.02)
 
 
 if __name__ == "__main__":

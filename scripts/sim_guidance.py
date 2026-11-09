@@ -1,5 +1,5 @@
 """Талис 5 ур.: «Волшебное указание» (TCE, чародей 5): проваленную проверку характеристики
-можно перебросить за 1 единицу чародейства, новый результат обязателен. 5 классовых единиц плюс 16 из ячеек, всего до 21 расхода за день алхимии."""
+можно перебросить за 1 единицу чародейства, новый результат обязателен. 5 классовых + 2 от черты в общем пуле плюс 16 из ячеек, всего до 23 расхода за день алхимии."""
 import random as _random
 from rules_data import CAT_STABLE, unstable_fraction
 from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, probs, potion_bonus
@@ -53,7 +53,7 @@ def build_tables(*, seed=5, days=100000):
         items.append((f"чернила {n}" + (" (выше мастерства)" if ml > MAST else ""), sl + (5 + ml - MAST if ml > MAST else 0), herbs + ess, price * .85, CAT_PRICE[cl], 8 // h, "ink", ml))
     for name, sl, mat, price, cat, per_day, item_kind, level in items:
         res = []
-        for pts in (0, 5, 21):
+        for pts in (0, 7, 23):
             best = max(sim(B, sl, mat, price, cat, per_day, pts, stop, days=days, u=unstable_fraction(.85), item_kind=item_kind, level=level, rng=rng) for stop in (range(CAT_STABLE, CAT_STABLE + len(INSTAB) + 1) if cat else (CAT_STABLE,)))
             res.append(best)
         rows.append((name, sl, per_day, res))

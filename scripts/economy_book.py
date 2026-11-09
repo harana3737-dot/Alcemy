@@ -6,7 +6,7 @@ import random
 import re
 
 from rules_data import (INK_PRICES, MB, HERB, P_SL, P_PRICE, NEED, ELIXIR_DC, CAT_PRICE,
-                        CAT_STABLE, proficiency, unstable_fraction)
+                        CAT_STABLE, elixir_batch, proficiency, unstable_fraction)
 from sim import INK
 from alchemy_guidance import EXAMPLE_CLASS, budget, chances, quality, sales
 from sim_plan import batch_p, ink_set, week
@@ -117,9 +117,9 @@ def growth_attempts(target, check_bonus, dc, guidance=False):
     return expectations[target]
 
 
-def batch_e(m, l):
+def batch_e(m, l, workshop=False):
     """Партия эликсиров-эффектов (6.2): (мастерство − уровень) + 2, I–II не больше 3, III–V не больше 2."""
-    return max(1, min(m-l+2, 3 if l<=2 else 2))
+    return max(1, elixir_batch(m,l,workshop))
 
 
 def sections():
@@ -129,8 +129,8 @@ def sections():
     out['bonuses'] = table(['Чародей', 'Алхимия', 'Инструменты', 'Мастерство', 'Место', 'Общий бонус'],
                           [(cl, m, f'+{proficiency(cl)}', f'+{MB[m]}', f'+{lab}', f'+{bonus(cl,m,lab)}')
                            for cl,m,lab in examples])
-    out['resources']=table(['Чародей','Классовые единицы','Из всех ячеек','Всего расхода за день'],
-        [(cl,cl if cl>=5 else 'указание недоступно',budget(cl)-cl if cl>=5 else '—',budget(cl)) for cl in (3,5,6,9,11,13,17,20)])
+    out['resources']=table(['Чародей','Класс','Черта: общий пул','Из всех ячеек','Всего за день после отдыха'],
+        [(cl,cl if cl>=5 else 'указание недоступно',2 if cl>=5 else '—',budget(cl)-cl if cl>=5 else '—',budget(cl,feat_points=2)) for cl in (3,5,6,9,11,13,17,20)])
     brewing = [(3,1,1,1), (5,2,1,1), (5,2,1,2), (6,3,1,3), (9,5,1,5),
                (11,7,3,6), (13,8,3,8), (17,9,5,9), (20,10,5,10)]
     out['brewing'] = table(['Чародей / алхимия', 'Лечение', 'Бонус / СЛ', 'Доз в партии', 'Успех', 'Стабильных доз в среднем'],
