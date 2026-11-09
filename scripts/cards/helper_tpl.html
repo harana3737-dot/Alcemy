@@ -242,7 +242,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <div class="card" id="sit" style="margin-top:16px"></div>
   </div>
 </div>
-<div id="tab-belt" hidden><div class="card"><b>Конец сессии 16 — подтверждено игроком</b><p>Игровой день 16, около 14:00. Вся группа — 5-го уровня. Талис: 37 / 42 ХП; ячейки I–III — 2 / 3 / 1; единицы чародейства — 6 всего (4 классовых + 2 от черты, общий пул по разрешению мастера); опыт 7 710; деньги 108,18 зм. Фаэнон: максимум 53 ХП, опыт 7 944. Лаэль: максимум 33 ХП, опыт 7 475; текущие ресурсы союзников не уточнены. Остаток трав для чернил: лечебные на 15 зм и ядовитые на 15 зм; учтены для I уровня, точный уровень ещё не уточнён. Чернила освоены, рост алхимии 4/15; метка: этап I завершён, II — 38/45, III — 0/60. Группа остановилась у четырёх саркофагов; ожидается опыт за тень и двух полтергейстов. Отдых перед походом уже учтён. Это подтверждённый срез, а не автоматическая замена сохранённых счётчиков: сверь их с ним. JSON от начала 01.11.2026 относится к состоянию до этой сессии; время конца сессии уточнено игроком: день 16, около 14:00.</p></div><div class="card clock">
+<div id="tab-belt" hidden><div class="card"><b>Конец сессии 17 — пересказ и LSS</b><p>Призраки упокоены. После перехода в лес группа с Эйлин разделилась у двух якорей: Лаэль и Фаэнон слева, Талис и Эйлин справа. Охрана побеждена; разрушение машин и бой с настоятельницей ещё не описаны. Талис: 41 / 42 ХП; ячейки I–III — 1 / 1 / 0; общий остаток единиц чародейства — 3, подтверждено игроком. Опыт 8 995, монеты по номиналам 108,18 зм. Зелья: 3.3 ×2, 2.2 ×2, 1.1 ×2; два 2.2 получены от освобождённого лекаря. Игровые часы не названы, отдых по одному намерению не начисляется. Это сверка, а не автоматическая замена сохранённых счётчиков. JSON конца сессии 16 остаётся историческим; не восстанавливай его как актуальные остатки после сессии 17.</p></div><div class="card clock">
   <div class="ctop"><div><div class="k">Время в игре</div><div class="now" id="now"></div></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="savest" id="savest"></div>
     <button type="button" class="btn" id="beltView" aria-pressed="false" title="Прячет материалы, добавление пьющих и пояснения. Включается само, когда начат бой">Только бой</button></div></div>
@@ -659,7 +659,7 @@ setTimeout(async()=>{
     setSave('сохраняется в аккаунте');renderBelt();
   }catch(e){setSave('сохраняется в этом браузере')}
   finally{if(!JDB){JDB=localDB();JDB.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется только в этом браузере (не на claude.ai).');renderJournal();renderBrewingPlan()})}
-    if(matInit()){ST.u=Date.now();save()}migrate();if(ST.seed===undefined)applySeed();else if(ST.seed!==SEED.id)syncSeed();else renderBelt()}
+    if(matInit()){ST.u=Date.now();save()}migrate();if(ST.seed===undefined)applySeed();else renderBelt()}
 },0);
 function migrate(){
   const need=!ST.allies||ST.bag.some(b=>!b.who);if(!need)return;
