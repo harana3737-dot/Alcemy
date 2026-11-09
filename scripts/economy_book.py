@@ -199,9 +199,9 @@ def sections():
     for name,f,l,state in [('Лечение 1.1',potion_sale,1,'открыт'),('Лечение 2.2',potion_sale,2,'нужен рецепт'),
                            ('Чернила I',ink_sale,1,'открыт'),('Чернила II',ink_sale,2,'открыт')]:
         rows.append([name,state,number(f(5,2,1,l,.85)),number(f(5,2,1,l,.75)),number(f(5,2,1,l,.85)*12,0)])
-    def shield(sale):  # Щит веры II: цена 25 зм, травы II и эссенция Тело II — 1,5 зм на дозу, партия 2
-        return sales(5,ELIXIR_DC[2],1.5,25*sale,0,unstable_fraction(sale),2,item_kind='elixir',level=2,batch=batch_e(2,2))['per_hour']
-    rows.insert(2,['Эликсир Щит веры II, партия '+str(batch_e(2,2)),'нужна формула Тела',number(shield(.85)),number(shield(.75)),number(shield(.85)*12,0)])
+    def shield(sale):  # Щит веры I (Ж-148): цена 25 зм; трава I и эссенция Тело I
+        return sales(5,ELIXIR_DC[1],2*HERB[1],25*sale,0,unstable_fraction(sale),2,item_kind='elixir',level=1,batch=batch_e(2,1))['per_hour']
+    rows.insert(2,['Эликсир Щит веры I, партия '+str(batch_e(2,1)),'нужна формула Тела',number(shield(.85)),number(shield(.75)),number(shield(.85)*12,0)])
     out['sell-now']=table(['Что продавать','Рецепт','Прибыль/ч: торговцу 85%','Прибыль/ч: Гильдии 75%','За неделю 12 ч, зм'],rows)
     rows=[]
     items=[(f'Лечение {l}.{l}',potion_sale,l,max(l,2)) for l in range(1,10)]+[(f'Чернила {r}',ink_sale,l,max(l,2)) for l,r in enumerate(['I','II','III','IV','V'],1)]
