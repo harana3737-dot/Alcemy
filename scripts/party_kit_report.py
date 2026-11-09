@@ -7,7 +7,7 @@ python3 -B scripts/party_kit_report.py --level 9 --int-mod 1 --lab 3
 Таблицы печатаются в Markdown, без записи игровых данных.
 """
 
-from rules_data import HERB as HERB_DATA, MB as MB_DATA, ELIXIR_DC, PLACE_LIMIT, proficiency, elixir_batch
+from rules_data import HERB as HERB_DATA, MB as MB_DATA, CAT_PRICE, CAT_STABLE, ELIXIR_DC, PLACE_LIMIT, proficiency, elixir_batch
 from functools import lru_cache
 import argparse
 from alchemy_guidance import chances
@@ -58,7 +58,7 @@ def materials(c):
     if c['name'] == 'Героизм':
         essence *= 2
     base = price(c) / 3 if c['cls'] in ('fl', 'chg', 'rea', 'oils') else l * HERB[l]
-    cat = 0 if l <= 2 else 14 if l <= 5 else 70 if l <= 7 else 350
+    cat = CAT_PRICE[l] / CAT_STABLE
     component = 100 if c['name'] == 'Каменная кожа' else 0
     return base + essence + cat + component
 
@@ -242,7 +242,7 @@ def write_sources():
     text=path.read_text(encoding='utf-8')
     stream=io.StringIO()
     with redirect_stdout(stream): main()
-    block='Персонаж уровня 5; дни алхимии с указанием, классовые единицы и переработка ячеек.\n\n'+stream.getvalue().strip()
+    block='Персонаж уровня 5; дни алхимии с указанием, общий пул 7 и до 16 из ячеек. Лаборатории будущих строк — условие сценария, не текущий доступ.\n\n'+stream.getvalue().strip()
     text=re.sub(r'(<!-- calculation-table -->).*?(<!-- /calculation-table -->)',
                 lambda m:m[1]+'\n\n'+block+'\n'+m[2],text,flags=re.S)
     stream=io.StringIO()

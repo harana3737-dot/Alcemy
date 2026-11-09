@@ -88,7 +88,7 @@ def build_tables(*, seed=90, runs=20000, guidance=False):
              ("зелье 4.4, типичный бонус", typ(4), 4, 4), ("зелье 5.5, типичный бонус", typ(5), 5, 5),
              ("чернила IV, бонус +8", 8, 4, "IV"), ("чернила V, бонус +8", 8, 5, "V")]
     for name, b, mast, it in cases:
-        cost = 2 if mast - 2 <= 2 else 5 if mast - 2 <= 5 else 15
+        cost = None  # №40: мастер не назвал плату; показываем прирост до оплаты.
         if isinstance(it, int):
             l = it; args = (P_SL[l], l * HERB[l], P_PRICE[l] * .85, CAT_PRICE[l], unstable_fraction(.85), 2)
         else:
@@ -100,10 +100,10 @@ def build_tables(*, seed=90, runs=20000, guidance=False):
             d1=sales(b+2,*args,item_kind=item_kind,level=item_level)["per_day"]
         else:
             d0=scenario(b,*args,item_kind=item_kind,level=item_level)["per_day"];d1=scenario(b+2,*args,item_kind=item_kind,level=item_level)["per_day"]
-        help_rows.append((name, b, cost, d0, d1, d1 - d0 - cost))
+        help_rows.append((name, b, cost, d0, d1, d1 - d0))
     for name, l, b, price, mat, s0, s1 in vol_rows:
-        m = l; cost = 5 if m - 2 <= 5 else 15
-        help_rows.append((f"{name}, объём работы", b, cost, s0["per_day"], s1["per_day"], s1["per_day"] - s0["per_day"] - cost))
+        m = l; cost = None
+        help_rows.append((f"{name}, объём работы", b, cost, s0["per_day"], s1["per_day"], s1["per_day"] - s0["per_day"]))
 
     return dict(vol_rows=vol_rows, help_rows=help_rows, rng_state=rng.getstate())
 

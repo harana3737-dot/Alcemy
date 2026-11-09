@@ -1,6 +1,7 @@
 """Волшебное указание в дни алхимии: запас класса плюс переработка ячеек.
 
-Одновременно хранится не больше уровня класса. points — суммарный доступный
+Классовый запас ограничен уровнем; в личном сценарии Талиса ещё 2 общего пула.
+points — суммарный доступный
 расход между отдыхами: ячейки переводятся по мере расхода, без переполнения.
 """
 from functools import lru_cache
@@ -17,12 +18,14 @@ SLOTS = {
 EXAMPLE_CLASS = {1:3,2:5,3:6,4:7,5:9,6:10,7:11,8:13,9:17,10:20}
 
 
-def budget(level, *, convert_slots=True, reserve=0):
+def budget(level, *, convert_slots=True, reserve=0, feat_points=0):
     if type(level) is not int or not 1 <= level <= 20:
         raise ValueError('Уровень чародея должен быть от 1 до 20')
     if type(reserve) is not int or reserve < 0:
         raise ValueError('Резерв не может быть отрицательным')
-    total = 0 if level < 5 else level + (sum(i*n for i,n in enumerate(SLOTS[level],1)) if convert_slots else 0)
+    if type(feat_points) is not int or feat_points < 0:
+        raise ValueError('Дополнительный общий пул не может быть отрицательным')
+    total = 0 if level < 5 else level + feat_points + (sum(i*n for i,n in enumerate(SLOTS[level],1)) if convert_slots else 0)
     if reserve > total:
         raise ValueError('Резерв больше доступного запаса')
     return total-reserve
@@ -42,18 +45,19 @@ def quality(bonus, dc, guidance=True):
 
 @lru_cache(None)
 def sales(bonus, dc, mat, price, cat, unstable, hours, *, item_kind, level,
-          class_level=5, batch=1, days=30, convert_slots=True, reserve=0):
+          class_level=5, batch=1, days=30, convert_slots=True, reserve=0, feat_points=2):
     """Конечные дневные ресурсы, целый катализатор и перенос его остатка.
 
-    Дневной объём — 8 часов; прибыль усредняется за 30 дней производства.
+    Личная модель Талиса: feat_points=2 по Ж-145, общий пул.
+    Для другого чародея укажи feat_points=0. Дневной объём — 8 часов; прибыль усредняется за 30 дней производства.
     На продаже дефект перебрасывается, только если это выгодно по политике
     общего scenario_engine. Дни подразумевают состоявшиеся долгие отдыхи.
     """
     from scenario_engine import Scenario, finite_exact
     from rules_data import CAT_STABLE, INSTAB
     attempts=int(8/hours)*batch
-    points=min(budget(class_level,convert_slots=convert_slots,reserve=reserve), attempts*(2 if cat else 1))
-    stable=10 if level==10 and cat else CAT_STABLE
+    points=min(budget(class_level,convert_slots=convert_slots,reserve=reserve,feat_points=feat_points), attempts*(2 if cat else 1))
+    stable=CAT_STABLE
     candidates=[]
     for stop in range(stable,stable+len(INSTAB)+1) if cat else (stable,):
         s=Scenario(bonus,dc,mat,price,cat,level,item_kind=item_kind,stop=stop,stable_uses=stable,

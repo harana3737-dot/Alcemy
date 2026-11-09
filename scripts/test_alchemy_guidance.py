@@ -42,7 +42,7 @@ class GuidanceDaysTests(unittest.TestCase):
         self.assertGreater(ample['profit'],constrained['profit'])
         self.assertAlmostEqual(ample['points_per_day'],4.8,places=7)
 
-    def test_level_ten_catalyst_has_ten_stable_uses(self):
+    def test_explicit_synthetic_catalyst_resource_is_respected(self):
         s=Scenario(100,25,0,100,7500,10,item_kind='ink',stable_uses=10,
                    stop=10,points=21,per_day=10,days=1)
         r=finite_exact(s)
@@ -58,6 +58,29 @@ class GuidanceDaysTests(unittest.TestCase):
         self.assertLess(potion(2,2,guidance=True)[0],potion(2,2)[0])
         self.assertAlmostEqual(ink_set(2,2,guidance=True)[0],2/.99)
         self.assertAlmostEqual(ink_set(2,2,guidance=True)[2],.7/.9)
+
+class CurrentTalisResourcesTests(unittest.TestCase):
+    def test_shared_feat_points_and_reserve(self):
+        self.assertEqual(budget(5,feat_points=2),23)
+        self.assertEqual(budget(5,convert_slots=False,feat_points=2),7)
+        self.assertEqual(budget(5,reserve=16,feat_points=2),7)
+        self.assertEqual(budget(4,feat_points=2),0)
+        for bad in (-1,1.5,True):
+            with self.assertRaises(ValueError):budget(5,feat_points=bad)
+
+    def test_sales_level_ten_does_not_gain_free_stable_uses(self):
+        from unittest.mock import patch
+        from alchemy_guidance import sales
+        captured=[]
+        def solve(s):
+            captured.append(s)
+            return dict(per_day=0,per_try=0)
+        sales.cache_clear()
+        with patch('scenario_engine.finite_exact',side_effect=solve):
+            sales(15,25,1280,3000,7500,.5,2,item_kind='potion',level=10,class_level=20,days=1)
+        self.assertEqual([s.stop for s in captured],list(range(5,11)))
+        self.assertTrue(all(s.stable_uses==5 for s in captured))
+        sales.cache_clear()
 
 
 if __name__=='__main__':unittest.main()

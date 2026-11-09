@@ -76,40 +76,60 @@ def mc_marks(need, b, sl, start=0, guidance=False, N=40000, *, rng=None):
         tot += a
     return tot / N
 
-def silver_progress(d, b):
-    """Прогресс этапа I по памятке мастера v0.2; половины не округляются."""
+def silver_progress(d, b, dc=14):
+    """Прогресс этапа с заданной СЛ по памятке мастера v0.2; половины не округляются."""
     total = d + b
     if d == 1:
         return 0
     if d == 20:
         return 2 * total
-    if total >= 19:
+    if total >= dc + 5:
         return total + 5
-    if total >= 14:
+    if total >= dc:
         return total
-    if total >= 10:
+    if total >= dc - 4:
         return total / 2
     return 0
 
-def silver_attempts(need, b, guidance=False):
+def silver_attempts(need, b, guidance=False, dc=14, *, require_success=False):
     """Точное ожидание подходов до цели с учётом превышения прогресса.
 
     Только двухчасовые подходы: очистка, реагенты и дни восстановления
     не включены. Переброс одного провала, без ограничения пула очков.
     """
     weights = {}
+    successful = {}
     for first in range(1, 21):
-        retry = guidance and first != 20 and (first == 1 or first + b < 14)
+        retry = guidance and first != 20 and (first == 1 or first + b < dc)
         outcomes = range(1, 21) if retry else (first,)
         for d in outcomes:
-            progress = int(2 * silver_progress(d, b))
-            weights[progress] = weights.get(progress, 0) + 1 / (20 * len(outcomes))
+            progress = int(2 * silver_progress(d, b, dc))
+            weight = 1 / (20 * len(outcomes))
+            weights[progress] = weights.get(progress, 0) + weight
+            if d == 20 or d != 1 and d + b >= dc:
+                successful[progress] = successful.get(progress, 0) + weight
     # Состояния в половинах единицы: E(r) = 1 + p(0)E(r) + Σ p(k)E(max(0,r-k)).
     remaining = int(2 * need)
     expected = [0.0] * (remaining + 1)
     for r in range(1, remaining + 1):
         expected[r] = (1 + sum(p * expected[max(0, r - k)]
                               for k, p in weights.items() if k)) / (1 - weights.get(0, 0))
+    if require_success:
+        # Все подходы здесь выполняются со своей холодной магией. Перенос
+        # прогресса с этапа I сам по себе не выполняет условие этапа II.
+        missing = [0.0] * (remaining + 1)
+        for r in range(remaining + 1):
+            value, same = 1.0, 0.0
+            for k, probability in weights.items():
+                good = successful.get(k, 0)
+                nxt = max(0, r - k)
+                value += good * expected[nxt]
+                if nxt == r:
+                    same += probability - good
+                else:
+                    value += (probability - good) * missing[nxt]
+            missing[r] = value / (1 - same)
+        return missing[remaining]
     return expected[remaining]
 
 def p_open_in(hours,b=4,N=40000,*,rng=None,guidance=False):
@@ -153,11 +173,11 @@ def build_tables(player_tables=None, *, day_guidance=False):
 
     for name, fn, h_per in [
         ("рецепт 2.2 по образцу (СЛ 10, +2 за образец, 1 отметка сразу)", lambda b, g: mc_marks(3, b + 2, 10, 1, g, rng=rng), 2),
-        ("исследование чернил: осталось 70 из 100", lambda b, g: mc_ink(70,b,rng=rng,guidance=g), 2),
-        ("рост мастерства 2 → 3: 15 успешных зелий 2.2", None, None),
+        ("чернила: исследование завершено (100/100)", lambda b, g: 0, 2),
+        ("рост мастерства 2 → 3: 6 практик после открытий и этапа метки", None, None),
         ("рецепт масел и мазей: 100 прогресса", lambda b, g: mc_ink(100,b,rng=rng,guidance=g), 2),
-        ("обычная ступень формулы (СЛ 12, эссенция — подсказка +2) и первая варка", None, None),
-        ("Корневая метка, этап I: осталось 16 из 30 (полная лаборатория, +7; подход — 2 часа)", lambda b, g: silver_attempts(16, ROOT_BONUS, g), 2),
+        ("обычный Разум через Бдительный отдых II (СЛ 12, подсказка +2) и первая варка", None, None),
+        ("Корневая метка, этап II: осталось 7 из 45 (СЛ 16, лаборатория, +7)", lambda b, g: silver_attempts(7, ROOT_BONUS, g, dc=16, require_success=True), 2),
     ]:
         row = []
         for extra, g in [(0, False), (0, True), (2, day_guidance)]:
@@ -165,8 +185,8 @@ def build_tables(player_tables=None, *, day_guidance=False):
             if name.startswith("рост"):
                 ok, _, p20 = growth_probs(b, 10, g)
                 per = ok + p20
-                h = 15 / per / 2 * 2
-            elif name.startswith("обычная"):
+                h = 6 / per / 2 * 2
+            elif name.startswith("обычн"):
                 h = mc_marks(3, b + 2, 12, 0, g, rng=rng) * 2 + 2 / ok_rate(b, 14, g)
             else:
                 h = fn(b, g) * h_per
