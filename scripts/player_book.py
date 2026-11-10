@@ -136,10 +136,18 @@ class Renderer:
                     while end < len(lines) and not re.match(r'^#{1,3}\s', lines[end]):
                         end += 1
                     detail_class = 'example' if label.startswith('Пример:') else 'explanation'
-                    result.append(f'<details class="{detail_class}" id="{hid}"><summary>{inline(label)}</summary><div class="detail-content">' + self.render(lines[i+1:end], examples=False) + '</div></details>')
+                    summary = f'<h4>{inline(label)}</h4>'
+                    result.append(f'<details class="{detail_class}" id="{hid}"><summary>{summary}</summary><div class="detail-content">' + self.render(lines[i+1:end], examples=False) + '</div></details>')
                     i = end
                     continue
-                level = max(3, level) if self.prefix.startswith('doc-') else level
+                if self.prefix.startswith('doc-'):
+                    if level == 1:
+                        result.append(f'<p class="source-title" id="{hid}">{inline(label)}</p>')
+                        i += 1
+                        continue
+                    level = min(6, level + 3)
+                elif self.prefix.startswith('chapter-'):
+                    level = min(6, level + 1)
                 result.append(f'<h{level} id="{hid}">{inline(label)}</h{level}>')
                 i += 1
                 continue
@@ -161,7 +169,8 @@ class Renderer:
                     i += 1
                 if rows:
                     width = len(rows[0])
-                    columns = f' data-columns="{width}"' if self.prefix.startswith('chapter-') else ''
+                    cards = self.prefix.startswith('chapter-') or (self.prefix == 'doc-cards' and width > 2)
+                    columns = f' data-columns="{width}"' if cards else ''
                     table = '<div class="table-wrap" tabindex="0" role="region" aria-label="Таблица, прокручивается по горизонтали"><table' + columns + '><thead><tr>'
                     table += ''.join('<th scope="col">' + inline(cell) + '</th>' for cell in rows[0])
                     table += '</tr></thead><tbody>'
@@ -170,8 +179,11 @@ class Renderer:
                         table += '<tr>'
                         for column, cell in enumerate(row):
                             label = rows[0][column] if column < width else ''
-                            attribute = ' data-label="' + html.escape(label, quote=True) + '"' if self.prefix.startswith('chapter-') else ''
-                            table += '<td' + attribute + '><span>' + inline(cell) + '</span></td>'
+                            attribute = ' data-label="' + html.escape(label, quote=True) + '"' if cards else ''
+                            value = inline(cell)
+                            if not self.prefix.startswith('doc-'):
+                                value = '<span>' + value + '</span>'
+                            table += '<td' + attribute + '>' + value + '</td>'
                         table += '</tr>'
                     result.append(table + '</tbody></table></div>')
                 continue
@@ -243,7 +255,8 @@ def build(root=ROOT):
     if len(chunks) < 3:
         raise ValueError('В книге отсутствуют главы')
     renderer = Renderer('intro')
-    guide = renderer.render(chunks[0].splitlines())
+    intro = re.sub(r'^# .+\n', '', chunks[0], count=1)
+    guide = '<details class="book-intro"><summary>О книге и источниках</summary>' + renderer.render(intro.splitlines()) + '</details>'
     nav = []
     chapters = []
     chapter_count = (len(chunks) - 1) // 2
@@ -254,12 +267,20 @@ def build(root=ROOT):
         number = (index+1)//2
         key = f'chapter-{number:02d}'
         route, label, description, first, last = next(r for r in ROUTES if r[3] <= number <= r[4])
+        lines = chunks[index+1].splitlines()
+        status = []
         if number == first:
+            while lines and not lines[0].strip():
+                lines.pop(0)
+            while lines and lines[0].startswith('>'):
+                status.append(re.sub(r'^> ?', '', lines.pop(0)))
             nav.append(f'<p class="nav-group"><a href="#route-{route}">{label}</a></p>')
             guide += f'<section class="book-route" id="route-{route}" aria-labelledby="route-{route}-title"><h2 id="route-{route}-title">{label}</h2><p class="route-description">{description}</p>'
+            if status:
+                guide += f'<aside class="route-status" id="status-{route}" data-search-title="Условия: {label}" aria-label="Условия маршрута">' + Renderer('status-' + route).render(status) + '</aside>'
         nav.append(f'<a href="#{key}">{html.escape(title)}</a>')
-        content = Renderer(key).render(chunks[index+1].splitlines(), examples=True)
-        guide += f'<details class="chapter" id="{key}" data-search-title="{html.escape(title, quote=True)}"><summary>{html.escape(title)}</summary><div class="chapter-content">{content}<a class="section-return" href="#route-{route}">↑ {label}: выбрать другой раздел</a></div></details>'
+        content = Renderer(key).render(lines, examples=True)
+        guide += f'<details class="chapter" id="{key}" data-search-title="{html.escape(title, quote=True)}"><summary><h3>{html.escape(title)}</h3></summary><div class="chapter-content">{content}<nav class="chapter-links" aria-label="Ссылки раздела"><a href="#doc-glossary">Словарь терминов</a><a class="section-return" href="#route-{route}">↑ {label}: выбрать другой раздел</a></nav></div></details>'
         if number == last:
             guide += '</section>'
         chapters.append(key)
@@ -276,12 +297,12 @@ def build(root=ROOT):
                 original = (root / doc.filename).read_text(encoding='utf-8')
                 text = namespace_anchors(select_sections(original, doc.sections), 'doc-' + doc.key)
                 content = Renderer('doc-' + doc.key).render(text.splitlines())
-                headings = re.findall(r'<h[34] id="([^"]+)">(.+?)</h[34]>', content)
+                headings = re.findall(r'<h[3-6] id="([^"]+)">(.+?)</h[3-6]>', content)
                 contents = ''
                 if len(headings) > 5:
                     links = ''.join(f'<a href="#{anchor}">{label}</a>' for anchor, label in headings)
                     contents = '<details class="source-index"><summary>Оглавление этого источника</summary><nav aria-label="Разделы источника">' + links + '</nav></details>'
-                library.append(f'<details class="source-document" id="doc-{doc.key}" data-search-title="{html.escape(Path(doc.filename).stem, quote=True)}"><summary>{html.escape(Path(doc.filename).stem)}</summary><p class="source-note">{html.escape(doc.note)}</p><div class="source-content">{contents}{content}<a class="section-return" href="#library">↑ Выбрать другой справочник</a></div></details>')
+                library.append(f'<details class="source-document" id="doc-{doc.key}" data-search-title="{html.escape(Path(doc.filename).stem, quote=True)}"><summary><h4>{html.escape(Path(doc.filename).stem)}</h4></summary><p class="source-note">{html.escape(doc.note)}</p><div class="source-content">{contents}{content}<a class="section-return" href="#library">↑ Выбрать другой справочник</a></div></details>')
         if not primary:
             library.append('</div></details>')
     template = (root / 'scripts/player_book_tpl.html').read_text(encoding='utf-8')
