@@ -32,7 +32,7 @@ Python-сборщики используют стандартную библио
 | Модели боя, карточки, `alchemy_bestiary/web-review/` | `alchemy_magic_review.py --write` | Отчёт о магии и CSV |
 | Карточки и расчёт каталога | `elixir_catalog_review.py --write` | Расчётный блок обзора каталога |
 | Markdown с парным HTML | `master_html.py "Имя документа"` | HTML документа |
-| Книга Markdown, 22 документа из `DOCUMENTS`, `player_book_tpl.html` | `player_book.py` | Книга HTML и два архива |
+| Книга Markdown, 24 документа из `DOCUMENTS`, `player_book_tpl.html` | `player_book.py` | Книга HTML и два архива |
 
 ```mermaid
 flowchart TD

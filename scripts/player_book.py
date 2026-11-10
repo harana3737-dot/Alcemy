@@ -38,7 +38,9 @@ DOCUMENTS = [
     Document('core', 'Алхимия Талиса — ядро правил.md', 'Правила', 'Короткая процедура. За точными таблицами переходи к правилам за столом.'),
     Document('rules', 'Алхимия Талиса — правила за столом.md', 'Правила', 'Действующий текст v0.3 без истории и альтернатив. Главный справочник для игры.'),
     Document('full', 'Алхимия Талиса — правила v0.3 (черновик на утверждение).md', 'Правила', 'Полная редакция со статусами и альтернативами. Предложения не применяются одновременно с действующим правилом.'),
-    Document('glossary', 'Глоссарий.md', 'Правила', 'Определения терминов. Короткие ответы простыми словами — в главе 22 книги.'),
+    Document('glossary', 'Глоссарий.md', 'Правила', 'Определения терминов. Для первого знакомства — раздел «Разобраться» книги.'),
+    Document('plan', 'Талис — план исследований.md', 'Подготовка', 'Единственный актуальный план. Выбранные работы отделены от предложений; чернила Лаэлю Талис оплачивает сам. Срез и неизвестные условия указаны в начале.'),
+    Document('economy-book', 'Для игрока — книга экономики.md', 'Подготовка', 'Полная книга экономики с объяснениями и таблицами. Средние расходы и условные продажи не заменяют текущий кошелёк.'),
     Document('catalog-review', 'Группа — обзор каталога эликсиров.md', 'Группа и развитие', 'Актуальные уточнения заклинаний, очередь исследований, 103 оценки и растущие пределы токсичности.'),
     Document('party', 'Группа — баффы и расходники.md', 'Группа и развитие', 'Расчёты сценариев по мастерству и уровню. Старые примеры с пределами L4 не ограничивают будущую группу; уточнения книги заклинаний и очереди — в обзоре каталога.'),
     Document('sheet', 'Талис — лист персонажа.md', 'Группа и развитие', 'Выдержка: основные числа, алхимия, запасы и союзники. Снимок, не синхронизация с журналом; полный исходник в проекте и в архиве исходников, собираемом по запросу.', ('Основное', 'Алхимия', 'Снаряжение', 'Союзники')),
@@ -47,7 +49,7 @@ DOCUMENTS = [
     Document('quality', 'Бонусы качества по карточкам.md', 'Практика', 'Подсказки для выбора, не обязательная награда. Длительность и ограничения сверяй с 8.12.'),
     Document('cards', 'Карточки эликсиров.md', 'Практика', 'Полный каталог 185 карточек со статусом черновиков. Включение в каталог не означает известную формулу. Альтернативы в карточках отделяй от основной версии.'),
     Document('sample', 'Образец — кровь шахтёра.md', 'Практика', 'Памятка по образцу. Сроки хранения считаются игровыми днями; доступность крови не равна уже полученной стабильной эссенции.'),
-    Document('economy', 'Симуляция экономики зелий.md', 'Экономика', 'Модели средних затрат, времени и роста. Прочитай допущения: доля продажи, бонус, рецепты, качество. Ночные часы учитывай один раз по главе 17.'),
+    Document('economy', 'Симуляция экономики зелий.md', 'Экономика', 'Модели средних затрат, времени и роста. Прочитай допущения: доля продажи, бонус, рецепты, качество. Рабочие ночи учитывай один раз.'),
     Document('week', 'Недельная варка — план и бюджет.md', 'Экономика', 'Сценарии после открытия нужных рецептов. Будущие лаборатории и бюджеты не описывают все доступные возможности сегодня.'),
     Document('costs', 'Алхимия Талиса — затраты по логам.md', 'Экономика', 'Исторические траты сессий. Не вычитать их повторно из подтверждённого кошелька; корень I на 60 зм уже оплачен.'),
     Document('master-economy', 'Экономика алхимии — для мастера.md', 'Экономика', 'Обоснования экономических моделей. Документ полезен для понимания системы, но гипотетический алхимик может иметь другие бонусы.'),
@@ -61,8 +63,15 @@ DOCUMENTS = [
 
 # Ежедневные справки. Остальные источники доступны по ссылкам и поиску,
 # но собраны под одним закрытым блоком, чтобы не загромождать библиотеку.
-PRIMARY_KEYS = {'rules', 'catalog-review', 'sheet', 'future',
-                'bonuses', 'quality', 'cards', 'sample'}
+PRIMARY_KEYS = {'rules', 'sheet', 'cards', 'plan', 'economy-book', 'glossary'}
+
+# Три входа в одну книгу. Разделы закрыты до выбора; весь текст остаётся
+# доступен без JavaScript, в поиске, по прямой ссылке и при печати.
+ROUTES = (
+    ('game', 'На игре', 'Открой одно действие. Условия, бросок и запись результата находятся рядом.', 1, 6),
+    ('prepare', 'Перед игрой', 'Сверь выбранные цели, придумай следующий шаг Талиса и выдели деньги и время.', 7, 12),
+    ('learn', 'Разобраться', 'Пройди законченный пример, затем разберись в материалах, формулах и развитии.', 13, 18),
+)
 
 LINKS = {doc.filename: '#doc-' + doc.key for doc in DOCUMENTS}
 
@@ -152,7 +161,8 @@ class Renderer:
                     i += 1
                 if rows:
                     width = len(rows[0])
-                    table = '<div class="table-wrap" tabindex="0" role="region" aria-label="Таблица, прокручивается по горизонтали"><table><thead><tr>'
+                    columns = f' data-columns="{width}"' if self.prefix.startswith('chapter-') else ''
+                    table = '<div class="table-wrap" tabindex="0" role="region" aria-label="Таблица, прокручивается по горизонтали"><table' + columns + '><thead><tr>'
                     table += ''.join('<th scope="col">' + inline(cell) + '</th>' for cell in rows[0])
                     table += '</tr></thead><tbody>'
                     for row in rows[1:]:
@@ -236,12 +246,22 @@ def build(root=ROOT):
     guide = renderer.render(chunks[0].splitlines())
     nav = []
     chapters = []
+    chapter_count = (len(chunks) - 1) // 2
+    if chapter_count != ROUTES[-1][4]:
+        raise ValueError('Число глав не соответствует маршрутам книги')
     for index in range(1, len(chunks), 2):
         title = chunks[index]
-        key = f'chapter-{(index+1)//2:02d}'
+        number = (index+1)//2
+        key = f'chapter-{number:02d}'
+        route, label, description, first, last = next(r for r in ROUTES if r[3] <= number <= r[4])
+        if number == first:
+            nav.append(f'<p class="nav-group"><a href="#route-{route}">{label}</a></p>')
+            guide += f'<section class="book-route" id="route-{route}" aria-labelledby="route-{route}-title"><h2 id="route-{route}-title">{label}</h2><p class="route-description">{description}</p>'
         nav.append(f'<a href="#{key}">{html.escape(title)}</a>')
         content = Renderer(key).render(chunks[index+1].splitlines(), examples=True)
-        guide += f'<section class="chapter" id="{key}" data-search-title="{html.escape(title, quote=True)}"><h2>{html.escape(title)}</h2>{content}</section>'
+        guide += f'<details class="chapter" id="{key}" data-search-title="{html.escape(title, quote=True)}"><summary>{html.escape(title)}</summary><div class="chapter-content">{content}<a class="section-return" href="#route-{route}">↑ {label}: выбрать другой раздел</a></div></details>'
+        if number == last:
+            guide += '</section>'
         chapters.append(key)
     if not PRIMARY_KEYS <= {doc.key for doc in DOCUMENTS}:
         raise ValueError('Неизвестная основная справка')
@@ -256,11 +276,17 @@ def build(root=ROOT):
                 original = (root / doc.filename).read_text(encoding='utf-8')
                 text = namespace_anchors(select_sections(original, doc.sections), 'doc-' + doc.key)
                 content = Renderer('doc-' + doc.key).render(text.splitlines())
-                library.append(f'<details class="source-document" id="doc-{doc.key}" data-search-title="{html.escape(Path(doc.filename).stem, quote=True)}"><summary>{html.escape(Path(doc.filename).stem)}</summary><p class="source-note">{html.escape(doc.note)}</p><div class="source-content">{content}</div></details>')
+                headings = re.findall(r'<h[34] id="([^"]+)">(.+?)</h[34]>', content)
+                contents = ''
+                if len(headings) > 5:
+                    links = ''.join(f'<a href="#{anchor}">{label}</a>' for anchor, label in headings)
+                    contents = '<details class="source-index"><summary>Оглавление этого источника</summary><nav aria-label="Разделы источника">' + links + '</nav></details>'
+                library.append(f'<details class="source-document" id="doc-{doc.key}" data-search-title="{html.escape(Path(doc.filename).stem, quote=True)}"><summary>{html.escape(Path(doc.filename).stem)}</summary><p class="source-note">{html.escape(doc.note)}</p><div class="source-content">{contents}{content}<a class="section-return" href="#library">↑ Выбрать другой справочник</a></div></details>')
         if not primary:
             library.append('</div></details>')
     template = (root / 'scripts/player_book_tpl.html').read_text(encoding='utf-8')
-    page = template.replace('@@GUIDE@@', guide).replace('@@NAV@@', ''.join(nav)).replace('@@LIBRARY@@', ''.join(library)).replace('@@DOCUMENT_COUNT@@', str(len(DOCUMENTS))).replace('@@PRIMARY_COUNT@@', str(len(PRIMARY_KEYS)))
+    print_options = ''.join(f'<option value="chapter-{number:02d}">{html.escape(chunks[number*2-1])}</option>' for number in range(1, chapter_count+1))
+    page = template.replace('@@GUIDE@@', guide).replace('@@NAV@@', ''.join(nav)).replace('@@LIBRARY@@', ''.join(library)).replace('@@DOCUMENT_COUNT@@', str(len(DOCUMENTS))).replace('@@PRIMARY_COUNT@@', str(len(PRIMARY_KEYS))).replace('@@PRINT_OPTIONS@@', print_options)
     if re.search(r'@@[A-Z_]+@@', page):
         raise ValueError('Не заменены поля шаблона')
     ids = re.findall(r'\bid="([^"]+)"', page)
