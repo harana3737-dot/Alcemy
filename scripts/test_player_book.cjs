@@ -17,21 +17,37 @@ if (!candidate) throw Error('Chromium не найден');
     page.on('pageerror', error => errors.push(error.message));
     page.on('request', request => requests.push(request.url()));
     await page.setContent(source);
-    assert.equal(await page.locator('.chapter').count(), 25);
-    assert.equal(await page.locator('.source-document').count(), 22);
-    assert.equal(await page.locator('#library > .source-document').count(), 8);
-    assert.equal(await page.locator('#library-extra .source-document').count(), 14);
+    assert.equal(await page.locator('.chapter').count(), 18);
+    assert.equal(await page.locator('.book-route').count(), 3);
+    assert.equal(await page.locator('.chapter[open]').count(), 0, 'Первый экран не разворачивает весь текст');
+    for (const route of ['game', 'prepare', 'learn']) {
+      assert.equal(await page.locator(`#route-${route} > .chapter`).count(), 6);
+    }
+    assert.equal(await page.locator('.source-document').count(), 24);
+    assert.equal(await page.locator('#library > .source-document').count(), 6);
+    assert.equal(await page.locator('#library-extra .source-document').count(), 18);
     assert.equal(await page.locator('#library-extra').evaluate(el => el.open), false);
     const links = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].every(a => document.getElementById(a.getAttribute('href').slice(1))));
     assert.ok(links, 'Все внутренние ссылки должны вести к существующему якорю');
 
     // Поиск обязан находить текст внутри закрытого примера и раскрывать его.
-    const closed = page.locator('#chapter-12 details').filter({ hasText: 'что будет при превышении' });
+    const closed = page.locator('#chapter-05 details').filter({ hasText: 'что будет при превышении' });
     assert.equal(await closed.evaluate(el => el.open), false);
     await page.locator('#search').fill('разово');
-    const result = page.locator('#search-results button').filter({ has: page.locator('strong', { hasText: '12. Токсичность' }) });
+    const result = page.locator('#search-results button').filter({ has: page.locator('strong', { hasText: '05. Совместить' }) });
     await result.click();
     assert.equal(await closed.evaluate(el => el.open), true);
+    assert.equal(await page.locator('#chapter-05').evaluate(el => el.open), true);
+
+    // Ограничение области действительно меняет результаты, а не только подпись.
+    await page.locator('#search').fill('чернила');
+    await page.locator('#search-scope').selectOption('guide');
+    assert.ok(await page.locator('#search-results button').count());
+    assert.ok((await page.locator('#search-results .search-kind').allTextContents()).every(t => t === 'Короткий раздел'));
+    await page.locator('#search-scope').selectOption('library');
+    assert.ok(await page.locator('#search-results button').count());
+    assert.ok((await page.locator('#search-results .search-kind').allTextContents()).every(t => t === 'Источник'));
+    await page.locator('#search-scope').selectOption('all');
     await page.locator('#search').fill('Щит веры');
     await page.locator('#search-results button').filter({ has: page.locator('strong', { hasText: 'Группа — обзор каталога эликсиров' }) }).click();
     assert.equal(await page.locator('#doc-catalog-review').evaluate(el => el.open), true);
@@ -44,6 +60,16 @@ if (!candidate) throw Error('Chromium не найден');
     await page.locator('#search-results button').filter({ has: page.locator('strong', { hasText: 'Заклинания Талиса — проверка на бестиарии' }) }).click();
     assert.equal(await page.locator('#doc-bestiary').evaluate(el => el.open), true);
     assert.equal(await page.locator('#library-extra').evaluate(el => el.open), true);
+
+    // Новый план встроен полностью; оглавление источника раскрывает его по ссылке.
+    await page.locator('#search').press('Escape');
+    await page.locator('.library-shortcuts a[href="#doc-plan"]').click();
+    assert.equal(await page.locator('#doc-plan').evaluate(el => el.open), true);
+    assert.match(await page.locator('#doc-plan .source-content').textContent(), /14,32/);
+    await page.locator('#doc-plan .source-index > summary').click();
+    const planTarget = await page.locator('#doc-plan .source-index a').first().getAttribute('href');
+    await page.locator('#doc-plan .source-index a').first().click();
+    assert.equal(await page.evaluate(() => location.hash), planTarget);
 
     // Подготовленный индекс сохраняет ё/е, регистр и порядок результатов.
     await page.locator('#search').fill('полёт');
@@ -67,24 +93,41 @@ if (!candidate) throw Error('Chromium не найден');
     for (const width of [1280, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, `Переполнение страницы ${width}`);
-      assert.equal(await page.locator('#chapter-03 td').first().evaluate(el => getComputedStyle(el).display), width < 650 ? 'grid' : 'table-cell', 'Таблицы должны превращаться в карточки на телефоне');
+      assert.equal(await page.locator('#chapter-02 table[data-columns="3"] td').first().evaluate(el => getComputedStyle(el).display), width < 650 ? 'grid' : 'table-cell', 'Широкие таблицы должны превращаться в карточки на телефоне');
+      assert.equal(await page.locator('#chapter-03 table[data-columns="2"] td').first().evaluate(el => getComputedStyle(el).display), 'table-cell', 'Короткая справка сохраняет две колонки без повторения подписей');
+      // Проверяем открытый рабочий раздел, не только свёрнутую обложку.
+      await page.evaluate(() => { location.hash = 'chapter-02'; });
+      await page.waitForFunction(() => document.getElementById('chapter-02').open);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
+      assert.ok(await page.locator('#chapter-02 > summary').isVisible());
     }
     await page.evaluate(() => dispatchEvent(new Event('beforeprint')));
     assert.equal(await page.locator('article details:not([open])').count(), 0);
     await page.evaluate(() => dispatchEvent(new Event('afterprint')));
-    assert.equal(await page.locator('article details[open]').count(), 0);
+    assert.equal(await page.locator('#chapter-02').evaluate(el => el.open), true, 'Печать восстанавливает открытый раздел');
+    await page.locator('#print-section').selectOption('chapter-02');
+    await page.evaluate(() => dispatchEvent(new Event('beforeprint')));
+    await page.emulateMedia({ media: 'print' });
+    assert.equal(await page.locator('.chapter:visible').count(), 1);
+    assert.ok(await page.locator('#chapter-02').isVisible());
+    await page.evaluate(() => dispatchEvent(new Event('afterprint')));
+    await page.emulateMedia({ media: 'screen' });
+    assert.equal(await page.locator('body').getAttribute('data-print-single'), null);
     // Отдельная копия с выключенным JS должна сохранять текст и ссылки.
     const nojs = await browser.newContext({ javaScriptEnabled: false });
     const plain = await nojs.newPage();
     await plain.setContent(source);
-    assert.equal(await plain.locator('.chapter').count(), 25);
+    assert.equal(await plain.locator('.chapter').count(), 18);
     assert.ok(await plain.locator('#book').textContent());
+    await plain.locator('#chapter-02 > summary').click();
+    assert.equal(await plain.locator('#chapter-02').evaluate(el => el.open), true);
+    assert.ok(await plain.locator('#chapter-02 table').first().isVisible());
     await plain.locator('#library-extra > summary').click();
     assert.equal(await plain.locator('#library-extra').evaluate(el => el.open), true);
     await nojs.close();
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, [], 'Книга не должна загружать внешние зависимости');
-    console.log('PASS: 25 глав, 8+14 документов, вложенные ссылки и поиск, темы, шрифт, телефон, печать, чтение без JS и сети');
+    console.log('PASS: три маршрута, 18 разделов, 6+18 источников, поиск с областями, оглавления, телефон, выбор печати, чтение без JS и сети');
   } finally {
     await browser.close();
   }
