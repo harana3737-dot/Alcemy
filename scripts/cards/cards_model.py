@@ -278,6 +278,11 @@ def link(c):
     return f"[{c['name']}](#{c['id']})"
 
 
+def ordered_cards(cards):
+    """Одинаковый порядок каталога, помощника, пульта и бонусов качества."""
+    return sorted(cards, key=lambda c: (c['lvl'], CLS_ORDER.index(c['cls']), c['name']))
+
+
 def prepare_cards():
     C = deepcopy(RAW_C)
     _miss = [c["name"] for c in C if c["name"] not in DUR]

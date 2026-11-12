@@ -19,6 +19,7 @@ from cards_model import (
     conc_short,
     link,
     prepare_cards,
+    ordered_cards,
     recipe,
     slug,
     status,
@@ -26,7 +27,7 @@ from cards_model import (
 
 def build_materials(C=None):
     C = prepare_cards() if C is None else C
-    cards = sorted(C, key=lambda c: (c["lvl"], CLS_ORDER.index(c["cls"]), c["name"]))
+    cards = ordered_cards(C)
     md = []
     md.append("# Карточки эликсиров — Алхимия Талиса\n")
     md.append("Черновик, 05.10.2026. Собрано из `реестр_эликсиров.md` и правил v0.3 (8.5, приложение А). Где реестр и v0.3 расходятся, взяты уровень, цена, эссенция и класс из v0.3; расхождения отмечены в карточках. "

@@ -79,11 +79,25 @@ def changed_files(root):
     return files
 
 
-
-
 class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass
+
+
+def run_browsers(scripts, root, env, failures, jobs):
+    """Один порядок запуска и закрытия сервера для всех областей проверки."""
+    executable = env.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH', '/opt/pw-browsers/chromium')
+    browser_env = dict(env, PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=executable, CHROMIUM_PATH=executable)
+    server = ThreadingHTTPServer(('127.0.0.1', 0), partial(QuietHandler, directory=str(root)))
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    browser_env['ALCEMY_URL'] = f'http://127.0.0.1:{server.server_port}'
+    try:
+        run_parallel([['node', str(script)] for script in scripts], root, browser_env, failures, jobs)
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()
 
 
 def check_full(root=ROOT, *, slow=False, browser=False, sources=False, jobs=4):
@@ -131,19 +145,8 @@ def check_full(root=ROOT, *, slow=False, browser=False, sources=False, jobs=4):
         else:
             print('ESLint не установлен: структурную компиляцию проверили; линтер обязателен в CI')
         if browser:
-            executable = env.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH', '/opt/pw-browsers/chromium')
-            env.update(PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=executable, CHROMIUM_PATH=executable)
-            server = ThreadingHTTPServer(('127.0.0.1', 0), partial(QuietHandler, directory=str(copy)))
-            thread = threading.Thread(target=server.serve_forever, daemon=True)
-            thread.start()
-            env['ALCEMY_URL'] = f'http://127.0.0.1:{server.server_port}'
-            try:
-                run_parallel([['node', str(script.relative_to(copy))]
-                              for script in sorted(copy.rglob('test_*.cjs'))], copy, env, failures, jobs)
-            finally:
-                server.shutdown()
-                server.server_close()
-                thread.join()
+            run_browsers([p.relative_to(copy) for p in sorted(copy.rglob('test_*.cjs'))],
+                         copy, env, failures, jobs)
         stale = outdated(before, snapshot(copy))
     if stale:
         print('Устаревшие файлы:')
@@ -263,15 +266,7 @@ def check(root=ROOT, *, slow=False, browser=False, sources=False, quick=False,
         if slow and not failures:
             run(py+['scripts/report.py'], copy, env, failures)
         if browsers and not failures:
-            executable = env.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH','/opt/pw-browsers/chromium')
-            env.update(PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=executable, CHROMIUM_PATH=executable)
-            server = ThreadingHTTPServer(('127.0.0.1',0), partial(QuietHandler,directory=str(copy)))
-            thread = threading.Thread(target=server.serve_forever,daemon=True); thread.start()
-            env['ALCEMY_URL'] = f'http://127.0.0.1:{server.server_port}'
-            try:
-                run_parallel([['node', p] for p in browsers], copy, env, failures, jobs)
-            finally:
-                server.shutdown();server.server_close();thread.join()
+            run_browsers(browsers, copy, env, failures, jobs)
         stale = outdated(before, snapshot(copy))
         if snapshot(root) != before:
             print('ОШИБКА: checkout изменился во время проверки; запись отменена')

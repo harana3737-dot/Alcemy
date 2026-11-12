@@ -4,11 +4,9 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from reading_guides import add_guide
-import pathlib, re
-HERE = pathlib.Path(__file__).resolve().parent
-from cards_model import prepare_cards, ROM, CLS, CLS_ORDER, saves, area, ROOT
+import re
+from cards_model import prepare_cards, ordered_cards, ROM, CLS, CLS_ORDER, saves, area, ROOT
 from upcast import UPCAST
-C = prepare_cards()
 
 POURED = {"Эликсир правды", "Любовный напиток"}
 NO_SAVE = {"Лабиринт"}                                   # выход — проверка Инт против СЛ 20, привязка её не меняет
@@ -68,7 +66,7 @@ def quality(c):
 
 
 def main():
-    cards = sorted(C, key=lambda c: (c["lvl"], CLS_ORDER.index(c["cls"]), c["name"]))
+    cards = ordered_cards(prepare_cards())
     L = ["# Бонусы качества по карточкам\n",
          "Документ игрока: какой бонус брать на успехе 5+ и натуральной 20 для каждого рецепта из каталога, если варишь для себя. "
          "На продажу — всегда экономия трав на 5+ и ещё одна доза на 20. Логика выбора — в «Бонусы за 5+ и 20 — что выгоднее брать». "

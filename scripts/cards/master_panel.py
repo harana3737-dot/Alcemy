@@ -42,9 +42,8 @@ def build():
     core = re.sub(r"<h1[^>]*>.*?</h1>", "", core, count=1, flags=re.S)
 
     # Карточки эликсиров
-    import quality
-    _g = vars(quality)
-    C, CLS, ORDER = _g["C"], _g["CLS"], _g["CLS_ORDER"]
+    from cards_model import prepare_cards, ordered_cards, CLS, CLS_ORDER as ORDER
+    C = ordered_cards(prepare_cards())
     def conc(c):  # как в каталоге (gen.py, conc_short): эффект — алхимическая по a89, заряды и склянки — обычная по полю conc
         if c["cls"] == "eff":
             return "алхимическая концентрация" if c["a89"].startswith("да") else "нет"
@@ -56,7 +55,7 @@ def build():
         return 0 if c["cls"] == "psn" or not m else int(m.group(1))
     cards = [dict(n=c["name"], l=c["lvl"], k=c["cls"], f=c["fam"] or "", e=c["ess"], p=c["price"], t=c["tox"],
                   d=c["dur"], c=conc(c), g=c["tasks"], es=c["ess_types"], tx=tox_n(c), s=c.get("src_raw") or c["src"], x=c["eff"], o=c["note"] or "")
-             for c in sorted(C, key=lambda c: (c["lvl"], ORDER.index(c["cls"]), c["name"]))]
+             for c in C]
 
     # Применение и варка — готовые блоки из «Карточек эликсиров.html» (как видит мастер в каталоге)
     subprocess.run([sys.executable, str(HERE / "gen_html.py")], check=True, capture_output=True)
@@ -80,7 +79,7 @@ def build():
     def brew_time(t):  # «объём работы 90 (≈5 …» → «долгая, объём 90»
         m = re.match(r"объём работы (\d+)", t)
         return f"долгая, объём {m.group(1)}" if m else t
-    for c, cd in zip(sorted(C, key=lambda c: (c["lvl"], ORDER.index(c["cls"]), c["name"])), cards):
+    for c, cd in zip(C, cards):
         cd["q"], cd["b"] = blocks.get(c["id"], ("", ""))
         if c["cls"] == "psn":  # контрольный яд своего рецепта не имеет — варится по рецепту зарядов и склянок своей эссенции (Ж-100)
             cd["b"] = re.sub(r"(<dt>Формула</dt><dd>)(.*?)(</dd>)", r"\1\2 — общий рецепт зарядов и склянок; отдельного рецепта яда нет (Ж-100)\3", cd["b"])
