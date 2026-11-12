@@ -7,6 +7,26 @@ from sim import HERB, P_SL, P_PRICE, CAT_PRICE, INSTAB, INK, check_success, prob
 random = _random.Random(5)
 
 
+def _d20_roller(rng):
+    """Тот же поток, что randint(1, 20), без общей обработки границ.
+
+    Для стандартного Random: пять бит, отбрасывание 20–31, сдвиг на 1.
+    Пользовательские генераторы сохраняют собственную реализацию randint.
+    """
+    from random import Random
+    if type(rng) is not Random or {'randint', 'randrange', '_randbelow'}.intersection(vars(rng)):
+        return lambda: rng.randint(1, 20)
+    bits = rng.getrandbits
+
+    def d20():
+        n = bits(5)
+        while n >= 20:
+            n = bits(5)
+        return n + 1
+
+    return d20
+
+
 def outcome(d, bonus, sl):
     if d == 1: return "fail"
     if d == 20 or d + bonus >= sl: return "ok"
@@ -17,6 +37,7 @@ def sim(bonus, sl, mat, price, cat, per_day, points, stop, days=100000, u=.5, *,
     ok_p, un_p, _ = probs(bonus, sl)
     reroll_unst = ok_p + un_p * u > u          # перебрасывать нестабильное, только если это выгодно
     rng = random if rng is None else rng
+    d20 = _d20_roller(rng)
     b5, b20 = potion_bonus(mat, price, item_kind=item_kind, level=level, allow_up_to_10=allow_up_to_10)
     profit = 0.0; tries = 0; use = 0
     for _ in range(days):
@@ -27,14 +48,14 @@ def sim(bonus, sl, mat, price, cat, per_day, points, stop, days=100000, u=.5, *,
             use += 1
             profit -= mat; tries += 1
             if use > stable_uses and cat:                 # проверка нестабильности — тоже проверка характеристики
-                ok = check_success(rng.randint(1, 20), bonus, INSTAB[use - stable_uses - 1])
+                ok = check_success(d20(), bonus, INSTAB[use - stable_uses - 1])
                 if not ok and pts:
-                    pts -= 1; ok = check_success(rng.randint(1, 20), bonus, INSTAB[use - stable_uses - 1])
+                    pts -= 1; ok = check_success(d20(), bonus, INSTAB[use - stable_uses - 1])
                 if not ok:
                     use = 0; continue
-            d = rng.randint(1, 20); r = outcome(d, bonus, sl)
+            d = d20(); r = outcome(d, bonus, sl)
             if pts and (r == "fail" or (r == "unst" and reroll_unst)):
-                pts -= 1; d = rng.randint(1, 20); r = outcome(d, bonus, sl)
+                pts -= 1; d = d20(); r = outcome(d, bonus, sl)
             profit += price if r == "ok" else price * u if r == "unst" else 0
             if r == "ok":                       # бонусы 7.7 у зелий: 5+ — экономия трав, 20 — лучший вариант
                 profit += b20 if d == 20 else b5 if d + bonus >= sl + 5 else 0

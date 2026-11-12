@@ -15,6 +15,28 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class OptimizationTests(unittest.TestCase):
+    def test_d20_keeps_randint_stream_and_custom_generators(self):
+        for seed in (0, 5, 12345):
+            fast, original = random.Random(seed), random.Random(seed)
+            d20 = sim_guidance._d20_roller(fast)
+            self.assertEqual([d20() for _ in range(10000)],
+                             [original.randint(1, 20) for _ in range(10000)])
+            self.assertEqual(fast.getstate(), original.getstate())
+
+        class CustomRandom(random.Random):
+            def randint(self, lower, upper):
+                self.bounds = lower, upper
+                return 20
+
+        custom = CustomRandom(5)
+        self.assertEqual(sim_guidance._d20_roller(custom)(), 20)
+        self.assertEqual(custom.bounds, (1, 20))
+        from unittest.mock import patch
+        fixed = random.Random(1)
+        with patch.object(fixed, 'randint', return_value=1) as roll:
+            self.assertEqual(sim_guidance._d20_roller(fixed)(), 1)
+            roll.assert_called_once_with(1, 20)
+
     def test_fresh_imports_do_not_write_or_touch_global_rng_and_cli(self):
         script = '''
 import contextlib, importlib, io, pathlib, random, sys, tempfile

@@ -1,0 +1,352 @@
+{
+  "base_commit": "3c8f7adeaf0c49e5b76a2b89ec07b6613f17da3c",
+  "report": {
+    "samples_seconds": {
+      "before": [
+        20.140306621999912,
+        19.178102306000028,
+        19.417333805
+      ],
+      "after": [
+        12.370817012000089,
+        13.677007935000006,
+        11.958149117000062
+      ]
+    },
+    "median_seconds": {
+      "before": 19.417333805,
+      "after": 12.370817012000089
+    },
+    "identical_sha256": {
+      "Симуляция экономики зелий.md": "4a2a78444f4d2955104fbf37b2d4bd5e38e34d0eba07df25b62b87822d64c5cb",
+      "Экономика алхимии — для мастера.md": "34d36919c90daaf6a32f2573daf3e0b1b3ee32fc71cb3d285f0fd101c2efc210"
+    }
+  },
+  "library_before": {
+    "browser": "151.0.7922.173",
+    "html_sha256": "8bdcd01764ca3226bbc1b693051bb2e284864ef7db4ddce3b6abb7f065350e0b",
+    "method": "Chromium CPU x4; 2 warmups; forced layout; highlighting excludes 150 ms debounce, includes yielded tasks",
+    "fallback": false,
+    "cases": [
+      {
+        "query": "на",
+        "medians": {
+          "filter_ms": 5.5,
+          "highlight_ms": 904,
+          "next_input_ms": 199.89999999990687
+        },
+        "samples": [
+          {
+            "filter_ms": 5.599999999976717,
+            "highlight_ms": 1579.8000000000466,
+            "next_input_ms": 234.90000000002328,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 5.699999999953434,
+            "highlight_ms": 832.3000000000466,
+            "next_input_ms": 196.19999999995343,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 4.899999999906868,
+            "highlight_ms": 904,
+            "next_input_ms": 209.90000000002328,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 6.300000000046566,
+            "highlight_ms": 1526.5,
+            "next_input_ms": 243.40000000002328,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 5.5,
+            "highlight_ms": 866.7000000000698,
+            "next_input_ms": 194,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 3.900000000023283,
+            "highlight_ms": 872.1999999999534,
+            "next_input_ms": 160.69999999995343,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 5.300000000046566,
+            "highlight_ms": 990.5,
+            "next_input_ms": 199.89999999990687,
+            "matches": 4868
+          }
+        ]
+      },
+      {
+        "query": "Талис",
+        "medians": {
+          "filter_ms": 9.800000000046566,
+          "highlight_ms": 443.79999999993015,
+          "next_input_ms": 67.5
+        },
+        "samples": [
+          {
+            "filter_ms": 7.900000000023283,
+            "highlight_ms": 395.9000000000233,
+            "next_input_ms": 54.5,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 9.599999999976717,
+            "highlight_ms": 375.69999999995343,
+            "next_input_ms": 67.5,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 11.400000000023283,
+            "highlight_ms": 486.19999999995343,
+            "next_input_ms": 84.40000000002328,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 9,
+            "highlight_ms": 478.69999999995343,
+            "next_input_ms": 66.70000000006985,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 10.199999999953434,
+            "highlight_ms": 415.19999999995343,
+            "next_input_ms": 73.29999999993015,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 14,
+            "highlight_ms": 443.79999999993015,
+            "next_input_ms": 54.300000000046566,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 9.800000000046566,
+            "highlight_ms": 497.80000000004657,
+            "next_input_ms": 74.90000000002328,
+            "matches": 1185
+          }
+        ]
+      },
+      {
+        "query": "гильдия",
+        "medians": {
+          "filter_ms": 14.099999999976717,
+          "highlight_ms": 119.79999999993015,
+          "next_input_ms": 9.900000000023283
+        },
+        "samples": [
+          {
+            "filter_ms": 11.5,
+            "highlight_ms": 104.19999999995343,
+            "next_input_ms": 9.79999999993015,
+            "matches": 14
+          },
+          {
+            "filter_ms": 15.400000000023283,
+            "highlight_ms": 122.59999999997672,
+            "next_input_ms": 9.900000000023283,
+            "matches": 14
+          },
+          {
+            "filter_ms": 12.900000000023283,
+            "highlight_ms": 119.79999999993015,
+            "next_input_ms": 9.20000000006985,
+            "matches": 14
+          },
+          {
+            "filter_ms": 14.300000000046566,
+            "highlight_ms": 120.89999999990687,
+            "next_input_ms": 11.399999999906868,
+            "matches": 14
+          },
+          {
+            "filter_ms": 14.400000000023283,
+            "highlight_ms": 120,
+            "next_input_ms": 11.800000000046566,
+            "matches": 14
+          },
+          {
+            "filter_ms": 11.79999999993015,
+            "highlight_ms": 110.90000000002328,
+            "next_input_ms": 11.099999999976717,
+            "matches": 14
+          },
+          {
+            "filter_ms": 14.099999999976717,
+            "highlight_ms": 98.60000000009313,
+            "next_input_ms": 9.699999999953434,
+            "matches": 14
+          }
+        ]
+      }
+    ]
+  },
+  "library_after": {
+    "browser": "151.0.7922.173",
+    "html_sha256": "c37abaeb1f4f607fa2e889efdc09aaab89afc44eef53c998642c5bbbe2bca7e9",
+    "method": "Chromium CPU x4; 2 warmups; forced layout; highlighting excludes 150 ms debounce, includes yielded tasks",
+    "cases": [
+      {
+        "query": "на",
+        "medians": {
+          "filter_ms": 5.300000000046566,
+          "highlight_ms": 557.1999999999534,
+          "next_input_ms": 21.0999999998603
+        },
+        "samples": [
+          {
+            "filter_ms": 5.300000000046566,
+            "highlight_ms": 556,
+            "next_input_ms": 19.100000000093132,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 5.300000000046566,
+            "highlight_ms": 564.8999999999069,
+            "next_input_ms": 20.300000000046566,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 5.400000000139698,
+            "highlight_ms": 557.1999999999534,
+            "next_input_ms": 23.199999999953434,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 5.600000000093132,
+            "highlight_ms": 579.8000000000466,
+            "next_input_ms": 24.9000000001397,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 6,
+            "highlight_ms": 530.5,
+            "next_input_ms": 21.0999999998603,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 4.600000000093132,
+            "highlight_ms": 548.2999999998137,
+            "next_input_ms": 20,
+            "matches": 4868
+          },
+          {
+            "filter_ms": 5.199999999953434,
+            "highlight_ms": 588.1999999999534,
+            "next_input_ms": 27.4000000001397,
+            "matches": 4868
+          }
+        ]
+      },
+      {
+        "query": "Талис",
+        "medians": {
+          "filter_ms": 6.899999999906868,
+          "highlight_ms": 262.60000000009313,
+          "next_input_ms": 11.599999999860302
+        },
+        "samples": [
+          {
+            "filter_ms": 7.400000000139698,
+            "highlight_ms": 235.0999999998603,
+            "next_input_ms": 10,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 6.899999999906868,
+            "highlight_ms": 308.10000000009313,
+            "next_input_ms": 11.599999999860302,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 6.300000000046566,
+            "highlight_ms": 278.39999999990687,
+            "next_input_ms": 11.899999999906868,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 6.899999999906868,
+            "highlight_ms": 262.60000000009313,
+            "next_input_ms": 11.600000000093132,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 6.600000000093132,
+            "highlight_ms": 259.89999999990687,
+            "next_input_ms": 7.800000000046566,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 7.699999999953434,
+            "highlight_ms": 254.39999999990687,
+            "next_input_ms": 4,
+            "matches": 1185
+          },
+          {
+            "filter_ms": 6.399999999906868,
+            "highlight_ms": 268.4000000001397,
+            "next_input_ms": 15.100000000093132,
+            "matches": 1185
+          }
+        ]
+      },
+      {
+        "query": "гильдия",
+        "medians": {
+          "filter_ms": 7.699999999953434,
+          "highlight_ms": 106.69999999995343,
+          "next_input_ms": 8.899999999906868
+        },
+        "samples": [
+          {
+            "filter_ms": 9.599999999860302,
+            "highlight_ms": 106.80000000004657,
+            "next_input_ms": 8.899999999906868,
+            "matches": 14
+          },
+          {
+            "filter_ms": 7.699999999953434,
+            "highlight_ms": 116.5,
+            "next_input_ms": 10.300000000046566,
+            "matches": 14
+          },
+          {
+            "filter_ms": 7.599999999860302,
+            "highlight_ms": 103.60000000009313,
+            "next_input_ms": 7.699999999953434,
+            "matches": 14
+          },
+          {
+            "filter_ms": 11.199999999953434,
+            "highlight_ms": 96.69999999995343,
+            "next_input_ms": 10.5,
+            "matches": 14
+          },
+          {
+            "filter_ms": 1.8999999999068677,
+            "highlight_ms": 106.69999999995343,
+            "next_input_ms": 19.800000000046566,
+            "matches": 14
+          },
+          {
+            "filter_ms": 8.800000000046566,
+            "highlight_ms": 102.80000000004657,
+            "next_input_ms": 7.900000000139698,
+            "matches": 14
+          },
+          {
+            "filter_ms": 2.3999999999068677,
+            "highlight_ms": 111.30000000004657,
+            "next_input_ms": 7.800000000046566,
+            "matches": 14
+          }
+        ]
+      }
+    ]
+  }
+}
