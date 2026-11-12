@@ -1338,9 +1338,20 @@ function migrateHeldShadow(mat){
   mat.other=mat.other.filter(e=>!old.includes(e));
   return true;
 }
+// Разовое исправление неполного старого снимка, подтверждённое игроком 12.11.
+// Метка сохраняется вместе с материалами: последующий расход/удаление не отменяется.
+function restoreConfirmedSpark(mat){
+  if(!mat||mat.sparkConfirmed20261112===true)return 0;
+  mat.sparkConfirmed20261112=true;
+  const name='Искра заблудшей души';
+  if([...mat.other,...mat.ess].some(e=>e.n===name))return 1;
+  mat.other.push({n:name,q:1,note:'эссенция блуждающего огонька; для определения нужна проверка; тип, ранг и СЛ неизвестны; количество порций не указано'});
+  return 2;
+}
 function matInit(){if(ST.dayOff===undefined)ST.dayOff=13;if(!ST.mat||ST.matSeed===undefined){ST.mat=JSON.parse(JSON.stringify(SEED.mat));ST.matSeed=SEED.mid;return true}
   let ch=false;if(ST.mat.gold===undefined){ST.mat.gold=SEED.mat.gold;ch=true}
   if(migrateHeldShadow(ST.mat)){logx('Уточнение учёта: Сгусток удержанной тени — в эссенциях, одна порция, не переработан');ch=true;}
+  const sparkFix=restoreConfirmedSpark(ST.mat);if(sparkFix){ch=true;if(sparkFix===2)logx('Исправлен неполный старый снимок: восстановлена запись Искры заблудшей души; тип и число порций не назначены');}
   if(ST.dayOff===undefined){ST.dayOff=13;ch=true}
   ST.mat.ess.forEach(e=>{if(e.id==='e4'&&!e.st){e.st='fresh';ch=true}});
   ST.mat.cat.forEach(x=>{if(!x.stable){x.stable=CAT_STABLE;ch=true}});return ch}

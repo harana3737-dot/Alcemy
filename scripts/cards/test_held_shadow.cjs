@@ -41,6 +41,24 @@ const name='Сгусток удержанной тени',legacyName='Эктоп
   const legacyBackup=page.waitForEvent('download');await page.locator('#restoreApply').click();await legacyBackup;
   await page.locator('#restoreDialog').waitFor({state:'hidden'});
   actual=await read();assert.equal(actual.ess.length,1);assert.equal(actual.ess[0].q,1);assert.equal(actual.other.length,0);
+  // Сверяем весь перечень трофеев с актуальным учётом, а не только исправленный сгусток.
+  const parity=await page.evaluate(()=>{
+   const items=m=>['ess','other'].flatMap(k=>m[k].map(e=>({section:k,name:e.n,q:e.q}))).sort((a,b)=>a.name.localeCompare(b.name));
+   return {actual:items(ST.mat),expected:items(SEED.mat)};
+  });
+  assert.deepEqual(parity.actual,parity.expected,'Старый снимок после поправок содержит весь подтверждённый перечень трофеев');
+  // Старый снимок не содержит Искру: исправление обязано вернуть оба подтверждённых трофея.
+  const spark='Искра заблудшей души';
+  let sparks=await page.evaluate(n=>ST.mat.other.filter(e=>e.n===n),spark);
+  assert.equal(sparks.length,1);assert.equal(sparks[0].q,1);
+  assert.equal(await page.evaluate(()=>ST.mat.sparkConfirmed20261112),true);
+  await page.reload();await page.waitForFunction(()=>JDB&&ST.mat);
+  assert.equal(await page.evaluate(n=>ST.mat.other.filter(e=>e.n===n).length,spark),1);
+  await page.evaluate(n=>mutate(()=>{ST.mat.other=ST.mat.other.filter(e=>e.n!==n)}),spark);
+  await page.reload();await page.waitForFunction(()=>JDB&&ST.mat);
+  assert.equal(await page.evaluate(n=>ST.mat.other.filter(e=>e.n===n).length,spark),0,'Удалённая после исправления Искра не появляется заново');
+  const spentSnapshot=await page.evaluate(()=>snapshot());await page.evaluate(x=>validateSnapshot(x),spentSnapshot);
+  assert.equal(spentSnapshot.state.mat.sparkConfirmed20261112,true,'Метка разового исправления входит в резервную копию');
   const file=path.resolve(__dirname,'../../Источники/Сохранения/alcemy-save-2026-11-12-held-shadow.json');
   const snapshot=JSON.parse(fs.readFileSync(file,'utf8'));await page.evaluate(x=>validateSnapshot(x),snapshot);
   for(let i=0;i<2;i++){
@@ -48,7 +66,8 @@ const name='Сгусток удержанной тени',legacyName='Эктоп
    const backup=page.waitForEvent('download');await page.locator('#restoreApply').click();await backup;
    await page.locator('#restoreDialog').waitFor({state:'hidden'});await page.reload();await page.waitForFunction(()=>JDB&&ST.mat);
    actual=await read();assert.equal(actual.ess.length,1);assert.equal(actual.ess[0].q,1);assert.equal(actual.other.length,0);
+   assert.equal(await page.evaluate(n=>ST.mat.other.filter(e=>e.n===n).length,spark),1,'Уже присутствующая Искра из снимка не удваивается');
   }
-  assert.deepEqual(errors,[]);await context.close();console.log('PASS: both shadow names, x1 raw essence, preserved bag/gold/time/processed quality, no duplicate or replenishment, immediate legacy import');
+  assert.deepEqual(errors,[]);await context.close();console.log('PASS: both shadow names, x1 raw essence, preserved bag/gold/time/processed quality, no duplicate or replenishment, immediate legacy import, missing spark restored once and never replenished');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)});
