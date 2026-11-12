@@ -1323,15 +1323,25 @@ const HERB_P=[0,0.1,0.5,1,2,4,8,16,32,64,128];
 const ORD=l=>l<=2?0:l<=5?1:l<=7?2:l<=9?3:4;
 const KIND={heal:'Лечебные',poison:'Ядовитые',any:'Любые'};
 const fmtZ=v=>(Math.round(v*100)/100).toString().replace('.',',');
+// Два старых имени относятся к одной подтверждённой порции. Отсутствующее сырьё не выдаётся.
+function migrateHeldShadow(mat){
+  if(!mat)return false;
+  const isShadow=e=>['сгусток удержанной тени','эктоплазма полтергейста'].includes(String(e.n||'').trim().toLowerCase());
+  const old=mat.other.filter(e=>isShadow(e)&&e.q===1);
+  if(!old.length)return false;
+  let present=mat.ess.find(e=>e.n==='Сгусток удержанной тени')||mat.ess.find(isShadow);
+  if(!present){
+    present={id:'held-shadow-20261112',n:'Сгусток удержанной тени',types:['Покров','Смерть/душа'],l:2,q:1,st:'fresh',note:'эссенция полтергейста; одна порция; не переработан; без консервации; в закрытой колбе не развеивается; переработка 1 час, СЛ 12'};
+    mat.ess.push(present);
+  }else if(present.n!=='Сгусток удержанной тени'){
+    present.n='Сгусток удержанной тени';present.types=['Покров','Смерть/душа'];present.l=2;
+  }
+  mat.other=mat.other.filter(e=>!old.includes(e));
+  return true;
+}
 function matInit(){if(ST.dayOff===undefined)ST.dayOff=13;if(!ST.mat||ST.matSeed===undefined){ST.mat=JSON.parse(JSON.stringify(SEED.mat));ST.matSeed=SEED.mid;return true}
   let ch=false;if(ST.mat.gold===undefined){ST.mat.gold=SEED.mat.gold;ch=true}
-  // Игрок подтвердил 12.11: одна порция известной эссенции, а не «Прочее».
-  // Переносим только сохранившуюся старую запись; не выдаём трофей заново.
-  const shadow=ST.mat.other.find(e=>e.n==='Сгусток удержанной тени'&&e.q===1&&/полтергейста/.test(e.note||'')&&/колбе/.test(e.note||''));
-  if(shadow){
-    if(!ST.mat.ess.some(e=>e.n===shadow.n))ST.mat.ess.push({id:'held-shadow-20261112',n:shadow.n,types:['Покров','Смерть/душа'],l:2,q:1,st:'fresh',note:'эссенция полтергейста; одна порция; не переработан; без консервации; в закрытой колбе не развеивается; переработка 1 час, СЛ 12'});
-    ST.mat.other=ST.mat.other.filter(e=>e!==shadow);logx('Уточнение учёта: Сгусток удержанной тени — в эссенциях, одна порция, не переработан');ch=true;
-  }
+  if(migrateHeldShadow(ST.mat)){logx('Уточнение учёта: Сгусток удержанной тени — в эссенциях, одна порция, не переработан');ch=true;}
   if(ST.dayOff===undefined){ST.dayOff=13;ch=true}
   ST.mat.ess.forEach(e=>{if(e.id==='e4'&&!e.st){e.st='fresh';ch=true}});
   ST.mat.cat.forEach(x=>{if(!x.stable){x.stable=CAT_STABLE;ch=true}});return ch}
@@ -2141,6 +2151,7 @@ $('restoreApply').onclick=async()=>{
     for(const t of next.tracks){const {id,...data}=t;await col.doc(id).set(data)}
     for(const t of old.tracks)if(!next.tracks.some(n=>n.id===t.id))await col.doc(t.id).delete();
     const restored=JSON.parse(JSON.stringify(next.state));restored.u=Date.now();
+    if(migrateHeldShadow(restored.mat))restored.log.unshift({T:restored.T,t:'Уточнение учёта: Эктоплазма полтергейста / Сгусток удержанной тени — одна непереработанная эссенция II'});
     // Сначала проверить запись браузера; только затем заменять общее состояние.
     localStorage.setItem('belt',JSON.stringify(restored));
     writeCrafts(next.crafts);
@@ -2542,6 +2553,6 @@ const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=RECIPES.find(c=>['basic','ink'].includes(c.k)&&c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
 list();render();renderBelt();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
 </script>
-<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка a39dac06e966</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
+<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка a2e51431e57b</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
 </body>
 </html>
