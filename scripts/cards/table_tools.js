@@ -221,6 +221,7 @@ $('restoreApply').onclick=async()=>{
     for(const t of next.tracks){const {id,...data}=t;await col.doc(id).set(data)}
     for(const t of old.tracks)if(!next.tracks.some(n=>n.id===t.id))await col.doc(t.id).delete();
     const restored=JSON.parse(JSON.stringify(next.state));restored.u=Date.now();
+    if(migrateHeldShadow(restored.mat))restored.log.unshift({T:restored.T,t:'Уточнение учёта: Эктоплазма полтергейста / Сгусток удержанной тени — одна непереработанная эссенция II'});
     // Сначала проверить запись браузера; только затем заменять общее состояние.
     localStorage.setItem('belt',JSON.stringify(restored));
     writeCrafts(next.crafts);
