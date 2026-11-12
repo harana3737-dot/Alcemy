@@ -82,16 +82,16 @@ def validate_seed(sheet, seed):
 def build():
     import hashlib, json, pathlib
     HERE = pathlib.Path(__file__).resolve().parent
-    import quality
-    _g = vars(quality)
-    C, CLS, CLS_ORDER, ROOT = _g["C"], _g["CLS"], _g["CLS_ORDER"], _g["ROOT"]
+    from cards_model import prepare_cards, ordered_cards, CLS, ROOT, saves, area
+    from quality import quality
+    from upcast import UPCAST
 
     data = []
-    for c in sorted(C, key=lambda c: (c["lvl"], CLS_ORDER.index(c["cls"]), c["name"])):
-        b5, b20 = _g["quality"](c)
+    for c in ordered_cards(prepare_cards()):
+        b5, b20 = quality(c)
         data.append(dict(n=c["name"], l=c["lvl"], k=c["cls"], f=c["fam"] or "", e=c["ess"], t=c["tox"], d=c["dur"],
-                         p=c["price"], b=c["base"], a=c["stacks_8_9"], s=_g["saves"](c), ar=_g["area"](c) or "", tk=c["tasks"],
-                         cc=c["concentration"], up=_g["UPCAST"].get(c["name"], "none"), b5=b5, b20=b20, eff=c["eff"]))
+                         p=c["price"], b=c["base"], a=c["stacks_8_9"], s=saves(c), ar=area(c) or "", tk=c["tasks"],
+                         cc=c["concentration"], up=UPCAST.get(c["name"], "none"), b5=b5, b20=b20, eff=c["eff"]))
 
     # Начальные сумки и материалы — из одного подтверждённого снимка.
     # Работающая сумка браузера по нему автоматически не сбрасывается.

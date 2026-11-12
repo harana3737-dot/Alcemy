@@ -1,5 +1,3 @@
-import pathlib
-HERE = pathlib.Path(__file__).resolve().parent
 import html, re
 from cards_model import (
     CLS,
