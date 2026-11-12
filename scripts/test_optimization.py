@@ -31,7 +31,7 @@ with tempfile.TemporaryDirectory() as directory:
     with contextlib.redirect_stdout(output):
         for name in ('sim', 'sim_volume', 'sim_player', 'sim_week', 'sim_plan',
                      'sim_guidance', 'report', 'weekly_economy_report', 'cards_model',
-                     'gen', 'gen_html', 'check', 'registry', 'quality'):
+                     'gen', 'check', 'registry', 'quality'):
             importlib.import_module(name)
     assert list(pathlib.Path('.').iterdir()) == []
 assert random.getstate() == state

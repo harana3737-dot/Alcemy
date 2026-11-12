@@ -11,7 +11,7 @@ from check_all import snapshot
 
 ROOT = Path(__file__).resolve().parent.parent
 BUILDERS = ('cards/helper.py', 'cards/master_panel.py', 'rules_html.py',
-            'master_html.py', 'table_rules.py')
+            'master_html.py', 'table_rules.py', 'cards/gen.py')
 
 
 class BuilderImportTests(unittest.TestCase):
@@ -31,7 +31,7 @@ for i, path in enumerate(%r):
     spec=importlib.util.spec_from_file_location('builder_'+str(i),Path('scripts')/path)
     module=importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    assert callable(module.build),path
+    assert callable(module.build if hasattr(module,'build') else module.main),path
 assert random.getstate()==state
 """ % (BUILDERS,)
             result = subprocess.run([sys.executable, '-B', '-c', code], cwd=root,

@@ -16,7 +16,7 @@ from document_paths import paired_html_sources
 ROOT = Path(__file__).resolve().parent.parent
 CHECKS = ('current_inventory.py', 'elixir_price_audit.py', 'economy_conditions.py', 'campaign_library.py', 'player_book.py', 'master_pack.py', 'bestiary_report.py', 'alchemy_bestiary_report.py', 'alchemy_magic_review.py', 'downtime_day.py')
 BUILDERS = (
-    ('rules_html.py',), ('cards/gen.py',), ('cards/gen_html.py',),
+    ('rules_html.py',), ('cards/gen.py',),
     ('cards/quality.py',), ('cards/registry.py',), ('cards/helper.py',),
     ('cards/master_panel.py',), ('weekly_economy_report.py', '--write'),
     ('elixir_catalog_review.py', '--write'), ('party_kit_report.py', '--write'),
@@ -138,11 +138,10 @@ def check_full(root=ROOT, *, slow=False, browser=False, sources=False, jobs=4):
         if sources:
             run(py+['scripts/player_book.py', '--check'], copy, env, failures)
         run(py+['scripts/check_html_budget.py'], copy, env, failures)
-        run(['node', 'scripts/check_javascript.cjs'], copy, env, failures)
-        if subprocess.run(['node', '-e', "require.resolve('eslint'); require.resolve('globals')"],
-                          cwd=copy, env=env, capture_output=True).returncode == 0:
-            run(['node', 'scripts/lint_javascript.cjs'], copy, env, failures)
-        else:
+        lint = subprocess.run(['node', '-e', "require.resolve('eslint'); require.resolve('globals')"],
+                              cwd=copy, env=env, capture_output=True).returncode == 0
+        run(['node', 'scripts/check_javascript.cjs', *(['--lint'] if lint else [])], copy, env, failures)
+        if not lint:
             print('ESLint не установлен: структурную компиляцию проверили; линтер обязателен в CI')
         if browser:
             run_browsers([p.relative_to(copy) for p in sorted(copy.rglob('test_*.cjs'))],
@@ -213,8 +212,8 @@ def scoped_plan(scope, root, files=()):
     elif scope == 'master':
         for name in ('Для мастера — начни отсюда','Для мастера — коротко на утверждение','Для мастера — сводка варки','Для мастера — вопросы и изменения','Образец — кровь шахтёра'):
             html(name)
-        builders += [('scripts/cards/master_panel.py',), ('scripts/master_pack.py',)]
-        outputs |= {'Пульт мастера.html','Алхимия Талиса — ядро правил.html','Карточки эликсиров.html','Образец — кровь шахтёра.html','Материалы мастера — актуальный комплект.zip'}
+        builders += [('scripts/cards/gen.py',), ('scripts/cards/master_panel.py',), ('scripts/master_pack.py',)]
+        outputs |= {'Пульт мастера.html','Алхимия Талиса — ядро правил.html','Карточки эликсиров.html','Образец — кровь шахтёра.html','Материалы мастера — актуальный комплект.zip','Карточки эликсиров.md','Реестр эликсиров.csv'}
         checks += [('scripts/check_master_rulings.py',), ('scripts/test_master_pack.py',), ('scripts/master_pack.py','--check')]
         browsers = ['scripts/test_master_panel.cjs']
     elif scope == 'economy':

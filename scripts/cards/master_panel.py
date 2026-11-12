@@ -2,7 +2,7 @@
 справка (ядро правил), каталог эликсиров, снимок алхимии Талиса, ремёсла Лаэля и Фаэнона.
 Запуск: python3 scripts/cards/master_panel.py → «Пульт мастера.html».
 Источники: «Для мастера — коротко на утверждение.md», «Алхимия Талиса — ядро правил.html»
-(собрать master_html.py), карточки (quality.py), лист персонажа (раздел «Алхимия»),
+(собрать master_html.py), каталог (сначала cards/gen.py), лист персонажа (раздел «Алхимия»),
 «Образец — кровь шахтёра.md». Только то, что можно мастеру."""
 
 
@@ -58,7 +58,6 @@ def build():
              for c in C]
 
     # Применение и варка — готовые блоки из «Карточек эликсиров.html» (как видит мастер в каталоге)
-    subprocess.run([sys.executable, str(HERE / "gen_html.py")], check=True, capture_output=True)
     cat = (ROOT / "Карточки эликсиров.html").read_text(encoding="utf-8")
     blocks = {}
     for m in re.finditer(r'<article class="card" id="(e\d+)".*?</article>', cat, re.S):

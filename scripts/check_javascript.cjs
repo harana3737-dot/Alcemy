@@ -1,20 +1,52 @@
-// Компиляция без исполнения: исходники инструментов и скрипты свежего HTML.
+// Один обход исходников и страниц: компиляция; с --lint также ESLint.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const root=path.resolve(process.argv[2]||path.join(__dirname,'..'));
-let checked=0;
-function parse(source,file){new vm.Script(source,{filename:file});checked++}
-function visit(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
- const file=path.join(dir,entry.name);
- if(entry.isDirectory()&&!['node_modules','__pycache__'].includes(entry.name))visit(file);
- else if(entry.isFile()&&/\.(cjs|js)$/.test(file))parse(fs.readFileSync(file,'utf8'),file);
-}}
-visit(path.join(root,'scripts'));
-for(const filename of ['Помощник варки.html','Пульт мастера.html','Для игрока — логи, записки и предыстория.html']){
- const html=fs.readFileSync(path.join(root,filename),'utf8');
- if(/__RULE_[A-Z0-9_]+__/.test(html))throw Error(filename+': остались маркеры правил');
- let index=0;for(const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)){
-  if(/\bsrc\s*=/.test(match[1])||/type\s*=\s*["']application\//i.test(match[1]))continue;
-  parse(match[2],filename+':script-'+(++index));
- }
+const args=process.argv.slice(2),lint=args.includes('--lint');
+if(args.some(arg=>arg.startsWith('--')&&arg!=='--lint'))throw Error('Неизвестный параметр');
+const root=path.resolve(args.find(arg=>arg!=='--lint')||path.join(__dirname,'..'));
+
+function* sources(directory){
+  for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
+    const file=path.join(directory,entry.name);
+    if(entry.isDirectory()){
+      if(!['.git','node_modules','__pycache__','.ruff_cache'].includes(entry.name))yield* sources(file);
+    }else if(entry.isFile()){
+      if(/\.(cjs|js)$/.test(file)&&path.relative(root,file).split(path.sep)[0]==='scripts'){
+        yield {name:file,text:fs.readFileSync(file,'utf8'),page:false};
+      }else if(entry.name.endsWith('.html')&&!entry.name.endsWith('_tpl.html')){
+        const html=fs.readFileSync(file,'utf8');
+        if(/__RULE_[A-Z0-9_]+__/.test(html))throw Error(file+': остались маркеры правил');
+        const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)]
+          .filter(match=>!/\bsrc\s*=|type\s*=\s*["']application\//i.test(match[1])).map(match=>match[2]);
+        if(scripts.length)yield {name:file,text:scripts.join('\n'),page:true};
+      }
+    }
+  }
 }
-console.log(`PASS: syntax compiled for ${checked} JavaScript sources; no template markers`);
+
+async function main(){
+  let engines;
+  if(lint){
+    const {ESLint}=require('eslint'),globals=require('globals');
+    const structural={'no-unreachable':'error','no-dupe-args':'error','no-dupe-keys':'error',
+      'no-func-assign':'error','no-const-assign':'error'};
+    const engine=page=>new ESLint({overrideConfigFile:true,overrideConfig:[{files:['**/*.js'],
+      languageOptions:{ecmaVersion:2022,sourceType:'script',globals:page?globals.browser:{...globals.node,...globals.browser}},
+      rules:{...structural,'no-undef':page?'error':'off'}}]});
+    engines={source:engine(false),page:engine(true)};
+  }
+  let checked=0,failures=0;
+  for(const source of sources(root)){
+    new vm.Script(source.text,{filename:source.name});
+    checked++;
+    if(engines){
+      const [result]=await engines[source.page?'page':'source'].lintText(source.text,{filePath:'audit.js'});
+      for(const message of result.messages){
+        failures++;
+        console.error(`${source.name}:${message.line}:${message.column}: ${message.ruleId}: ${message.message}`);
+      }
+    }
+  }
+  if(failures)process.exitCode=1;
+  else console.log(`PASS: compiled ${checked} JavaScript sources/pages; no template markers${lint?'; ESLint passed':''}`);
+}
+main().catch(error=>{console.error(error);process.exitCode=1});

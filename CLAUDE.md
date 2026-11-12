@@ -86,7 +86,7 @@
 
 - Правила (полные + за столом): `python3 scripts/rules_html.py`
 - Любой md → html (для мастера, экономика, ядро и т. п.): `python3 scripts/master_html.py "Имя файла без .md"`
-- Карточки: `python3 scripts/cards/gen.py && python3 scripts/cards/gen_html.py && python3 scripts/cards/check.py` (должно быть 0 ошибок); бонусы: `python3 scripts/cards/quality.py`
+- Карточки: `python3 scripts/cards/gen.py && python3 scripts/cards/check.py` (должно быть 0 ошибок); бонусы: `python3 scripts/cards/quality.py`
 - Экономика: `python3 scripts/report.py` (долго, Монте-Карло), затем html через master_html.py
 - Помощник: `python3 -B scripts/cards/helper.py`. Выдать игроку готовый HTML; перенос состояния — отдельным JSON. Прежняя публикация: https://claude.ai/artifact/9ahrBRLCbGqR7y5myPKor2 (общая база: `tracks` и `belt/state`). Её обновление требует доступного инструмента; локальная сборка публикацию не меняет.
 - Пульт мастера: `python3 -B scripts/cards/master_panel.py` (берёт «коротко на утверждение», ядро, карточки, лист, образец). Прежняя публикация: https://claude.ai/artifact/F5chdTVmCghTWf2wuYSzu4, старые ответы — коллекция `answers`; уточнения 12.11 — отдельная коллекция `answers_followup_20261112`. Читать ответы и обновлять публикацию только через доступный инструмент; при отсутствии доступа запрашивать выгрузку.
