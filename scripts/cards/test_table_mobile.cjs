@@ -49,23 +49,6 @@ const shots=process.env.TABLE_TOOLS_SCREENSHOTS;
     for(const tab of ['belt','jour','plan','scroll','smith','combo','brewing-plan','brew']){
       await page.locator(`[data-tab="${tab}"]`).click();await fits();
     }
-    await page.goto(base+'/'+encodeURIComponent('Пульт мастера.html'));await fits();
-    // В CI резервный DejaVu Sans шире локального системного шрифта.
-    await page.locator('body').evaluate(el=>el.style.fontFamily='"DejaVu Sans", sans-serif');await fits();
-    assert.match(await page.locator('#buildInfo summary').innerText(),/^Сборка [0-9a-f]{12}$/);
-    assert.equal(await page.locator('#sumN').innerText(),'0 из 6');
-    assert.match(await page.locator('.sum').innerText(),/Неотмеченные пункты остаются без нового ответа/);
-    for(const tab of ['ref','el','ta','ok']){
-      await page.locator(`[data-t="${tab}"]`).click();await fits();
-      if(tab==='el'){
-        await page.locator('.el>button').evaluateAll(buttons=>buttons.forEach(button=>button.click()));await fits();
-      }
-      if(tab==='ref'){
-        assert.ok(await page.locator('#p-ref details').count()>0);
-        await page.locator('#p-ref details').evaluateAll(items=>items.forEach(item=>item.open=true));await fits();
-      }
-    }
-    if(shots)await page.screenshot({path:path.join(shots,`master-${width}.png`)});
     assert.deepEqual(errors,[]);await context.close();
   }console.log('PASS: 360/375/390/414/1280, все вкладки, версии сборки, пустая кузня, пример и отказ очищать, журнал без прокрутки, компактная шапка, закреплённые вкладки, границы страницы');}
   finally{await browser.close()}

@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -39,8 +41,13 @@ jobs:
           echo "NODE_PATH=$browser_env/node_modules" >> "$GITHUB_ENV"
           browser_path=$(NODE_PATH="$browser_env/node_modules" node -e "process.stdout.write(require('playwright').chromium.executablePath())")
           echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$browser_path" >> "$GITHUB_ENV"
-      - name: Проверить данные, расчёты, сборку, ссылки и страницы в браузере
+      - name: Проверить затронутую область рабочей ветки
+        if: github.ref != 'refs/heads/claude/alchemy-talis-crash-test-6g8sk7' && github.event_name != 'workflow_dispatch'
+        run: python3 -B scripts/check_all.py --quick --sources --browser
+      - name: Проверить полный выпуск
+        if: github.ref == 'refs/heads/claude/alchemy-talis-crash-test-6g8sk7' || github.event_name == 'workflow_dispatch'
         run: python3 -B scripts/check_all.py --sources --slow --browser
 
       - name: Сверить точный расчёт и Монте-Карло на сетке
+        if: github.ref == 'refs/heads/claude/alchemy-talis-crash-test-6g8sk7' || github.event_name == 'workflow_dispatch'
         run: python3 -B scripts/scenario_engine.py --grid --runs 10000

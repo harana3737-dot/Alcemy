@@ -1,7 +1,7 @@
 """Регрессии ценового потолка и независимый перебор всех пар кубиков."""
 import unittest
 from elixir_price_audit import (C, Case, COMPONENTS, ceiling, profit, price,
-                                 reference, final_probabilities, BATCHED)
+                                 reference, BATCHED)
 from rules_data import HERB, ELIXIR_DC, CAT_PRICE, CAT_STABLE, elixir_batch
 from sim import potion_bonus
 

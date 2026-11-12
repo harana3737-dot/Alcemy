@@ -42,7 +42,7 @@
     {
       "model": "Длинная варка",
       "source": "scripts/sim_volume.py",
-      "sha256": "0c4b267d22e6daa448f648bd8e62320079e22f88eeda35793fce6f0267dc04a8",
+      "sha256": "9d0d1c25a49ec53ce2186b2c4cf5ec1545f4649e3338eba63ce6b41a587cdbff",
       "conditions": "VI–VII: объём 90, VIII: 240; лаборатория как условие будущего сценария; цена и уровень названных эффектов сверены с каталогом."
     },
     {

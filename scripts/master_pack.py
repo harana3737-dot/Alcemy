@@ -7,7 +7,6 @@ from pathlib import Path, PurePosixPath
 from io import BytesIO
 from urllib.parse import unquote, urlsplit
 import argparse
-import json
 import posixpath
 import re
 import zipfile

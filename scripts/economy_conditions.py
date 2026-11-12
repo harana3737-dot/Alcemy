@@ -4,8 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 from alchemy_guidance import budget, sales
-from rules_data import (HERB, MB, P_SL, CAT_PRICE, CAT_STABLE, ELIXIR_DC,
-                        proficiency, unstable_fraction, elixir_batch, PLACE_LIMIT)
+from rules_data import (HERB, MB, P_SL, CAT_PRICE, CAT_STABLE,
+                        proficiency, unstable_fraction, elixir_batch)
 from sim_plan import batch_p
 from party_kit_report import CARDS, price, materials
 from sim_volume import EFF
