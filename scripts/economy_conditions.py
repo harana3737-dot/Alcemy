@@ -11,9 +11,9 @@ from party_kit_report import CARDS, price, materials
 from sim_volume import EFF
 
 ROOT=Path(__file__).resolve().parent.parent
-DATE='09.11.2026'
+DATE='12.11.2026'
 SAVE='Источники/Сохранения/alcemy-save-2026-11-09-session17-essences.json'
-OUT='Архив/Проверки/Сверка моделей экономики — 2026-11-09.md'
+OUT='Архив/Проверки/Сверка моделей экономики — 2026-11-12.md'
 DATA='scripts/economy_audit/current_conditions.json'
 MODELS=[
  ('Рынок без указания','sim.py','Уровни I–X; минимальные мастерство и место; бонус — отдельная ось; без классовых ресурсов. Контрольная модель, не текущий Талис.'),
@@ -34,7 +34,7 @@ def build():
     t=state['talis'];total=t['sp']+t['meta'];slots=sum(int(k)*v for k,v in t['slots'].items())
     b=proficiency(5)+MB[2]+1
     assert b==5 and total==3 and slots==3
-    assert CARDS['Щит веры']['lvl']==1 and price(CARDS['Щит веры'])==25
+    assert CARDS['Щит веры']['lvl']==1 and price(CARDS['Щит веры'])==20
     assert CARDS['Каменная кожа']['lvl']==4
     assert elixir_batch(2,1)==3 and elixir_batch(2,2)==2
     assert elixir_batch(9,1,True)==4 and batch_p(2,2)==2
@@ -46,7 +46,7 @@ def build():
     for title,module,conditions in MODELS:
         path='scripts/'+module
         models.append(dict(model=title,source=path,sha256=hashlib.sha256((ROOT/path).read_bytes()).hexdigest(),conditions=conditions))
-    sources=['scripts/rules.json','scripts/alchemy_guidance.py','scripts/cards/cards_data.py',
+    sources=['scripts/elixir_price_audit.py','scripts/cards/price_adjustments.json','scripts/rules.json','scripts/alchemy_guidance.py','scripts/cards/cards_data.py',
              'scripts/report.py','scripts/weekly_economy_report.py','Алхимия Талиса — правила за столом.md',SAVE]
     ink=sales(5,12,40.5,120*.85,0,unstable_fraction(.85),2,item_kind='ink',level=2)
     x=sales(16,P_SL[10],10*HERB[10],3435*.85,CAT_PRICE[10],unstable_fraction(.85),2,item_kind='potion',level=10,class_level=20)

@@ -37,6 +37,11 @@ def potion_bonus(mat, price, *, item_kind, level, allow_up_to_10=True):
         raise ValueError('Неизвестный вид предмета')
     if type(level) is not int or not 1 <= level <= 10:
         raise ValueError('Уровень предмета должен быть от 1 до 10')
+    if item_kind == 'elixir':
+        # 8.12: экономится только счётная травяная основа; на 20 выгоднее
+        # дополнительная доза. Эссенция/катализатор в экономию не входят.
+        herbs = level * HERB[level]
+        return herbs, max(price, herbs)
     if item_kind != 'potion':
         return 0.0, 0.0
     ceiling = 10 if allow_up_to_10 else 9

@@ -1,5 +1,5 @@
 {
-  "verified": "09.11.2026",
+  "verified": "12.11.2026",
   "snapshot": "Источники/Сохранения/alcemy-save-2026-11-09-session17-essences.json",
   "current": {
     "level": 5,
@@ -24,7 +24,7 @@
     {
       "model": "Рынок без указания",
       "source": "scripts/sim.py",
-      "sha256": "1b65310ab8d48dee4d5dcd49556ae2bacde8e0560f06d3e793cfc77d097ac59a",
+      "sha256": "3485f5cffbaef1988637eb4a493671bdb1703c026db0b61fb6e88744df5ff1de",
       "conditions": "Уровни I–X; минимальные мастерство и место; бонус — отдельная ось; без классовых ресурсов. Контрольная модель, не текущий Талис."
     },
     {
@@ -83,12 +83,14 @@
     }
   ],
   "source_hashes": {
+    "scripts/elixir_price_audit.py": "65cf95956112253e4f17646971ee87de5dcdc6995d22f954bbfdec4ee04fbb8a",
+    "scripts/cards/price_adjustments.json": "5549ef7e42c29d99193ceda6cb94c3604e8158868943b15761b2a54921ee478d",
     "scripts/rules.json": "3fc008d193c1c5e2d9c17f5c960b3f51a5123610503ec32587dd36ec04ebce9a",
     "scripts/alchemy_guidance.py": "085cba4d81e286de8fe8ee0b8c08593e8650f80c982dc928262a8413703520e3",
-    "scripts/cards/cards_data.py": "2f758e53150c0ada0fe71f6d5a2687bcf7e031a10199fff5fa1a5b9699f992fb",
+    "scripts/cards/cards_data.py": "d95f47bd9f760ecfdac4f65e07f7fee075eebdf373da5018d3fb8ceeef74b102",
     "scripts/report.py": "656c7c678eda16e974cab6c37e74b423a872e42717b4258ed955345d77576c02",
     "scripts/weekly_economy_report.py": "650b1f4cb2b4b45e9b4c2819d963e4916b67cb8f6694012580f7a14c52b7d0e4",
-    "Алхимия Талиса — правила за столом.md": "8805c90ea96c6c54b024b3f6f7f96a4f7d1540e7a17206c4796aa53cb3912ccb",
+    "Алхимия Талиса — правила за столом.md": "f03a0ce680fc42eaf3f9d3702972d101ec82411f5dfcfaf4b1a6d8846ed97a07",
     "Источники/Сохранения/alcemy-save-2026-11-09-session17-essences.json": "70acd65d4ace87b5acc9a8fa8ecd1cb56b937623245cae910d8fccc9df2ce873"
   }
 }
