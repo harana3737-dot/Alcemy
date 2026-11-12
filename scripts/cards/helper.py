@@ -80,7 +80,7 @@ def validate_seed(sheet, seed):
 
 
 def build():
-    import hashlib, json, pathlib, re
+    import hashlib, json, pathlib
     HERE = pathlib.Path(__file__).resolve().parent
     import quality
     _g = vars(quality)
@@ -93,78 +93,13 @@ def build():
                          p=c["price"], b=c["base"], a=c["stacks_8_9"], s=_g["saves"](c), ar=_g["area"](c) or "", tk=c["tasks"],
                          cc=c["concentration"], up=_g["UPCAST"].get(c["name"], "none"), b5=b5, b20=b20, eff=c["eff"]))
 
-    # Сумка из листа персонажа: блоки «Зелья и расходники» и «На разборку»
-    CARD_OF = {"Зелье сопротивления (некротика)": "Сопротивление", "Зелье подводного дыхания": "Водное дыхание"}
-    sheet = (pathlib.Path(ROOT) / "Талис — лист персонажа.md").read_text(encoding="utf-8")
+    # Начальные сумки и материалы — из одного подтверждённого снимка.
+    # Работающая сумка браузера по нему автоматически не сбрасывается.
+    from current_inventory import seed as inventory_seed
+    sheet = (pathlib.Path(ROOT) / 'Талис — лист персонажа.md').read_text(encoding='utf-8')
     limits = combat_limits(sheet, json.loads((HERE / 'talis_resources.json').read_text(encoding='utf-8')))
-    seed, block = [], None
-    assert "## Снаряжение" in sheet, "Талис — лист персонажа.md: нет раздела «## Снаряжение»"
-    for line in sheet.split("## Снаряжение", 1)[1].split("\n"):
-        t = line.strip()
-        if t in ("Зелья и расходники", "На разборку"):
-            block = t
-        elif t and not t.startswith("•"):
-            block = None
-        elif t and block:
-            n = t.lstrip("• ").strip()
-            m = re.search(r"\s*(?:×(\d+)|\((\d+) исп\.\))$", n)
-            q = int(m.group(1) or m.group(2)) if m else 1
-            n = n[:m.start()] if m else n
-            it = dict(n=n, q=q, note="на разборку" if block == "На разборку" else "")
-            if m and m.group(2):
-                it["u"] = "исп."  # «Аптечка (10 исп.)» — для блоков LSS
-            if n in CARD_OF:
-                it["card"] = CARD_OF[n]
-            seed.append(it)
-    for it in seed:
-        it["who"] = "p1"
-    # Союзники — по строке «Зелья союзников» в листе
-    ALLY = [dict(n="Зелье подводного дыхания", q=1, note="", card="Водное дыхание", who=w) for w in ("pF", "pL")]
-    given = re.search(r'Зелье лечения 1\.1 ×(\d+) у Фаэнона', sheet)
-    if given and int(given[1]) > 0:
-        ALLY.append(dict(n="Зелье лечения 1.1", q=int(given[1]), note="от Талиса", who="pF"))
-    restored = re.search(r'Зелье лечения 6\.6 ×(\d+) у Лаэля', sheet)
-    if restored and int(restored[1]) > 0:
-        ALLY.append(dict(n="Зелье лечения 6.6", q=int(restored[1]),
-                         note="восстановились после Вордта", who="pL"))
-    seed += ALLY
+    seed, MAT = inventory_seed(pathlib.Path(ROOT))
     validate_seed(sheet, seed)
-    # Материалы Талиса — по блоку «Ингредиенты» листа (сверено 05.10.2026)
-    MAT = dict(
-        sparkConfirmed20261112=True,  # текущая Искра уже включена ниже; после расхода не восстанавливать
-        gold=108.18,  # «Монеты» в листе
-        herbs=[dict(k="heal", l=1, q=5), dict(k="poison", l=1, q=4)],  # лечебные 1 ур. ×4 + «трава 1.1» ×1; ядовитые 1 ур. ×4 (5 собрано в пещере куа-тоа − 1 на опыт с водорослями; сверено 06.10)
-        ess=[dict(id="held-shadow-20261112", n="Сгусток удержанной тени", types=["Покров", "Смерть/душа"], l=2, q=1, st="fresh", note="эссенция полтергейста; одна порция; не переработан; без консервации; в закрытой колбе не развеивается; переработка 1 час, СЛ 12"),
-             dict(id="e2", n="Хитин", types=["Чувства", "Тело"], l=1, q=1, note="одна эссенция: Чувства или Тело"),
-             dict(id="e3", n="Соль алхимическая", types=["Вода/дыхание"], l=1, q=1, note="годится и как консервант"),
-             dict(id="e4", n="Фрагмент аномальной рубцовой ткани", types=["Тело"], l=2, q=2, st="fresh", note="у Анариэль, Талису не возвращены; условия хранения уточняются")],
-        pools=[dict(k="heal", min=1, v=15), dict(k="poison", min=1, v=15)],  # гарантированный минимум I; точный уровень не подтверждён
-        cat=[],
-        other=[dict(n="Моток серебряных ниток", q=1, note="трофей; свойства и применение не уточнены"),
-               dict(n="Искра заблудшей души", q=1, note="эссенция блуждающего огонька; для определения нужна проверка; тип, ранг и СЛ неизвестны; количество порций не указано"),
-               dict(n="Сырой катализатор I порядка", q=1, note="не серебрянка; сначала изготовить (5.3, СЛ 11)"),
-               dict(n="Кусок руды из аномалии", q=1, note="у Анариэль, Талису не возвращён; мимикрирует под магию")])
-
-    # Материалы переписаны из листа вручную (там свободный текст) — сверка, чтобы лист и помощник не разошлись
-    def sheet_check():
-        eq = sheet.split("## Снаряжение", 1)[1]
-        ing = eq.split("Ингредиенты", 1)[1].split("\n\n", 1)[0] if "Ингредиенты" in eq else ""
-        errs = []
-        gm = re.search(r"Монеты:\s*([\d\s]+(?:,\d+)?)\s*зм", eq)
-        if not gm or float(gm.group(1).replace(" ", "").replace(",", ".")) != MAT["gold"]:
-            errs.append(f"монеты: в листе {gm.group(1) if gm else 'не найдены'}, в MAT {MAT['gold']}")
-        num = lambda pat: sum(int(x) for x in re.findall(pat, ing))
-        herbs = {(h["k"], h["l"]): h["q"] for h in MAT["herbs"]}
-        if num(r"Лечебные травы 1 ур\. ×(\d+)") + num(r"Трава 1\.1 ×(\d+)") != herbs.get(("heal", 1), 0):
-            errs.append("лечебные травы 1 ур.")
-        if num(r"Ядовитые травы 1 ур\. ×(\d+)") != herbs.get(("poison", 1), 0):
-            errs.append("ядовитые травы 1 ур.")
-        for x in MAT["ess"] + MAT["other"]:
-            if x["n"].split()[0].lower() not in ing.lower():
-                errs.append(f"«{x['n']}» нет в блоке «Ингредиенты»")
-        if errs:
-            raise SystemExit("helper.py: MAT не совпадает с листом персонажа — " + "; ".join(errs) + ". Поправь MAT или лист.")
-    sheet_check()
     seed_id = hashlib.sha1(json.dumps([{k: v for k, v in it.items() if k != "u"} for it in seed], ensure_ascii=False).encode()).hexdigest()[:10]
 
     # Дорогие компоненты исходных заклинаний (8.10; по текстам 5etools): use — расходуемый (тратится при каждой варке), иначе инструмент рецепта
@@ -209,7 +144,7 @@ def build():
     from generated_files import generated_html
     html = generated_html(html, "scripts/cards/helper.py", "scripts/cards/helper_tpl.html; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js", version=True)
     out.write_text(html, encoding="utf-8")
-    print(out, len(data), len(html), seed_id, seed)
+    print(out, len(data), len(html), seed_id)
 
 
 if __name__ == '__main__':

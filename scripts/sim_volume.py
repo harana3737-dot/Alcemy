@@ -102,7 +102,7 @@ def build_tables(*, seed=90, runs=20000, guidance=False):
             d0=scenario(b,*args,item_kind=item_kind,level=item_level)["per_day"];d1=scenario(b+2,*args,item_kind=item_kind,level=item_level)["per_day"]
         help_rows.append((name, b, cost, d0, d1, d1 - d0))
     for name, l, b, price, mat, s0, s1 in vol_rows:
-        m = l; cost = None
+        cost = None
         help_rows.append((f"{name}, объём работы", b, cost, s0["per_day"], s1["per_day"], s1["per_day"] - s0["per_day"]))
 
     return dict(vol_rows=vol_rows, help_rows=help_rows, rng_state=rng.getstate())

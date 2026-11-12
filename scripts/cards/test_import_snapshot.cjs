@@ -25,4 +25,12 @@ for(const key of ['__proto__','constructor','prototype']){
  assert.throws(()=>validate(bad),/Неверный/);
 }
 assert.equal(validate(valid),valid);
+// Подтверждённый источник для новой сумки проходит тот же штатный валидатор.
+const folder=require('node:path').resolve(__dirname,'../../Источники/Сохранения');
+const helper=fs.readFileSync(require('node:path').resolve(__dirname,'../../Помощник варки.html'),'utf8');
+context.TALIS_LIMITS=JSON.parse(helper.match(/const TALIS_LIMITS=(.*);/)[1]);
+vm.runInContext(helper.match(/^const PLAN_NEEDS=.*;$/m)[0],context);
+const current=JSON.parse(fs.readFileSync(require('node:path').join(folder,'current.json'),'utf8'));
+assert.equal(require('node:path').basename(current.snapshot),current.snapshot);
+assert.doesNotThrow(()=>validate(JSON.parse(fs.readFileSync(require('node:path').join(folder,current.snapshot),'utf8'))));
 console.log('PASS: valid snapshot, legacy and craft data, invalid crafts, depth boundary, deep input, unsafe keys');

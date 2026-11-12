@@ -48,7 +48,7 @@ class SeedInventoryTests(unittest.TestCase):
             copy = Path(tmp)/'repo'
             shutil.copytree(ROOT, copy, ignore=shutil.ignore_patterns('.git','__pycache__','*.zip'))
             script = copy/'scripts/cards/helper.py'
-            script.write_text(script.read_text().replace('    seed += ALLY', '    seed += ALLY\n    seed[0]["q"] += 1', 1))
+            script.write_text(script.read_text().replace('    validate_seed(sheet, seed)', '    seed[0]["q"] += 1\n    validate_seed(sheet, seed)', 1))
             html = copy/'Помощник варки.html'
             before = html.read_bytes()
             from check_all import run
