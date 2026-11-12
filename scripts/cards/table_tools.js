@@ -222,6 +222,7 @@ $('restoreApply').onclick=async()=>{
     for(const t of old.tracks)if(!next.tracks.some(n=>n.id===t.id))await col.doc(t.id).delete();
     const restored=JSON.parse(JSON.stringify(next.state));restored.u=Date.now();
     if(migrateHeldShadow(restored.mat))restored.log.unshift({T:restored.T,t:'Уточнение учёта: Эктоплазма полтергейста / Сгусток удержанной тени — одна непереработанная эссенция II'});
+    if(restoreConfirmedSpark(restored.mat)===2)restored.log.unshift({T:restored.T,t:'Исправлен неполный старый снимок: восстановлена запись Искры заблудшей души; тип и число порций не назначены'});
     // Сначала проверить запись браузера; только затем заменять общее состояние.
     localStorage.setItem('belt',JSON.stringify(restored));
     writeCrafts(next.crafts);
