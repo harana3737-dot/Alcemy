@@ -1,5 +1,6 @@
 """Проверить комплект в свежей копии без записи в checkout."""
 import argparse
+import json
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -165,12 +166,16 @@ def select_scope(files):
     """Небольшая явная карта областей; неизвестный общий код проверяется полностью."""
     if files is None:
         return 'full'
+    from campaign_library import records, LOGS, STORY, HANDOUTS, NOTES, PAGE
+    library_inputs = {LOGS, STORY, HANDOUTS, NOTES} | {item['source'] for item in records()}
     areas = set()
     for name in files:
         if name.startswith('Шаэрра/') or name == 'scripts/test_shaerra.cjs':
             areas.add('shaerra')
-        elif name in {'scripts/check_all.py', 'scripts/test_check_all.py'}:
-            return 'full'
+        elif name in {'scripts/check_all.py', 'scripts/test_check_all.py', 'scripts/test_campaign_library.py', '.github/workflows/check.yml'}:
+            areas.add('checks')
+        elif name in library_inputs or name == PAGE:
+            areas.add('library')
         elif name in {'scripts/current_inventory.py', 'scripts/test_current_inventory.py', 'Талис — лист персонажа.md', 'Талис — лист персонажа.html'} or name.startswith('Источники/Сохранения/'):
             areas.add('inventory')
         elif name in {'scripts/cards/helper.py', 'Помощник варки.html', 'scripts/cards/helper_tpl.html', 'scripts/cards/table_tools.js'}:
@@ -221,6 +226,13 @@ def scoped_plan(scope, root, files=()):
                    ('scripts/test_alchemy_guidance.py',), ('scripts/elixir_price_audit.py','--check'), ('scripts/economy_book.py','--check')]
     elif scope == 'shaerra':
         browsers = ['scripts/test_shaerra.cjs']
+    elif scope == 'library':
+        from campaign_library import PAGE
+        builders = [('scripts/campaign_library.py',)]
+        checks = [('scripts/campaign_library.py', '--check')]
+        outputs.add(PAGE)
+    elif scope == 'checks':
+        checks = [('scripts/test_check_all.py',), ('scripts/test_campaign_library.py',)]
     elif scope == 'text':
         from document_paths import paired_html_sources
         for source in paired_html_sources(root, SPECIAL_HTML):
@@ -250,12 +262,15 @@ def check(root=ROOT, *, slow=False, browser=False, sources=False, quick=False,
     files = set(files if files is not None else changed_files(root) or ())
     if any(Path(p).is_absolute() or '..' in Path(p).parts for p in files):
         raise ValueError('--files принимает только пути внутри проекта')
+    builders, checks, browsers, outputs = scoped_plan(scope, root, files)
+    print(f'Область: {scope}; сборщиков {len(builders)}, проверок {len(checks)}, браузерных сценариев {len(browsers)}', flush=True)
+    if not (builders or checks or browsers):
+        print('ПРОПУЩЕНО: автоматические проверки не выбраны. Нужна ручная сверка текста; это не успешный прогон.')
+        return 2
     before, failures = snapshot(root), []
     with tempfile.TemporaryDirectory(prefix='alcemy-scope-') as directory:
         copy = Path(directory)/'repo'
         shutil.copytree(root, copy, ignore=shutil.ignore_patterns('.git','__pycache__','*.zip'))
-        builders, checks, browsers, outputs = scoped_plan(scope, copy, files)
-        print(f'Область: {scope}; сборщиков {len(builders)}, проверок {len(checks)}, браузерных сценариев {len(browsers)}', flush=True)
         env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1', PYTHONPATH=os.pathsep.join((str(copy/'scripts'),str(copy/'scripts/cards'))))
         py = [sys.executable, '-B']
         for args in builders + checks:
@@ -294,12 +309,24 @@ def main():
     parser.add_argument('--sources', action='store_true', help='Проверить исходники и свежую сборку; устаревшие готовые документы сообщить без ошибки')
     parser.add_argument('--quick', action='store_true',
                         help='Выбрать область по изменённым файлам; неизвестные общие изменения требуют полного прогона')
-    parser.add_argument('--scope', choices=('text','inventory','helper','master','economy','shaerra','full'), help='Явно выбрать затронутую часть проекта')
-    parser.add_argument('--files', nargs='+', help='Файлы для точечной проверки текста')
+    parser.add_argument('--scope', choices=('text','library','checks','inventory','helper','master','economy','shaerra','full'), help='Явно выбрать затронутую часть проекта')
+    parser.add_argument('--files', nargs='*', help='Изменённые файлы; пустой список означает отсутствие изменений')
+    parser.add_argument('--plan', action='store_true', help='Вывести JSON плана без запуска проверок и сборки')
     parser.add_argument('--build', action='store_true', help='После успешных точечных проверок перенести только объявленные результаты сборки')
     parser.add_argument('--jobs', type=int, default=min(4, os.cpu_count() or 1),
                         help='Сколько браузерных тестов запускать одновременно')
     args = parser.parse_args()
+    if args.plan:
+        files = set(args.files) if args.files is not None else changed_files(ROOT)
+        scope = args.scope or (select_scope(files) if args.quick else 'full')
+        builders, checks, browsers, _ = scoped_plan(scope, ROOT, files or ())
+        print(json.dumps(dict(scope=scope,
+                              automatic=scope == 'full' or bool(builders or checks or browsers),
+                              browser=args.browser if scope == 'full' else bool(browsers),
+                              python=scope == 'full' or any(p.endswith('.py') for p in files or ()),
+                              files=sorted(files) if files is not None else None),
+                         ensure_ascii=False))
+        return 0
     return check(slow=args.slow, browser=args.browser, sources=args.sources, quick=args.quick, jobs=args.jobs, scope=args.scope, files=args.files, build=args.build)
 
 

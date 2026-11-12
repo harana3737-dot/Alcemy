@@ -1,13 +1,21 @@
 """Проверка новых, удалённых и изменённых артефактов без побочных записей."""
 from pathlib import Path
+import contextlib
+import io
+import json
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
-from check_all import check, select_scope, scoped_plan, outdated, snapshot
+from check_all import check, main, select_scope, scoped_plan, outdated, snapshot
 
 
 class CheckAllTests(unittest.TestCase):
+    def setUp(self):
+        # Ожидаемые ошибки искусственных сборщиков не засоряют итог прогона.
+        self.enterContext(contextlib.redirect_stdout(io.StringIO()))
+
     def test_compare_detects_added_removed_and_changed(self):
         self.assertEqual(outdated({'same': b'x', 'old': b'a', 'gone': b'z'},
                                   {'same': b'x', 'old': b'b', 'new': b'z'}), ['gone', 'new', 'old'])
@@ -31,7 +39,8 @@ class CheckAllTests(unittest.TestCase):
                 self.assertNotEqual(copy, root)
                 self.assertFalse((copy/'.git').exists())
                 (copy/'x.md').write_bytes(b'new')
-            with patch('check_all.run', side_effect=build):
+            with patch('check_all.run', side_effect=build), \
+                    patch('check_all.subprocess.run', return_value=SimpleNamespace(returncode=1)):
                 self.assertEqual(check(root), 1)
                 self.assertEqual(check(root, sources=True), 0)
             self.assertEqual(snapshot(root), before)
@@ -43,7 +52,8 @@ class CheckAllTests(unittest.TestCase):
             def fail(command, copy, env, failures):
                 failures.append(command)
                 return False
-            with patch('check_all.run',side_effect=fail):
+            with patch('check_all.run',side_effect=fail), \
+                    patch('check_all.subprocess.run', return_value=SimpleNamespace(returncode=1)):
                 self.assertEqual(check(root,sources=True),1)
 
     def test_scope_selects_related_checks_and_falls_back_for_shared_code(self):
@@ -54,10 +64,54 @@ class CheckAllTests(unittest.TestCase):
                                 ({'Шаэрра/README.md'}, 'shaerra'),
                                 (None, 'full'), ({'x.json'}, 'full'),
                                 ({'scripts/report.py'}, 'full'),
-                                ({'scripts/check_all.py'}, 'full'),
+                                ({'scripts/check_all.py'}, 'checks'),
+                                ({'.github/workflows/check.yml'}, 'checks'),
+                                ({'scripts/campaign_library.py'}, 'full'),
+                                ({'scripts/campaign_library_tpl.html'}, 'full'),
                                 ({'Шаэрра/README.md', 'Талис — лист персонажа.md'}, 'full')):
             with self.subTest(files=files):
                 self.assertEqual(select_scope(files), expected)
+
+    def test_library_inputs_select_only_build_and_freshness_check(self):
+        from campaign_library import records, NOTES, PAGE
+        inputs = {item['source'] for item in records()} | {NOTES}
+        for name in inputs | {PAGE}:
+            with self.subTest(name=name):
+                self.assertEqual(select_scope({name}), 'library')
+        builders, checks, browsers, outputs = scoped_plan('library', Path('.'))
+        self.assertEqual(builders, [('scripts/campaign_library.py',)])
+        self.assertEqual(checks, [('scripts/campaign_library.py', '--check')])
+        self.assertEqual(browsers, [])
+        self.assertEqual(outputs, {PAGE})
+        self.assertEqual(select_scope({next(iter(inputs)), 'Талис — лист персонажа.md'}), 'full')
+
+    def test_empty_plan_is_a_skip_even_with_build_or_sources(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root/'scripts').mkdir()
+            (root/'README.md').write_text('Текст')
+            before = snapshot(root)
+            for options in ({}, {'build': True}, {'sources': True}):
+                output = io.StringIO()
+                with patch('check_all.run') as run, contextlib.redirect_stdout(output):
+                    self.assertEqual(check(root, scope='text', files=['README.md'], **options), 2)
+                    run.assert_not_called()
+                self.assertIn('ПРОПУЩЕНО', output.getvalue())
+                self.assertEqual(snapshot(root), before)
+
+    def test_plan_cli_does_not_run_checks_or_request_browser_for_log(self):
+        from campaign_library import LOGS
+        for files, scope, automatic, browser, python in (([LOGS], 'library', True, False, False),
+                                                        ([], 'text', False, False, False),
+                                                        (['scripts/check_all.py'], 'checks', True, False, True),
+                                                        (['scripts/report.py'], 'full', True, True, True)):
+            output = io.StringIO()
+            with patch('sys.argv', ['check_all', '--quick', '--browser', '--plan', '--files', *files]), \
+                    patch('check_all.check') as run, contextlib.redirect_stdout(output):
+                self.assertEqual(main(), 0)
+                run.assert_not_called()
+            self.assertEqual(json.loads(output.getvalue()), dict(scope=scope, automatic=automatic,
+                                                               browser=browser, python=python, files=files))
 
     def test_inventory_plan_excludes_unrelated_campaign_and_master(self):
         builders, checks, browsers, outputs = scoped_plan('inventory', Path('.'))
