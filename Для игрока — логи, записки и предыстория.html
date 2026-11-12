@@ -5,7 +5,7 @@
 <style>
 :root{color-scheme:light dark;--bg:#f5f1e8;--ink:#272d29;--panel:#fffdf7;--line:#cbcfc4;--muted:#5c6860;--accent:#315d49}
 @media(prefers-color-scheme:dark){:root{--bg:#171c19;--ink:#eceee7;--panel:#222a24;--line:#485348;--muted:#bdc6ba;--accent:#a9d1b2}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:24px 16px 60px}h1{font:600 clamp(26px,5vw,38px)/1.2 Georgia,serif}h2{font-size:19px;line-height:1.3;margin:0}.lead{color:var(--muted)}.warning{border-left:3px solid var(--accent);padding:8px 14px}.filters{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 10px}input,select,button{font:inherit;border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--panel);color:var(--ink)}input{flex:1;min-width:160px}select{max-width:100%}button{cursor:pointer}.copy{white-space:nowrap;color:var(--accent)}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.material{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}.material header{display:flex;gap:16px;justify-content:space-between;align-items:flex-start}.material header>div{min-width:0}.meta{font-size:13px;color:var(--muted);overflow-wrap:anywhere;margin:6px 0 12px}summary{cursor:pointer;color:var(--accent)}.text{overflow-wrap:anywhere}.text h2,.text h3{margin:24px 0 12px}.text p{margin:12px 0}.text blockquote{border-left:2px solid var(--line);padding-left:14px;margin-left:0}.text table{border-collapse:collapse}.text td,.text th{border-bottom:1px solid var(--line);padding:6px}.text .table-wrap,.text .tw,.text .wrap{overflow-x:auto}.text pre{white-space:pre-wrap}.muted{color:var(--muted)}[hidden]{display:none!important}#status{min-height:1.6em;color:var(--accent)}.fallback textarea{width:100%;height:240px;font:14px/1.5 monospace;margin:12px 0}.label{display:inline-block;font:600 13px/1.5 ui-monospace,monospace;padding:0 6px;border:1px solid var(--line);border-radius:6px;color:var(--accent);margin-right:6px;vertical-align:2px}.actions{display:flex;gap:8px}.summary{margin:0 0 10px}.note{margin:0 0 10px;font-size:15px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}.hits{font-size:15px;margin:0 0 10px;color:var(--muted)}.hits .snip{display:block;color:var(--ink);margin-top:4px}mark{background:#f2d36b;color:#1d1d1d;border-radius:2px}.material.target{outline:3px solid var(--accent);outline-offset:2px}.material:focus{outline:none}@media(prefers-color-scheme:dark){mark{background:#8a6d1c;color:#fff}}@media(max-width:480px){.filters>*{flex:1 1 100%;width:100%}.material header{flex-wrap:wrap;gap:4px}.material header>div{width:100%}.actions{margin-bottom:12px}}@media print{.filters,.actions,.hits,#status,.warning{display:none}.material{break-inside:avoid}mark{background:none;color:inherit}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:24px 16px 60px}h1{font:600 clamp(26px,5vw,38px)/1.2 Georgia,serif}h2{font-size:19px;line-height:1.3;margin:0}.lead{color:var(--muted)}.warning{border-left:3px solid var(--accent);padding:8px 14px}.filters{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 10px}input,select,button{font:inherit;border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--panel);color:var(--ink)}input{flex:1;min-width:160px}select{max-width:100%}button{cursor:pointer}.copy{white-space:nowrap;color:var(--accent)}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.material{content-visibility:auto;contain-intrinsic-size:auto 200px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}.material header{display:flex;gap:16px;justify-content:space-between;align-items:flex-start}.material header>div{min-width:0}.meta{font-size:13px;color:var(--muted);overflow-wrap:anywhere;margin:6px 0 12px}summary{cursor:pointer;color:var(--accent)}.text{overflow-wrap:anywhere}.text h2,.text h3{margin:24px 0 12px}.text p{margin:12px 0}.text blockquote{border-left:2px solid var(--line);padding-left:14px;margin-left:0}.text table{border-collapse:collapse}.text td,.text th{border-bottom:1px solid var(--line);padding:6px}.text .table-wrap,.text .tw,.text .wrap{overflow-x:auto}.text pre{white-space:pre-wrap}.muted{color:var(--muted)}[hidden]{display:none!important}#status{min-height:1.6em;color:var(--accent)}.fallback textarea{width:100%;height:240px;font:14px/1.5 monospace;margin:12px 0}.label{display:inline-block;font:600 13px/1.5 ui-monospace,monospace;padding:0 6px;border:1px solid var(--line);border-radius:6px;color:var(--accent);margin-right:6px;vertical-align:2px}.actions{display:flex;gap:8px}.summary{margin:0 0 10px}.note{margin:0 0 10px;font-size:15px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}.hits{font-size:15px;margin:0 0 10px;color:var(--muted)}.hits .snip{display:block;color:var(--ink);margin-top:4px}mark{background:#f2d36b;color:#1d1d1d;border-radius:2px}.material.target{outline:3px solid var(--accent);outline-offset:2px}.material:focus{outline:none}@media(prefers-color-scheme:dark){mark{background:#8a6d1c;color:#fff}}@media(max-width:480px){.filters>*{flex:1 1 100%;width:100%}.material header{flex-wrap:wrap;gap:4px}.material header>div{width:100%}.actions{margin-bottom:12px}}@media print{.filters,.actions,.hits,#status,.warning{display:none}.material{break-inside:avoid;content-visibility:visible;contain-intrinsic-size:none}mark{background:none;color:inherit}}
 </style></head><body><main>
 <h1>Логи, записки и предыстория Талиса</h1>
 <p class="lead">Найди нужный материал и нажми «Скопировать». Каждый лог, записка и разговор копируется отдельно, целиком, в исходном оформлении Markdown. Поиск раскрывает найденные материалы и подсвечивает совпадения. Метки: S — логи сессий, ЗТ — записки Талиса, КВ — квента, ОД — опорные диалоги, ДМ — документы от мастера, РС — разборы сессий.</p>
@@ -106,27 +106,51 @@ const cards=[...document.querySelectorAll('.material')];
 // «ё» и «е» не различаются; замена не меняет длину строки, позиции совпадают.
 const fold=text=>text.toLocaleLowerCase('ru').replace(/ё/g,'е');
 const haystack=new Map(items.map(item=>[item.id,fold([item.label,item.title,item.context,item.summary||'',item.note||'',item.text].join('\n'))]));
-function clearMarks(card){const text=card.querySelector('.text');for(const mark of text.querySelectorAll('mark'))mark.replaceWith(...mark.childNodes);text.normalize();}
-function markText(root,query){const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-for(const node of nodes){const folded=fold(node.data);let at=folded.indexOf(query);if(at<0)continue;const parts=[];let last=0;
-while(at>=0){parts.push(node.data.slice(last,at));const mark=document.createElement('mark');mark.textContent=node.data.slice(at,at+query.length);parts.push(mark);last=at+query.length;at=folded.indexOf(query,last);}
-parts.push(node.data.slice(last));node.replaceWith(...parts);}}
-function showHits(card,item,query){const folded=fold(item.text),found=[];let at=folded.indexOf(query);while(at>=0){found.push(at);at=folded.indexOf(query,at+query.length);}
-const hits=card.querySelector('.hits');if(!found.length)return;hits.append(`Совпадений в тексте: ${found.length}`);
+const foldedText=new Map(items.map(item=>[item.id,fold(item.text)]));
+const materials=document.getElementById('materials'),textIndex=new WeakMap(),markedNodes=new Set(),restoreRange=document.createRange();
+// Индекс хранит исходные текстовые узлы; очистка возвращает их без normalize().
+function textNodes(root){
+if(textIndex.has(root))return textIndex.get(root);
+const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];
+while(walker.nextNode()){const node=walker.currentNode;nodes.push({node,folded:fold(node.data)});}
+textIndex.set(root,nodes);return nodes;}
+function* clearMarks(){
+for(const entry of markedNodes){restoreRange.setStartBefore(entry.first);restoreRange.setEndAfter(entry.last);restoreRange.deleteContents();restoreRange.insertNode(entry.node);markedNodes.delete(entry);yield;}}
+function* markText(card,query){
+for(const {node,folded} of textNodes(card.querySelector('.text'))){let at=folded.indexOf(query);const parts=[];let last=0;
+while(at>=0){parts.push(node.data.slice(last,at));const mark=document.createElement('mark');mark.textContent=node.data.slice(at,at+query.length);parts.push(mark);
+last=at+query.length;at=folded.indexOf(query,last);yield;}
+if(last){parts.push(node.data.slice(last));const fragment=document.createDocumentFragment();fragment.append(...parts);const first=fragment.firstChild,lastNode=fragment.lastChild;node.replaceWith(fragment);markedNodes.add({first,last:lastNode,node});}yield;}}
+function showHits(card,item,query){const folded=foldedText.get(item.id);let count=0;const found=[];let at=folded.indexOf(query);
+while(at>=0){count++;if(found.length<3)found.push(at);at=folded.indexOf(query,at+query.length);}
+const hits=card.querySelector('.hits');if(!count)return false;hits.append(`Совпадений в тексте: ${count}`);
 for(const position of found.slice(0,3)){const from=Math.max(0,position-70),to=Math.min(item.text.length,position+query.length+70);const snip=document.createElement('span');snip.className='snip';
 const before=item.text.slice(from,position).replace(/\s+/g,' '),after=item.text.slice(position+query.length,to).replace(/\s+/g,' ');const mark=document.createElement('mark');mark.textContent=item.text.slice(position,position+query.length);
 snip.append((from?'…':'')+before,mark,after+(to<item.text.length?'…':''));hits.append(snip);}
-hits.hidden=false;const details=card.querySelector('details');if(!details.open){details.open=true;card.dataset.auto='1';}markText(card.querySelector('.text'),query);card.dataset.marked='1';}
-let pending;
+return true;}
+let pending,searchVersion=0;
 function shown(){return cards.filter(card=>!card.hidden).map(card=>byId.get(card.dataset.id));}
 function filter(){const query=fold(search.value.trim()),[group,context]=category.value.split('::');let count=0;
+clearTimeout(pending);const version=++searchVersion;materials.setAttribute('aria-busy','true');
 for(const card of cards){const item=byId.get(card.dataset.id);const visible=(!group||item.category===group)&&(!context||item.context===context)&&(!query||haystack.get(item.id).includes(query));card.hidden=!visible;
-if(card.dataset.marked){clearMarks(card);delete card.dataset.marked;}const hits=card.querySelector('.hits');hits.hidden=true;hits.textContent='';
+const hits=card.querySelector('.hits');hits.hidden=true;hits.textContent='';
 if(card.dataset.auto){card.querySelector('details').open=false;delete card.dataset.auto;}
 if(visible)count++;}
-document.getElementById('count').textContent=`Показано ${count} из ${items.length}`;copyAll.textContent=`Скопировать показанные (${count})`;copyAll.disabled=!count;clearTimeout(pending);pending=setTimeout(()=>highlight(query),150);}
-// Подсветка тяжелее фильтра: выполняется после паузы в наборе.
-function highlight(query){if(query.length<2)return;for(const card of cards)if(!card.hidden)showHits(card,byId.get(card.dataset.id),query);}
+document.getElementById('count').textContent=`Показано ${count} из ${items.length}`;copyAll.textContent=`Скопировать показанные (${count})`;copyAll.disabled=!count;
+pending=setTimeout(()=>highlight(query,version),query.length>=2?150:0);}
+function* highlightSteps(query){
+yield* clearMarks();
+if(query.length<2)return;
+const found=[];
+for(const card of cards){if(!card.hidden&&showHits(card,byId.get(card.dataset.id),query)){found.push(card);yield* markText(card,query);}yield;}
+// Раскрываем карточки после подготовки подсветки: одна раскладка страницы.
+for(const card of found){card.querySelector('.hits').hidden=false;const details=card.querySelector('details');if(!details.open){details.open=true;card.dataset.auto='1';}}}
+// Бюджет порции — 6 мс; следующий ввод отменяет оставшуюся работу старого запроса.
+function highlight(query,version){const steps=highlightSteps(query);
+function advance(){if(version!==searchVersion)return;const until=performance.now()+6;let step;
+do{step=steps.next();}while(!step.done&&performance.now()<until);
+if(step.done)materials.setAttribute('aria-busy','false');else pending=setTimeout(advance,0);}
+advance();}
 search.addEventListener('input',filter);category.addEventListener('change',filter);filter();
 async function copyText(text){if(navigator.clipboard?.writeText){try{await navigator.clipboard.writeText(text);return true;}catch{}}
 const area=document.createElement('textarea');area.value=text;area.setAttribute('aria-label','Копируемый текст');area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';document.body.append(area);area.focus();area.select();area.setSelectionRange(0,text.length);let ok=false;try{ok=document.execCommand('copy');}catch{}finally{area.remove();}return ok;}
@@ -145,5 +169,5 @@ const card=cards.find(card=>card.dataset.label===key)||document.getElementById(k
 if(card.hidden){search.value='';category.value='';filter();}for(const other of cards)other.classList.remove('target');
 card.querySelector('details').open=true;card.classList.add('target');card.tabIndex=-1;card.focus({preventScroll:true});card.scrollIntoView({block:'start'});}
 addEventListener('hashchange',openFromHash);openFromHash();
-</script><footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 926e2b912359</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/campaign_library_tpl.html. Сборщик: scripts/campaign_library.py.</p></details></footer>
+</script><footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 724e663e3d93</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/campaign_library_tpl.html. Сборщик: scripts/campaign_library.py.</p></details></footer>
 </body></html>

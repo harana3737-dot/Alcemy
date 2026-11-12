@@ -11,21 +11,44 @@ for(const item of items){await page.locator(`[data-id="${item.id}"] .copy`).clic
 await page.locator('#category').selectOption({label:'Опорные диалоги'});assert.equal(await page.locator('.material:visible').count(),6);
 await page.locator('#search').fill('ФРАЗА-КОТОРОЙ-НЕТ-7193');assert.equal(await page.locator('.material:visible').count(),0);
 await page.locator('#search').fill('');await page.locator('#category').selectOption('');
-await page.locator('#search').fill('веревку');await page.waitForTimeout(300);const warm=await page.locator('.material:visible').count();assert.ok(warm>0,'ё и е не различаются');
+const settled=target=>target.waitForFunction(()=>document.getElementById('materials').getAttribute('aria-busy')==='false');
+await page.locator('#search').fill('веревку');await settled(page);const warm=await page.locator('.material:visible').count();assert.ok(warm>0,'ё и е не различаются');
 assert.equal(await page.locator('.material:visible details[open]').count(),warm,'найденные карточки раскрыты');assert.ok(await page.locator('.material:visible .text mark').count()>0,'совпадения подсвечены');assert.match(await page.locator('.material:visible .hits').first().innerText(),/Совпадений в тексте: \d+/);
-await page.locator('#search').fill('');await page.waitForTimeout(300);assert.equal(await page.locator('.material details[open]').count(),0,'после очистки поиска карточки свёрнуты');assert.equal(await page.locator('.text mark').count(),0);
+await page.locator('#search').fill('');await settled(page);assert.equal(await page.locator('.material details[open]').count(),0,'после очистки поиска карточки свёрнуты');assert.equal(await page.locator('.text mark').count(),0);
+// Частый запрос, смена фильтра и ввод посреди порции не оставляют старую подсветку.
+async function checkSearch(target){
+  await settled(target);
+  const original=await target.locator('.text').allTextContents();
+  const markup=await target.locator('.text').evaluateAll(nodes=>nodes.map(node=>node.innerHTML));
+  await target.locator('#search').fill('на');await settled(target);
+  assert.ok(await target.locator('.text mark').count()>1000);
+  await target.evaluate(()=>{search.value='на';filter();clearTimeout(pending);highlight(fold(search.value),searchVersion);search.value='ФРАЗА-КОТОРОЙ-НЕТ-7193';filter();});
+  await settled(target);assert.equal(await target.locator('.material:visible').count(),0);
+  assert.equal(await target.locator('.text mark').count(),0);
+  await target.locator('#search').fill('Талис');
+  await target.locator('#category').selectOption({label:'Опорные диалоги'});await settled(target);
+  assert.equal(await target.locator('.material[hidden] .text mark').count(),0);
+  await target.locator('#search').fill('');await target.locator('#category').selectOption('');await settled(target);
+  assert.deepEqual(await target.locator('.text').allTextContents(),original,'порции и отмена сохраняют исходный текст');
+  assert.equal(await target.locator('.text mark').count(),0);
+  assert.deepEqual(await target.locator('.text').evaluateAll(nodes=>nodes.map(node=>node.innerHTML)),markup,'очистка восстанавливает исходный DOM без лишних обёрток');
+}
+await checkSearch(page);
 await page.locator('#category').selectOption({label:'— Дело связки Маррена Вельда'});const velds=items.filter(item=>item.context==='Дело связки Маррена Вельда');assert.equal(await page.locator('.material:visible').count(),velds.length);
 await page.locator('#copyAll').click();assert.equal(await page.evaluate(()=>window.copied.at(-1)),velds.map(item=>item.text.replace(/\s+$/,'')).join('\n\n')+'\n');await page.locator('#category').selectOption('');
 const s13=items.find(item=>item.label==='S13');await page.locator(`[data-id="${s13.id}"] .link`).click();assert.match(await page.evaluate(()=>window.copied.at(-1)),/#S13$/);
 const first=page.locator(`[data-id="${items[0].id}"] .copy`);await first.click();assert.equal(await first.innerText(),'Скопировано');await page.waitForTimeout(2300);assert.equal(await first.innerText(),'Скопировать');
 const linked=await context.newPage();await linked.route('https://**/*',route=>route.abort());await linked.goto(base+'/'+encodeURIComponent('Для игрока — логи, записки и предыстория.html')+'#'+encodeURIComponent('ДМ8'));const target=items.find(item=>item.label==='ДМ8');
-assert.equal(await linked.locator(`[data-id="${target.id}"] details`).evaluate(element=>element.open),true);assert.equal(await linked.locator(`[data-id="${target.id}"]`).evaluate(element=>element.classList.contains('target')),true);await linked.close();
+assert.equal(await linked.locator(`[data-id="${target.id}"] details`).evaluate(element=>element.open),true);assert.equal(await linked.locator(`[data-id="${target.id}"]`).evaluate(element=>element.classList.contains('target')),true);
+assert.equal(await linked.locator(`[data-id="${target.id}"]`).evaluate(element=>{const rect=element.getBoundingClientRect();return rect.top<innerHeight&&rect.bottom>0;}),true,'ссылка прокручивает к нужной карточке');await linked.close();
 await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw Error('denied');}}});document.execCommand=()=>false;});
 await page.locator('.copy').first().click();assert.equal(await page.locator('#manual').inputValue(),items[0].text);assert.equal(await page.locator('#fallback').isVisible(),true);
 assert.equal(await page.locator('#manual').evaluate(element=>element.selectionEnd-element.selectionStart),items[0].text.length);
 await page.locator('#close').click();
 await page.evaluate(()=>{document.execCommand=()=>true;});await page.locator('.copy').first().click();assert.match(await page.locator('#status').innerText(),/Скопировано/);
 for(const width of [360,1280]){await page.setViewportSize({width,height:900});if(width===360){const [field,select]=await Promise.all(['#search','#category'].map(selector=>page.locator(selector).evaluate(element=>element.getBoundingClientRect().width)));assert.equal(Math.round(field),Math.round(select),'на телефоне список во всю ширину');}await page.locator('.material details').first().locator('summary').click();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.locator('.material details').first().locator('summary').click();}
+const last=page.locator('.material').last();await last.scrollIntoViewIfNeeded();await last.locator('summary').click();assert.equal(await last.locator('.text').isVisible(),true,'последний материал читается после прокрутки');await last.locator('summary').click();
+await page.emulateMedia({media:'print'});assert.equal(await last.evaluate(element=>getComputedStyle(element).contentVisibility),'visible','печать не пропускает карточки вне экрана');await page.emulateMedia({media:'screen'});
 const offline=await browser.newContext({javaScriptEnabled:false});const reader=await offline.newPage();await reader.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());await reader.goto(base+'/'+encodeURIComponent('Для игрока — логи, записки и предыстория.html'));assert.equal(await reader.locator('.material').count(),items.length);await reader.locator('summary').first().click();assert.equal(await reader.locator('.text').first().isVisible(),true);await offline.close();
 assert.deepEqual(errors,[]);await context.close();console.log(`PASS: ${items.length} exact copies, filters, search highlight, links, copy all, clipboard denial and fallback, mobile/desktop, reading without JavaScript`);
 }finally{await browser.close();}})().catch(error=>{console.error(error);process.exitCode=1});
