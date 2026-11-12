@@ -187,10 +187,10 @@ details.grp>summary h2{margin:0;flex:0 1 auto}
 <div class="wrap">
 <header>
   <h1>Пульт мастера</h1>
-  <p>Начните с вкладки «Утвердить»: там вопросы и варианты ответа. Для проверки конкретного случая откройте «Справку» или «Эликсиры». Вкладка «Талис» показывает срез персонажа. В «Свитках Лаэля» и «Кузне Фаэнона» — правила ремёсел, расчёты и спорные места.</p>
+  <p>Осталось шесть уточнений после ответа 08.11.2026. Начните с вкладки «Уточнить». Для проверки конкретного случая откройте «Справку» или «Эликсиры». Вкладка «Талис» показывает срез персонажа. В «Свитках Лаэля» и «Кузне Фаэнона» — правила ремёсел, расчёты и спорные места.</p>
 </header>
 <nav class="tabs" role="tablist">
-  <button type="button" role="tab" id="t-ok" data-t="ok" aria-selected="true">Утвердить</button>
+  <button type="button" role="tab" id="t-ok" data-t="ok" aria-selected="true">Уточнить</button>
   <button type="button" role="tab" id="t-ref" data-t="ref" aria-selected="false">Справка</button>
   <button type="button" role="tab" id="t-el" data-t="el" aria-selected="false">Эликсиры</button>
   <button type="button" role="tab" id="t-ta" data-t="ta" aria-selected="false">Талис</button>
@@ -199,10 +199,11 @@ details.grp>summary h2{margin:0;flex:0 1 auto}
 </nav>
 
 <section id="p-ok">
+  <details class="qt" id="price-updates"><summary>После ответа изменены четыре цены</summary>__PRICE_UPDATES__</details>
   <div class="sum">
     <div><div class="note" style="margin:0">Отмечено</div><div class="big" id="sumN">0 из __NQ__</div><div class="stack" id="sumBar" aria-hidden="true"></div></div>
-    <div class="grow"><div class="counts" id="sumC"></div>Не отмеченные считаются принятыми: играем как в строке «Играем». <span id="saveSt"></span></div>
-    <button type="button" class="btn pri" id="copy">Скопировать отчёт для Claude</button>
+    <div class="grow"><div class="counts" id="sumC"></div>Неотмеченные пункты остаются без нового ответа. Отметка подтверждает изложенное; недостающую деталь напиши в комментарии. <span id="saveSt"></span></div>
+    <button type="button" class="btn pri" id="copy">Скопировать отчёт</button>
   </div>
   <div class="modebar" style="margin-top:12px"><span class="seg mode" role="group" aria-label="Какие пункты показывать" id="qshow">
     <button type="button" data-v="all">Все</button><button type="button" data-v="open">Без принятых</button><button type="button" data-v="hot">Только спорные</button></span>
@@ -275,6 +276,7 @@ const J=id=>JSON.parse($(id).textContent);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const md=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*\s][^*]*?)\*(?!\*)/g,'$1<i>$2</i>');
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const ANSWER_KEY='manswers-followup-20261112', ANSWER_COLLECTION='answers_followup_20261112';
 const G=J('d-groups'), NQ=G.reduce((s,g)=>s+g.q.length,0), PRICE_Q=19;
 
 // вкладки
@@ -285,7 +287,7 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset
 
 // ===== Утвердить: ответы — в общей базе (answers/qN), иначе — только в этом браузере =====
 let A={}, DB=null, CANW=true;
-try{A=JSON.parse(ls.get('manswers')||'{}')||{}}catch(e){A={}}
+try{A=JSON.parse(ls.get(ANSWER_KEY)||'{}')||{}}catch(e){A={}}
 // три положения: принято (ok) · с изменением (alt) · обсудить (talk); коды в базе прежние
 const LBL={ok:'Принято',alt:'С изменением',talk:'Обсудить'};
 const ALLQ=G.flatMap(g=>g.q);
@@ -307,7 +309,7 @@ function renderQs(){
     // группа сворачивается; в заголовке — свой счётчик и «оставить как есть» для неотмеченных
     const cnt={ok:0,alt:0,talk:0,none:0};g.q.forEach(q=>{const c=(A['q'+q.n]||{}).c;cnt[c in LBL?c:'none']++});
     const det=document.createElement('details');det.className='grp';det.open=!GCLOSED.has(gi);
-    det.innerHTML=`<summary><h2>${esc(g.t)}</h2><span class="gcnt"><b>${g.q.length-cnt.none}</b> из ${g.q.length} отмечено · принято ${cnt.ok}, с изменением ${cnt.alt}, обсудить ${cnt.talk}${cnt.none?`, не отмечено ${cnt.none}`:''}</span>${cnt.none?`<button type="button" class="btn" data-all>Оставить как есть (${cnt.none})</button>`:''}</summary>`;
+    det.innerHTML=`<summary><h2>${esc(g.t)}</h2><span class="gcnt"><b>${g.q.length-cnt.none}</b> из ${g.q.length} отмечено · принято ${cnt.ok}, с изменением ${cnt.alt}, обсудить ${cnt.talk}${cnt.none?`, не отмечено ${cnt.none}`:''}</span>${cnt.none?`<button type="button" class="btn" data-all>Подтвердить изложенное (${cnt.none})</button>`:''}</summary>`;
     det.ontoggle=()=>{det.open?GCLOSED.delete(gi):GCLOSED.add(gi);ls.set('mgclosed',JSON.stringify([...GCLOSED]))};
     const ba=det.querySelector('[data-all]');if(ba)ba.onclick=e=>{e.preventDefault();g.q.forEach(q=>{const cur=A['q'+q.n]||{};if(!(cur.c in LBL))save(q.n,{...cur,c:'ok'})});renderQs()};
     box.appendChild(det);
@@ -317,45 +319,46 @@ function renderQs(){
         <div class="opt">${q.w?`<b>Суть</b><span>${md(q.w)}</span>`:''}<b>Играем</b><span>${md(q.y)}</span>${q.a&&q.a!=='—'?`<b>Иначе</b><span>${md(q.a)}</span>`:''}</div>
         <div class="ctl"><span class="seg" role="group" aria-label="Ответ на пункт ${q.n}">
           <button type="button" data-c="ok" aria-pressed="${a.c==='ok'}">${LBL.ok}</button><button type="button" data-c="alt" aria-pressed="${a.c==='alt'}">${LBL.alt}</button><button type="button" data-c="talk" aria-pressed="${a.c==='talk'}">${LBL.talk}</button></span>
-          ${q.n===PRICE_Q?`<label class="note" for="price">Цена рецепта, зм</label><input id="price" type="number" min="0" step="10" placeholder="500" value="${a.price??''}">`:''}
-          <span class="state">${a.c?'':'не отмечено — значит принято'}</span></div>
-        ${a.c==='alt'||a.c==='talk'||a.note?`<textarea id="note${q.n}" placeholder="${a.c==='alt'?(q.a&&q.a!=='—'?'Как играем (пусто — как в строке «Иначе»)':'Как играем'):'Что обсудить'}" aria-label="Комментарий к пункту ${q.n}">${esc(a.note||'')}</textarea>`:''}`;
+          ${q.n===PRICE_Q?`<label class="note" for="price">Цена рецепта, зм</label><input id="price" type="number" min="0" step="10" placeholder="Не указана" value="${a.price??''}">`:''}
+          <span class="state">${a.c?'':'нет нового ответа'}</span></div>
+        ${true?`<textarea id="note${q.n}" placeholder="${a.c==='alt'?(q.a&&q.a!=='—'?'Как играем (пусто — как в строке «Иначе»)':'Как играем'):'Что обсудить'}" aria-label="Комментарий к пункту ${q.n}">${esc(a.note||'')}</textarea>`:''}`;
       el.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{const cur=A['q'+q.n]||{};save(q.n,{...cur,c:cur.c===b.dataset.c?null:b.dataset.c});renderQs();
         if(b.dataset.c!=='ok'){const t=$('note'+q.n);if(t)t.focus()}});
       const t=el.querySelector('textarea');if(t){t.onchange=()=>save(q.n,{...(A['q'+q.n]||{}),note:t.value.trim()})}
       const p=el.querySelector('#price');if(p)p.onchange=()=>save(q.n,{...(A['q'+q.n]||{}),price:p.value===''?null:+p.value});
       c.appendChild(el)})});
   renderSum();renderShow()}
-function save(n,a){a.t=Date.now();A['q'+n]=a;ls.set('manswers',JSON.stringify(A));renderSum();
+function save(n,a){a.t=Date.now();A['q'+n]=a;ls.set(ANSWER_KEY,JSON.stringify(A));renderSum();
   if(!DB||!CANW)return;const st=$('saveSt');st.textContent='Сохраняется…';
-  DB.collection('answers').doc('q'+n).set(a).then(()=>{st.textContent='Сохранено — игрок видит ответ.'},e=>{
+  DB.collection(ANSWER_COLLECTION).doc('q'+n).set(a).then(()=>{st.textContent='Сохранено — игрок видит ответ.'},e=>{
     st.textContent='Не сохранилось в общий список — нажми «Скопировать отчёт» и отправь текстом.';if(e&&(e.code==='not_granted'||e.code==='permission_denied'))readOnly()})}
 function readOnly(){CANW=false;const b=$('ro');b.hidden=false;
-  b.textContent='Ответы видишь только ты: у этой ссылки нет права записи. Отметь пункты и нажми «Скопировать отчёт для Claude» — текст можно вставить в чат.'}
+  b.textContent='Ответы видишь только ты: у этой ссылки нет права записи. Отметь пункты и нажми «Скопировать отчёт» — текст можно вставить в чат.'}
 // отчёт — чистый Markdown для чата проекта: только текст, без HTML
 function answerText(){const plain=t=>String(t).replace(/\*\*/g,'').replace(/\*/g,'').replace(/<[^>]+>/g,''),cell=t=>plain(t).replace(/\|/g,'/').replace(/\s*\n\s*/g,' ').trim();
   const t=tally(),p=(A['q'+PRICE_Q]||{}).price,d=new Date(),dd=`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
   const alt=ALLQ.filter(q=>(A['q'+q.n]||{}).c==='alt'),talk=ALLQ.filter(q=>(A['q'+q.n]||{}).c==='talk'),ok=ALLQ.filter(q=>(A['q'+q.n]||{}).c==='ok');
-  const L=['# Алхимия Талиса — ответ мастера','',`${dd} · согласовано ${NQ-t.talk} из ${NQ}: принято явно ${t.ok}, с изменением ${t.alt}, обсудить ${t.talk}, не отмечено ${t.none} (молчание — принято).`];
-  if(alt.length){L.push('','## С изменением','','| № | Вопрос | Как играем |','| --- | --- | --- |');
-    alt.forEach(q=>{const a=A['q'+q.n];L.push(`| ${q.n} | ${cell(q.q)} | ${cell(a.note||(q.a&&q.a!=='—'?q.a:'(не указано)'))} |`)})}
-  if(talk.length){L.push('','## Обсудить','');talk.forEach(q=>{const a=A['q'+q.n];L.push(`- **${q.n}.** ${cell(q.q)}${a.note?' — '+cell(a.note):''}`)})}
+  const none=ALLQ.filter(q=>!((A['q'+q.n]||{}).c in LBL));
+  const L=['# Алхимия Талиса — уточнения мастера','',`${dd} · отмечено ${NQ-t.none} из ${NQ}: изложенное подтверждено ${t.ok}, с изменением ${t.alt}, обсудить ${t.talk}, без нового ответа ${t.none}.`];
+  for(const [heading,items] of [['Изложенное подтверждено',ok],['С изменением',alt],['Обсудить',talk]]){
+    if(!items.length)continue;L.push('','## '+heading,'','| № | Вопрос | Уточнение |','| --- | --- | --- |');
+    items.forEach(q=>{const a=A['q'+q.n];L.push(`| ${q.n} | ${cell(q.q)} | ${cell(a.note||'Уточнение не записано; отсутствующие числа и правила не назначены.')} |`)})
+  }
   L.push('',`## Цена рецепта зарядов и склянок (п. ${PRICE_Q})`,'',(p!=null&&p!=='')?`${p} зм`:'не указана');
-  const rest=NQ-alt.length-talk.length;
-  L.push('',`Остальные ${rest} пунктов — принято, играем как в строке «Играем».`+(ok.length?` Явно отмечены: ${ok.map(q=>q.n).join(', ')}.`:''));
+  if(none.length)L.push('','## Без нового ответа','',...none.map(q=>`- ${q.n}. ${cell(q.q)}`));
   return L.join('\n')}
 $('copy').onclick=async()=>{const s=answerText();try{await navigator.clipboard.writeText(s);$('copy').textContent='Скопировано'}catch(e){
   const ta=document.createElement('textarea');ta.value=s;ta.style.cssText='width:100%;min-height:120px;margin-top:10px';$('ro').hidden=false;$('ro').textContent='Скопировать не вышло — выдели текст ниже:';$('ro').appendChild(ta);ta.select()}
-  setTimeout(()=>$('copy').textContent='Скопировать отчёт для Claude',1600)};
+  setTimeout(()=>$('copy').textContent='Скопировать отчёт',1600)};
 $('extra').innerHTML=J('d-extra').map(x=>'Не обязательно: '+md(x)).join('<br>');
 renderQs();
 setTimeout(async()=>{try{
-  if(!window.claude||!window.claude.use){$('saveSt').textContent='';const b=$('ro');b.hidden=false;b.innerHTML='<b>Это файл, а не страница на claude.ai:</b> отметки сохраняются только у тебя. Когда закончишь — нажми «Скопировать отчёт для Claude» и пришли текст игроку в чат.';return}
+  if(!window.claude||!window.claude.use){$('saveSt').textContent='';const b=$('ro');b.hidden=false;b.innerHTML='<b>Это файл, а не страница на claude.ai:</b> отметки сохраняются только у тебя. Когда закончишь — нажми «Скопировать отчёт» и пришли текст игроку в чат.';return}
   const db=await window.claude.use('db'), user=await window.claude.use('user');
   if(!db){$('saveSt').textContent='';readOnly();return}
   DB=db;const cw=user?await user.can('data.write'):null;if(cw===false)readOnly();
-  db.collection('answers').onSnapshot(sn=>{const got={};sn.docs.forEach(d=>{got[d.id]=d.data()});
-    Object.keys(got).forEach(k=>{if(!A[k]||(got[k].t||0)>=(A[k].t||0))A[k]=got[k]});ls.set('manswers',JSON.stringify(A));
+  db.collection(ANSWER_COLLECTION).onSnapshot(sn=>{const got={};sn.docs.forEach(d=>{got[d.id]=d.data()});
+    Object.keys(got).forEach(k=>{if(!A[k]||(got[k].t||0)>=(A[k].t||0))A[k]=got[k]});ls.set(ANSWER_KEY,JSON.stringify(A));
     if(!document.activeElement||!document.activeElement.closest||!document.activeElement.closest('#qs'))renderQs();else renderSum();
     if(CANW)$('saveSt').textContent='Ответы видит игрок.'},()=>{$('saveSt').textContent='Связь со списком ответов потеряна — обнови страницу.'});
 }catch(e){$('saveSt').textContent='Ответы сохраняются только в этом браузере.'}},0);
@@ -482,7 +485,7 @@ $('talis').innerHTML=T.map(s=>`<li>${md(s)}</li>`).join('');
     <dt>Подход</dt><dd>${md(r.approach.replace(/^Подход — /,''))}</dd>
     <dt>Материалы</dt><dd>${md(r.mats.replace(/^Материалы этапа /,'этапа '))}</dd>
     <dt>Итог</dt><dd>${md(r.result)}</dd>${r.credit?`<dt>Зачёт</dt><dd>${md(r.credit)}</dd>`:''}</dl>`}}
-$('sample').innerHTML=J('d-sample').filter(s=>s.trim()&&!s.startsWith('|')).map(s=>s.startsWith('- ')?`<li>${md(s.slice(2))}</li>`:`<p>${md(s)}</p>`).join('').replace(/(<li>.*?<\/li>)+/gs,m=>`<ul>${m}</ul>`);
+$('sample').innerHTML=J('d-sample');
 
 // Ремёсла союзников: общие исходники с помощником, отдельные стили и элементы.
 __CRAFTS__
