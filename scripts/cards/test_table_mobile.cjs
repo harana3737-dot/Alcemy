@@ -54,7 +54,7 @@ const shots=process.env.TABLE_TOOLS_SCREENSHOTS;
     await page.locator('body').evaluate(el=>el.style.fontFamily='"DejaVu Sans", sans-serif');await fits();
     assert.match(await page.locator('#buildInfo summary').innerText(),/^Сборка [0-9a-f]{12}$/);
     assert.equal(await page.locator('#sumN').innerText(),'0 из 6');
-    assert.match(await page.locator('.sum').innerText(),/Не отмеченные считаются принятыми/);
+    assert.match(await page.locator('.sum').innerText(),/Неотмеченные пункты остаются без нового ответа/);
     for(const tab of ['ref','el','ta','ok']){
       await page.locator(`[data-t="${tab}"]`).click();await fits();
       if(tab==='el'){

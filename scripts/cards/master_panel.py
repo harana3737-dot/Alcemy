@@ -146,16 +146,25 @@ def build():
         return dict(stages=[dict(n=a, t=b, v=int(c), dc=int(d), gp=int(e), x=f.strip(" ,—").strip()) for a, b, c, d, e, f in st],
                     total=sum(int(x[4]) for x in st), approach=pick("Подход"), mats=pick("Материалы"), result=итог.replace("Итог — ", ""), credit=зачёт)
     root = root_struct(root) or root
-    # Служебные метки (<!-- reading-guide:… --> и т. п.) мастеру не показываем
-    sample = [x for x in (ROOT / "Образец — кровь шахтёра.md").read_text(encoding="utf-8").splitlines()[1:]
-              if not re.fullmatch(r"\s*<!--.*-->\s*", x)]
+    # Полная карточка образца с заголовками и таблицами, без личного листа.
+    subprocess.run([sys.executable, str(ROOT / 'scripts/master_html.py'), 'Образец — кровь шахтёра'], check=True, capture_output=True)
+    sample = (ROOT / 'Образец — кровь шахтёра.html').read_text().split('<main>', 1)[1].split('</main>', 1)[0]
+    sample = re.sub(r'<nav>.*?</nav>', '', sample, flags=re.S)
+    sample = re.sub(r'<h1[^>]*>.*?</h1>', '', sample, count=1, flags=re.S)
+    sample = re.sub(r'(id|href)="(#?)(h\d+)"', lambda m: f'{m.group(1)}="{m.group(2)}sample-{m.group(3)}"', sample)
 
     from craft_embed import embed_craft
     crafts = embed_craft(ROOT, "Шпаргалка свитков.html", "master-scroll") + "\n" + embed_craft(ROOT, "Шпаргалка кузнеца.html", "master-smith")
 
+    import html
+    prices = json.loads((ROOT / 'scripts/cards/price_adjustments.json').read_text())['changes']
+    updates = '<p>Рабочие цены игрока от 12.11.2026 (Ж-150); отдельного ответа мастера пока нет. Уровни и эффекты сохранены.</p><ul>'
+    updates += ''.join(f"<li>{html.escape(p['name'])}: {p['old']:g} → <b>{p['new']:g} зм</b></li>" for p in prices)
+    updates += '</ul><p>Порог — более 20% прибыли сверх лучших доступных чернил II и выше. Заряды, склянки и масла кары сохраняют модель чернил.</p>'
+
     tpl = (HERE / "master_tpl.html").read_text(encoding="utf-8")
     dump = lambda o: json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
-    out = (tpl.replace("__GROUPS__", dump(groups)).replace("__EXTRA__", dump(extra)).replace("__NQ__", str(nq))
+    out = (tpl.replace("__PRICE_UPDATES__", updates).replace("__GROUPS__", dump(groups)).replace("__EXTRA__", dump(extra)).replace("__NQ__", str(nq))
               .replace("__CARDS__", dump(cards)).replace("__CLS__", dump(CLS)).replace("__ORDER__", dump(ORDER))
               .replace("__TALIS__", dump(talis)).replace("__ROOT__", dump(root)).replace("__QUICK__", dump(quick)).replace("__SAMPLE__", dump(sample)).replace("__CORE__", core).replace("__CRAFTS__", crafts))
     from generated_files import generated_html
