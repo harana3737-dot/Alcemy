@@ -36,6 +36,18 @@ def potion_profit_table(format_profit, bonuses=(4, 6, 8, 10, 12, 14, 16)):
                      ' | '.join(cells) + ' |')
     return lines
 
+def readable_explanations(text):
+    """Отделить ресурсы, метод и ограничения в длинных пояснениях отчёта."""
+    import re
+    def paragraphs(match):
+        result = match.group(0)
+        for phrase in ('Основной личный сценарий', 'Помощник —', 'Рецепты, чернила и масла',
+                       'Для проекта учтены', 'Часы проекта —', 'Золото —', '«Волшебное указание» —'):
+            result = result.replace(' ' + phrase, '\n\n' + phrase)
+        return result
+    return re.sub(r'(?m)^(?:Сейчас бонус \+5;|Переход m → m\+1)[^\n]*', paragraphs, text)
+
+
 def price_summary(root=None):
     """Краткий итог берётся из того же решения, что и техническая проверка цен."""
     import json
@@ -334,7 +346,7 @@ def main():
 
 **Чего не хватает для точного расчёта:** реального бонуса Талиса по уровням (цена нестабильного предмета — половина, по правилам v0.3, раздел 2). Лимита сбыта и трав нет (решение мастера), поэтому прибыль за день — это потолок при постоянной работе, а не реальный доход.
 """)
-    open(__file__.replace("scripts/report.py","Симуляция экономики зелий.md"),"w",encoding="utf-8").write(add_guide("\n".join(L), "Симуляция экономики зелий"))
+    open(__file__.replace("scripts/report.py","Симуляция экономики зелий.md"),"w",encoding="utf-8").write(add_guide(readable_explanations("\n".join(L)), "Симуляция экономики зелий"))
     print("\n".join(L))
 
     # Версия для мастера: только то, что нужно для решений, без планов Талиса и статусов.
@@ -395,7 +407,7 @@ def main():
     _m = "\n".join("- **Неделя** — три варианта, как у Талиса по логам сессий: 12 часов алхимии (неделя с вылазками), 22 (среднее), 30 (неделя в городе); столбцы «за неделю» — 12 часов, 1,5 рабочих дня; для среднего ×1,8, для города ×2,5." if l.startswith("- **Неделя Талиса**") else l for l in _m.splitlines()) + "\n"
     for w in ("решение игрока", "решение мастера", "вердикт мастера", "вопрос мастеру", "утверждено"):
         assert w not in _m.lower(), w
-    open(__file__.replace("scripts/report.py", "Экономика алхимии — для мастера.md"), "w", encoding="utf-8").write(add_guide(_m, "Экономика алхимии — для мастера"))
+    open(__file__.replace("scripts/report.py", "Экономика алхимии — для мастера.md"), "w", encoding="utf-8").write(add_guide(readable_explanations(_m), "Экономика алхимии — для мастера"))
 
 
 if __name__ == '__main__':
@@ -405,6 +417,6 @@ if __name__ == '__main__':
     elif '--reading-guides-only' in sys.argv[1:]:
         for name in ('Симуляция экономики зелий', 'Экономика алхимии — для мастера'):
             path = Path(__file__).resolve().parent.parent / (name + '.md')
-            path.write_text(add_guide(path.read_text(encoding='utf-8'), name), encoding='utf-8')
+            path.write_text(add_guide(readable_explanations(path.read_text(encoding='utf-8')), name), encoding='utf-8')
     else:
         main()
