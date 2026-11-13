@@ -1,6 +1,7 @@
 """Проверить комплект в свежей копии без записи в checkout."""
 import argparse
 import json
+import hashlib
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -27,9 +28,14 @@ SPECIAL_HTML = {'Для игрока — книга алхимии', 'Карто
                 'Алхимия Талиса — правила за столом'}
 
 
+def file_digest(path):
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').digest()
+
+
 def snapshot(root):
     """Архивы выдаются по запросу и в Git не хранятся; байткод не артефакт."""
-    return {p.relative_to(root).as_posix(): p.read_bytes() for p in root.rglob('*')
+    return {p.relative_to(root).as_posix(): file_digest(p) for p in root.rglob('*')
             if p.is_file() and '.git' not in p.relative_to(root).parts
             and '__pycache__' not in p.parts and p.suffix not in ('.zip', '.pyc')}
 
@@ -166,8 +172,7 @@ def select_scope(files):
     """Небольшая явная карта областей; неизвестный общий код проверяется полностью."""
     if files is None:
         return 'full'
-    from campaign_library import records, LOGS, STORY, HANDOUTS, NOTES, PAGE
-    library_inputs = {LOGS, STORY, HANDOUTS, NOTES} | {item['source'] for item in records()}
+    from campaign_library import INPUTS as library_inputs, PAGE
     areas = set()
     for name in files:
         if name.startswith('Шаэрра/') or name == 'scripts/test_shaerra.cjs':

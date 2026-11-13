@@ -1,10 +1,11 @@
 import unittest
-from campaign_library import ROOT, LOGS, STORY, records, sections, render
+from campaign_library import ROOT, LOGS, STORY, INPUTS, NOTES, records, sections, render
 
 
 class CampaignLibraryTest(unittest.TestCase):
     def test_original_text_and_boundaries(self):
         items = records()
+        self.assertEqual({item['source'] for item in items} | {NOTES}, INPUTS)
         self.assertEqual(len({item['id'] for item in items}), len(items))
         self.assertEqual([item['title'] for item in items if item['category'] == 'Логи'],
                          [f'Сессия {i}' for i in range(1, 18)])

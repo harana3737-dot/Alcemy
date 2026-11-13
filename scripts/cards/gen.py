@@ -61,16 +61,22 @@ def build_materials(C=None):
         md.append(f"| [{ROM[l]}](#lvl-{l}) | {RAR[l]} | {SL[l]} | {CAT[l]} | " + ", ".join(link(c) for c in items) + " |")
     md.append("")
 
+    def index_group(title, items, describe):
+        md.append(f"### {title} ({len(items)})\n")
+        md.append("| Эликсир | Для выбора |\n| --- | --- |")
+        md.extend(f"| {link(c)} | {describe(c)} |" for c in items)
+        md.append("")
+
     md.append('<a id="by-class"></a>\n\n## По классам\n')
     for k in CLS_ORDER:
         items = [c for c in cards if c["cls"] == k]
-        md.append(f"**{CLS[k].capitalize()}** ({len(items)}): " + ", ".join(f"{link(c)} {ROM[c['lvl']]}" for c in items) + "\n")
+        index_group(CLS[k].capitalize(), items, lambda c: ROM[c["lvl"]])
 
     md.append('<a id="by-task"></a>\n\n## По задаче\n')
     md.append("Задача — для чего эликсир чаще всего нужен; у многих две. Внутри — по уровню: название, уровень, класс, цена. «Контрольный яд» — только карточки этого класса (Ж-84); отдельных зарядов этих заклинаний в каталоге нет (Ж-106). Обычные яды 1–10 карточек не имеют — они варятся как зелья (7.5).\n")
     for t in TASKS:
         items = [c for c in cards if t in c["tasks"]]
-        md.append(f"**{t}** ({len(items)}): " + "; ".join(f"{link(c)} {ROM[c['lvl']]} · {CLS[c['cls']]} · {c['price']} зм" for c in items) + "\n")
+        index_group(t, items, lambda c: f"{ROM[c['lvl']]} · {CLS[c['cls']]} · {c['price']} зм")
 
     md.append('<a id="by-combat"></a>\n\n## Боевой индекс\n')
     md.append("Эликсиры для урона, контроля, защиты и усиления: как применяются, концентрация и цена.\n")
@@ -88,7 +94,7 @@ def build_materials(C=None):
             ess.setdefault(t, []).append(c)
     for t in ESS_TYPES + sorted(k for k in ess if k not in ESS_TYPES):
         if t in ess:
-            md.append(f"**{t}** ({len(ess[t])}): " + "; ".join(f"{link(c)} {ROM[c['lvl']]} ({c['base'][:-2]}ая основа)" for c in ess[t]) + "\n")
+            index_group(t, ess[t], lambda c: f"{ROM[c['lvl']]} · {c['base'][:-2]}ая основа")
 
     md.append('<a id="by-family"></a>\n\n## По формулам\n')
     md.append("Формула — рецепт на класс доставки и тип эссенции; открывается по ступеням редкости (обычная I–II, необычная III–V, редкая VI–VII, очень редкая VIII–IX). Первая варка нового варианта — с СЛ +2. Заряды и склянки — один рецепт на эссенцию для обоих классов, на все уровни, как у чернил (Ж-100); их ступени — только для порядка. Масла и мази — один рецепт на все уровни.\n")
@@ -97,7 +103,8 @@ def build_materials(C=None):
         if c["fam"]:
             fams.setdefault(c["fam"], []).append(c)
     for f in sorted(fams):
-        md.append(f'<a id="fam-{slug(f)}"></a>**{f}:** ' + ", ".join(f"{link(c)} {ROM[c['lvl']]}" for c in fams[f]) + "\n")
+        md.append(f'<a id="fam-{slug(f)}"></a>\n')
+        index_group(f, fams[f], lambda c: ROM[c["lvl"]])
 
     md.append('<a id="by-abc"></a>\n\n## Алфавитный указатель\n')
     md.append("| Эликсир | Ур. | Класс | Токс. | Цена, зм |\n| --- | --- | --- | --- | --- |")

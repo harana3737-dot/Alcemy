@@ -3,6 +3,7 @@ from pathlib import Path
 import contextlib
 import io
 import json
+import hashlib
 import tempfile
 import unittest
 from types import SimpleNamespace
@@ -27,7 +28,7 @@ class CheckAllTests(unittest.TestCase):
                 path = root/name
                 path.parent.mkdir(exist_ok=True)
                 path.write_bytes(b'x')
-            self.assertEqual(snapshot(root), {'x.md': b'x'})
+            self.assertEqual(snapshot(root), {'x.md': hashlib.sha256(b'x').digest()})
 
     def test_build_mutates_only_temporary_copy_and_fails_on_stale_file(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -71,6 +72,13 @@ class CheckAllTests(unittest.TestCase):
                                 ({'Шаэрра/README.md', 'Талис — лист персонажа.md'}, 'full')):
             with self.subTest(files=files):
                 self.assertEqual(select_scope(files), expected)
+
+    def test_scope_selection_does_not_read_campaign_texts(self):
+        from campaign_library import INPUTS
+        with patch('campaign_library.records', side_effect=AssertionError('не читать логи')):
+            for name in INPUTS:
+                self.assertEqual(select_scope({name}), 'library')
+            self.assertEqual(select_scope({'scripts/check_all.py'}), 'checks')
 
     def test_library_inputs_select_only_build_and_freshness_check(self):
         from campaign_library import records, NOTES, PAGE
