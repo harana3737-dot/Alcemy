@@ -60,7 +60,7 @@ class DocumentPathsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='alcemy-layout-test-') as directory:
             root = Path(directory)
             (root / 'scripts').mkdir()
-            for name in ('master_html.py', 'document_paths.py', 'generated_files.py'):
+            for name in ('master_html.py', 'document_paths.py', 'generated_files.py', 'markdown_links.py'):
                 shutil.copyfile(ROOT / 'scripts' / name, root / 'scripts' / name)
             source = root / (EXTRA_HTML[0] + '.md')
             source.write_text('# Пример\n\n![Карта](Источники/Карта.png)\n')

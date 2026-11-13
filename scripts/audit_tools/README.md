@@ -78,7 +78,7 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium python3 -B scripts/check_a
 
 ## Повторить замеры помощника
 
-[`completion.md`](completion.md) содержит результаты и список файлов продолжения. `benchmark_helper.cjs` измеряет обработчики на двух размерах сохранения и двух ширинах экрана; `helper_timings.json` хранит выборки до и после. Помощник обновляет скрытый пояс при открытии вкладки, сохраняя состояние после каждой мутации.
+[Сводка аудитов](../../История%20проверок%20—%20оглавление.md) содержит результаты и список файлов продолжения. `benchmark_helper.cjs` измеряет обработчики на двух размерах сохранения и двух ширинах экрана; `helper_timings.json` хранит выборки до и после. Помощник обновляет скрытый пояс при открытии вкладки, сохраняя состояние после каждой мутации.
 
 ## Использовать полный пакет сопровождения
 
@@ -90,4 +90,4 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium python3 -B scripts/check_a
 
 ## Повторить проверки оставшихся гипотез
 
-[Отчёт игроку](../../Архив/Проверки/Аудит%20—%20проверка%20оставшихся%20гипотез.md) содержит условия и выводы. Числа: `python3 -B scripts/audit_tools/hypotheses_probe.py --runs 10000 --output /tmp/hypotheses.json`. Для графика добавить `--plot /tmp/volume.png` (нужен matplotlib). Мобильная разметка: `node scripts/audit_tools/probe_mobile_tables.cjs /tmp/fresh-repo /tmp/mobile-tables.json`; экономика должна быть собрана в свежей временной копии. Скрипты не меняют игровые цены и решения.
+[Отчёт игроку](../../История%20проверок%20—%20оглавление.md) содержит условия и выводы. Числа: `python3 -B scripts/audit_tools/hypotheses_probe.py --runs 10000 --output /tmp/hypotheses.json`. Для графика добавить `--plot /tmp/volume.png` (нужен matplotlib). Мобильная разметка: `node scripts/audit_tools/probe_mobile_tables.cjs /tmp/fresh-repo /tmp/mobile-tables.json`; экономика должна быть собрана в свежей временной копии. Скрипты не меняют игровые цены и решения.

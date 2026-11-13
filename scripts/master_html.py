@@ -2,6 +2,7 @@
 Запуск: python3 scripts/master_html.py [имя файла без .md]"""
 
 import html
+from markdown_links import replace_links
 import os
 from pathlib import Path
 import re
@@ -28,11 +29,10 @@ def document_link(target, root, source):
 def render_inline(text, resolve_link=lambda target: target):
     text = html.escape(text).replace("\\*", "&#42;")  # \* — буквальная звёздочка
     text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img src="\2" alt="\1" loading="lazy">', text)
-    pattern = r"\[([^\]]+)\]\(((?:[^()]|\([^()]*\))+)\)"
     def link(match):
         target = resolve_link(html.unescape(match.group(2)).strip().strip('<>'))
         return f'<a href="{html.escape(target, quote=True)}">{match.group(1)}</a>'
-    text = re.sub(pattern, link, text)
+    text = replace_links(text, link)
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
     text = re.sub(r"<b>⚠ (.+?)</b>", r'<span class="badge">⚠ \1</span>', text)
     return re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<i>\1</i>", text)

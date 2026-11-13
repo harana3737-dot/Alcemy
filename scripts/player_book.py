@@ -11,6 +11,7 @@ python3 -B scripts/player_book.py --check проверяет актуально�
 from dataclasses import dataclass
 from pathlib import Path
 import argparse
+from markdown_links import replace_links
 import html
 import re
 import shutil
@@ -98,7 +99,7 @@ def inline(text):
         external = ' target="_blank" rel="noopener noreferrer"' if target.startswith('http') else ''
         return keep('<a href="' + html.escape(target, quote=True) + '"' + external + '>' + html.escape(label) + '</a>')
 
-    text = re.sub(r'\[([^\]]+)\]\(((?:[^()]|\([^()]*\))*)\)', link, text)
+    text = replace_links(text, link, empty_targets=True)
     text = html.escape(text)
     text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
     text = re.sub(r'(?<!\*)\*([^*]+)\*(?!\*)', r'<em>\1</em>', text)
