@@ -26,6 +26,15 @@ if (!candidate) throw Error('Chromium не найден');
     assert.equal(await page.locator('.chapter').count(), 18);
     assert.equal(await page.locator('.book-route').count(), 3);
     assert.equal(await page.locator('.chapter[open]').count(), 0, 'Первый экран не разворачивает весь текст');
+    assert.equal(await page.locator('details.book-intro').count(), 0, 'Вступление не скрыто в свёрнутом блоке');
+    assert.ok(await page.locator('#book-start').isVisible());
+    await page.locator('.route-links a[href="#chapter-10"]').click();
+    assert.equal(await page.locator('#chapter-10').evaluate(el => el.open), true);
+    for (const text of ['мастерство 1–2', 'мастерство 3–5', 'мастерство 6–7', 'мастерство 8–9', 'мастерство 10']) {
+      assert.ok((await page.locator('#chapter-10').innerText()).includes(text), 'Показана ступень развития: ' + text);
+    }
+    assert.equal(await page.locator('#chapter-10 .explanation').first().evaluate(el => el.open), false, 'Нынешний план остаётся дополнительным примером');
+    await page.locator('#chapter-10 > summary').click();
     for (const route of ['game', 'prepare', 'learn']) {
       assert.equal(await page.locator(`#route-${route} > .chapter`).count(), 6);
     }
@@ -55,7 +64,7 @@ if (!candidate) throw Error('Chromium не найден');
     await page.locator('#reading-settings > summary').click();
     await page.locator('#search-scope').selectOption('guide');
     assert.ok(await page.locator('#search-results button').count());
-    assert.ok((await page.locator('#search-results .search-kind').allTextContents()).every(t => t === 'Короткий раздел'));
+    assert.ok((await page.locator('#search-results .search-kind').allTextContents()).every(t => t === 'Глава книги'));
     await page.locator('#search-scope').selectOption('library');
     assert.ok(await page.locator('#search-results button').count());
     assert.ok((await page.locator('#search-results .search-kind').allTextContents()).every(t => t === 'Источник'));
@@ -132,8 +141,9 @@ if (!candidate) throw Error('Chromium не найден');
     assert.equal(await mobile.locator('.contents').evaluate(el => el.open), false);
     assert.equal(await mobile.locator('#reading-settings').evaluate(el => el.open), false);
     assert.equal(await mobile.locator('#book-tools').evaluate(el => el.open), false);
-    assert.ok(await mobile.locator('.chapter').first().evaluate(el => el.getBoundingClientRect().top < 1000), 'Первая глава находится в пределах чуть больше одного мобильного экрана');
+    assert.ok(await mobile.locator('#book-start').evaluate(el => el.getBoundingClientRect().top < 1000), 'На первом экране доступно начало книги');
     await mobile.locator('.route-links a[href="#route-game"]').click();
+    await mobile.waitForFunction(() => document.querySelector('#chapter-01').getBoundingClientRect().top < innerHeight);
     await mobile.locator('#chapter-02 > summary').click();
     await mobile.locator('#chapter-02 .chapter-links a[href="#doc-glossary"]').click();
     assert.equal(await mobile.locator('#doc-glossary').evaluate(el => el.open), true);

@@ -248,11 +248,12 @@ def write_sources():
     stream=io.StringIO()
     with redirect_stdout(stream): progress()
     output=stream.getvalue()
-    heading='### Одно мастерство при разных уровнях Талиса'
-    a=output.index(heading)
-    found=re.search(r'(?m)^\|[^\n]*(?:\n\|[^\n]*)*',output[a:])
-    start=text.index(heading);old=re.search(r'(?m)^\|[^\n]*(?:\n\|[^\n]*)*',text[start:])
-    text=text[:start+old.start()]+found[0]+text[start+old.end():]
+    start, end = '<!-- party-growth:start -->', '<!-- party-growth:end -->'
+    if text.count(start) != 1 or text.count(end) != 1:
+        raise ValueError('Отсутствуют или повторены границы таблиц роста группы')
+    text = re.sub(re.escape(start) + r'.*?' + re.escape(end),
+                  lambda _: start + '\n\n' + output.strip() + '\n\n' + end,
+                  text, flags=re.S)
     path.write_text(text,encoding='utf-8')
     print('Обновлены расчёты запаса группы: указание с уровня чародея 5')
 
