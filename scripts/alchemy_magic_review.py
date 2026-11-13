@@ -15,7 +15,8 @@ import bestiary_report as b
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / 'scripts/alchemy_bestiary'
-REPORT = ROOT / 'Алхимия — заклинания и метамагия.md'
+from magic_guide import REPORT as REPORT_NAME, update_report
+REPORT = ROOT / REPORT_NAME
 
 
 def verify_sources():
@@ -243,15 +244,15 @@ def render(rows,csv_text):
            'Шанс Искусной остроты включает одно попадание кинжалом и переброс одного к20 при успешном начальном спасброске. Острота применяется только при нужном событии и сохранённой реакции. Иммунитет к заклинанию I круга блокирует помощь Остроты: у ракшаса оставлен обычный шанс яда без прибавки. Сама трактовка яда против ракшаса по-прежнему условна.','',
            'Урон Ускоренного Шара и Короны не включает кинжал; доставка паралича уже включена в вероятность усиления. Против непарализованного врага в 5 фт атака имеет помеху. Подготовка яда и Короны вынесена за пределы хода.','',
            '## Как пересобрать','',
-           '`python3 -B scripts/alchemy_magic_review.py --write`, `python3 -B scripts/alchemy_magic_review.py --check`, `python3 -B scripts/master_html.py "Алхимия — заклинания и метамагия"`. Сборка — в свежей временной копии без `.git`. Данные: `scripts/alchemy_bestiary/magic-results.csv.gz` (после распаковки — обычный CSV). Интернет-снимки и адреса: `scripts/alchemy_bestiary/web-review/sources.json`.','',
+           '`python3 -B scripts/alchemy_magic_review.py --write`, `python3 -B scripts/alchemy_magic_review.py --check`, `python3 -B scripts/master_html.py "Талис — алхимия, заклинания и метамагия"`. Сборка — в свежей временной копии без `.git`. Данные: `scripts/alchemy_bestiary/magic-results.csv.gz` (после распаковки — обычный CSV). Интернет-снимки и адреса: `scripts/alchemy_bestiary/web-review/sources.json`.','',
            f'SHA256 дополнительного CSV: `{hashlib.sha256(csv_text.encode()).hexdigest()}`.','']
-    return add_guide('\n'.join(text), 'Алхимия — заклинания и метамагия')
+    return add_guide('\n'.join(text), 'Талис — алхимия, заклинания и метамагия')
 
 
 def main():
     from result_archive import csv_archive
     parser=argparse.ArgumentParser();parser.add_argument('--write',action='store_true');parser.add_argument('--check',action='store_true');args=parser.parse_args()
-    rows,csv_text=calculate();outputs={REPORT:render(rows,csv_text).encode('utf-8'),DATA/'magic-results.csv.gz':csv_archive(csv_text)}
+    rows,csv_text=calculate();outputs={REPORT:update_report(ROOT, 'metamagic', render(rows,csv_text)).encode('utf-8'),DATA/'magic-results.csv.gz':csv_archive(csv_text)}
     for path,content in outputs.items():
         if args.check:
             if not path.exists() or path.read_bytes()!=content:raise SystemExit('Нужно пересобрать '+str(path))

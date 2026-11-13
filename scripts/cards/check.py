@@ -79,7 +79,7 @@ def main():
             E(c, "нет длительности")
 
     # уровни официальных — против таблицы А.2 правил
-    rules = open(ROOT / "Алхимия Талиса — правила v0.3 (черновик на утверждение).md", encoding="utf-8").read()
+    rules = open(ROOT / "Алхимия Талиса — полные правила v0.3.md", encoding="utf-8").read()
     a2 = rules[rules.index("## А.2 Пересмотр"):rules.index("## А.3")]
     by = {c["name"]: c for c in C}
     for row in re.findall(r"^\| ([^|]+?) \| [^|]+ \| ([^|]+?) \|", a2, re.M):

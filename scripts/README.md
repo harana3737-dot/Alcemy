@@ -61,9 +61,9 @@ Python-сборщики используют стандартную библио
 | Правила за столом, лист Талиса, снимок по `current.json`, карточки, `helper_tpl.html`, `table_tools.js`, шпаргалки ремёсел | `cards/helper.py` | Помощник варки |
 | Вопросы мастеру, ядро, карточки, разрешённая часть листа, образец, `master_tpl.html` | `cards/master_panel.py` | Пульт мастера |
 | `rules_data.py`, `sim*.py` | `report.py`, `weekly_economy_report.py --write` | Экономика, симуляция, таблицы недельного бюджета |
-| `bestiary/srd2014-monsters.json`, модели боя | `bestiary_report.py --write`, `alchemy_bestiary_report.py --write` | Отчёты по бестиарию и CSV |
-| Модели боя, карточки, `alchemy_bestiary/web-review/` | `alchemy_magic_review.py --write` | Отчёт о магии и CSV |
-| Карточки и расчёт каталога | `elixir_catalog_review.py --write` | Расчётный блок обзора каталога |
+| `bestiary/srd2014-monsters.json`, модели боя | `bestiary_report.py --write`, `alchemy_bestiary_report.py --write` | Две области общего разбора «Талис — алхимия, заклинания и метамагия» и прежние CSV |
+| Модели боя, карточки, `alchemy_bestiary/web-review/` | `alchemy_magic_review.py --write` | Область метамагии в общем разборе и CSV; границы областей задаёт `magic_guide.py` |
+| Карточки и модели снабжения | `party_kit_report.py --write`, `elixir_catalog_review.py --write` | Две области единой справки «Группа — баффы и расходники» |
 | Markdown с парным HTML | `master_html.py "Имя документа"` | HTML документа |
 | Книга Markdown, документы из `DOCUMENTS`, `player_book_tpl.html` | `player_book.py` | Книга HTML и два архива |
 

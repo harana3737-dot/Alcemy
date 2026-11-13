@@ -48,7 +48,7 @@ class DocumentLinkTests(unittest.TestCase):
     def test_built_table_and_relocated_page_links(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory);(root / 'scripts').mkdir()
-            for name in ('master_html.py', 'document_paths.py', 'generated_files.py'):
+            for name in ('master_html.py', 'document_paths.py', 'generated_files.py', 'markdown_links.py'):
                 shutil.copy(Path(__file__).parent / name, root / 'scripts' / name)
             source = root / 'Группа — баффы и расходники.md'
             source.write_text('# Пример\n\n[ядро](ядро.md)\n\n| Число | Эффект |\n| --- | --- |\n| 1 | помощь |\n')

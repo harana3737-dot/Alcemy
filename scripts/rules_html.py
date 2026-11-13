@@ -8,7 +8,7 @@ def build():
 
     ROOT = pathlib.Path(__file__).resolve().parent.parent
     TABLE = "table" in sys.argv[1:]
-    SRC = ROOT / ("Алхимия Талиса — правила за столом.md" if TABLE else "Алхимия Талиса — правила v0.3 (черновик на утверждение).md")
+    SRC = ROOT / ("Алхимия Талиса — правила за столом.md" if TABLE else "Алхимия Талиса — полные правила v0.3.md")
     OUT = ROOT / ("Алхимия Талиса — правила за столом.html" if TABLE else "Алхимия Талиса — правила v0.3.html")
 
     lines = [line for line in SRC.read_text(encoding="utf-8").splitlines()

@@ -29,9 +29,9 @@ if (!candidate) throw Error('Chromium не найден');
     for (const route of ['game', 'prepare', 'learn']) {
       assert.equal(await page.locator(`#route-${route} > .chapter`).count(), 6);
     }
-    assert.equal(await page.locator('.source-document').count(), 23);
+    assert.equal(await page.locator('.source-document').count(), 21);
     assert.equal(await page.locator('#library > .source-document').count(), 6);
-    assert.equal(await page.locator('#library-extra .source-document').count(), 17);
+    assert.equal(await page.locator('#library-extra .source-document').count(), 15);
     assert.equal(await page.locator('#library-extra').evaluate(el => el.open), false);
     const links = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].every(a => document.getElementById(a.getAttribute('href').slice(1))));
     assert.ok(links, 'Все внутренние ссылки должны вести к существующему якорю');
@@ -56,15 +56,15 @@ if (!candidate) throw Error('Chromium не найден');
     assert.ok((await page.locator('#search-results .search-kind').allTextContents()).every(t => t === 'Источник'));
     await page.locator('#search-scope').selectOption('all');
     await page.locator('#search').fill('Щит веры');
-    await page.locator('#search-results button').filter({ has: page.locator('strong', { hasText: 'Группа — обзор каталога эликсиров' }) }).click();
-    assert.equal(await page.locator('#doc-catalog-review').evaluate(el => el.open), true);
+    await page.locator('#search-results button').filter({ has: page.locator('strong', { hasText: 'Группа — баффы и расходники' }) }).click();
+    assert.equal(await page.locator('#doc-party').evaluate(el => el.open), true);
 
     // Прямая ссылка и поиск раскрывают оба уровня дополнительной библиотеки.
     await page.evaluate(() => { location.hash = 'doc-economy'; });
     await page.waitForFunction(() => document.getElementById('doc-economy').open && document.getElementById('library-extra').open);
     await page.locator('#library-extra').evaluate(el => { el.open = false; });
-    await page.locator('#search').fill('бестиарии');
-    await page.locator('#search-results button').filter({ has: page.locator('strong', { hasText: 'Заклинания Талиса — проверка на бестиарии' }) }).click();
+    await page.locator('#search').fill('алхимия заклинания метамагия');
+    await page.locator('#search-results button').filter({ has: page.locator('strong', { hasText: 'Талис — алхимия, заклинания и метамагия' }) }).click();
     assert.equal(await page.locator('#doc-bestiary').evaluate(el => el.open), true);
     assert.equal(await page.locator('#library-extra').evaluate(el => el.open), true);
 
@@ -72,7 +72,7 @@ if (!candidate) throw Error('Chromium не найден');
     await page.locator('#search').press('Escape');
     await page.locator('.library-shortcuts a[href="#doc-plan"]').click();
     assert.equal(await page.locator('#doc-plan').evaluate(el => el.open), true);
-    assert.match(await page.locator('#doc-plan .source-content').textContent(), /14,32/);
+    assert.match(await page.locator('#doc-plan .source-content').textContent(), /6,57/);
     await page.locator('#doc-plan .source-index > summary').click();
     const planTarget = await page.locator('#doc-plan .source-index a').first().getAttribute('href');
     await page.locator('#doc-plan .source-index a').first().click();
@@ -150,7 +150,7 @@ if (!candidate) throw Error('Chromium не найден');
     await nojs.close();
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, [], 'Книга не должна загружать внешние зависимости');
-    console.log('PASS: три маршрута, 18 разделов, 6+17 источников, поиск с областями, оглавления, телефон, выбор печати, чтение без JS и сети');
+    console.log('PASS: три маршрута, 18 разделов, 6+15 источников, поиск с областями, оглавления, телефон, выбор печати, чтение без JS и сети');
   } finally {
     await browser.close();
   }

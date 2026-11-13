@@ -4,7 +4,7 @@
 
 Этот материал содержит данные из System Reference Document 5.1, © Wizards of the Coast LLC, доступного по https://dnd.wizards.com/resources/systems-reference-document; SRD 5.1 распространяется по Creative Commons Attribution 4.0 International: https://creativecommons.org/licenses/by/4.0/. Лицензия программного проекта источника — MIT. Набор относится к 2014, не 2024.
 
-`method.md` и `development.md` — редактируемые объяснения. Генератор `../bestiary_report.py` создаёт общий отчёт «Заклинания Талиса — проверка на бестиарии.md» и подробный `results.csv`; браузерное представление делает `master_html.py`. Отчёт входит в 22 источника книги, поэтому после сборки обновить и книгу. Архивы книги по-прежнему не хранятся в Git.
+`method.md` и `development.md` — редактируемые объяснения. Генератор `../bestiary_report.py` обновляет раздел заклинаний в общем отчёте «Талис — алхимия, заклинания и метамагия.md» и подробный `results.csv`; браузерное представление делает `master_html.py`. Отчёт входит в библиотеку книги, поэтому после сборки обновить и книгу. Архивы книги по-прежнему не хранятся в Git.
 
 Запуск в свежей временной копии без `.git`:
 
@@ -12,7 +12,7 @@
 python3 -B scripts/bestiary_report.py --write
 python3 -B scripts/bestiary_report.py --check
 python3 -B scripts/test_bestiary.py
-python3 -B scripts/master_html.py "Заклинания Талиса — проверка на бестиарии"
+python3 -B scripts/master_html.py "Талис — алхимия, заклинания и метамагия"
 python3 -B scripts/player_book.py
 python3 -B scripts/player_book.py --check
 node scripts/test_player_book.cjs

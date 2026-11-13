@@ -187,7 +187,7 @@ def build(runs):
             'source_hashes': {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in [root / 'scripts/rules.json', root / 'scripts/cards/cards_data.py',
                                         root / 'scripts/sim_volume.py',
-                                        root / 'Алхимия Талиса — правила v0.3 (черновик на утверждение).md']}}
+                                        root / 'Алхимия Талиса — полные правила v0.3.md']}}
 
 
 def plot(result, output):
