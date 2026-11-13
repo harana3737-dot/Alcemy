@@ -15,7 +15,7 @@ from rules_data import ROM
 from dur import DUR
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = ROOT / 'Недельная варка — план и бюджет.md'
+SOURCE = ROOT / 'Недельная варка — расчётные сценарии.md'
 NOTE = marker('scripts/weekly_economy_report.py', 'scripts/sim_plan.py; scripts/rules_data.py', partial=True)
 
 
