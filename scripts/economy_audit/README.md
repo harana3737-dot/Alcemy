@@ -17,7 +17,7 @@ python3 -B scripts/report.py
 python3 -B scripts/weekly_economy_report.py --write
 python3 -B scripts/master_html.py 'Симуляция экономики зелий'
 python3 -B scripts/master_html.py 'Экономика алхимии — для мастера'
-python3 -B scripts/master_html.py 'Недельная варка — план и бюджет'
+python3 -B scripts/master_html.py 'Недельная варка — расчётные сценарии'
 python3 -B scripts/player_book.py
 node scripts/test_player_book.cjs
 ```
