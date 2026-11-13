@@ -29,10 +29,15 @@ if (!candidate) throw Error('Chromium не найден');
     for (const route of ['game', 'prepare', 'learn']) {
       assert.equal(await page.locator(`#route-${route} > .chapter`).count(), 6);
     }
-    assert.equal(await page.locator('.source-document').count(), 21);
+    assert.equal(await page.locator('.source-document').count(), 20);
     assert.equal(await page.locator('#library > .source-document').count(), 6);
-    assert.equal(await page.locator('#library-extra .source-document').count(), 15);
+    assert.equal(await page.locator('#library-extra .source-document').count(), 14);
     assert.equal(await page.locator('#library-extra').evaluate(el => el.open), false);
+    assert.equal(await page.locator('#doc-economy').count(), 0, 'Техническая симуляция не встраивается целиком');
+    const reportLinks = await page.locator('#doc-economy-book a[href^="https://github.com/"]').evaluateAll(nodes => nodes.map(a => decodeURIComponent(a.href)));
+    for (const report of ['Симуляция экономики зелий.md', 'Цены эликсиров — проверка прибыли.md']) {
+      assert.ok(reportLinks.some(href => href.endsWith('/' + report)), 'Технический отчёт доступен по ссылке: ' + report);
+    }
     const links = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].every(a => document.getElementById(a.getAttribute('href').slice(1))));
     assert.ok(links, 'Все внутренние ссылки должны вести к существующему якорю');
 
@@ -60,8 +65,8 @@ if (!candidate) throw Error('Chromium не найден');
     assert.equal(await page.locator('#doc-party').evaluate(el => el.open), true);
 
     // Прямая ссылка и поиск раскрывают оба уровня дополнительной библиотеки.
-    await page.evaluate(() => { location.hash = 'doc-economy'; });
-    await page.waitForFunction(() => document.getElementById('doc-economy').open && document.getElementById('library-extra').open);
+    await page.evaluate(() => { location.hash = 'doc-master-economy'; });
+    await page.waitForFunction(() => document.getElementById('doc-master-economy').open && document.getElementById('library-extra').open);
     await page.locator('#library-extra').evaluate(el => { el.open = false; });
     await page.locator('#search').fill('алхимия заклинания метамагия');
     await page.locator('#search-results button').filter({ has: page.locator('strong', { hasText: 'Талис — алхимия, заклинания и метамагия' }) }).click();
@@ -150,7 +155,7 @@ if (!candidate) throw Error('Chromium не найден');
     await nojs.close();
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, [], 'Книга не должна загружать внешние зависимости');
-    console.log('PASS: три маршрута, 18 разделов, 6+15 источников, поиск с областями, оглавления, телефон, выбор печати, чтение без JS и сети');
+    console.log('PASS: три маршрута, 18 разделов, 6+14 источников, поиск с областями, оглавления, телефон, выбор печати, чтение без JS и сети');
   } finally {
     await browser.close();
   }
