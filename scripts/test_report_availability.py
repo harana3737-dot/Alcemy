@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from rules_data import (normal_brewing_requirements, normal_brewing_allowed,
                         normal_brewing_bonus_floor)
-from report import potion_profit_table
+from report import potion_profit_table, price_summary, update_price_summary
 from sim import scenario, HERB, P_SL, P_PRICE, CAT_PRICE
 from rules_data import unstable_fraction
 
@@ -52,6 +52,22 @@ class ReportAvailabilityTests(unittest.TestCase):
         for level in (0, 11, 2.5, True):
             with self.assertRaises(ValueError):
                 normal_brewing_requirements(level)
+
+
+class PriceSummaryTests(unittest.TestCase):
+    def test_update_preserves_calculations_and_is_idempotent(self):
+        original = '# Экономика\n\nРабочие цены игрока от 12.11 (Ж-150): старый абзац.\n\n## Расчёт\n\n| Число | 123,45 |\n'
+        updated = update_price_summary(original)
+        self.assertTrue(updated.startswith('# Экономика\n\n'))
+        self.assertTrue(updated.endswith('## Расчёт\n\n| Число | 123,45 |\n'))
+        self.assertIn(price_summary(), updated)
+        self.assertEqual(updated, update_price_summary(updated))
+
+    def test_incomplete_or_ambiguous_summary_is_rejected(self):
+        for text in ('', '<!-- price-summary:start -->',
+                     '<!-- price-summary:start --><!-- price-summary:start --><!-- price-summary:end -->'):
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                update_price_summary(text)
 
 
 if __name__ == '__main__':
