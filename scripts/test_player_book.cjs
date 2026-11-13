@@ -17,10 +17,16 @@ if (!candidate) throw Error('Chromium не найден');
     page.on('pageerror', error => errors.push(error.message));
     page.on('request', request => requests.push(request.url()));
     await page.setContent(source);
+    const guideMarkdown = fs.readFileSync(path.join(__dirname, '..', 'Для игрока — книга алхимии.md'), 'utf8');
+    const chapterAnchors = [...guideMarkdown.matchAll(/<a id="(chapter-\d{2})"><\/a>/g)].map(match => match[1]);
+    assert.equal(new Set(chapterAnchors).size, 18, 'Markdown сохраняет переходы к тем же 18 главам');
+    for (const anchor of chapterAnchors) {
+      assert.equal(await page.locator(`[id="${anchor}"]`).count(), 1, 'В HTML якорь главы единственный');
+    }
     assert.equal(await page.locator('h1').count(), 1, 'У книги один главный заголовок в шапке');
     assert.equal(await page.locator('header h1').count(), 1);
     assert.equal(await page.locator('.chapter > summary > h3').count(), 18);
-    assert.ok(await page.getByRole('heading', { level: 3, name: '02. Сварить чернила II Лаэлю', exact: true }).isVisible(), 'Заголовок закрытой главы доступен навигации по заголовкам');
+    assert.ok(await page.getByRole('heading', { level: 3, name: '02. Сварить чернила для свитков', exact: true }).isVisible(), 'Заголовок закрытой главы доступен навигации по заголовкам');
     assert.equal(await page.locator('header #print').count(), 0);
     assert.equal(await page.locator('header #examples').count(), 0);
     assert.equal(await page.locator('.chapter').count(), 18);
@@ -33,7 +39,7 @@ if (!candidate) throw Error('Chromium не найден');
     for (const text of ['мастерство 1–2', 'мастерство 3–5', 'мастерство 6–7', 'мастерство 8–9', 'мастерство 10']) {
       assert.ok((await page.locator('#chapter-10').innerText()).includes(text), 'Показана ступень развития: ' + text);
     }
-    assert.equal(await page.locator('#chapter-10 .explanation').first().evaluate(el => el.open), false, 'Нынешний план остаётся дополнительным примером');
+    assert.equal(await page.locator('#chapter-10 .explanation').first().evaluate(el => el.open), false, 'Подробности дорогого роста остаются свёрнутыми');
     await page.locator('#chapter-10 > summary').click();
     for (const route of ['game', 'prepare', 'learn']) {
       assert.equal(await page.locator(`#route-${route} > .chapter`).count(), 6);

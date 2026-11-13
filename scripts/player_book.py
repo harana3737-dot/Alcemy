@@ -66,8 +66,8 @@ PRIMARY_KEYS = {'rules', 'sheet', 'cards', 'plan', 'economy-book', 'glossary'}
 # доступен без JavaScript, в поиске, по прямой ссылке и при печати.
 ROUTES = (
     ('game', 'На игре', 'Открой одно действие. Условия, бросок и запись результата находятся рядом.', 1, 6),
-    ('prepare', 'Перед игрой', 'Посмотри на путь развития, выбери направление и подготовь ближайшую работу.', 7, 12),
-    ('learn', 'Разобраться', 'Пройди законченный пример, затем разберись в материалах, формулах и развитии.', 13, 18),
+    ('prepare', 'Перед игрой', 'Выбери пользу для группы, проверь доступность и распредели время и деньги.', 7, 12),
+    ('learn', 'Разобраться', 'Пройди пример варки, разберись в материалах и сравни пользу с затратами.', 13, 18),
 )
 
 LINKS = {doc.filename: '#doc-' + doc.key for doc in DOCUMENTS}
@@ -251,6 +251,8 @@ def write_archive(path, entries):
 
 def build(root=ROOT):
     source = (root / (BOOK + '.md')).read_text(encoding='utf-8')
+    # Якоря позволяют читать Markdown по тем же ссылкам. В HTML их создают главы.
+    source = re.sub(r'^<a id="chapter-\d{2}"></a>\s*\n', '', source, flags=re.M)
     chunks = re.split(r'^## (.+)$', source, flags=re.M)
     if len(chunks) < 3:
         raise ValueError('В книге отсутствуют главы')
