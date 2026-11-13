@@ -24,6 +24,6 @@
 
 ### Как пересобрать
 
-В свежей временной копии без `.git`: `python3 -B scripts/bestiary_report.py --write`, затем `--check` и `python3 -B scripts/test_bestiary.py`. HTML: `python3 -B scripts/master_html.py "Заклинания Талиса — проверка на бестиарии"`. После этого пересобрать книгу `python3 -B scripts/player_book.py` и проверить `--check`.
+В свежей временной копии без `.git`: `python3 -B scripts/bestiary_report.py --write`, затем `--check` и `python3 -B scripts/test_bestiary.py`. HTML: `python3 -B scripts/master_html.py "Талис — алхимия, заклинания и метамагия"`. После этого пересобрать книгу `python3 -B scripts/player_book.py` и проверить `--check`.
 
 Пояснения и рекомендации правятся в `development.md`, метод — здесь, в `method.md`. Сгенерированный отчёт вручную не править.

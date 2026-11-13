@@ -20,7 +20,7 @@ from statistics import mean
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / 'scripts/bestiary'
 SHA = 'cbf1b6d0a94f6e13afd1480d647d288c61ba0ddc3d3a7842d1501852dc954237'
-REPORT = 'Заклинания Талиса — проверка на бестиарии.md'
+from magic_guide import REPORT, update_report
 LEVELS = (4, 5, 6, 7, 8, 9, 11, 12, 13, 15, 17, 20)
 ELEMENTS = ('acid', 'cold', 'fire', 'lightning', 'poison', 'thunder')
 ABILITIES = {'str': 'strength', 'dex': 'dexterity', 'con': 'constitution',
@@ -315,6 +315,7 @@ def main():
     if args.write and args.check:
         parser.error('Выберите --write или --check')
     report, detail = calculate()
+    report = update_report(ROOT, 'spells', report)
     outputs = {ROOT / REPORT: report, DATA / 'results.csv': detail}
     if args.check:
         for path, content in outputs.items():

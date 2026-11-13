@@ -1,6 +1,6 @@
 # Прогоны алхимии и заклинаний
 
-Расчёт Codex по закреплённому SRD 2014 и текущим карточкам Alcemy. Основной документ: `Алхимия и магия — проверка на бестиарии.md`, готовый HTML рядом с ним. Правила и цены расчёт не изменяет.
+Расчёт Codex по закреплённому SRD 2014 и текущим карточкам Alcemy. Основной документ: `Талис — алхимия, заклинания и метамагия.md`, готовый HTML рядом с ним. Правила и цены расчёт не изменяет.
 
 ## Запуск
 
@@ -10,7 +10,7 @@
 python3 -B -m unittest discover -s scripts -p test_alchemy_bestiary.py
 python3 -B scripts/alchemy_bestiary_report.py --write
 python3 -B scripts/alchemy_bestiary_report.py --check
-python3 -B scripts/master_html.py 'Алхимия и магия — проверка на бестиарии'
+python3 -B scripts/master_html.py 'Талис — алхимия, заклинания и метамагия'
 ```
 
 Генерацию выполнять в свежей временной копии без `.git`, затем переносить проверенные результаты в checkout согласно AGENTS.md. Дополнительных пакетов не требуется.
@@ -41,13 +41,13 @@ python3 -B scripts/master_html.py 'Алхимия и магия — провер
 
 ## Дополнение: Метамагия и способности классов
 
-`magic_review.md` — редактируемый текст дополнительного разбора. `../alchemy_magic_review.py` добавляет таблицы и создаёт «Алхимия — заклинания и метамагия.md» и `magic-results.csv`. Использует тот же бестиарий и уровни.
+`magic_review.md` — редактируемый текст дополнительного разбора. `../alchemy_magic_review.py` обновляет раздел метамагии в «Талис — алхимия, заклинания и метамагия.md» и создаёт `magic-results.csv.gz`. Использует тот же бестиарий и уровни.
 
 ```bash
 python3 -B -m unittest discover -s scripts -p 'test_alchemy*.py'
 python3 -B scripts/alchemy_magic_review.py --write
 python3 -B scripts/alchemy_magic_review.py --check
-python3 -B scripts/master_html.py 'Алхимия — заклинания и метамагия'
+python3 -B scripts/master_html.py 'Талис — алхимия, заклинания и метамагия'
 ```
 
 Генерация также выполняется в свежей временной копии. В `web-review/` лежат реально прочитанные интернет-снимки SRD 2014 и манифест адресов, даты и SHA256. Копии проверяются при каждом запуске. Атрибуция SRD 5.1 и лицензия источника — в `../bestiary/README.md` и `../bestiary/UPSTREAM_LICENSE.md`.

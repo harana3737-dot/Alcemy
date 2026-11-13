@@ -51,7 +51,7 @@ class RegistryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)
             (root/'Алхимия Талиса — ядро правил.md').write_text('')
-            p=root/'Алхимия Талиса — правила v0.3 (черновик на утверждение).md'
+            p=root/'Алхимия Талиса — полные правила v0.3.md'
             p.write_text('В-999\nВ-19 ждёт мастера\nВ-19 решено, Ж-78\nЖ-999')
             errors=check_references(root,rows())
             self.assertEqual(len(errors),3)

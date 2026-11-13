@@ -98,7 +98,7 @@ def references(text):
 
 def check_references(root,records):
     known={r['id']:r for r in records};errors=[]
-    for filename in ('Алхимия Талиса — правила v0.3 (черновик на утверждение).md','Алхимия Талиса — ядро правил.md'):
+    for filename in ('Алхимия Талиса — полные правила v0.3.md','Алхимия Талиса — ядро правил.md'):
         for number,line in enumerate((root/filename).read_text(encoding='utf-8').splitlines(),1):
             for qid,_ in references(line):
                 if qid not in known:errors.append(f'{filename}:{number}: несуществующий {qid}')

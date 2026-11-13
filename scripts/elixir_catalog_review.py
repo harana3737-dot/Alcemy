@@ -208,7 +208,7 @@ if __name__=='__main__':
     if '--write' in sys.argv:
         import contextlib
         import io
-        report = Path(__file__).resolve().parent.parent / 'Группа — обзор каталога эликсиров.md'
+        report = Path(__file__).resolve().parent.parent / 'Группа — баффы и расходники.md'
         start, end = '## Расчёты и полный каталог', '## Воспроизведение'
         source = report.read_text(encoding='utf-8')
         if source.count(start) != 1 or source.count(end) != 1:
@@ -218,7 +218,7 @@ if __name__=='__main__':
             main()
         head, tail = source.split(start)
         _, footer = tail.split(end)
-        report.write_text(add_guide(head + start + '\n\n' + output.getvalue() + '\n' + end + footer, 'Группа — обзор каталога эликсиров'), encoding='utf-8')
+        report.write_text(add_guide(head + start + '\n\n' + output.getvalue() + '\n' + end + footer, 'Группа — баффы и расходники'), encoding='utf-8')
         print('Обзор обновлён: 103 эликсира-эффекта')
     else:
         main()

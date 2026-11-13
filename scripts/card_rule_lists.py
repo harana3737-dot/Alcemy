@@ -7,7 +7,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parent/'cards'))
 from cards_data import C
 
 ROOT=Path(__file__).resolve().parent.parent
-RULES='Алхимия Талиса — правила v0.3 (черновик на утверждение).md'
+RULES='Алхимия Талиса — полные правила v0.3.md'
 
 
 def blocks(cards=C):

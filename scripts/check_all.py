@@ -189,7 +189,7 @@ def select_scope(files):
             areas.add('master')
         elif name.startswith('scripts/') and name not in {'scripts/README.md'}:
             return 'full'
-        elif name in {'Алхимия Талиса — правила v0.3 (черновик на утверждение).md', 'Алхимия Талиса — правила за столом.md', 'Алхимия Талиса — ядро правил.md'}:
+        elif name in {'Алхимия Талиса — полные правила v0.3.md', 'Алхимия Талиса — правила за столом.md', 'Алхимия Талиса — ядро правил.md'}:
             return 'full'
         elif not name.endswith(('.md', '.html')):
             return 'full'
