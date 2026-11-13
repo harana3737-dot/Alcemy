@@ -65,7 +65,7 @@ Python-сборщики используют стандартную библио
 | `rules_data.py`, `sim*.py` | `report.py`, `weekly_economy_report.py --write` | Экономика, симуляция, таблицы недельного бюджета |
 | `bestiary/srd2014-monsters.json`, модели боя | `bestiary_report.py --write`, `alchemy_bestiary_report.py --write` | Две области общего разбора «Талис — алхимия, заклинания и метамагия» и прежние CSV |
 | Модели боя, карточки, `alchemy_bestiary/web-review/` | `alchemy_magic_review.py --write` | Область метамагии в общем разборе и CSV; границы областей задаёт `magic_guide.py` |
-| Карточки и модели снабжения | `party_kit_report.py --write`, `elixir_catalog_review.py --write` | Две области единой справки «Группа — баффы и расходники» |
+| Карточки и модели снабжения | `party_kit_report.py --write`, `elixir_catalog_review.py --write` | Модель снабжения и `party-growth` — первый скрипт; `party-shortlist` из карточек и полный каталог — второй. Остальной текст справки пишется вручную |
 | Markdown с парным HTML | `master_html.py "Имя документа"` | HTML документа |
 | Книга Markdown, документы из `DOCUMENTS`, `player_book_tpl.html` | `player_book.py` | Книга HTML и два архива |
 

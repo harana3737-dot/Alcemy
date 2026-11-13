@@ -66,7 +66,7 @@ PRIMARY_KEYS = {'rules', 'sheet', 'cards', 'plan', 'economy-book', 'glossary'}
 # доступен без JavaScript, в поиске, по прямой ссылке и при печати.
 ROUTES = (
     ('game', 'На игре', 'Открой одно действие. Условия, бросок и запись результата находятся рядом.', 1, 6),
-    ('prepare', 'Перед игрой', 'Сверь выбранные цели, придумай следующий шаг Талиса и выдели деньги и время.', 7, 12),
+    ('prepare', 'Перед игрой', 'Посмотри на путь развития, выбери направление и подготовь ближайшую работу.', 7, 12),
     ('learn', 'Разобраться', 'Пройди законченный пример, затем разберись в материалах, формулах и развитии.', 13, 18),
 )
 
@@ -256,8 +256,8 @@ def build(root=ROOT):
         raise ValueError('В книге отсутствуют главы')
     renderer = Renderer('intro')
     intro = re.sub(r'^# .+\n', '', chunks[0], count=1)
-    guide = '<details class="book-intro"><summary>О книге и источниках</summary>' + renderer.render(intro.splitlines()) + '</details>'
-    nav = []
+    guide = '<section class="book-intro" id="book-start" data-search-title="Знакомство с алхимией"><h2>С чего начинается ремесло</h2>' + renderer.render(intro.splitlines()) + '</section>'
+    nav = ['<a href="#book-start">С чего начинается ремесло</a>']
     chapters = []
     chapter_count = (len(chunks) - 1) // 2
     if chapter_count != ROUTES[-1][4]:
