@@ -29,9 +29,9 @@ if (!candidate) throw Error('Chromium не найден');
     for (const route of ['game', 'prepare', 'learn']) {
       assert.equal(await page.locator(`#route-${route} > .chapter`).count(), 6);
     }
-    assert.equal(await page.locator('.source-document').count(), 24);
+    assert.equal(await page.locator('.source-document').count(), 23);
     assert.equal(await page.locator('#library > .source-document').count(), 6);
-    assert.equal(await page.locator('#library-extra .source-document').count(), 18);
+    assert.equal(await page.locator('#library-extra .source-document').count(), 17);
     assert.equal(await page.locator('#library-extra').evaluate(el => el.open), false);
     const links = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].every(a => document.getElementById(a.getAttribute('href').slice(1))));
     assert.ok(links, 'Все внутренние ссылки должны вести к существующему якорю');
@@ -150,7 +150,7 @@ if (!candidate) throw Error('Chromium не найден');
     await nojs.close();
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, [], 'Книга не должна загружать внешние зависимости');
-    console.log('PASS: три маршрута, 18 разделов, 6+18 источников, поиск с областями, оглавления, телефон, выбор печати, чтение без JS и сети');
+    console.log('PASS: три маршрута, 18 разделов, 6+17 источников, поиск с областями, оглавления, телефон, выбор печати, чтение без JS и сети');
   } finally {
     await browser.close();
   }
