@@ -73,6 +73,15 @@ class CheckAllTests(unittest.TestCase):
             with self.subTest(files=files):
                 self.assertEqual(select_scope(files), expected)
 
+    def test_mixed_log_and_document_require_full_build(self):
+        from campaign_library import LOGS
+        document = 'Талис — тактическая памятка.md'
+        for changed in (document, document.replace('.md', '.html')):
+            with self.subTest(changed=changed):
+                self.assertEqual(select_scope({LOGS, changed}), 'full')
+        self.assertEqual(select_scope({LOGS, 'README.md'}), 'library')
+        self.assertEqual(select_scope({document}), 'text')
+
     def test_scope_selection_does_not_read_campaign_texts(self):
         from campaign_library import INPUTS
         with patch('campaign_library.records', side_effect=AssertionError('не читать логи')):
@@ -110,6 +119,7 @@ class CheckAllTests(unittest.TestCase):
     def test_plan_cli_does_not_run_checks_or_request_browser_for_log(self):
         from campaign_library import LOGS
         for files, scope, automatic, browser, python in (([LOGS], 'library', True, False, False),
+                                                        ([LOGS, 'Талис — тактическая памятка.md'], 'full', True, True, True),
                                                         ([], 'text', False, False, False),
                                                         (['scripts/check_all.py'], 'checks', True, False, True),
                                                         (['scripts/report.py'], 'full', True, True, True)):

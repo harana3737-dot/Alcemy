@@ -66,7 +66,7 @@
     {
       "model": "Именные запасы группы",
       "source": "scripts/party_kit_report.py",
-      "sha256": "89a8fe241ffa32a20b5f1d54052e564d044caf200cc09b1c63d1c8b0068b5147",
+      "sha256": "78c73785b5ace2721f4ed24c1cae03372cec7d9722a9dae809503f52e2bc9615",
       "conditions": "Точный размер последней партии; уровни и цены из каталога, компоненты Каменной кожи и две эссенции Героизма учтены. После M5 оборудование — условное."
     },
     {
@@ -85,12 +85,12 @@
   "source_hashes": {
     "scripts/elixir_price_audit.py": "65cf95956112253e4f17646971ee87de5dcdc6995d22f954bbfdec4ee04fbb8a",
     "scripts/cards/price_adjustments.json": "5549ef7e42c29d99193ceda6cb94c3604e8158868943b15761b2a54921ee478d",
-    "scripts/rules.json": "3fc008d193c1c5e2d9c17f5c960b3f51a5123610503ec32587dd36ec04ebce9a",
+    "scripts/rules.json": "96256ce2d582632a3cb3040e30fbd0b1b2f1f92967c0b759bcc150cb9ffa1032",
     "scripts/alchemy_guidance.py": "085cba4d81e286de8fe8ee0b8c08593e8650f80c982dc928262a8413703520e3",
     "scripts/cards/cards_data.py": "d95f47bd9f760ecfdac4f65e07f7fee075eebdf373da5018d3fb8ceeef74b102",
-    "scripts/report.py": "6579e9e2315f2fea6b6316f9d95ea2a1e18ff202a716382da6664555cdee3bd7",
-    "scripts/weekly_economy_report.py": "2f4a30db7f0995979558ee4f06863b945f572a6e8ffe3755dc4b0f5876a868bf",
-    "Алхимия Талиса — правила за столом.md": "f03a0ce680fc42eaf3f9d3702972d101ec82411f5dfcfaf4b1a6d8846ed97a07",
+    "scripts/report.py": "ed91a7903122066a1c00b2c776c1aac1f0a3743a3a0a94da55e9fe4253766179",
+    "scripts/weekly_economy_report.py": "45d761b5517ee9e6ef3ccfe30af37f64a28aceabb9c8a8b2b0620365b6981bd7",
+    "Алхимия Талиса — правила за столом.md": "7d85b74a81bb8779a4e2bdf2075aff815acd86902db5581ec2aa4f51cb43f674",
     "Источники/Сохранения/alcemy-save-2026-11-09-session17-essences.json": "70acd65d4ace87b5acc9a8fa8ecd1cb56b937623245cae910d8fccc9df2ce873"
   }
 }

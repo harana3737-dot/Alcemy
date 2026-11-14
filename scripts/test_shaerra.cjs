@@ -18,6 +18,16 @@ const source=fs.readFileSync(path.join(__dirname,'..','Шаэрра','Руны �
   await p.locator('#importMode').selectOption(mode);await p.locator('#imp').click();
  }
  try {
+  // A target entered as the first action must be exported and survive reload.
+  for(const i of [1,2]) {
+   const draft=await open();await draft.locator(`#tg${i}`).fill(`Цель ${i}`);
+   const saved=await state(draft);assert.equal(saved.day.tg[i],`Цель ${i}`);
+   await draft.reload();assert.equal(await draft.locator(`#tg${i}`).inputValue(),`Цель ${i}`);
+   await draft.goto('http://shaerra.test/#7-2');await draft.locator(`#tg${i}`).fill('Просмотр');
+   assert.deepEqual(await state(draft),saved);await draft.locator('#backDay').click();
+   assert.equal(await draft.locator(`#tg${i}`).inputValue(),`Цель ${i}`);
+   await draft.context().close();
+  }
   const p=await open({'shaerra-log':[{a:15,b:1,d:'24.10.2026, 22:54',ev:'Ишида-сан и удача мёртвых',s1:'спасённые'}],
    'shaerra-day':{v:2,a:7,b:2,spent:{1:'союзник',2:''},tg:{1:'',2:'зомби'},evExp:'ожидание',ev:'черновик вечера',evFal:'сомнение'}});
   assert.equal(await p.locator('#d1').inputValue(),'7');assert.equal(await p.locator('#tg2').inputValue(),'зомби');

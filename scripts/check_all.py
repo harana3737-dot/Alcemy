@@ -173,6 +173,13 @@ def select_scope(files):
     if files is None:
         return 'full'
     from campaign_library import INPUTS as library_inputs, PAGE
+    from document_paths import html_path
+    from player_book import BOOK, DOCUMENTS
+    text_inputs = {'Журнал решений.md', 'Очередь вопросов мастеру.md', BOOK + '.md',
+                   *(doc.filename for doc in DOCUMENTS)}
+    for source in paired_html_sources(ROOT, SPECIAL_HTML):
+        text_inputs.add(source.relative_to(ROOT).as_posix())
+        text_inputs.add(html_path(ROOT, source).relative_to(ROOT).as_posix())
     areas = set()
     for name in files:
         if name.startswith('Шаэрра/') or name == 'scripts/test_shaerra.cjs':
@@ -197,6 +204,10 @@ def select_scope(files):
             # Рукописные интерактивные страницы могут влиять на несколько областей.
             if not (ROOT / name).with_suffix('.md').exists():
                 return 'full'
+            if name in text_inputs:
+                areas.add('text')
+        elif name in text_inputs:
+            areas.add('text')
     if areas <= {'inventory', 'helper'} and areas:
         return 'helper' if 'helper' in areas else 'inventory'
     return next(iter(areas)) if len(areas) == 1 else 'full' if areas else 'text'
