@@ -274,6 +274,132 @@ def validate_sources():
         raise ValueError('Перепроверить условия консультации Лаэля')
 
 
+def mixed_program(hours, policy='healing_first', ready=False):
+    """Конечный бюджет M2: исследования, освоение и смеси; без перебросов.
+
+    После нат.1 работа приостанавливается до решения мастера, после M3 —
+    до нового плана. Так неизвестная осечка не становится бесплатной.
+    """
+    if hours not in (8, 12, 20) or policy not in ('healing_first', 'body_first'):
+        raise ValueError('Неизвестная программа')
+    names = ('ink', 'healing', 'aid', 'shield', 'practice', 'cash', 'hours',
+             'body_essence_I', 'body_essence_II', 'ink_essence_II',
+             'sample_used', 'heal_recipe', 'body_recipe', 'aid_mastered',
+             'full_aid_sets', 'shield_casts', 'paused', 'mastery3', 'unpaired_ink')
+    # State: ink attempts, heal/body marks, shield/aid mastery, ordinary
+    # healing doses, aid doses, shield doses, practice in half-points, mix index,
+    # consumed sample, completed healing opening and an unpaired ordinary ink.
+    initial = (0, 3 if ready else 1, 3 if ready else 0,
+               int(ready), int(ready), 0, 0, 0, 8, 0, 0, int(ready), 0)
+
+    def action(state):
+        ink_n, hm, bm, sm, am, heals, aids, shields, practice2, mix, sample, heal_open, unpaired = state
+        if ink_n < 2:
+            return 'ink'
+        if not ready:
+            if policy == 'healing_first':
+                if hm < 3:
+                    return 'research_heal'
+                if heals < 2:
+                    return 'healing'
+            if bm < 3:
+                return 'research_body'
+            if not sm:
+                return 'shield'
+            if not am or policy == 'body_first' and aids < 3:
+                return 'aid'
+            if hm < 3:
+                return 'research_heal'
+        return ('healing', 'aid', 'shield', 'healing', 'aid', 'healing', 'aid', 'shield')[mix % 8]
+
+    @lru_cache(None)
+    def solve(remaining, state, paused=False):
+        ink_n, hm, bm, sm, am, heals, aids, shields, practice2, mix, sample, heal_open, unpaired = state
+        if not remaining or paused or practice2 >= 30:
+            terminal = dict(heal_recipe=heal_open, body_recipe=int(bm >= 3 and sm),
+                            aid_mastered=am, full_aid_sets=aids//3,
+                            shield_casts=shields, paused=int(paused),
+                            mastery3=int(practice2 >= 30), unpaired_ink=unpaired)
+            return tuple(float(terminal.get(k, 0)) for k in names)
+        kind = action(state)
+        count = 2 if kind == 'healing' or kind == 'aid' and am else 3 if kind == 'shield' and sm else 1
+        if kind.startswith('research'):
+            count = 1
+        # Outcomes include stable doses and practice; stop a batch on nat.1.
+        outcomes = {(0, 0, False): 1.}
+        dc = 10 if kind in ('healing', 'research_heal') else 12
+        if kind == 'aid' and not am or kind == 'shield' and not sm:
+            dc += 2
+        bonus = 9 if kind.startswith('research') else 7
+        for _ in range(count):
+            nxt = defaultdict(float)
+            for (stable, gain2, pause), prob in outcomes.items():
+                if pause:
+                    nxt[(stable, gain2, pause)] += prob
+                    continue
+                for face in range(1, 21):
+                    success = face != 1 and (face == 20 or face+bonus >= dc)
+                    gain = (3 if face == 20 else 2 if face+bonus >= dc+5 else int(success)) if kind.startswith('research') else 0
+                    dose = int(success and not kind.startswith('research'))
+                    if kind == 'ink':
+                        practice_gain = 2 if face == 20 else int(success)
+                    elif kind in ('healing', 'aid'):
+                        practice_gain = 4 if face == 20 else 2*int(success)
+                    else:
+                        practice_gain = 0
+                    nxt[(stable+dose, gain2+gain+practice_gain, face == 1)] += prob/20
+            outcomes = nxt
+        result = [0.]*len(names)
+        for (stable, gain, pause), prob in outcomes.items():
+            values = list(state); reward = defaultdict(float)
+            reward['hours'] = 2
+            if kind == 'research_heal':
+                values[1] = min(3, hm+gain)
+                reward['cash'] = .25
+                reward['sample_used'] = int(not sample)
+                values[10] = 1
+            elif kind == 'research_body':
+                values[2] = min(3, bm+gain)
+                reward['cash'] = 5.125
+                reward['body_essence_I'] = 1
+            else:
+                reward[kind] = stable
+                if kind == 'ink' and stable and gain == 1:
+                    values[12] = 1-unpaired
+                    gain = 2*unpaired
+                values[8] += gain; reward['practice'] = gain/2
+                if kind == 'ink':
+                    values[0] += 1; reward['cash'] = 40.5
+                    reward['ink_essence_II'] = 1
+                elif kind == 'healing':
+                    values[5] += stable; reward['cash'] = count*1.
+                    if stable and not heal_open:
+                        values[11] = 1; values[8] += 2; reward['practice'] += 1
+                elif kind == 'aid':
+                    values[6] += stable; values[4] = int(am or stable)
+                    reward['cash'] = count*1.5; reward['body_essence_II'] = count
+                else:
+                    values[7] += stable; values[3] = int(sm or stable)
+                    if stable and not sm:
+                        values[8] += 2; reward['practice'] += 1
+                    reward['cash'] = count*.2; reward['body_essence_I'] = count
+                # Only the repeatable mixed-production tail advances the index.
+                if kind != 'ink' and (ready or hm >= 3 and bm >= 3 and sm and am and (policy != 'body_first' or aids >= 3) and (policy != 'healing_first' or heals >= 2)):
+                    values[9] += 1
+            future = solve(remaining-1, tuple(values), pause)
+            for j, key in enumerate(names):
+                result[j] += prob*(reward[key]+future[j])
+        return tuple(result)
+
+    result = dict(zip(names, solve(hours//2, initial)))
+    return dict(budget_hours=hours, policy=policy, recipes_ready=ready,
+                expected=result, assumptions=dict(bonus=7, guidance=0,
+                    research_hint=2, initial_practice=4, ink_attempts=2,
+                    stop_on_natural1=True, stop_on_mastery3=True,
+                    batch_materials_reserved_in_full=True,
+                    repair_travel_training_hours_excluded=True))
+
+
 def build():
     validate_sources()
     result=dict(goal='M5 и устойчивое снабжение группы; коммерция — дополнительный источник',
@@ -295,6 +421,8 @@ def build():
         recipe_100=[dict(bonus=b,attempts=progress_research(100,b,3)[0],
                          gold=progress_research(100,b,3)[1],hours=2*progress_research(100,b,3)[0]) for b in (5,7,8)],
         mixed_two_cycles=mixed_two_cycles(),
+        mixed_programs=[mixed_program(h,p,ready) for ready in (False,True)
+                        for p in (('healing_first',) if ready else ('healing_first','body_first')) for h in (8,12,20)],
         consulted_cycles=[joint_cycle(l,b,2,consult=True) for l,b in ((2,5),(3,7))],
         finance_bridge_M4=[dict(sale=s,first_cash=472,two_attempt_cash=874,
             profit_per_attempt=ink(8,4,True,s)['profit']-CAT_PRICE[4]/CAT_STABLE)

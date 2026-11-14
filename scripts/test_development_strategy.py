@@ -4,10 +4,49 @@ import random
 import unittest
 
 from development_strategy import (build, chain, growth, ink, joint_cycle,
-                                  mixed_two_cycles, rolls, scroll_rolls)
+                                  mixed_two_cycles, mixed_program, rolls, scroll_rolls)
 
 
 class DevelopmentStrategyTests(unittest.TestCase):
+    def test_ready_program_matches_independent_batch_survival(self):
+        row = mixed_program(8, ready=True)['expected']
+        # Two single inks, two healing rolls, then two aid rolls. Every
+        # natural 1 stops the remaining work, independently of success.
+        self.assertAlmostEqual(row['ink'], .8*(1+.95))
+        self.assertAlmostEqual(row['healing'], .95**2*.9*(1+.95))
+        self.assertAlmostEqual(row['aid'], .95**4*.8*(1+.95))
+        self.assertAlmostEqual(row['paused'], 1-.95**6)
+        self.assertEqual(row['full_aid_sets'], 0)
+        self.assertEqual(row['sample_used'], 0)
+        self.assertLessEqual(row['hours'], 8)
+
+    def test_unknown_recipe_cannot_produce_before_research_and_first_brew(self):
+        row = mixed_program(8, 'body_first')['expected']
+        self.assertEqual(row['aid'], 0)
+        self.assertEqual(row['healing'], 0)
+        self.assertEqual(row['heal_recipe'], 0)
+        self.assertAlmostEqual(row['body_recipe'], .95**2*.05*.7)
+        heal = mixed_program(8, 'healing_first')['expected']
+        self.assertAlmostEqual(heal['healing'], .95**2*.75*.9*(1+.95))
+        # Earliest sequence is ink, ink, successful research, first shield.
+        # Body only awards its opening after that successful full brew.
+        self.assertAlmostEqual(row['practice']-(.05*(1+.95)+.75**2), row['body_recipe'])
+        self.assertGreater(row['body_essence_I'], row['shield'])
+
+    def test_mixed_program_stops_at_mastery_and_does_not_reuse_sample(self):
+        for policy in ('healing_first', 'body_first'):
+            row = mixed_program(20, policy)['expected']
+            self.assertLessEqual(row['sample_used'], 1)
+            self.assertLessEqual(row['hours'], 20)
+            self.assertLessEqual(3*row['full_aid_sets'], row['aid'])
+            self.assertLessEqual(row['shield_casts'], row['shield'])
+            self.assertLessEqual(row['aid'], row['body_essence_II'])
+            self.assertGreater(row['paused'], 0)
+        ready = mixed_program(20, ready=True)['expected']
+        self.assertGreater(ready['mastery3'], 0)
+        with self.assertRaises(ValueError):
+            mixed_program(22)
+
     def test_ink_probability_matches_independent_die_count(self):
         for bonus in (5,7):
             raw=sum(d==20 or d!=1 and d+bonus>=12 for d in range(1,21))/20
