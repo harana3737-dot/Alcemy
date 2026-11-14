@@ -71,8 +71,9 @@ ROUTES = (
 )
 
 LINKS = {doc.filename: '#doc-' + doc.key for doc in DOCUMENTS}
-# Подробные технические отчёты открываются отдельно от самодостаточной книги.
-for _report in ('Симуляция экономики зелий.md', 'Цены эликсиров — проверка прибыли.md'):
+# Подробные отчёты и анализ решений открываются отдельно от самодостаточной книги.
+for _report in ('Симуляция экономики зелий.md', 'Цены эликсиров — проверка прибыли.md',
+                'Талис — стратегия развития алхимии.md'):
     LINKS[_report] = 'https://github.com/harana3737-dot/Alcemy/blob/claude/alchemy-talis-crash-test-6g8sk7/' + quote(_report, safe='')
 
 

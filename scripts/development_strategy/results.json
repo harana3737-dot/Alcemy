@@ -1,0 +1,886 @@
+{
+  "snapshot_cash": 108.18,
+  "assumptions": {
+    "sale": 0.85,
+    "alternative_sale": 0.75,
+    "reserve_proposed": 20,
+    "weekly_total": 22,
+    "buffer_proposed": 4,
+    "stable_cat_uses": 5,
+    "osseka_extra_cost": "не установлена; не назначена нулевой фактической тратой"
+  },
+  "ink": [
+    {
+      "bonus": 5,
+      "level": 1,
+      "guidance": false,
+      "sale": 0.75,
+      "cost": 10.1,
+      "lost": 0.1,
+      "unstable": 0.2,
+      "stable": 0.7000000000000001,
+      "profit": 8.65,
+      "profit_per_hour": 4.325
+    },
+    {
+      "bonus": 5,
+      "level": 1,
+      "guidance": false,
+      "sale": 0.85,
+      "cost": 10.1,
+      "lost": 0.1,
+      "unstable": 0.2,
+      "stable": 0.7000000000000001,
+      "profit": 10.750000000000002,
+      "profit_per_hour": 5.375000000000001
+    },
+    {
+      "bonus": 5,
+      "level": 1,
+      "guidance": true,
+      "sale": 0.75,
+      "cost": 10.1,
+      "lost": 0.029999999999999995,
+      "unstable": 0.06000000000000002,
+      "stable": 0.9100000000000005,
+      "profit": 11.275000000000011,
+      "profit_per_hour": 5.6375000000000055
+    },
+    {
+      "bonus": 5,
+      "level": 1,
+      "guidance": true,
+      "sale": 0.85,
+      "cost": 10.1,
+      "lost": 0.029999999999999995,
+      "unstable": 0.06000000000000002,
+      "stable": 0.9100000000000005,
+      "profit": 14.005000000000015,
+      "profit_per_hour": 7.0025000000000075
+    },
+    {
+      "bonus": 7,
+      "level": 1,
+      "guidance": false,
+      "sale": 0.75,
+      "cost": 10.1,
+      "lost": 0.05,
+      "unstable": 0.15000000000000002,
+      "stable": 0.8000000000000002,
+      "profit": 10.15,
+      "profit_per_hour": 5.075
+    },
+    {
+      "bonus": 7,
+      "level": 1,
+      "guidance": false,
+      "sale": 0.85,
+      "cost": 10.1,
+      "lost": 0.05,
+      "unstable": 0.15000000000000002,
+      "stable": 0.8000000000000002,
+      "profit": 12.550000000000002,
+      "profit_per_hour": 6.275000000000001
+    },
+    {
+      "bonus": 7,
+      "level": 1,
+      "guidance": true,
+      "sale": 0.75,
+      "cost": 10.1,
+      "lost": 0.01,
+      "unstable": 0.029999999999999995,
+      "stable": 0.9600000000000004,
+      "profit": 11.950000000000012,
+      "profit_per_hour": 5.975000000000006
+    },
+    {
+      "bonus": 7,
+      "level": 1,
+      "guidance": true,
+      "sale": 0.85,
+      "cost": 10.1,
+      "lost": 0.01,
+      "unstable": 0.029999999999999995,
+      "stable": 0.9600000000000004,
+      "profit": 14.83000000000001,
+      "profit_per_hour": 7.415000000000005
+    },
+    {
+      "bonus": 5,
+      "level": 2,
+      "guidance": false,
+      "sale": 0.75,
+      "cost": 40.5,
+      "lost": 0.1,
+      "unstable": 0.2,
+      "stable": 0.7000000000000001,
+      "profit": 34.5,
+      "profit_per_hour": 17.25
+    },
+    {
+      "bonus": 5,
+      "level": 2,
+      "guidance": false,
+      "sale": 0.85,
+      "cost": 40.5,
+      "lost": 0.1,
+      "unstable": 0.2,
+      "stable": 0.7000000000000001,
+      "profit": 42.900000000000006,
+      "profit_per_hour": 21.450000000000003
+    },
+    {
+      "bonus": 5,
+      "level": 2,
+      "guidance": true,
+      "sale": 0.75,
+      "cost": 40.5,
+      "lost": 0.029999999999999995,
+      "unstable": 0.06000000000000002,
+      "stable": 0.9100000000000005,
+      "profit": 45.00000000000004,
+      "profit_per_hour": 22.50000000000002
+    },
+    {
+      "bonus": 5,
+      "level": 2,
+      "guidance": true,
+      "sale": 0.85,
+      "cost": 40.5,
+      "lost": 0.029999999999999995,
+      "unstable": 0.06000000000000002,
+      "stable": 0.9100000000000005,
+      "profit": 55.92000000000006,
+      "profit_per_hour": 27.96000000000003
+    },
+    {
+      "bonus": 7,
+      "level": 2,
+      "guidance": false,
+      "sale": 0.75,
+      "cost": 40.5,
+      "lost": 0.05,
+      "unstable": 0.15000000000000002,
+      "stable": 0.8000000000000002,
+      "profit": 40.5,
+      "profit_per_hour": 20.25
+    },
+    {
+      "bonus": 7,
+      "level": 2,
+      "guidance": false,
+      "sale": 0.85,
+      "cost": 40.5,
+      "lost": 0.05,
+      "unstable": 0.15000000000000002,
+      "stable": 0.8000000000000002,
+      "profit": 50.10000000000001,
+      "profit_per_hour": 25.050000000000004
+    },
+    {
+      "bonus": 7,
+      "level": 2,
+      "guidance": true,
+      "sale": 0.75,
+      "cost": 40.5,
+      "lost": 0.01,
+      "unstable": 0.029999999999999995,
+      "stable": 0.9600000000000004,
+      "profit": 47.700000000000045,
+      "profit_per_hour": 23.850000000000023
+    },
+    {
+      "bonus": 7,
+      "level": 2,
+      "guidance": true,
+      "sale": 0.85,
+      "cost": 40.5,
+      "lost": 0.01,
+      "unstable": 0.029999999999999995,
+      "stable": 0.9600000000000004,
+      "profit": 59.22000000000004,
+      "profit_per_hour": 29.61000000000002
+    }
+  ],
+  "laboratory": {
+    "cash_cost": 50,
+    "repair_hours": 6,
+    "profit_improvement_per_hour": 1.6499999999999915,
+    "cash_only_payback_hours": 30.30303030303046,
+    "including_six_hours_opportunity": 131.97575757575837,
+    "expected_two_stable_cost_before": 89.01098901098896,
+    "expected_two_stable_cost_after": 84.37499999999996
+  },
+  "funding": [
+    {
+      "initial": 108.18,
+      "target": 151,
+      "reserve": 20,
+      "max_attempts": 2,
+      "points": 0,
+      "sale": 0.75,
+      "funded": 0.8400000000000001,
+      "expected_attempts": 1.3000000000000003,
+      "expected_cash": 153.03000000000003,
+      "minimum_cash": 27.18,
+      "lose_cash": 0.05000000000000001
+    },
+    {
+      "initial": 108.18,
+      "target": 151,
+      "reserve": 20,
+      "max_attempts": 2,
+      "points": 3,
+      "sale": 0.75,
+      "funded": 0.9646000000000002,
+      "expected_attempts": 1.0900000000000003,
+      "expected_cash": 157.23000000000005,
+      "minimum_cash": 27.18,
+      "lose_cash": 0.0045
+    },
+    {
+      "initial": 108.18,
+      "target": 151,
+      "reserve": 20,
+      "max_attempts": 2,
+      "points": 0,
+      "sale": 0.85,
+      "funded": 0.8400000000000001,
+      "expected_attempts": 1.3000000000000003,
+      "expected_cash": 163.95000000000002,
+      "minimum_cash": 27.18,
+      "lose_cash": 0.05000000000000001
+    },
+    {
+      "initial": 108.18,
+      "target": 151,
+      "reserve": 20,
+      "max_attempts": 2,
+      "points": 3,
+      "sale": 0.85,
+      "funded": 0.9646000000000002,
+      "expected_attempts": 1.0900000000000003,
+      "expected_cash": 169.13280000000006,
+      "minimum_cash": 27.18,
+      "lose_cash": 0.0045
+    }
+  ],
+  "healing2_research": [
+    {
+      "bonus": 5,
+      "attempts": 1.2906855864197526,
+      "hours": 2.5813711728395052,
+      "herbs": 0.32267139660493815,
+      "points": 0.12906750000000006,
+      "sample_opportunity": 4.5
+    },
+    {
+      "bonus": 7,
+      "attempts": 1.2135602271468149,
+      "hours": 2.4271204542936298,
+      "herbs": 0.3033900567867037,
+      "points": 0.060678000000000024,
+      "sample_opportunity": 4.5
+    }
+  ],
+  "growth": [
+    {
+      "remaining": 11,
+      "mastery": 2,
+      "bonus": 5,
+      "guidance": false,
+      "batch": 2,
+      "expected_batches": 6.755617518166621,
+      "hours": 13.511235036333241,
+      "attempts": 13.511235036333241,
+      "allocated_cost": 6.080055766349959,
+      "initial_cat": 0
+    },
+    {
+      "remaining": 11,
+      "mastery": 2,
+      "bonus": 5,
+      "guidance": true,
+      "batch": 2,
+      "expected_batches": 5.693893114680965,
+      "hours": 11.38778622936193,
+      "attempts": 11.38778622936193,
+      "allocated_cost": 3.871847317983055,
+      "initial_cat": 0
+    },
+    {
+      "remaining": 11,
+      "mastery": 2,
+      "bonus": 7,
+      "guidance": false,
+      "batch": 2,
+      "expected_batches": 6.073787865617685,
+      "hours": 12.14757573123537,
+      "attempts": 12.14757573123537,
+      "allocated_cost": 4.251651505932379,
+      "initial_cat": 0
+    },
+    {
+      "remaining": 11,
+      "mastery": 2,
+      "bonus": 7,
+      "guidance": true,
+      "batch": 2,
+      "expected_batches": 5.594770995825515,
+      "hours": 11.18954199165103,
+      "attempts": 11.18954199165103,
+      "allocated_cost": 3.1890194676205414,
+      "initial_cat": 0
+    },
+    {
+      "remaining": 9,
+      "mastery": 2,
+      "bonus": 5,
+      "guidance": false,
+      "batch": 2,
+      "expected_batches": 5.580136500877585,
+      "hours": 11.16027300175517,
+      "attempts": 11.16027300175517,
+      "allocated_cost": 5.0221228507898275,
+      "initial_cat": 0
+    },
+    {
+      "remaining": 9,
+      "mastery": 2,
+      "bonus": 5,
+      "guidance": true,
+      "batch": 2,
+      "expected_batches": 4.727054575203907,
+      "hours": 9.454109150407813,
+      "attempts": 9.454109150407813,
+      "allocated_cost": 3.214397111138655,
+      "initial_cat": 0
+    },
+    {
+      "remaining": 9,
+      "mastery": 2,
+      "bonus": 7,
+      "guidance": false,
+      "batch": 2,
+      "expected_batches": 5.027714756365848,
+      "hours": 10.055429512731695,
+      "attempts": 10.055429512731695,
+      "allocated_cost": 3.519400329456093,
+      "initial_cat": 0
+    },
+    {
+      "remaining": 9,
+      "mastery": 2,
+      "bonus": 7,
+      "guidance": true,
+      "batch": 2,
+      "expected_batches": 4.657239630186708,
+      "hours": 9.314479260373416,
+      "attempts": 9.314479260373416,
+      "allocated_cost": 2.654626589206422,
+      "initial_cat": 0
+    },
+    {
+      "remaining": 20,
+      "mastery": 3,
+      "bonus": 5,
+      "guidance": false,
+      "batch": 4,
+      "expected_batches": 6.644649343798486,
+      "hours": 13.289298687596972,
+      "attempts": 26.578597375193944,
+      "allocated_cost": 411.96825931550615,
+      "initial_cat": 70
+    },
+    {
+      "remaining": 20,
+      "mastery": 3,
+      "bonus": 5,
+      "guidance": true,
+      "batch": 4,
+      "expected_batches": 5.366098767224296,
+      "hours": 10.732197534448591,
+      "attempts": 21.464395068897183,
+      "allocated_cost": 324.6489754170699,
+      "initial_cat": 70
+    },
+    {
+      "remaining": 20,
+      "mastery": 3,
+      "bonus": 7,
+      "guidance": false,
+      "batch": 4,
+      "expected_batches": 5.948073014180351,
+      "hours": 11.896146028360702,
+      "attempts": 23.792292056721404,
+      "allocated_cost": 361.64283926216535,
+      "initial_cat": 70
+    },
+    {
+      "remaining": 20,
+      "mastery": 3,
+      "bonus": 7,
+      "guidance": true,
+      "batch": 4,
+      "expected_batches": 5.138121782085798,
+      "hours": 10.276243564171596,
+      "attempts": 20.55248712834319,
+      "allocated_cost": 306.84863282616385,
+      "initial_cat": 70
+    },
+    {
+      "remaining": 25,
+      "mastery": 4,
+      "bonus": 6,
+      "guidance": false,
+      "batch": 4,
+      "expected_batches": 8.730553717552276,
+      "hours": 17.46110743510455,
+      "attempts": 34.9222148702091,
+      "allocated_cost": 642.5687536118475,
+      "initial_cat": 70
+    },
+    {
+      "remaining": 25,
+      "mastery": 4,
+      "bonus": 6,
+      "guidance": true,
+      "batch": 4,
+      "expected_batches": 6.806596560859157,
+      "hours": 13.613193121718314,
+      "attempts": 27.22638624343663,
+      "allocated_cost": 471.56100973632243,
+      "initial_cat": 70
+    },
+    {
+      "remaining": 25,
+      "mastery": 4,
+      "bonus": 8,
+      "guidance": false,
+      "batch": 4,
+      "expected_batches": 7.745184281853594,
+      "hours": 15.490368563707188,
+      "attempts": 30.980737127414375,
+      "allocated_cost": 545.2609734424931,
+      "initial_cat": 70
+    },
+    {
+      "remaining": 25,
+      "mastery": 4,
+      "bonus": 8,
+      "guidance": true,
+      "batch": 4,
+      "expected_batches": 6.518109431894645,
+      "hours": 13.03621886378929,
+      "attempts": 26.07243772757858,
+      "allocated_cost": 435.93115880511385,
+      "initial_cat": 70
+    },
+    {
+      "remaining": 25,
+      "mastery": 5,
+      "bonus": 6,
+      "guidance": false,
+      "batch": 4,
+      "expected_batches": 10.019970410170176,
+      "hours": 20.03994082034035,
+      "attempts": 40.0798816406807,
+      "allocated_cost": 1082.156804298379,
+      "initial_cat": 70
+    },
+    {
+      "remaining": 25,
+      "mastery": 5,
+      "bonus": 6,
+      "guidance": true,
+      "batch": 4,
+      "expected_batches": 7.264668410712328,
+      "hours": 14.529336821424655,
+      "attempts": 29.05867364284931,
+      "allocated_cost": 703.2199021569533,
+      "initial_cat": 70
+    },
+    {
+      "remaining": 25,
+      "mastery": 5,
+      "bonus": 8,
+      "guidance": false,
+      "batch": 4,
+      "expected_batches": 8.730553717552276,
+      "hours": 17.46110743510455,
+      "attempts": 34.9222148702091,
+      "allocated_cost": 873.0553717552276,
+      "initial_cat": 70
+    },
+    {
+      "remaining": 25,
+      "mastery": 5,
+      "bonus": 8,
+      "guidance": true,
+      "batch": 4,
+      "expected_batches": 6.806596560859157,
+      "hours": 13.613193121718314,
+      "attempts": 27.22638624343663,
+      "allocated_cost": 607.1484132286367,
+      "initial_cat": 70
+    }
+  ],
+  "healing_stock": [
+    {
+      "quantity": 2,
+      "bonus": 5,
+      "hours": 2.157297830374754,
+      "materials": 0.7334812623274161,
+      "buy": 9.0
+    },
+    {
+      "quantity": 2,
+      "bonus": 7,
+      "hours": 2.0398079411901584,
+      "materials": 0.5813452632391948,
+      "buy": 9.0
+    },
+    {
+      "quantity": 6,
+      "bonus": 5,
+      "hours": 6.440687574337416,
+      "materials": 2.1898337752747206,
+      "buy": 27.0
+    },
+    {
+      "quantity": 6,
+      "bonus": 7,
+      "hours": 6.117147616191244,
+      "materials": 1.7433870706145034,
+      "buy": 27.0
+    },
+    {
+      "quantity": 9,
+      "bonus": 5,
+      "hours": 10.118282599701843,
+      "materials": 3.440216083898625,
+      "buy": 40.5
+    },
+    {
+      "quantity": 9,
+      "bonus": 7,
+      "hours": 10.008541690661248,
+      "materials": 2.852434381838454,
+      "buy": 40.5
+    }
+  ],
+  "hundred_progress": [
+    {
+      "bonus": 5,
+      "attempts": 6.787603602083095,
+      "cost": 193.45332527173545,
+      "hours": 13.57520720416619
+    },
+    {
+      "bonus": 7,
+      "attempts": 6.082207869789955,
+      "cost": 173.34662357277566,
+      "hours": 12.16441573957991
+    }
+  ],
+  "formula_entry": [
+    {
+      "name": "Благословение",
+      "bonus": 5,
+      "sample": false,
+      "hours": 5.023320592592584,
+      "cost": 12.872259018518497,
+      "points": 0.9721359999999987,
+      "first_variant_stable": 0.84
+    },
+    {
+      "name": "Благословение",
+      "bonus": 5,
+      "sample": true,
+      "hours": 2.73453,
+      "cost": 27.007233125,
+      "points": 0.2733599999999998,
+      "first_variant_stable": 0.84
+    },
+    {
+      "name": "Благословение",
+      "bonus": 7,
+      "sample": false,
+      "hours": 4.526641068513127,
+      "cost": 11.599517738064888,
+      "points": 0.6739972500000008,
+      "first_variant_stable": 0.9099999999999999
+    },
+    {
+      "name": "Благословение",
+      "bonus": 7,
+      "sample": true,
+      "hours": 2.5813711728395052,
+      "cost": 26.61476363040123,
+      "points": 0.12906750000000006,
+      "first_variant_stable": 0.9099999999999999
+    },
+    {
+      "name": "Щит веры",
+      "bonus": 5,
+      "sample": false,
+      "hours": 5.023320592592584,
+      "cost": 12.872259018518497,
+      "points": 0.9721359999999987,
+      "first_variant_stable": 0.84
+    },
+    {
+      "name": "Щит веры",
+      "bonus": 5,
+      "sample": true,
+      "hours": 2.73453,
+      "cost": 27.007233125,
+      "points": 0.2733599999999998,
+      "first_variant_stable": 0.84
+    },
+    {
+      "name": "Щит веры",
+      "bonus": 7,
+      "sample": false,
+      "hours": 4.526641068513127,
+      "cost": 11.599517738064888,
+      "points": 0.6739972500000008,
+      "first_variant_stable": 0.9099999999999999
+    },
+    {
+      "name": "Щит веры",
+      "bonus": 7,
+      "sample": true,
+      "hours": 2.5813711728395052,
+      "cost": 26.61476363040123,
+      "points": 0.12906750000000006,
+      "first_variant_stable": 0.9099999999999999
+    },
+    {
+      "name": "Шаг сквозь туман",
+      "bonus": 5,
+      "sample": false,
+      "hours": 5.023320592592584,
+      "cost": 14.442046703703678,
+      "points": 0.9721359999999987,
+      "first_variant_stable": 0.84
+    },
+    {
+      "name": "Шаг сквозь туман",
+      "bonus": 5,
+      "sample": true,
+      "hours": 2.73453,
+      "cost": 32.86177375,
+      "points": 0.2733599999999998,
+      "first_variant_stable": 0.84
+    },
+    {
+      "name": "Шаг сквозь туман",
+      "bonus": 7,
+      "sample": false,
+      "hours": 4.526641068513127,
+      "cost": 13.01409307197524,
+      "points": 0.6739972500000008,
+      "first_variant_stable": 0.9099999999999999
+    },
+    {
+      "name": "Шаг сквозь туман",
+      "bonus": 7,
+      "sample": true,
+      "hours": 2.5813711728395052,
+      "cost": 32.42144212191358,
+      "points": 0.12906750000000006,
+      "first_variant_stable": 0.9099999999999999
+    }
+  ],
+  "ink_long": [
+    {
+      "class_level": 5,
+      "mastery": 3,
+      "bonus": 7,
+      "initial_outlay": 171.0,
+      "profit_per_hour": 32.89062500000032
+    },
+    {
+      "class_level": 5,
+      "mastery": 4,
+      "bonus": 8,
+      "initial_outlay": 472.0,
+      "profit_per_hour": 137.05000000000118
+    },
+    {
+      "class_level": 5,
+      "mastery": 5,
+      "bonus": 8,
+      "initial_outlay": 907.3333333333334,
+      "profit_per_hour": 258.4166666666685
+    },
+    {
+      "class_level": 9,
+      "mastery": 3,
+      "bonus": 8,
+      "initial_outlay": 171.0,
+      "profit_per_hour": 33.57500000000029
+    },
+    {
+      "class_level": 9,
+      "mastery": 4,
+      "bonus": 9,
+      "initial_outlay": 472.0,
+      "profit_per_hour": 142.56250000000134
+    },
+    {
+      "class_level": 9,
+      "mastery": 5,
+      "bonus": 9,
+      "initial_outlay": 907.3333333333334,
+      "profit_per_hour": 275.21354166666896
+    },
+    {
+      "class_level": 13,
+      "mastery": 3,
+      "bonus": 9,
+      "initial_outlay": 171.0,
+      "profit_per_hour": 34.12812500000028
+    },
+    {
+      "class_level": 13,
+      "mastery": 4,
+      "bonus": 10,
+      "initial_outlay": 472.0,
+      "profit_per_hour": 145.30000000000118
+    },
+    {
+      "class_level": 13,
+      "mastery": 5,
+      "bonus": 10,
+      "initial_outlay": 907.3333333333334,
+      "profit_per_hour": 289.3541666666688
+    },
+    {
+      "class_level": 17,
+      "mastery": 3,
+      "bonus": 10,
+      "initial_outlay": 171.0,
+      "profit_per_hour": 34.55000000000031
+    },
+    {
+      "class_level": 17,
+      "mastery": 4,
+      "bonus": 11,
+      "initial_outlay": 472.0,
+      "profit_per_hour": 147.51250000000115
+    },
+    {
+      "class_level": 17,
+      "mastery": 5,
+      "bonus": 11,
+      "initial_outlay": 907.3333333333334,
+      "profit_per_hour": 300.8385416666693
+    },
+    {
+      "class_level": 20,
+      "mastery": 3,
+      "bonus": 10,
+      "initial_outlay": 171.0,
+      "profit_per_hour": 34.55000000000031
+    },
+    {
+      "class_level": 20,
+      "mastery": 4,
+      "bonus": 11,
+      "initial_outlay": 472.0,
+      "profit_per_hour": 147.51250000000115
+    },
+    {
+      "class_level": 20,
+      "mastery": 5,
+      "bonus": 11,
+      "initial_outlay": 907.3333333333334,
+      "profit_per_hour": 300.8385416666693
+    }
+  ],
+  "supply_comparison": [
+    {
+      "name": "Благословение",
+      "quantity": 3,
+      "place": 1,
+      "known_recipe": true,
+      "materials": 0.6593406593406594,
+      "hours": 2.5458687823790522,
+      "stable": 0.9099999999999999,
+      "shadow_cost_at_ink2_city": 71.84183181465903
+    },
+    {
+      "name": "Благословение",
+      "quantity": 3,
+      "place": 3,
+      "known_recipe": true,
+      "materials": 0.6250000000000001,
+      "hours": 2.24051262357714,
+      "stable": 0.96,
+      "shadow_cost_at_ink2_city": 63.2697329552169
+    },
+    {
+      "name": "Щит веры",
+      "quantity": 3,
+      "place": 1,
+      "known_recipe": true,
+      "materials": 0.6593406593406594,
+      "hours": 2.5458687823790522,
+      "stable": 0.9099999999999999,
+      "shadow_cost_at_ink2_city": 71.84183181465903
+    },
+    {
+      "name": "Щит веры",
+      "quantity": 3,
+      "place": 3,
+      "known_recipe": true,
+      "materials": 0.6250000000000001,
+      "hours": 2.24051262357714,
+      "stable": 0.96,
+      "shadow_cost_at_ink2_city": 63.2697329552169
+    },
+    {
+      "name": "Шаг сквозь туман",
+      "quantity": 2,
+      "place": 1,
+      "known_recipe": true,
+      "materials": 3.296703296703297,
+      "hours": 2.3792721040427467,
+      "stable": 0.9099999999999999,
+      "shadow_cost_at_ink2_city": 69.82115132573857
+    },
+    {
+      "name": "Шаг сквозь туман",
+      "quantity": 2,
+      "place": 3,
+      "known_recipe": true,
+      "materials": 3.125,
+      "hours": 2.1634615384615388,
+      "stable": 0.96,
+      "shadow_cost_at_ink2_city": 63.615384615384684
+    },
+    {
+      "name": "Бдительный отдых",
+      "quantity": 1,
+      "place": 1,
+      "known_recipe": true,
+      "materials": 1.6483516483516485,
+      "hours": 2.197802197802198,
+      "stable": 0.9099999999999999,
+      "shadow_cost_at_ink2_city": 63.09890109890117
+    },
+    {
+      "name": "Бдительный отдых",
+      "quantity": 1,
+      "place": 3,
+      "known_recipe": true,
+      "materials": 1.5625,
+      "hours": 2.0833333333333335,
+      "stable": 0.96,
+      "shadow_cost_at_ink2_city": 59.812500000000064
+    }
+  ]
+}
