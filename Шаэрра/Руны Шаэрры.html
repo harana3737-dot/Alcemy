@@ -805,7 +805,7 @@ $("flows").addEventListener("click", e => {
   if (t.dataset.spend) { const i = t.dataset.spend; touch(); CLOSED = false; SPENT[i] = TG[i].trim() || "без записи, на кого"; TG[i] = ""; renderFlows(); store(); renderBanner(); const u = document.querySelector(`[data-undo="${i}"]`); if (u) u.focus(); }
   if (t.dataset.undo) { const i = t.dataset.undo; SPENT[i] = ""; renderFlows(); store(); const f = $(`tg${i}`); if (f) f.focus(); }
 });
-$("flows").addEventListener("input", e => { const m = /^tg([12])$/.exec(e.target.id); if (m) { TG[m[1]] = e.target.value; store(); } });
+$("flows").addEventListener("input", e => { const m = /^tg([12])$/.exec(e.target.id); if (m && MODE !== "preview") { touch(); CLOSED = false; TG[m[1]] = e.target.value; store(); renderBanner(); } });
 EVF.forEach(k => $(k).addEventListener("input", () => { touch(); CLOSED = false; store(); renderBanner(); }));
 
 // Тетрадь — только в этом браузере; повреждённые данные не стираем, а откладываем в резервный ключ
