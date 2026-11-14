@@ -1,13 +1,11 @@
 """Точные опорные расчёты стратегии; не изменяет игровые сохранения.
 
---write / --check: JSON расчётов и полный отбор каталога CSV.
+--write / --check: JSON совместной цепочки I–III, роста и тактических изделий.
 Условная оценка времени не является обещанием простоя или дохода.
 """
 import argparse
 from collections import defaultdict
-import csv
 from functools import lru_cache
-import io
 import json
 from pathlib import Path
 import re
@@ -18,8 +16,7 @@ from current_inventory import load
 from economy_book import formula_research, progress_research
 from rules_data import (BATCH_T, CAT_PRICE, CAT_STABLE, ELIXIR_DC, HERB,
                         INK_PRICES, MB, P_PRICE, P_SL,
-                        normal_brewing_allowed, proficiency)
-from scenario_engine import Scenario, finite_exact
+                        proficiency, elixir_batch)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / 'cards'))
 from cards_data import C
@@ -52,34 +49,6 @@ def ink(bonus, level=2, guidance=True, sale=.85):
     return dict(bonus=bonus, level=level, guidance=guidance, sale=sale,
                 cost=cost, **dist, profit=revenue-cost,
                 profit_per_hour=(revenue-cost)/(2 if level <= 2 else 4))
-
-
-def fund(initial, target, *, attempts=2, points=3, reserve=20, sale=.85):
-    """Конечный кошелёк: продаём по одному, останавливаемся при цели/дефиците.
-
-    Цены в медных монетах; без продажи будущих подарков, кредита и новых отдыхов.
-    Не оплачивает ремонт: только вероятность сначала собрать нужные деньги.
-    """
-    active = {(round(initial*100), points, 0): 1.}
-    terminal = defaultdict(float)
-    goal, floor, cost = round(target*100), round(reserve*100), 4050
-    for step in range(attempts+1):
-        following = defaultdict(float)
-        for (cash, pool, used), probability in active.items():
-            if cash >= goal or step == attempts or cash-cost < floor:
-                terminal[cash, used] += probability
-                continue
-            for face, left, mass in rolls(5, 12, pool):
-                revenue = round(120*sale*100) if face == 20 or face != 1 and face+5 >= 12 else 6000 if face != 1 and face+5 >= 8 else 0
-                following[cash-cost+revenue, left, used+1] += probability*mass
-        active = following
-    return dict(initial=initial, target=target, reserve=reserve, max_attempts=attempts,
-                points=points, sale=sale,
-                funded=sum(p for (cash, _), p in terminal.items() if cash >= goal),
-                expected_attempts=sum(n*p for (_, n), p in terminal.items()),
-                expected_cash=sum(cash*p/100 for (cash, _), p in terminal.items()),
-                minimum_cash=min(cash/100 for cash, _ in terminal),
-                lose_cash=sum(p for (cash, _), p in terminal.items() if cash < round(initial*100)))
 
 
 def growth(remaining, mastery, bonus, guidance=True):
@@ -127,137 +96,228 @@ def research(bonus):
                 sample_opportunity=P_PRICE[2])
 
 
-def formula(c):
-    if c['cls'] in ('oilw','oils','salve'):
-        return 'Масла и мази'
-    essence = re.split(r'\s+(?:X|IX|VIII|VII|VI|V|IV|III|II|I)\b', c['ess'])[0]
-    if essence.startswith('Стихия'):
-        essence = 'Стихия'
-    if c['cls'] in ('chg','rea','fl'):
-        return 'Заряды и склянки: '+essence
-    if c['cls'] == 'psn':
-        return 'Контрольные яды: '+essence
-    return 'Эликсир '+('Сноровки' if c['name'].startswith('Сноровка') else essence)
+SCROLL_PRICES = {1: 60, 2: 250, 3: 600}
+SLOTS_LAEL = {1: 4, 2: 3, 3: 2}
 
 
-def screening():
-    selected = {'Благословение':'Первый кандидат против атак и спасбросков; Разум',
-                'Бдительный отдых':'Кандидат на возврат времени, нужен сюжетный повод; Разум',
-                'Шаг сквозь туман':'Первый кандидат на аварийный выход; Движение',
-                'Щит веры':'Запасной выбор под атаки, особенно Фаэнону; Тело',
-                'Защита от смерти':'Цель M4 при реальной угрозе смерти; Смерть/душа',
-                'Зеркальные образы':'Цель M3 против видящих атакующих; Покров',
-                'Психическая стойкость':'Цель M3 против контроля; Разум'}
-    rows=[]
-    for c in C:
-        price=float(re.search(r'[\d.]+',c['price'].replace(' ','')).group())
-        l=c['lvl']; by_value=c['cls'] in ('fl','chg','psn','rea','oils')
-        herbs=price/3 if by_value else l*HERB[l]
-        why=selected.get(c['name'], 'Сравнивать с конкретной угрозой; отдельный ранний приоритет не назначен')
-        if c['cls'] in ('chg','rea','fl'):
-            why='Отложить самостоятельное исследование: 100 прогресса на тип; взять найденный рецепт или готовое средство под угрозу'
-        elif c['cls'] == 'psn':
-            why='Отложить: иммунитеты нежити/сопротивления и цена открытия; проверить конкретного противника'
-        elif c['cls'] in ('oilw','oils','salve'):
-            why='Отложить покупку рецепта за 500 зм; магический меч Фаэнона ограничивает часть масел'
-        rows.append(dict(name=c['name'],level=l,kind=c['cls'],formula=formula(c),
-                         ordinary_at_M2_place1=normal_brewing_allowed(l,2,1),
-                         confirmed_recipe=False,price=price,base_per_attempt=herbs,
-                         essence=c['ess'],catalyst_upfront=CAT_PRICE[l],
-                         raw_effect=c['eff'],reason=why))
-    return rows
+@lru_cache(None)
+def ink_rolls(level, bonus, points):
+    result=defaultdict(float)
+    for face,left,p in rolls(bonus,ELIXIR_DC[level],points):
+        if face==1 or face!=20 and face+bonus<ELIXIR_DC[level]-4:
+            quality=None
+        elif face!=20 and face+bonus<ELIXIR_DC[level]:
+            quality=-2
+        else:
+            quality=4 if face==20 else 2 if face+bonus>=ELIXIR_DC[level]+5 else 0
+        result[quality,left]+=p
+    return tuple((quality,left,p) for (quality,left),p in result.items())
 
 
-def healing_stock(quantity, bonus=5):
-    from math import comb
-    p=chances(bonus,P_SL[2],True)[0]
-    @lru_cache(None)
-    def batches(left):
-        if left<=0:
-            return 0.
-        return (1+sum(comb(2,k)*p**k*(1-p)**(2-k)*batches(max(0,left-k))
-                      for k in (1,2)))/(1-(1-p)**2)
-    n=batches(quantity); saved=0.
-    for face,_,mass in rolls(bonus,P_SL[2],1):
-        if face==20 or face!=1 and face+bonus>=P_SL[2]+5:
-            saved+=mass
-    return dict(quantity=quantity,bonus=bonus,hours=2*n,
-                materials=2*n*(1-saved),buy=quantity*P_PRICE[2])
+@lru_cache(None)
+def scroll_rolls(level, quality, nth, luck):
+    """Везунчик 2014: лучший из двух, только на неудаче, максимум один пункт."""
+    bonus=10+quality-2*(nth-1);dc=10+2*level
+    result=defaultdict(float)
+    for first in range(1,21):
+        retry=bool(luck and (first==1 or first!=20 and first+bonus<dc))
+        for second in (range(1,21) if retry else (first,)):
+            face=max(first,second) if retry else first
+            status=('lost' if face==1 or face!=20 and face+bonus<dc-4 else
+                    'stable' if face==20 or face+bonus>=dc else 'unstable')
+            result[status,luck-int(retry)]+=1/(400 if retry else 20)
+    return tuple((status,left,p) for (status,left),p in result.items())
 
 
-def entry(name, bonus=5, sample=True):
-    c=next(c for c in C if c['name']==name)
-    target=2 if sample else 3
-    dc=ELIXIR_DC[c['lvl']] + (0 if sample else 2)
-    trials, points=formula_research(target,dc,bonus+(2 if sample else 0),3)
-    base=c['lvl']*HERB[c['lvl']]
-    reagents=5 + base/4 + HERB[c['lvl']]
-    specimen=float(c['price']) if sample else 0
-    return dict(name=name,bonus=bonus,sample=sample,hours=2*trials,
-                cost=trials*reagents+specimen,points=points,
-                first_variant_stable=chances(bonus,ELIXIR_DC[c['lvl']]+2,True)[0])
+def chain(level, bonus, *, lucky=True, sale=.75, ink_sale=.75, accept_unstable=True):
+    """На один исходный подход; первое Начертание после реального отдыха.
+
+    Учитываем все чернила, в том числе нестабильные. Не продаём дефектные
+    свитки, не кредитуем экономию материалов и не оцениваем ячейки монетами.
+    """
+    material=INK_PRICES[level]/3+HERB[level]
+    allocated=material+CAT_PRICE[level]/CAT_STABLE
+    accepted=success=unstable=luck_use=direct=direct_premium=0.
+    for quality,_,p in ink_rolls(level,bonus,1):
+        if quality is None:
+            continue
+        direct+=p*INK_PRICES[level]*(.5 if quality<0 else ink_sale)
+        direct_premium+=p*INK_PRICES[level]*(.5 if quality<0 else ink_sale*(2 if quality==4 else 1.5 if quality==2 else 1))
+        if quality<0 and not accept_unstable:
+            continue
+        accepted+=p
+        for status,left,q in scroll_rolls(level,quality,1,int(lucky)):
+            success+=p*q*(status=='stable');unstable+=p*q*(status=='unstable')
+            luck_use+=p*q*(int(lucky)-left)
+    price=SCROLL_PRICES[level];duration=2 if level<=2 else 4
+    return dict(level=level,bonus=bonus,lucky=lucky,accept_unstable=accept_unstable,scroll_sale_fraction=sale,
+                first_attempt_cash=material+CAT_PRICE[level],allocated_per_attempt=allocated,
+                ink_accepted=accepted,stable_per_attempt=success,unstable_per_attempt=unstable,
+                cost_per_stable=allocated/success,talis_hours_per_stable=duration/success,
+                lael_hours_per_stable=2*accepted/success,slots_per_stable=accepted/success,
+                luck_per_stable=luck_use/success,scroll_sale_price=price*sale,
+                profit_per_production_attempt=price*sale*success-allocated,
+                net_per_stable=price*sale-allocated/success,
+                direct_ink_profit=direct-allocated,
+                scroll_increment_per_lael_hour=(price*sale*success-direct)/(2*accepted),
+                break_even_scroll_sale_fraction=direct/(price*success),
+                break_even_with_quality_premium=direct_premium/(price*success))
+
+
+def joint_cycle(level=2, bonus=5, attempts=2, *, luck=3, guide=3, slots=None, sale=.75, consult=False):
+    """Конечный блок без отдыхов: очередь, слоты, усталость, время отдельно.
+
+    Талис работает последовательно, Лаэль начинает сразу после получения
+    очередного набора и освобождения от предыдущей работы. Не помещающиеся
+    в слоты чернила остаются запасом, не считаются свитками или выручкой.
+    """
+    slots=SLOTS_LAEL[level] if slots is None else slots
+    if attempts<1 or slots<0 or luck<0 or guide<0:
+        raise ValueError("Неверный размер блока или запас ресурсов")
+    duration=2 if level<=2 else 4
+    # Остатки ресурсов, число Начертаний/стабильных/дефектных/ожидающих, конец письма.
+    states={(guide,luck,0,0,0,0,0,0):1.}
+    for attempt in range(1,attempts+1):
+        nxt=defaultdict(float)
+        for (g,l,used,good,bad,waiting,end,t_end),probability in states.items():
+            production_end=t_end+duration
+            if consult:
+                production_end=max(production_end-.5,end)+.5
+            writer_end=production_end if consult else end
+            for quality,left,p in ink_rolls(level,bonus+int(consult),g):
+                if quality is None or used>=slots:
+                    key=(left,l,used,good,bad,waiting+int(quality is not None),writer_end,production_end)
+                    nxt[key]+=probability*p
+                    continue
+                finish=max(production_end,writer_end)+2
+                for status,new_l,q in scroll_rolls(level,quality,used+1,l):
+                    key=(left,new_l,used+1,good+int(status=='stable'),bad+int(status=='unstable'),waiting,finish,production_end)
+                    nxt[key]+=probability*p*q
+        states=nxt
+    assert abs(sum(states.values())-1)<1e-9
+    material=INK_PRICES[level]/3+HERB[level]
+    cash=attempts*material+(CAT_PRICE[level]*((attempts+CAT_STABLE-1)//CAT_STABLE))
+    mean=lambda f:sum(f(k)*p for k,p in states.items())
+    good=mean(lambda k:k[3]);sold=mean(lambda k:max(0,k[3]-1))
+    ideal_t=ideal_l=0
+    for i in range(attempts):
+        ideal_t+=duration
+        if consult:
+            ideal_t=max(ideal_t-.5,ideal_l)+.5
+            ideal_l=ideal_t
+        if i<slots:
+            ideal_l=max(ideal_t,ideal_l)+2
+    return dict(level=level,bonus=bonus,attempts=attempts,initial_guide=guide,initial_luck=luck,
+        slot_limit=slots,consult=consult,consultation_hours=.5*attempts if consult else 0,cash_upfront=cash,talis_hours=duration*attempts,
+        lael_hours=2*mean(lambda k:k[2])+(.5*attempts if consult else 0),slots_used=mean(lambda k:k[2]),
+        guide_used=guide-mean(lambda k:k[0]),luck_used=luck-mean(lambda k:k[1]),
+        elapsed_work_only=mean(lambda k:max(k[7],k[6])),
+        ideal_elapsed_with_available_slots=max(ideal_t,ideal_l),
+        stable_scrolls=good,unstable_scrolls=mean(lambda k:k[4]),waiting_inks=mean(lambda k:k[5]),
+        probability_two_stable=sum(p for k,p in states.items() if k[3]>=2),
+        stable_distribution={str(i):sum(p for k,p in states.items() if k[3]==i) for i in range(attempts+1)},
+        all_sold_cash_net=good*SCROLL_PRICES[level]*sale-cash,
+        first_kept_scrolls=mean(lambda k:min(1,k[3])),excess_sold_scrolls=sold,
+        first_kept_cash_net=sold*SCROLL_PRICES[level]*sale-cash)
+
+
+def mixed_two_cycles():
+    block=joint_cycle()
+    distribution={int(k):v for k,v in block['stable_distribution'].items()}
+    totals=defaultdict(float)
+    for a,pa in distribution.items():
+        for b,pb in distribution.items():
+            totals[a+b]+=pa*pb
+    stock=sum(min(2,n)*p for n,p in totals.items())
+    sold=sum(max(0,n-2)*p for n,p in totals.items())
+    return dict(attempts=4,cash_without_interim_sales=162,talis_hours=8,
+                lael_hours=2*block['lael_hours'],separate_resource_cycles=2,
+                group_stock=stock,sold=sold,conditional_cash_net=sold*187.5-162,
+                probability_stock_two=sum(p for n,p in totals.items() if n>=2))
+
+
+def tactical(name):
+    c=next(c for c in C if c['name']==name);l=c['lvl']
+    price=float(re.search(r'[\d.]+',c['price'].replace(' ','')).group())
+    base=price/3 if c['cls'] in ('chg','rea','fl','psn','oils') else l*HERB[l]
+    # Все выбранные цели требуют одну эссенцию своего уровня и не имеют дорогого компонента.
+    material=base+HERB[l];duration=2 if l<=2 else 4
+    bonus=proficiency(5)+MB[5]+3
+    first=chances(bonus,ELIXIR_DC[l]+2,True)[0]
+    known=chances(bonus,ELIXIR_DC[l],True)[0]
+    expected_cash=material/first+(CAT_PRICE[l]/(1-(1-first)**CAT_STABLE) if CAT_PRICE[l] else 0)
+    return dict(name=name,level=l,kind=c['cls'],essence=c['ess'],price=price,
+                base=base,raw_material=material,catalyst=CAT_PRICE[l],
+                first_attempt_cash=material+CAT_PRICE[l],duration=duration,
+                stable_first=first,stable_known=known,first_stable_hours=duration/first,
+                first_stable_cash=expected_cash,
+                allocated_known_per_stable=(material+CAT_PRICE[l]/CAT_STABLE)/known,
+                toxicity=c['tox'],concentration=c.get('concentration',False),effect=c['eff'])
+
+
+def validate_sources():
+    """Не переносить старые цены и правило закупки в новую редакцию молча."""
+    page=(ROOT/'Шпаргалка свитков.html').read_text()
+    for label,expected in (('Материалы, зм',[15,30,120,300]),
+                           ('Готовый свиток, зм',[30,60,250,600])):
+        row=re.search(r'<tr><td>'+re.escape(label)+r'</td>(.*?)</tr>',page,re.S)
+        if not row:
+            raise ValueError('Нет исходной строки цен: '+label)
+        values=re.findall(r'<td[^>]*>(.*?)</td>',row[1],re.S)
+        actual=[int(re.sub(r'<[^>]+>|\s','',v)) for v in values[:4]]
+        if actual!=expected:
+            raise ValueError('Изменились цены свитков/чернил: пересмотреть стратегию')
+    rules=(ROOT/'Алхимия Талиса — полные правила v0.3.md').read_text()
+    if 'На деле Гильдия берёт за 75%' not in rules or 'свитки Лаэля' not in rules:
+        raise ValueError('Перепроверить подтверждение закупки собственных свитков')
+    if 'помогает не меньше 30 минут' not in rules:
+        raise ValueError('Перепроверить условия консультации Лаэля')
 
 
 def build():
-    cash=load()['state']['mat']['gold']
-    a,b=ink(5),ink(7)
-    improvement=(b['profit']-a['profit'])/2
-    data=dict(snapshot_cash=cash, assumptions=dict(sale=.85,alternative_sale=.75,
-        reserve_proposed=20,weekly_total=22,buffer_proposed=4,stable_cat_uses=5,
-        osseka_extra_cost='не установлена; не назначена нулевой фактической тратой'),
-        ink=[ink(b,l,g,s) for l in (1,2) for b in (5,7) for g in (False,True) for s in (.75,.85)],
-        laboratory=dict(cash_cost=50,repair_hours=6,profit_improvement_per_hour=improvement,
-            cash_only_payback_hours=50/improvement,
-            including_six_hours_opportunity=(50+6*a['profit_per_hour'])/improvement,
-            expected_two_stable_cost_before=2*a['cost']/a['stable'],
-            expected_two_stable_cost_after=2*b['cost']/b['stable']),
-        funding=[fund(cash,151,sale=s,points=p) for s in (.75,.85) for p in (0,3)],
+    validate_sources()
+    result=dict(goal='M5 и устойчивое снабжение группы; коммерция — дополнительный источник',
+        confirmed_cash=load()['state']['mat']['gold'],
+        assumptions=dict(lael_base_bonus=10,scroll_market=SCROLL_PRICES,
+            scroll_sale_fraction=.75,crafted_scroll_sale_confirmed=True,
+            sale_source="Полные правила, справочник цен: со слов игрока, собственные свитки Лаэля тоже 75%",
+            guaranteed_buy_volume=None,refund_credit=0,unstable_scroll_revenue=0,
+            ink_quality_premium_in_baseline=False,
+            talis_weekly_alchemy_hours=[20,22],lael_hours='отдельный бюджет',
+            travel_trade_repair_in_alchemy_cap='не установлено; считать отдельно',
+            inventory_sharing='не согласовано; прибыль цепочки не личный кошелёк Талиса'),
+        chain=[chain(l,b,lucky=lucky) for l in (1,2,3) for b in (5,7) for lucky in (False,True)],
+        stable_inks_only=[chain(l,b,accept_unstable=False) for l in (1,2,3) for b in (5,7)],
+        cycles=[joint_cycle(l,b,n,luck=luck) for l,n in ((1,3),(2,2),(2,3),(3,2),(3,3))
+                for b in (5,7) for luck in (0,3)],
+        growth=[growth(r,m,b) for m,r in ((2,9),(3,20),(4,25)) for b in (proficiency(5)+MB[m]+1,proficiency(5)+MB[m]+3)],
         healing2_research=[research(b) for b in (5,7)],
-        growth=[growth(r,m,b,g) for m,r in ((2,11),(2,9),(3,20),(4,25),(5,25))
-                for b in ((5,7) if m<=3 else (6,8)) for g in (False,True)],
-        healing_stock=[healing_stock(q,b) for q in (2,6,9) for b in (5,7)],
-        hundred_progress=[dict(bonus=b,attempts=progress_research(100,b,3)[0],
-            cost=progress_research(100,b,3)[1],hours=2*progress_research(100,b,3)[0]) for b in (5,7)],
-        formula_entry=[entry(n,b,s) for n in ('Благословение','Щит веры','Шаг сквозь туман') for b in (5,7) for s in (False,True)],
-        ink_long=[])
-    for level in (5,9,13,17,20):
-        for m in (3,4,5):
-            bonus=proficiency(level)+MB[m]+3
-            mat=INK_PRICES[m]/3+HERB[m]
-            # 30 отдельных производственных дней; не прогноз календаря.
-            s=Scenario(bonus,ELIXIR_DC[m],mat,.85*INK_PRICES[m],CAT_PRICE[m],m,
-                       item_kind='ink',points=2,per_day=2,days=30,stop=5)
-            result=finite_exact(s)
-            data['ink_long'].append(dict(class_level=level,mastery=m,bonus=bonus,
-                 initial_outlay=mat+CAT_PRICE[m],profit_per_hour=result['per_day']/8))
-    from party_kit_report import CARDS, small
-    data['supply_comparison']=[]
-    for name,q in (('Благословение',3),('Щит веры',3),('Шаг сквозь туман',2),('Бдительный отдых',1)):
-        for lab in (1,3):
-            cost,hours,p=small(CARDS[name],2,q,level=5,lab=lab,guidance=True)
-            data['supply_comparison'].append(dict(name=name,quantity=q,place=lab,
-                known_recipe=True,materials=cost,hours=hours,stable=p,
-                shadow_cost_at_ink2_city=cost+hours*a['profit_per_hour']))
-    csvout=io.StringIO();rows=screening()
-    writer=csv.DictWriter(csvout,fieldnames=list(rows[0]),lineterminator="\n");writer.writeheader();writer.writerows(rows)
-    return json.dumps(data,ensure_ascii=False,indent=2)+'\n',csvout.getvalue()
+        recipe_100=[dict(bonus=b,attempts=progress_research(100,b,3)[0],
+                         gold=progress_research(100,b,3)[1],hours=2*progress_research(100,b,3)[0]) for b in (5,7,8)],
+        mixed_two_cycles=mixed_two_cycles(),
+        consulted_cycles=[joint_cycle(l,b,2,consult=True) for l,b in ((2,5),(3,7))],
+        finance_bridge_M4=[dict(sale=s,first_cash=472,two_attempt_cash=874,
+            profit_per_attempt=ink(8,4,True,s)['profit']-CAT_PRICE[4]/CAT_STABLE)
+            for s in (.75,.85)],
+        mastery5_batches=dict(healing=list(BATCH_T[5]),elixir=[elixir_batch(5,l,False) for l in range(1,6)],charge=1,flask=1),
+        targets=[tactical(n) for n in ('Склянка стихии: большая','Молниевый выдох','Склянка стихии: малая',
+            'Контрзаклинание','Сковывающая склянка: замедление','Благословение',
+            'Щит веры','Шаг сквозь туман','Зеркальные образы','Защита от смерти')])
+    return json.dumps(result,ensure_ascii=False,indent=2)+'\n'
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write',action='store_true');parser.add_argument('--check',action='store_true')
-    args=parser.parse_args();data,screen=build()
-    for name,content in (('results.json',data),('catalog_screen.csv',screen)):
-        path=OUTPUT/name
-        if args.check:
-            if not path.exists() or path.read_text()!=content:
-                raise SystemExit('Устарел расчёт стратегии: '+name)
-        elif args.write:
-            OUTPUT.mkdir(exist_ok=True);path.write_text(content)
-        else:
-            print(content if name=='results.json' else f'Каталог: {len(C)} карточек')
+    args=parser.parse_args();content=build();path=OUTPUT/'results.json'
     if args.check:
-        print(f'PASS: стратегия, конечный кошелёк и отбор {len(C)} карточек воспроизводятся')
+        if not path.exists() or path.read_text()!=content:
+            raise SystemExit('Устарел расчёт совместной стратегии: results.json')
+        print('PASS: цепочка I–III, конечные ресурсы, параллельность, M5 и выбранные средства воспроизводятся')
+    elif args.write:
+        OUTPUT.mkdir(exist_ok=True);path.write_text(content)
+    else:
+        print(content)
 
 
 if __name__=='__main__':
