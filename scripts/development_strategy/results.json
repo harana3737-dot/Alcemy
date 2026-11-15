@@ -25680,6 +25680,105 @@
       }
     ]
   },
+  "research_entry_comparison": {
+    "assumptions": {
+      "start": "M3, неизвестный рецепт и вариант; катализатор покупается с нуля",
+      "rerolls": false,
+      "formula_hint": 2,
+      "progress_research_hint": 0,
+      "extra_research_mishaps_excluded": true,
+      "training_and_travel_hours_unknown": true,
+      "inventory_changes": false,
+      "rows_are_alternatives_not_additive": true
+    },
+    "rows": [
+      {
+        "item": "Дрёма",
+        "recipe": "Эликсир Разума; необычная (III–V)",
+        "research_target": "Дрёма",
+        "bonus": 7,
+        "mastery": 3,
+        "first_stable_success": 0.65,
+        "research_hours": 5.864872307563367,
+        "research_cash": 49.118305575843195,
+        "first_stable_brew_hours": 6.153846153846153,
+        "first_stable_brew_cash": 76.52344045742748,
+        "catalyst_full_cash": 70.36959430358134,
+        "hours_from_research": 12.01871846140952,
+        "cash_from_research": 125.64174603327068,
+        "purchase_formula": 150,
+        "cash_from_purchase": 226.52344045742748
+      },
+      {
+        "item": "Зеркальные образы",
+        "recipe": "Эликсир Покрова; необычная (III–V)",
+        "research_target": "Зеркальные образы",
+        "bonus": 7,
+        "mastery": 3,
+        "first_stable_success": 0.65,
+        "research_hours": 5.864872307563367,
+        "research_cash": 49.118305575843195,
+        "first_stable_brew_hours": 6.153846153846153,
+        "first_stable_brew_cash": 76.52344045742748,
+        "catalyst_full_cash": 70.36959430358134,
+        "hours_from_research": 12.01871846140952,
+        "cash_from_research": 125.64174603327068,
+        "purchase_formula": 150,
+        "cash_from_purchase": 226.52344045742748
+      },
+      {
+        "item": "Защита от добра и зла",
+        "recipe": "Эликсир Смерти/души; необычная (III–V)",
+        "research_target": "Защита от добра и зла",
+        "bonus": 7,
+        "mastery": 3,
+        "first_stable_success": 0.65,
+        "research_hours": 5.864872307563367,
+        "research_cash": 49.118305575843195,
+        "first_stable_brew_hours": 6.153846153846153,
+        "first_stable_brew_cash": 76.52344045742748,
+        "catalyst_full_cash": 70.36959430358134,
+        "hours_from_research": 12.01871846140952,
+        "cash_from_research": 125.64174603327068,
+        "purchase_formula": 150,
+        "cash_from_purchase": 226.52344045742748
+      },
+      {
+        "item": "Контрзаклинание",
+        "recipe": "Заряды и склянки Эфира",
+        "research_target": null,
+        "bonus": 7,
+        "mastery": 3,
+        "first_stable_success": 0.65,
+        "research_hours": 12.480119982828661,
+        "research_cash": 187.2017997424299,
+        "first_stable_brew_hours": 6.153846153846153,
+        "first_stable_brew_cash": 225.75420968819674,
+        "catalyst_full_cash": 70.36959430358134,
+        "hours_from_research": 18.633966136674815,
+        "cash_from_research": 412.95600943062664,
+        "purchase_formula": null,
+        "cash_from_purchase": null
+      },
+      {
+        "item": "Склянка разума: гипноз",
+        "recipe": "Заряды и склянки Разума",
+        "research_target": null,
+        "bonus": 7,
+        "mastery": 3,
+        "first_stable_success": 0.65,
+        "research_hours": 12.480119982828661,
+        "research_cash": 187.2017997424299,
+        "first_stable_brew_hours": 6.153846153846153,
+        "first_stable_brew_cash": 225.75420968819674,
+        "catalyst_full_cash": 70.36959430358134,
+        "hours_from_research": 18.633966136674815,
+        "cash_from_research": 412.95600943062664,
+        "purchase_formula": null,
+        "cash_from_purchase": null
+      }
+    ]
+  },
   "assumptions": {
     "lael_base_bonus": 10,
     "scroll_market": {
