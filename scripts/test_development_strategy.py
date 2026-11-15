@@ -138,6 +138,65 @@ class DevelopmentStrategyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             growth(25,6,9)
 
+class CatalogInvestmentTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from elixir_catalog_review import catalog_investments
+        cls.model = catalog_investments()
+        cls.by = {r['name']: r for r in cls.model['items']}
+
+    def test_complete_catalog_and_shared_recipes(self):
+        self.assertEqual(self.model['total'], 185)
+        self.assertEqual(sum(self.model['counts'].values()), 185)
+        self.assertEqual(self.model['counts']['eff'], 102)
+        self.assertEqual(self.model['counts']['psn'], 14)
+        self.assertEqual(self.by['Яд: удержание чудовища']['recipes'], ['Заряды и склянки Разума'])
+        self.assertEqual(self.by['Масло скольжения']['recipes'], ['Масла и мази'])
+        self.assertEqual(self.by['Силовая клетка']['recipes'], self.by['Контрзаклинание']['recipes'])
+
+    def test_high_essences_and_reusable_tools_are_not_flat_costs(self):
+        crown = self.by['Звёздная корона']
+        self.assertEqual(crown['essence_price_range'], [32, 48])
+        self.assertEqual(crown['first_attempt_cash_with_new_catalyst'], [494, 510])
+        cage = self.by['Силовая клетка']
+        self.assertEqual(cage['reusable_tool'], 1500)
+        self.assertEqual(cage['consumed_component'], 0)
+        self.assertAlmostEqual(cage['raw_per_attempt'][0], 12500/3+32)
+        self.assertIsNone(self.by['Размер великана']['raw_per_attempt'])
+        self.assertEqual(self.by['Размер великана']['minimum_place_bonus'], 5)
+
+    def test_control_poison_is_single_and_uses_price_base(self):
+        poison = self.by['Яд: удержание чудовища']
+        self.assertAlmostEqual(poison['herb_base'], poison['source_price']/3)
+        self.assertEqual(set(poison['known_batches_ordinary_lab'].values()), {1})
+
+    def test_first_variant_surcharge_and_long_final_roll(self):
+        from unittest.mock import patch
+        from elixir_catalog_review import brewing_profile
+        self.assertAlmostEqual(brewing_profile(2, 7)['success'], .8)
+        self.assertAlmostEqual(brewing_profile(2, 7, True)['success'], .7)
+        # Two natural 20 approaches reach 90, quality +2; the final roll
+        # remains independent, not an automatic critical success.
+        with patch('elixir_catalog_review.random.Random') as rng:
+            rng.return_value.randint.return_value = 20
+            result = brewing_profile(7, 11, runs=1)
+        self.assertEqual(result['attempt_hours'], 4)
+        self.assertAlmostEqual(result['success'], .65)
+        # A natural 1 loses progress and reduces final quality by one.
+        with patch('elixir_catalog_review.random.Random') as rng:
+            rng.return_value.randint.side_effect = [1, 20, 20, 20]
+            result = brewing_profile(7, 10, runs=1)
+        self.assertEqual(result['attempt_hours'], 6)
+        self.assertAlmostEqual(result['success'], .55)
+        brewing_profile.cache_clear()
+
+    def test_very_rare_research_has_six_hour_probes(self):
+        group = next(r for r in self.model['recipes']
+                     if 'Сокрытие разума' in r['unlocks'])
+        acquisition = group['acquisition']
+        self.assertAlmostEqual(acquisition['hours'], 6*acquisition['expected_probes'])
+        self.assertGreater(acquisition['expected_research_cash_range'][0], 0)
+
 
 if __name__=='__main__':
     unittest.main()
