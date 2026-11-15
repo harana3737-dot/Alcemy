@@ -269,6 +269,61 @@ class ScrollSupplyReviewTests(unittest.TestCase):
         self.assertEqual(target['byproduct_sale_credit'], 0)
         self.assertLess(target['allocated_gold_until_target'], third['stable_first_chain']['cost_per_stable'])
 
+class UpcastGoalTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from development_strategy import upcast_goals
+        cls.model=upcast_goals()
+        cls.rows={r['spell']:r for r in cls.model['goals']}
+
+    def test_flight_and_invisibility_target_scaling(self):
+        from development_strategy import spell_power, scroll_supply_review
+        self.assertEqual(spell_power('Fly',3)['value'],1)
+        self.assertEqual(spell_power('Fly',5)['value'],3)
+        self.assertEqual(spell_power('Invisibility',4)['value'],3)
+        cards={r['spell']:r for r in scroll_supply_review()['alternatives']}
+        self.assertEqual(cards['Fly']['base_spell_level'],3)
+        self.assertEqual(cards['Invisibility']['base_spell_level'],2)
+        self.assertFalse(self.rows['Fly']['alchemy']['available_at_M5'])
+        self.assertFalse(self.rows['Invisibility']['alchemy']['available_at_M5'])
+
+    def test_quality_cannot_bridge_more_than_two_levels(self):
+        for name in ('Hold Person','Shadow Blade'):
+            second=self.rows[name]['paths'][0]
+            self.assertEqual(second['written_level'],2)
+            self.assertEqual(second['stable_target_per_ink_attempt'],0)
+            self.assertIsNone(second['allocated_until_target'])
+        third=self.rows['Fly']['paths'][0]
+        self.assertLess(third['stable_target_per_ink_attempt'],.1)
+        self.assertGreater(third['talis_hours_until_target'],60)
+
+    def test_target_budget_does_not_credit_other_scrolls_as_sales(self):
+        fly=self.rows['Fly']['paths']
+        self.assertGreater(fly[0]['allocated_until_target'],fly[2]['allocated_until_target'])
+        invis=self.rows['Invisibility']['paths']
+        self.assertLess(invis[1]['allocated_until_target'],invis[2]['allocated_until_target'])
+        for row in self.model['goals']:
+            for p in row['paths']:
+                self.assertEqual(p['byproduct_sale_credit'],0)
+                self.assertEqual(p['reading_level'],p['written_level'])
+                if p['stable_target_per_ink_attempt']:
+                    self.assertAlmostEqual(p['allocated_until_target']*p['stable_target_per_ink_attempt'],
+                                           p['allocated_per_attempt'])
+
+    def test_high_fast_requires_explicit_scenario_and_classic_is_not_two_hours(self):
+        from development_strategy import quality_scroll_distribution
+        with self.assertRaises(ValueError):
+            quality_scroll_distribution(5,11,scribe_bonus=11)
+        d=quality_scroll_distribution(5,11,scribe_bonus=11,approved_higher=True)
+        self.assertGreater(sum(d.values()),0)
+        self.assertLess(sum(d.values()),1)
+        self.assertEqual(self.rows['Fly']['classical_hours_lael'],160)
+        self.assertEqual(self.rows['Invisibility']['classical_hours_lael'],80)
+        self.assertTrue(self.rows['Fly']['paths'][-1]['requires_higher_fast_permission'])
+        q=self.model['fireball_flask_quality']
+        self.assertEqual(q['next_turn_d6'],q['initial_d6']//2)
+        self.assertTrue(q['targets_must_remain_in_area'])
+
 
 if __name__=='__main__':
     unittest.main()
