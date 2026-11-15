@@ -21137,7 +21137,7 @@
   },
   "scroll_supply_review": {
     "planned_upcast_confirmed": "Игрок подтвердил решение мастера 15.11.2026",
-    "scope": "Все 16 обсуждавшихся альтернатив; Magic Missile — дополнительный пример апкаста",
+    "scope": "Все 18 обсуждавшихся альтернатив; Magic Missile — дополнительный пример апкаста",
     "quality_policy": "Максимальное усиление эффекта, без экономии и без премии к цене продажи",
     "first_chain_bonus": 7,
     "source_spells": "scripts/cards/src/spells.json: уровень, время, концентрация; SRD 2014 и XGE: апкаст",
@@ -21194,6 +21194,410 @@
       "conditions": "Лаэль сначала изучает и готовит заклинание; независимые циклы с реальными отдыхами"
     },
     "alternatives": [
+      {
+        "item": "Полёт",
+        "alchemy_level": 7,
+        "spell": "Fly",
+        "base_spell_level": 3,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "flying targets, 60 feet, ten minutes",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "flying targets, 60 feet, ten minutes",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "flying targets, 60 feet, ten minutes",
+                  "value": 2
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "flying targets, 60 feet, ten minutes",
+                  "value": 3
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "flying targets, 60 feet, ten minutes",
+              "value": 2
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "flying targets, 60 feet, ten minutes",
+                  "value": 2
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "flying targets, 60 feet, ten minutes",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "flying targets, 60 feet, ten minutes",
+                  "value": 4
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "flying targets, 60 feet, ten minutes",
+              "value": 3
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "flying targets, 60 feet, ten minutes",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "flying targets, 60 feet, ten minutes",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "flying targets, 60 feet, ten minutes",
+                  "value": 5
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Невидимость",
+        "alchemy_level": 6,
+        "spell": "Invisibility",
+        "base_spell_level": 2,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "invisible targets, one hour",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 2
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 3
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "invisible targets, one hour",
+              "value": 2
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 2
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 4
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "invisible targets, one hour",
+              "value": 3
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 5
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "invisible targets, one hour",
+              "value": 4
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 5
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "invisible targets, one hour",
+                  "value": 6
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
       {
         "item": "Шаг сквозь туман",
         "alchemy_level": 2,
@@ -24915,6 +25319,364 @@
             "higher_crafting_permission_required": true
           }
         ]
+      }
+    ]
+  },
+  "upcast_goals": {
+    "assumptions": {
+      "talis_mastery": 5,
+      "lael_has_slots_V": true,
+      "spells_learned_and_prepared": true,
+      "talis_bonus": 11,
+      "lael_scribing_bonus_before_ink": 11,
+      "guidance_per_attempt": 1,
+      "lucky_only_on_failure": true,
+      "each_cycle_after_real_resource_recovery": true,
+      "higher_fast_scenarios_conditional_on_master": true,
+      "classical_has_no_quality_bonus": true,
+      "catalyst_allocation": "five stable uses",
+      "byproduct_revenue": 0,
+      "new_spell_and_recipe_acquisition_excluded": true,
+      "travel_and_trade_hours_excluded": true
+    },
+    "fireball_flask_quality": {
+      "initial_d6": 8,
+      "next_turn_d6": 4,
+      "delayed_requires_natural20": true,
+      "targets_must_remain_in_area": true,
+      "separate_save": true,
+      "alternative_extra_dose": true,
+      "ordinary_options": [
+        "reroll damage ones once",
+        "range 60 feet without disadvantage"
+      ]
+    },
+    "goals": [
+      {
+        "spell": "Fly",
+        "required_power": 3,
+        "base_spell_level": 3,
+        "planned_level": 5,
+        "paths": [
+          {
+            "written_level": 3,
+            "reading_level": 3,
+            "requires_higher_fast_permission": false,
+            "stable_target_per_ink_attempt": 0.05604375,
+            "allocated_per_attempt": 115.0,
+            "first_attempt_cash": 171.0,
+            "allocated_until_target": 2051.9683283149325,
+            "talis_hours_until_target": 71.37281141964982,
+            "lael_hours_until_target": 35.59718969555035,
+            "other_stable_scrolls_until_target": 16.487119437939096,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 4,
+            "reading_level": 4,
+            "requires_higher_fast_permission": true,
+            "stable_target_per_ink_attempt": 0.6341,
+            "allocated_per_attempt": 416.0,
+            "first_attempt_cash": 472.0,
+            "allocated_until_target": 656.0479419649897,
+            "talis_hours_until_target": 6.308153288124902,
+            "lael_hours_until_target": 3.130421069231982,
+            "other_stable_scrolls_until_target": 0.47981390947799984,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 5,
+            "reading_level": 5,
+            "requires_higher_fast_permission": true,
+            "stable_target_per_ink_attempt": 0.871874999999998,
+            "allocated_per_attempt": 851.3333333333334,
+            "first_attempt_cash": 907.3333333333334,
+            "allocated_until_target": 976.4396654719259,
+            "talis_hours_until_target": 4.587813620071695,
+            "lael_hours_until_target": 2.2652329749103997,
+            "other_stable_scrolls_until_target": 0.0,
+            "byproduct_sale_credit": 0
+          }
+        ],
+        "alchemy": {
+          "item": "Полёт",
+          "level": 7,
+          "available_at_M5": false,
+          "ordinary_concentration": false,
+          "alchemy_concentration": true,
+          "raw_per_attempt": [
+            144,
+            160
+          ],
+          "toxicity": "3 (не мягкий, 8.7)"
+        },
+        "classical_hours_lael": 160
+      },
+      {
+        "spell": "Invisibility",
+        "required_power": 3,
+        "base_spell_level": 2,
+        "planned_level": 4,
+        "paths": [
+          {
+            "written_level": 2,
+            "reading_level": 2,
+            "requires_higher_fast_permission": false,
+            "stable_target_per_ink_attempt": 0.05289375,
+            "allocated_per_attempt": 40.5,
+            "first_attempt_cash": 40.5,
+            "allocated_until_target": 765.6859269762496,
+            "talis_hours_until_target": 37.81165071487652,
+            "lael_hours_until_target": 37.71712158808933,
+            "other_stable_scrolls_until_target": 17.78163771712159,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 3,
+            "reading_level": 3,
+            "requires_higher_fast_permission": false,
+            "stable_target_per_ink_attempt": 0.7025812499999993,
+            "allocated_per_attempt": 115.0,
+            "first_attempt_cash": 171.0,
+            "allocated_until_target": 163.68213640771103,
+            "talis_hours_until_target": 5.693291701137775,
+            "lael_hours_until_target": 2.8395292359424653,
+            "other_stable_scrolls_until_target": 0.39491873715673487,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 4,
+            "reading_level": 4,
+            "requires_higher_fast_permission": true,
+            "stable_target_per_ink_attempt": 0.9383499999999997,
+            "allocated_per_attempt": 416.0,
+            "first_attempt_cash": 472.0,
+            "allocated_until_target": 443.33137954920886,
+            "talis_hours_until_target": 4.2628017264347005,
+            "lael_hours_until_target": 2.11541535674322,
+            "other_stable_scrolls_until_target": 0.0,
+            "byproduct_sale_credit": 0
+          }
+        ],
+        "alchemy": {
+          "item": "Невидимость",
+          "level": 6,
+          "available_at_M5": false,
+          "ordinary_concentration": false,
+          "alchemy_concentration": true,
+          "raw_per_attempt": [
+            56,
+            56
+          ],
+          "toxicity": "3"
+        },
+        "classical_hours_lael": 80
+      },
+      {
+        "spell": "Hold Person",
+        "required_power": 4,
+        "base_spell_level": 2,
+        "planned_level": 5,
+        "paths": [
+          {
+            "written_level": 2,
+            "reading_level": 2,
+            "requires_higher_fast_permission": false,
+            "stable_target_per_ink_attempt": 0,
+            "allocated_per_attempt": 40.5,
+            "first_attempt_cash": 40.5,
+            "allocated_until_target": null,
+            "talis_hours_until_target": null,
+            "lael_hours_until_target": null,
+            "other_stable_scrolls_until_target": null,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 3,
+            "reading_level": 3,
+            "requires_higher_fast_permission": false,
+            "stable_target_per_ink_attempt": 0.05604375,
+            "allocated_per_attempt": 115.0,
+            "first_attempt_cash": 171.0,
+            "allocated_until_target": 2051.9683283149325,
+            "talis_hours_until_target": 71.37281141964982,
+            "lael_hours_until_target": 35.59718969555035,
+            "other_stable_scrolls_until_target": 16.487119437939096,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 4,
+            "reading_level": 4,
+            "requires_higher_fast_permission": true,
+            "stable_target_per_ink_attempt": 0.6341,
+            "allocated_per_attempt": 416.0,
+            "first_attempt_cash": 472.0,
+            "allocated_until_target": 656.0479419649897,
+            "talis_hours_until_target": 6.308153288124902,
+            "lael_hours_until_target": 3.130421069231982,
+            "other_stable_scrolls_until_target": 0.47981390947799984,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 5,
+            "reading_level": 5,
+            "requires_higher_fast_permission": true,
+            "stable_target_per_ink_attempt": 0.871874999999998,
+            "allocated_per_attempt": 851.3333333333334,
+            "first_attempt_cash": 907.3333333333334,
+            "allocated_until_target": 976.4396654719259,
+            "talis_hours_until_target": 4.587813620071695,
+            "lael_hours_until_target": 2.2652329749103997,
+            "other_stable_scrolls_until_target": 0.0,
+            "byproduct_sale_credit": 0
+          }
+        ],
+        "alchemy": {
+          "item": "Яд: удержание личности",
+          "level": 2,
+          "available_at_M5": true,
+          "ordinary_concentration": false,
+          "alchemy_concentration": false,
+          "raw_per_attempt": [
+            40.5,
+            40.5
+          ],
+          "toxicity": "через рану — нет; выпитый или съеденный — 1"
+        },
+        "classical_hours_lael": 160
+      },
+      {
+        "spell": "Shadow Blade",
+        "required_power": 4,
+        "base_spell_level": 2,
+        "planned_level": 5,
+        "paths": [
+          {
+            "written_level": 2,
+            "reading_level": 2,
+            "requires_higher_fast_permission": false,
+            "stable_target_per_ink_attempt": 0,
+            "allocated_per_attempt": 40.5,
+            "first_attempt_cash": 40.5,
+            "allocated_until_target": null,
+            "talis_hours_until_target": null,
+            "lael_hours_until_target": null,
+            "other_stable_scrolls_until_target": null,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 3,
+            "reading_level": 3,
+            "requires_higher_fast_permission": false,
+            "stable_target_per_ink_attempt": 0.05604375,
+            "allocated_per_attempt": 115.0,
+            "first_attempt_cash": 171.0,
+            "allocated_until_target": 2051.9683283149325,
+            "talis_hours_until_target": 71.37281141964982,
+            "lael_hours_until_target": 35.59718969555035,
+            "other_stable_scrolls_until_target": 16.487119437939096,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 4,
+            "reading_level": 4,
+            "requires_higher_fast_permission": true,
+            "stable_target_per_ink_attempt": 0.6341,
+            "allocated_per_attempt": 416.0,
+            "first_attempt_cash": 472.0,
+            "allocated_until_target": 656.0479419649897,
+            "talis_hours_until_target": 6.308153288124902,
+            "lael_hours_until_target": 3.130421069231982,
+            "other_stable_scrolls_until_target": 0.47981390947799984,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 5,
+            "reading_level": 5,
+            "requires_higher_fast_permission": true,
+            "stable_target_per_ink_attempt": 0.871874999999998,
+            "allocated_per_attempt": 851.3333333333334,
+            "first_attempt_cash": 907.3333333333334,
+            "allocated_until_target": 976.4396654719259,
+            "talis_hours_until_target": 4.587813620071695,
+            "lael_hours_until_target": 2.2652329749103997,
+            "other_stable_scrolls_until_target": 0.0,
+            "byproduct_sale_credit": 0
+          }
+        ],
+        "alchemy": {
+          "item": "Теневой клинок",
+          "level": 2,
+          "available_at_M5": true,
+          "ordinary_concentration": false,
+          "alchemy_concentration": true,
+          "raw_per_attempt": [
+            1.5,
+            1.5
+          ],
+          "toxicity": "1"
+        },
+        "classical_hours_lael": 160
+      },
+      {
+        "spell": "Fireball",
+        "required_power": 10,
+        "base_spell_level": 3,
+        "planned_level": 5,
+        "paths": [
+          {
+            "written_level": 3,
+            "reading_level": 3,
+            "requires_higher_fast_permission": false,
+            "stable_target_per_ink_attempt": 0.05604375,
+            "allocated_per_attempt": 115.0,
+            "first_attempt_cash": 171.0,
+            "allocated_until_target": 2051.9683283149325,
+            "talis_hours_until_target": 71.37281141964982,
+            "lael_hours_until_target": 35.59718969555035,
+            "other_stable_scrolls_until_target": 16.487119437939096,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 4,
+            "reading_level": 4,
+            "requires_higher_fast_permission": true,
+            "stable_target_per_ink_attempt": 0.6341,
+            "allocated_per_attempt": 416.0,
+            "first_attempt_cash": 472.0,
+            "allocated_until_target": 656.0479419649897,
+            "talis_hours_until_target": 6.308153288124902,
+            "lael_hours_until_target": 3.130421069231982,
+            "other_stable_scrolls_until_target": 0.47981390947799984,
+            "byproduct_sale_credit": 0
+          },
+          {
+            "written_level": 5,
+            "reading_level": 5,
+            "requires_higher_fast_permission": true,
+            "stable_target_per_ink_attempt": 0.871874999999998,
+            "allocated_per_attempt": 851.3333333333334,
+            "first_attempt_cash": 907.3333333333334,
+            "allocated_until_target": 976.4396654719259,
+            "talis_hours_until_target": 4.587813620071695,
+            "lael_hours_until_target": 2.2652329749103997,
+            "other_stable_scrolls_until_target": 0.0,
+            "byproduct_sale_credit": 0
+          }
+        ],
+        "alchemy": {
+          "item": "Склянка стихии: большая",
+          "level": 5,
+          "available_at_M5": true,
+          "ordinary_concentration": false,
+          "alchemy_concentration": false,
+          "raw_per_attempt": [
+            104.0,
+            104.0
+          ],
+          "toxicity": "0 (склянку не пьют)"
+        },
+        "classical_hours_lael": 160
       }
     ]
   },

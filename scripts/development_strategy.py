@@ -407,6 +407,8 @@ def mixed_program(hours, policy='healing_first', ready=False):
 # Уровень изделия алхимии не обязан совпадать с кругом заклинания.
 # Здесь записаны обсуждавшиеся альтернативы; это не новые знания Лаэля.
 SCROLL_ALTERNATIVES = (
+    ('Полёт', 'Fly', 3, False, True),
+    ('Невидимость', 'Invisibility', 2, False, True),
     ('Шаг сквозь туман', 'Misty Step', 2, False, True),
     ('Зеркальные образы', 'Mirror Image', 2, True, True),
     ('Теневой клинок', 'Shadow Blade', 2, False, True),
@@ -432,6 +434,10 @@ def spell_power(name, slot):
         return dict(kind='d8 weapon dice', value=2 if slot==2 else 3 if slot<=4 else 4 if slot<=6 else 5)
     if name in ('Fireball', 'Lightning Bolt'):
         return dict(kind='d6 area dice', value=8+slot-3)
+    if name == 'Fly':
+        return dict(kind='flying targets, 60 feet, ten minutes', value=slot-2)
+    if name == 'Invisibility':
+        return dict(kind='invisible targets, one hour', value=slot-1)
     if name == 'Aid':
         return dict(kind='hp per target, up to three targets', value=5*(slot-1))
     if name == 'Hold Person':
@@ -447,20 +453,20 @@ def spell_power(name, slot):
     return dict(kind='unchanged effect', value=1)
 
 
-def quality_scroll_distribution(level, bonus, nth=1, lucky=True):
+def quality_scroll_distribution(level, bonus, nth=1, lucky=True, *, scribe_bonus=10, approved_higher=False):
     """На исходную варку: стабильные свитки по бонусу качества письма.
 
     Политика: Везунчик только при нестабильном/потерянном результате,
     Указание на один провал чернил; нет переброса ради качества.
     0/1/2 — возможное усиление эффекта, не цена и не уровень чтения.
     """
-    if level not in (1,2,3) or nth < 1:
+    if level not in (1,2,3,4,5) or level>=4 and not approved_higher or nth < 1:
         raise ValueError('Обычное быстрое Начертание моделируется только для I–III')
     result=defaultdict(float)
     for quality,_,p in ink_rolls(level,bonus,1):
         if quality is None:
             continue
-        b=10+quality-2*(nth-1); dc=10+2*level
+        b=scribe_bonus+quality-2*(nth-1); dc=10+2*level
         for first in range(1,21):
             retry=lucky and (first==1 or first!=20 and first+b<dc)
             for second in (range(1,21) if retry else (first,)):
@@ -512,7 +518,7 @@ def scroll_supply_review():
                        on_natural20='Выбрать +1 к эффекту и второй обычный бонус; IV даёт те же 3к8',
                        conditions='Лаэль сначала изучает и готовит заклинание; независимые циклы с реальными отдыхами')
     return dict(planned_upcast_confirmed='Игрок подтвердил решение мастера 15.11.2026',
-                scope='Все 16 обсуждавшихся альтернатив; Magic Missile — дополнительный пример апкаста',
+                scope='Все 18 обсуждавшихся альтернатив; Magic Missile — дополнительный пример апкаста',
                 quality_policy='Максимальное усиление эффекта, без экономии и без премии к цене продажи',
                 first_chain_bonus=7,
                 source_spells='scripts/cards/src/spells.json: уровень, время, концентрация; SRD 2014 и XGE: апкаст',
@@ -532,6 +538,62 @@ def scroll_supply_review():
                 shadow_blade_quality_target=shadow_target, alternatives=rows)
 
 
+
+def upcast_goals():
+    """Будущее M5 / ячейки V: одинаковые бонусы и цели, не текущие запасы.
+
+    Обычная схема I–III и отдельно условное разрешённое быстрое IV–V.
+    Цель — достаточная сила эффекта, не обязательно старший записанный круг.
+    """
+    from elixir_catalog_review import catalog_investments
+    cards={r['name']:r for r in catalog_investments()['items']}
+    goals=(('Fly',3,5,3,'Полёт'),('Invisibility',2,4,3,'Невидимость'),
+           ('Hold Person',2,5,4,'Яд: удержание личности'),
+           ('Shadow Blade',2,5,4,'Теневой клинок'),
+           ('Fireball',3,5,10,'Склянка стихии: большая'))
+    rows=[]
+    for spell,base,written,need,item in goals:
+        paths=[]
+        for level in range(base,written+1):
+            quality=quality_scroll_distribution(level,11,scribe_bonus=11,approved_higher=level>=4)
+            target=sum(p for upgrade,p in quality.items()
+                       if spell_power(spell,min(9,level+upgrade))['value']>=need)
+            accepted=sum(p for q,_,p in ink_rolls(level,11,1) if q is not None)
+            material=INK_PRICES[level]/3+HERB[level]
+            allocated=material+CAT_PRICE[level]/CAT_STABLE
+            duration=2 if level<=2 else 4
+            paths.append(dict(written_level=level,reading_level=level,
+                              requires_higher_fast_permission=level>=4,
+                              stable_target_per_ink_attempt=target,
+                              allocated_per_attempt=allocated,
+                              first_attempt_cash=material+CAT_PRICE[level],
+                              allocated_until_target=allocated/target if target else None,
+                              talis_hours_until_target=duration/target if target else None,
+                              lael_hours_until_target=2*accepted/target if target else None,
+                              other_stable_scrolls_until_target=(sum(quality.values())-target)/target if target else None,
+                              byproduct_sale_credit=0))
+        alchemy=cards[item]
+        rows.append(dict(spell=spell,required_power=need,base_spell_level=base,
+                         planned_level=written,paths=paths,
+                         alchemy=dict(item=item,level=alchemy['level'],available_at_M5=alchemy['level']<=5,
+                                      ordinary_concentration=alchemy['ordinary_concentration'],
+                                      alchemy_concentration=alchemy['alchemy_concentration'],
+                                      raw_per_attempt=alchemy['raw_per_attempt'],toxicity=alchemy['toxicity']),
+                         classical_hours_lael={4:80,5:160}[written]))
+    return dict(assumptions=dict(talis_mastery=5,lael_has_slots_V=True,
+                spells_learned_and_prepared=True,talis_bonus=11,lael_scribing_bonus_before_ink=11,
+                guidance_per_attempt=1,lucky_only_on_failure=True,
+                each_cycle_after_real_resource_recovery=True,
+                higher_fast_scenarios_conditional_on_master=True,
+                classical_has_no_quality_bonus=True,catalyst_allocation='five stable uses',
+                byproduct_revenue=0,new_spell_and_recipe_acquisition_excluded=True,
+                travel_and_trade_hours_excluded=True),
+                fireball_flask_quality=dict(initial_d6=8,next_turn_d6=4,
+                    delayed_requires_natural20=True,targets_must_remain_in_area=True,
+                    separate_save=True,alternative_extra_dose=True,
+                    ordinary_options=['reroll damage ones once','range 60 feet without disadvantage']),
+                goals=rows)
+
 def build():
     from elixir_catalog_review import catalog_investments
     validate_sources()
@@ -539,6 +601,7 @@ def build():
         confirmed_cash=load()['state']['mat']['gold'],
         catalog_investments=catalog_investments(),
         scroll_supply_review=scroll_supply_review(),
+        upcast_goals=upcast_goals(),
         assumptions=dict(lael_base_bonus=10,scroll_market=SCROLL_PRICES,
             scroll_sale_fraction=.75,crafted_scroll_sale_confirmed=True,
             sale_source="Полные правила, справочник цен: со слов игрока, собственные свитки Лаэля тоже 75%",
@@ -569,16 +632,41 @@ def build():
     return json.dumps(result,ensure_ascii=False,indent=2)+'\n'
 
 
+
+def upcast_table(model):
+    rows={r['spell']:r for r in model['goals']}
+    lines=['| Нужный результат | Как записывать | Средний расход, зм | Часы Талиса / Лаэля |',
+           '| --- | --- | ---: | ---: |']
+    for spell,label in [('Invisibility','Невидимость на троих'),
+                        ('Fly','Сила V: Полёт на троих и другие цели выше')]:
+        for p in rows[spell]['paths']:
+            level=p['written_level']; target=rows[spell]['planned_level']
+            how=f'{level} круг; '+('обычный успех' if level==target else
+                                   'натуральная 20' if level+2==target else 'обычное усиление качества')
+            lines.append(f"| {label} | {how} | {p['allocated_until_target']:.2f} | "
+                         f"{p['talis_hours_until_target']:.2f} / {p['lael_hours_until_target']:.2f} |")
+    return '\n'.join(lines)
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write',action='store_true');parser.add_argument('--check',action='store_true')
     args=parser.parse_args();content=build();path=OUTPUT/'results.json'
+    report=ROOT/'Талис — стратегия развития алхимии — расчёты.md'
+    source=report.read_text()
+    start,end='<!-- upcast-goals:start -->','<!-- upcast-goals:end -->'
+    if source.count(start)!=1 or source.count(end)!=1:
+        raise ValueError('Не найдены границы сравнительной таблицы апкаста')
+    expected=re.sub(re.escape(start)+r'.*?'+re.escape(end),
+                    lambda _:start+'\n\n'+upcast_table(json.loads(content)['upcast_goals'])+'\n\n'+end,
+                    source,flags=re.S)
     if args.check:
-        if not path.exists() or path.read_text()!=content:
+        if not path.exists() or path.read_text()!=content or expected!=source:
             raise SystemExit('Устарел расчёт совместной стратегии: results.json')
         print('PASS: цепочка I–III, конечные ресурсы, параллельность, M5 и выбранные средства воспроизводятся')
     elif args.write:
         OUTPUT.mkdir(exist_ok=True);path.write_text(content)
+        report.write_text(expected)
     else:
         print(content)
 
