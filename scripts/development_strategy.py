@@ -267,6 +267,10 @@ def validate_sources():
         actual=[int(re.sub(r'<[^>]+>|\s','',v)) for v in values[:4]]
         if actual!=expected:
             raise ValueError('Изменились цены свитков/чернил: пересмотреть стратегию')
+    if 'СЛ спасброска свитка — по заклинателю' not in page or '1–2 уровень — СЛ 13 / +5' in page:
+        raise ValueError('Шпаргалка противоречит полным правилам о СЛ свитка')
+    if 'для проверки чтения сохраняется записанный уровень свитка' not in page:
+        raise ValueError('Перепроверить уточнение Чистой формулы')
     rules=(ROOT/'Алхимия Талиса — полные правила v0.3.md').read_text()
     if 'На деле Гильдия берёт за 75%' not in rules or 'свитки Лаэля' not in rules:
         raise ValueError('Перепроверить подтверждение закупки собственных свитков')
@@ -400,12 +404,141 @@ def mixed_program(hours, policy='healing_first', ready=False):
                     repair_travel_training_hours_excluded=True))
 
 
+# Уровень изделия алхимии не обязан совпадать с кругом заклинания.
+# Здесь записаны обсуждавшиеся альтернативы; это не новые знания Лаэля.
+SCROLL_ALTERNATIVES = (
+    ('Шаг сквозь туман', 'Misty Step', 2, False, True),
+    ('Зеркальные образы', 'Mirror Image', 2, True, True),
+    ('Теневой клинок', 'Shadow Blade', 2, False, True),
+    ('Кинетический рывок', 'Kinetic Jaunt', 2, False, True),
+    ('Склянка стихии: большая', 'Fireball', 3, True, True),
+    ('Молниевый выдох', 'Lightning Bolt', 3, False, True),
+    ('Контрзаклинание', 'Counterspell', 3, False, True),
+    ('Рассеивание магии', 'Dispel Magic', 3, False, True),
+    ('Подмога', 'Aid', 2, False, False),
+    ('Щит веры', 'Shield of Faith', 1, False, False),
+    ('Благословение', 'Bless', 1, False, False),
+    ('Сковывающая склянка: паутина', 'Web', 2, False, True),
+    ('Сковывающая склянка: замедление', 'Slow', 3, False, True),
+    ('Яд: удержание личности', 'Hold Person', 2, False, True),
+    ('Щит', 'Shield', 1, True, True),
+    ('Поглощение стихий', 'Absorb Elements', 1, True, True),
+)
+
+
+def spell_power(name, slot):
+    """Только масштабируемая величина эффекта 2014; без попаданий и спасбросков."""
+    if name == 'Shadow Blade':
+        return dict(kind='d8 weapon dice', value=2 if slot==2 else 3 if slot<=4 else 4 if slot<=6 else 5)
+    if name in ('Fireball', 'Lightning Bolt'):
+        return dict(kind='d6 area dice', value=8+slot-3)
+    if name == 'Aid':
+        return dict(kind='hp per target, up to three targets', value=5*(slot-1))
+    if name == 'Hold Person':
+        return dict(kind='humanoid targets', value=slot-1)
+    if name == 'Bless':
+        return dict(kind='targets', value=slot+2)
+    if name in ('Counterspell', 'Dispel Magic'):
+        return dict(kind='automatic spell level threshold', value=slot)
+    if name == 'Magic Missile':
+        return dict(kind='darts, d4+1 each', value=slot+2)
+    if name == 'Absorb Elements':
+        return dict(kind='d6 on next melee hit; resistance unchanged', value=slot)
+    return dict(kind='unchanged effect', value=1)
+
+
+def quality_scroll_distribution(level, bonus, nth=1, lucky=True):
+    """На исходную варку: стабильные свитки по бонусу качества письма.
+
+    Политика: Везунчик только при нестабильном/потерянном результате,
+    Указание на один провал чернил; нет переброса ради качества.
+    0/1/2 — возможное усиление эффекта, не цена и не уровень чтения.
+    """
+    if level not in (1,2,3) or nth < 1:
+        raise ValueError('Обычное быстрое Начертание моделируется только для I–III')
+    result=defaultdict(float)
+    for quality,_,p in ink_rolls(level,bonus,1):
+        if quality is None:
+            continue
+        b=10+quality-2*(nth-1); dc=10+2*level
+        for first in range(1,21):
+            retry=lucky and (first==1 or first!=20 and first+b<dc)
+            for second in (range(1,21) if retry else (first,)):
+                face=max(first,second) if retry else first
+                weight=p/(400 if retry else 20)
+                if face!=1 and (face==20 or face+b>=dc):
+                    upgrade=2 if face==20 else int(face+b>=dc+5)
+                    result[upgrade]+=weight
+    return dict(sorted(result.items()))
+
+
+def scroll_supply_review():
+    spell_source=json.loads((ROOT/'scripts/cards/src/spells.json').read_text())
+    by_name={s['name']:s for s in spell_source if s['source'] in ('PHB','XGE','SCC')}
+    cards={c['name']:c for c in C}
+    rows=[]
+    for item,spell,base,book,normal_list in SCROLL_ALTERNATIVES:
+        if by_name[spell]['level'] != base:
+            raise ValueError('Пересмотреть круг исходного заклинания: '+spell)
+        options=[]
+        for slot in range(base,6):
+            power=spell_power(spell,slot)
+            qdist=quality_scroll_distribution(slot,7) if slot<=3 else None
+            powers=[dict(quality_upgrade=i,effective_level=min(9,slot+i),
+                         power=spell_power(spell,min(9,slot+i))) for i in range(3)]
+            options.append(dict(written_level=slot,spent_slot=slot,ink_level=slot,
+                                minimum_alchemy_mastery=slot,
+                                standard_fast=slot<=3,
+                                available_slots_at_wizard5=slot<=3,
+                                stable_first_chain=chain(slot,7) if slot<=3 else None,
+                                reading_level=slot, power=power,quality_powers=powers,
+                                stable_quality_per_ink_attempt=qdist,
+                                effect_increases=any(p['power']!=power for p in powers[1:]),
+                                higher_crafting_permission_required=slot>=4))
+        rows.append(dict(item=item,alchemy_level=cards[item]['lvl'],spell=spell,
+                         base_spell_level=base,lael_book_confirmed=book,
+                         lael_standard_wizard_spell=normal_list,
+                         preparation_required=True,options=options))
+    # Цель серии — усиленный клинок. Обычные свитки остаются побочным
+    # запасом; выручка от них не кредитуется. Каждый цикл начинается после
+    # настоящего отдыха, как исходная chain(), а не третий свиток подряд.
+    q=quality_scroll_distribution(2,7); target=q[1]+q[2]; base_chain=chain(2,7)
+    shadow_target=dict(minimum_weapon_d8=3,ink_level=2,probability_per_ink_attempt=target,
+                       allocated_gold_until_target=base_chain['allocated_per_attempt']/target,
+                       talis_hours_until_target=2/target,
+                       lael_hours_until_target=2*base_chain['ink_accepted']/target,
+                       ordinary_scroll_byproducts=q[0]/target,
+                       byproduct_sale_credit=0,
+                       on_natural20='Выбрать +1 к эффекту и второй обычный бонус; IV даёт те же 3к8',
+                       conditions='Лаэль сначала изучает и готовит заклинание; независимые циклы с реальными отдыхами')
+    return dict(planned_upcast_confirmed='Игрок подтвердил решение мастера 15.11.2026',
+                scope='Все 16 обсуждавшихся альтернатив; Magic Missile — дополнительный пример апкаста',
+                quality_policy='Максимальное усиление эффекта, без экономии и без премии к цене продажи',
+                first_chain_bonus=7,
+                source_spells='scripts/cards/src/spells.json: уровень, время, концентрация; SRD 2014 и XGE: апкаст',
+                unresolved=['Цена продажи свитка, усиленного качеством'],
+                quality_changes_reading_level=False, save_dc='по заклинателю; у Лаэля 15 до привязки',
+                rules=dict(known_spell_not_required_for_class_list_reading=True,
+                           normal_casting_time=True,ordinary_concentration=True,
+                           toxicity=0,quality_is_not_automatic=True,
+                           fixed_alchemy_effect_does_not_upcast_from_scroll_rule=True),
+                examples=dict(shadow_blade_II=spell_power('Shadow Blade',2),
+                              shadow_blade_III=spell_power('Shadow Blade',3),
+                              shadow_blade_IV=spell_power('Shadow Blade',4),
+                              fireball_V=spell_power('Fireball',5),
+                              aid_III_total_added_hp=3*spell_power('Aid',3)['value'],
+                              hold_person_III=spell_power('Hold Person',3),
+                              magic_missile_III=spell_power('Magic Missile',3)),
+                shadow_blade_quality_target=shadow_target, alternatives=rows)
+
+
 def build():
     from elixir_catalog_review import catalog_investments
     validate_sources()
     result=dict(goal='M5 и устойчивое снабжение группы; коммерция — дополнительный источник',
         confirmed_cash=load()['state']['mat']['gold'],
         catalog_investments=catalog_investments(),
+        scroll_supply_review=scroll_supply_review(),
         assumptions=dict(lael_base_bonus=10,scroll_market=SCROLL_PRICES,
             scroll_sale_fraction=.75,crafted_scroll_sale_confirmed=True,
             sale_source="Полные правила, справочник цен: со слов игрока, собственные свитки Лаэля тоже 75%",

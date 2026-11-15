@@ -197,6 +197,78 @@ class CatalogInvestmentTests(unittest.TestCase):
         self.assertAlmostEqual(acquisition['hours'], 6*acquisition['expected_probes'])
         self.assertGreater(acquisition['expected_research_cash_range'][0], 0)
 
+class ScrollSupplyReviewTests(unittest.TestCase):
+    def test_source_circle_is_independent_of_alchemy_tier_and_known_book(self):
+        from development_strategy import scroll_supply_review
+        rows = {r['item']: r for r in scroll_supply_review()['alternatives']}
+        self.assertEqual(rows['Зеркальные образы']['base_spell_level'], 2)
+        self.assertEqual(rows['Зеркальные образы']['alchemy_level'], 3)
+        self.assertTrue(rows['Зеркальные образы']['lael_book_confirmed'])
+        self.assertFalse(rows['Теневой клинок']['lael_book_confirmed'])
+        self.assertFalse(rows['Контрзаклинание']['lael_book_confirmed'])
+        self.assertFalse(rows['Подмога']['lael_standard_wizard_spell'])
+        self.assertEqual(rows['Склянка стихии: большая']['alchemy_level'], 5)
+        self.assertEqual(rows['Склянка стихии: большая']['base_spell_level'], 3)
+
+    def test_obsolete_scroll_dc_is_rejected_and_quality_does_not_raise_reading(self):
+        from unittest.mock import patch
+        from development_strategy import ROOT, validate_sources, scroll_supply_review
+        original = (ROOT/'Шпаргалка свитков.html').read_text()
+        wrong = original.replace('СЛ спасброска свитка — по заклинателю',
+                                 '1–2 уровень — СЛ 13 / +5')
+        with patch('pathlib.Path.read_text', return_value=wrong):
+            with self.assertRaisesRegex(ValueError, 'СЛ свитка'):
+                validate_sources()
+        model = scroll_supply_review()
+        self.assertFalse(model['quality_changes_reading_level'])
+        fire = next(r for r in model['alternatives'] if r['spell']=='Fireball')
+        third = fire['options'][0]
+        self.assertEqual(third['quality_powers'][2]['effective_level'], 5)
+        self.assertEqual(third['quality_powers'][2]['power']['value'], 10)
+        self.assertEqual(third['reading_level'], 3)
+
+    def test_upcast_plateaus_targets_and_thresholds(self):
+        from development_strategy import spell_power
+        self.assertEqual(spell_power('Shadow Blade', 3), spell_power('Shadow Blade', 4))
+        self.assertEqual(spell_power('Shadow Blade', 5)['value'], 4)
+        self.assertEqual(spell_power('Fireball', 5)['value'], 10)
+        self.assertEqual(spell_power('Aid', 3)['value'], 10)
+        self.assertEqual(spell_power('Hold Person', 3)['value'], 2)
+        self.assertEqual(spell_power('Counterspell', 5)['value'], 5)
+        self.assertEqual(spell_power('Mirror Image', 2), spell_power('Mirror Image', 5))
+
+    def test_quality_is_not_guaranteed_and_preserves_existing_chain(self):
+        from development_strategy import quality_scroll_distribution
+        for level in (1, 2, 3):
+            for b in (5, 7):
+                for lucky in (False, True):
+                    d = quality_scroll_distribution(level, b, lucky=lucky)
+                    self.assertAlmostEqual(sum(d.values()), chain(level, b, lucky=lucky)['stable_per_attempt'])
+                    self.assertGreater(d[0], 0)
+                    self.assertLess(d[2], .1)
+        fresh = sum(quality_scroll_distribution(2, 7).values())
+        tired = sum(quality_scroll_distribution(2, 7, nth=3).values())
+        self.assertLess(tired, fresh)
+        with self.assertRaises(ValueError):
+            quality_scroll_distribution(4, 7)
+
+    def test_planned_upcast_uses_senior_resources_and_keeps_high_scroll_gate(self):
+        from development_strategy import scroll_supply_review
+        model = scroll_supply_review()
+        blade = next(r for r in model['alternatives'] if r['spell']=='Shadow Blade')
+        third = next(r for r in blade['options'] if r['written_level']==3)
+        self.assertEqual(third['spent_slot'], 3)
+        self.assertEqual(third['ink_level'], 3)
+        self.assertEqual(third['minimum_alchemy_mastery'], 3)
+        fifth = next(r for r in blade['options'] if r['written_level']==5)
+        self.assertIsNone(fifth['stable_first_chain'])
+        self.assertFalse(fifth['available_slots_at_wizard5'])
+        self.assertTrue(fifth['higher_crafting_permission_required'])
+        target = model['shadow_blade_quality_target']
+        self.assertAlmostEqual(target['probability_per_ink_attempt'], .71715)
+        self.assertEqual(target['byproduct_sale_credit'], 0)
+        self.assertLess(target['allocated_gold_until_target'], third['stable_first_chain']['cost_per_stable'])
+
 
 if __name__=='__main__':
     unittest.main()
