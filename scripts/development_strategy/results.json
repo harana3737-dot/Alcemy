@@ -21135,6 +21135,3789 @@
       }
     ]
   },
+  "scroll_supply_review": {
+    "planned_upcast_confirmed": "Игрок подтвердил решение мастера 15.11.2026",
+    "scope": "Все 16 обсуждавшихся альтернатив; Magic Missile — дополнительный пример апкаста",
+    "quality_policy": "Максимальное усиление эффекта, без экономии и без премии к цене продажи",
+    "first_chain_bonus": 7,
+    "source_spells": "scripts/cards/src/spells.json: уровень, время, концентрация; SRD 2014 и XGE: апкаст",
+    "unresolved": [
+      "Цена продажи свитка, усиленного качеством"
+    ],
+    "quality_changes_reading_level": false,
+    "save_dc": "по заклинателю; у Лаэля 15 до привязки",
+    "rules": {
+      "known_spell_not_required_for_class_list_reading": true,
+      "normal_casting_time": true,
+      "ordinary_concentration": true,
+      "toxicity": 0,
+      "quality_is_not_automatic": true,
+      "fixed_alchemy_effect_does_not_upcast_from_scroll_rule": true
+    },
+    "examples": {
+      "shadow_blade_II": {
+        "kind": "d8 weapon dice",
+        "value": 2
+      },
+      "shadow_blade_III": {
+        "kind": "d8 weapon dice",
+        "value": 3
+      },
+      "shadow_blade_IV": {
+        "kind": "d8 weapon dice",
+        "value": 3
+      },
+      "fireball_V": {
+        "kind": "d6 area dice",
+        "value": 10
+      },
+      "aid_III_total_added_hp": 30,
+      "hold_person_III": {
+        "kind": "humanoid targets",
+        "value": 2
+      },
+      "magic_missile_III": {
+        "kind": "darts, d4+1 each",
+        "value": 5
+      }
+    },
+    "shadow_blade_quality_target": {
+      "minimum_weapon_d8": 3,
+      "ink_level": 2,
+      "probability_per_ink_attempt": 0.7171499999999995,
+      "allocated_gold_until_target": 56.473541100188285,
+      "talis_hours_until_target": 2.7888168444537422,
+      "lael_hours_until_target": 2.760928676009205,
+      "ordinary_scroll_byproducts": 0.36613679146622063,
+      "byproduct_sale_credit": 0,
+      "on_natural20": "Выбрать +1 к эффекту и второй обычный бонус; IV даёт те же 3к8",
+      "conditions": "Лаэль сначала изучает и готовит заклинание; независимые циклы с реальными отдыхами"
+    },
+    "alternatives": [
+      {
+        "item": "Шаг сквозь туман",
+        "alchemy_level": 2,
+        "spell": "Misty Step",
+        "base_spell_level": 2,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Зеркальные образы",
+        "alchemy_level": 3,
+        "spell": "Mirror Image",
+        "base_spell_level": 2,
+        "lael_book_confirmed": true,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Теневой клинок",
+        "alchemy_level": 2,
+        "spell": "Shadow Blade",
+        "base_spell_level": 2,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "d8 weapon dice",
+              "value": 2
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 2
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 3
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "d8 weapon dice",
+              "value": 3
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 4
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "d8 weapon dice",
+              "value": 3
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 4
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "d8 weapon dice",
+              "value": 4
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "d8 weapon dice",
+                  "value": 5
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Кинетический рывок",
+        "alchemy_level": 2,
+        "spell": "Kinetic Jaunt",
+        "base_spell_level": 2,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Склянка стихии: большая",
+        "alchemy_level": 5,
+        "spell": "Fireball",
+        "base_spell_level": 3,
+        "lael_book_confirmed": true,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "d6 area dice",
+              "value": 8
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 8
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 9
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 10
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "d6 area dice",
+              "value": 9
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 9
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 10
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 11
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "d6 area dice",
+              "value": 10
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 10
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 11
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 12
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Молниевый выдох",
+        "alchemy_level": 5,
+        "spell": "Lightning Bolt",
+        "base_spell_level": 3,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "d6 area dice",
+              "value": 8
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 8
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 9
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 10
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "d6 area dice",
+              "value": 9
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 9
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 10
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 11
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "d6 area dice",
+              "value": 10
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 10
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 11
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "d6 area dice",
+                  "value": 12
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Контрзаклинание",
+        "alchemy_level": 3,
+        "spell": "Counterspell",
+        "base_spell_level": 3,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "automatic spell level threshold",
+              "value": 3
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 5
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "automatic spell level threshold",
+              "value": 4
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 5
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 6
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "automatic spell level threshold",
+              "value": 5
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 5
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 6
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 7
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Рассеивание магии",
+        "alchemy_level": 3,
+        "spell": "Dispel Magic",
+        "base_spell_level": 3,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "automatic spell level threshold",
+              "value": 3
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 5
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "automatic spell level threshold",
+              "value": 4
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 5
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 6
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "automatic spell level threshold",
+              "value": 5
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 5
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 6
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "automatic spell level threshold",
+                  "value": 7
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Подмога",
+        "alchemy_level": 2,
+        "spell": "Aid",
+        "base_spell_level": 2,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": false,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "hp per target, up to three targets",
+              "value": 5
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 5
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 10
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 15
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "hp per target, up to three targets",
+              "value": 10
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 10
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 15
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 20
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "hp per target, up to three targets",
+              "value": 15
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 15
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 20
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 25
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "hp per target, up to three targets",
+              "value": 20
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 20
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 25
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "hp per target, up to three targets",
+                  "value": 30
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Щит веры",
+        "alchemy_level": 1,
+        "spell": "Shield of Faith",
+        "base_spell_level": 1,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": false,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 1,
+            "spent_slot": 1,
+            "ink_level": 1,
+            "minimum_alchemy_mastery": 1,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 1,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 10.1,
+              "allocated_per_attempt": 10.1,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9869250000000003,
+              "unstable_per_attempt": 0.0006,
+              "cost_per_stable": 10.233807026876406,
+              "talis_hours_per_stable": 2.026496440965625,
+              "lael_hours_per_stable": 2.0062314765559686,
+              "slots_per_stable": 1.0031157382779843,
+              "luck_per_stable": 0.05319553157534767,
+              "scroll_sale_price": 45.0,
+              "profit_per_production_attempt": 34.311625000000014,
+              "net_per_stable": 34.766192973123594,
+              "direct_ink_profit": 11.949999999999998,
+              "scroll_increment_per_lael_hour": 11.29375000000001,
+              "break_even_scroll_sale_fraction": 0.3723687210274335,
+              "break_even_with_quality_premium": 0.5091572307926132
+            },
+            "reading_level": 1,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 1,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 2,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.185025,
+              "1": 0.7497749999999997,
+              "2": 0.052125000000000005
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Благословение",
+        "alchemy_level": 1,
+        "spell": "Bless",
+        "base_spell_level": 1,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": false,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 1,
+            "spent_slot": 1,
+            "ink_level": 1,
+            "minimum_alchemy_mastery": 1,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 1,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 10.1,
+              "allocated_per_attempt": 10.1,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9869250000000003,
+              "unstable_per_attempt": 0.0006,
+              "cost_per_stable": 10.233807026876406,
+              "talis_hours_per_stable": 2.026496440965625,
+              "lael_hours_per_stable": 2.0062314765559686,
+              "slots_per_stable": 1.0031157382779843,
+              "luck_per_stable": 0.05319553157534767,
+              "scroll_sale_price": 45.0,
+              "profit_per_production_attempt": 34.311625000000014,
+              "net_per_stable": 34.766192973123594,
+              "direct_ink_profit": 11.949999999999998,
+              "scroll_increment_per_lael_hour": 11.29375000000001,
+              "break_even_scroll_sale_fraction": 0.3723687210274335,
+              "break_even_with_quality_premium": 0.5091572307926132
+            },
+            "reading_level": 1,
+            "power": {
+              "kind": "targets",
+              "value": 3
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 1,
+                "power": {
+                  "kind": "targets",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 2,
+                "power": {
+                  "kind": "targets",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 3,
+                "power": {
+                  "kind": "targets",
+                  "value": 5
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.185025,
+              "1": 0.7497749999999997,
+              "2": 0.052125000000000005
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "targets",
+              "value": 4
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "targets",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "targets",
+                  "value": 5
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "targets",
+                  "value": 6
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "targets",
+              "value": 5
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "targets",
+                  "value": 5
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "targets",
+                  "value": 6
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "targets",
+                  "value": 7
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "targets",
+              "value": 6
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "targets",
+                  "value": 6
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "targets",
+                  "value": 7
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "targets",
+                  "value": 8
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "targets",
+              "value": 7
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "targets",
+                  "value": 7
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "targets",
+                  "value": 8
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "targets",
+                  "value": 9
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Сковывающая склянка: паутина",
+        "alchemy_level": 2,
+        "spell": "Web",
+        "base_spell_level": 2,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Сковывающая склянка: замедление",
+        "alchemy_level": 3,
+        "spell": "Slow",
+        "base_spell_level": 3,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Яд: удержание личности",
+        "alchemy_level": 2,
+        "spell": "Hold Person",
+        "base_spell_level": 2,
+        "lael_book_confirmed": false,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "humanoid targets",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 2
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 3
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "humanoid targets",
+              "value": 2
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 2
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 4
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "humanoid targets",
+              "value": 3
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 5
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "humanoid targets",
+              "value": 4
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 5
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "humanoid targets",
+                  "value": 6
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Щит",
+        "alchemy_level": 1,
+        "spell": "Shield",
+        "base_spell_level": 1,
+        "lael_book_confirmed": true,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 1,
+            "spent_slot": 1,
+            "ink_level": 1,
+            "minimum_alchemy_mastery": 1,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 1,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 10.1,
+              "allocated_per_attempt": 10.1,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9869250000000003,
+              "unstable_per_attempt": 0.0006,
+              "cost_per_stable": 10.233807026876406,
+              "talis_hours_per_stable": 2.026496440965625,
+              "lael_hours_per_stable": 2.0062314765559686,
+              "slots_per_stable": 1.0031157382779843,
+              "luck_per_stable": 0.05319553157534767,
+              "scroll_sale_price": 45.0,
+              "profit_per_production_attempt": 34.311625000000014,
+              "net_per_stable": 34.766192973123594,
+              "direct_ink_profit": 11.949999999999998,
+              "scroll_increment_per_lael_hour": 11.29375000000001,
+              "break_even_scroll_sale_fraction": 0.3723687210274335,
+              "break_even_with_quality_premium": 0.5091572307926132
+            },
+            "reading_level": 1,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 1,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 2,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.185025,
+              "1": 0.7497749999999997,
+              "2": 0.052125000000000005
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": false,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "unchanged effect",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "unchanged effect",
+                  "value": 1
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": false,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      },
+      {
+        "item": "Поглощение стихий",
+        "alchemy_level": 1,
+        "spell": "Absorb Elements",
+        "base_spell_level": 1,
+        "lael_book_confirmed": true,
+        "lael_standard_wizard_spell": true,
+        "preparation_required": true,
+        "options": [
+          {
+            "written_level": 1,
+            "spent_slot": 1,
+            "ink_level": 1,
+            "minimum_alchemy_mastery": 1,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 1,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 10.1,
+              "allocated_per_attempt": 10.1,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9869250000000003,
+              "unstable_per_attempt": 0.0006,
+              "cost_per_stable": 10.233807026876406,
+              "talis_hours_per_stable": 2.026496440965625,
+              "lael_hours_per_stable": 2.0062314765559686,
+              "slots_per_stable": 1.0031157382779843,
+              "luck_per_stable": 0.05319553157534767,
+              "scroll_sale_price": 45.0,
+              "profit_per_production_attempt": 34.311625000000014,
+              "net_per_stable": 34.766192973123594,
+              "direct_ink_profit": 11.949999999999998,
+              "scroll_increment_per_lael_hour": 11.29375000000001,
+              "break_even_scroll_sale_fraction": 0.3723687210274335,
+              "break_even_with_quality_premium": 0.5091572307926132
+            },
+            "reading_level": 1,
+            "power": {
+              "kind": "d6 on next melee hit; resistance unchanged",
+              "value": 1
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 1,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 1
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 2,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 2
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 3,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 3
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.185025,
+              "1": 0.7497749999999997,
+              "2": 0.052125000000000005
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 2,
+            "spent_slot": 2,
+            "ink_level": 2,
+            "minimum_alchemy_mastery": 2,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 2,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 40.5,
+              "allocated_per_attempt": 40.5,
+              "ink_accepted": 0.99,
+              "stable_per_attempt": 0.9797250000000003,
+              "unstable_per_attempt": 0.0078000000000000005,
+              "cost_per_stable": 41.33813059787184,
+              "talis_hours_per_stable": 2.041389165327004,
+              "lael_hours_per_stable": 2.0209752736737343,
+              "slots_per_stable": 1.0104876368368672,
+              "luck_per_stable": 0.08726938681772946,
+              "scroll_sale_price": 187.5,
+              "profit_per_production_attempt": 143.19843750000007,
+              "net_per_stable": 146.16186940212816,
+              "direct_ink_profit": 47.69999999999999,
+              "scroll_increment_per_lael_hour": 48.23153409090913,
+              "break_even_scroll_sale_fraction": 0.36010104876368354,
+              "break_even_with_quality_premium": 0.4923830666768735
+            },
+            "reading_level": 2,
+            "power": {
+              "kind": "d6 on next melee hit; resistance unchanged",
+              "value": 2
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 2,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 2
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 3,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 4,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 4
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.26257499999999995,
+              "1": 0.6633749999999995,
+              "2": 0.053775
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 3,
+            "spent_slot": 3,
+            "ink_level": 3,
+            "minimum_alchemy_mastery": 3,
+            "standard_fast": true,
+            "available_slots_at_wizard5": true,
+            "stable_first_chain": {
+              "level": 3,
+              "bonus": 7,
+              "lucky": true,
+              "accept_unstable": true,
+              "scroll_sale_fraction": 0.75,
+              "first_attempt_cash": 171.0,
+              "allocated_per_attempt": 115.0,
+              "ink_accepted": 0.9875,
+              "stable_per_attempt": 0.9490312500000003,
+              "unstable_per_attempt": 0.03500000000000001,
+              "cost_per_stable": 121.17619941387595,
+              "talis_hours_per_stable": 4.214824327439164,
+              "lael_hours_per_stable": 2.081069511673087,
+              "slots_per_stable": 1.0405347558365434,
+              "luck_per_stable": 0.19295992624057426,
+              "scroll_sale_price": 450.0,
+              "profit_per_production_attempt": 312.06406250000015,
+              "net_per_stable": 328.82380058612404,
+              "direct_ink_profit": 103.4375,
+              "scroll_increment_per_lael_hour": 105.63370253164564,
+              "break_even_scroll_sale_fraction": 0.38361487042708015,
+              "break_even_with_quality_premium": 0.5194441700418189
+            },
+            "reading_level": 3,
+            "power": {
+              "kind": "d6 on next melee hit; resistance unchanged",
+              "value": 3
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 3,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 3
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 4,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 5
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": {
+              "0": 0.2926562499999998,
+              "1": 0.5978437499999989,
+              "2": 0.058531250000000014
+            },
+            "effect_increases": true,
+            "higher_crafting_permission_required": false
+          },
+          {
+            "written_level": 4,
+            "spent_slot": 4,
+            "ink_level": 4,
+            "minimum_alchemy_mastery": 4,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 4,
+            "power": {
+              "kind": "d6 on next melee hit; resistance unchanged",
+              "value": 4
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 4,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 4
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 5
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 6,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 6
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          },
+          {
+            "written_level": 5,
+            "spent_slot": 5,
+            "ink_level": 5,
+            "minimum_alchemy_mastery": 5,
+            "standard_fast": false,
+            "available_slots_at_wizard5": false,
+            "stable_first_chain": null,
+            "reading_level": 5,
+            "power": {
+              "kind": "d6 on next melee hit; resistance unchanged",
+              "value": 5
+            },
+            "quality_powers": [
+              {
+                "quality_upgrade": 0,
+                "effective_level": 5,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 5
+                }
+              },
+              {
+                "quality_upgrade": 1,
+                "effective_level": 6,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 6
+                }
+              },
+              {
+                "quality_upgrade": 2,
+                "effective_level": 7,
+                "power": {
+                  "kind": "d6 on next melee hit; resistance unchanged",
+                  "value": 7
+                }
+              }
+            ],
+            "stable_quality_per_ink_attempt": null,
+            "effect_increases": true,
+            "higher_crafting_permission_required": true
+          }
+        ]
+      }
+    ]
+  },
   "assumptions": {
     "lael_base_bonus": 10,
     "scroll_market": {
