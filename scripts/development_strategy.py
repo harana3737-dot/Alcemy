@@ -401,9 +401,11 @@ def mixed_program(hours, policy='healing_first', ready=False):
 
 
 def build():
+    from elixir_catalog_review import catalog_investments
     validate_sources()
     result=dict(goal='M5 и устойчивое снабжение группы; коммерция — дополнительный источник',
         confirmed_cash=load()['state']['mat']['gold'],
+        catalog_investments=catalog_investments(),
         assumptions=dict(lael_base_bonus=10,scroll_market=SCROLL_PRICES,
             scroll_sale_fraction=.75,crafted_scroll_sale_confirmed=True,
             sale_source="Полные правила, справочник цен: со слов игрока, собственные свитки Лаэля тоже 75%",
