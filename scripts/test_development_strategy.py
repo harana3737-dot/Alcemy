@@ -324,6 +324,33 @@ class UpcastGoalTests(unittest.TestCase):
         self.assertEqual(q['next_turn_d6'],q['initial_d6']//2)
         self.assertTrue(q['targets_must_remain_in_area'])
 
+class ResearchEntryComparisonTests(unittest.TestCase):
+    def test_first_use_counts_full_catalyst_purchases_and_retries(self):
+        import math
+        from development_strategy import research_entry_comparison
+        rows={r['item']:r for r in research_entry_comparison()['rows']}
+        for name,raw in [('Дрёма',4),('Контрзаклинание',101)]:
+            r=rows[name];p=.65
+            # Independent geometric sum: buy another catalyst on attempts
+            # 6, 11, ...; failed first variants still consume one use.
+            brew=sum(p*(1-p)**(n-1)*(raw*n+70*math.ceil(n/5)) for n in range(1,150))
+            self.assertAlmostEqual(r['first_stable_brew_cash'],brew)
+            self.assertAlmostEqual(r['hours_from_research'],r['research_hours']+4/p)
+            self.assertEqual(r['bonus'],7)
+            self.assertEqual(r['mastery'],3)
+        self.assertAlmostEqual(rows['Дрёма']['cash_from_research'],125.64174603327068)
+        self.assertAlmostEqual(rows['Контрзаклинание']['cash_from_research'],412.95600943062664)
+
+    def test_shared_name_does_not_merge_mind_research_or_invent_recipe_price(self):
+        from development_strategy import research_entry_comparison
+        m=research_entry_comparison();rows={r['item']:r for r in m['rows']}
+        self.assertNotEqual(rows['Дрёма']['recipe'],rows['Склянка разума: гипноз']['recipe'])
+        self.assertEqual(rows['Дрёма']['purchase_formula'],150)
+        self.assertIsNone(rows['Контрзаклинание']['purchase_formula'])
+        self.assertIsNone(rows['Склянка разума: гипноз']['cash_from_purchase'])
+        self.assertTrue(m['assumptions']['rows_are_alternatives_not_additive'])
+        self.assertFalse(m['assumptions']['rerolls'])
+
 
 if __name__=='__main__':
     unittest.main()

@@ -594,6 +594,54 @@ def upcast_goals():
                     ordinary_options=['reroll damage ones once','range 60 feet without disadvantage']),
                 goals=rows)
 
+def research_entry_comparison():
+    """Старт с M3, +7: исследование и первая стабильная доза.
+
+    Катализатор покупается целиком, заново после каждых пяти попыток.
+    Нет перебросов, дополнительных последствий осечек и цены времени.
+    """
+    from elixir_catalog_review import catalog_investments
+    catalog=catalog_investments(); items={r['name']:r for r in catalog['items']}
+    groups={g['recipe']:g for g in catalog['recipes']}
+    rows=[]
+    for name in ('Дрёма','Зеркальные образы','Защита от добра и зла',
+                 'Контрзаклинание','Склянка разума: гипноз'):
+        item=items[name]; key=item['recipes'][0]
+        if item['cls']=='eff':
+            key+='; '+item['recipe_tier']
+        acquisition=groups[key]['acquisition']
+        research_cash=(acquisition['expected_research_cash_range'][0]
+                       if 'expected_research_cash_range' in acquisition else acquisition['expected_research_cash'])
+        first=item['profiles'][0]['first']; p=first['success']; level=item['level']
+        # E[ceil(G/5)] = sum(P(G>5k)), G geometric with success p.
+        catalyst_cash=CAT_PRICE[level]/(1-(1-p)**CAT_STABLE)
+        brewing_cash=item['raw_per_attempt'][0]/p+catalyst_cash
+        purchase=acquisition['purchase']
+        rows.append(dict(item=name,recipe=key,research_target=acquisition.get('target'),
+                         bonus=7,mastery=3,first_stable_success=p,
+                         research_hours=acquisition['hours'],research_cash=research_cash,
+                         first_stable_brew_hours=first['stable_hours'],
+                         first_stable_brew_cash=brewing_cash,
+                         catalyst_full_cash=catalyst_cash,
+                         hours_from_research=acquisition['hours']+first['stable_hours'],
+                         cash_from_research=research_cash+brewing_cash,
+                         purchase_formula=purchase,
+                         cash_from_purchase=purchase+brewing_cash if purchase is not None else None))
+    return dict(assumptions=dict(start='M3, неизвестный рецепт и вариант; катализатор покупается с нуля',
+                rerolls=False,formula_hint=2,progress_research_hint=0,
+                extra_research_mishaps_excluded=True,training_and_travel_hours_unknown=True,
+                inventory_changes=False,rows_are_alternatives_not_additive=True),rows=rows)
+
+
+def research_entry_table(model):
+    lines=['| Исследование через первый эффект | Часы до первой стабильной дозы | Деньги на исследование и дозу, зм | Купить формулу и получить дозу, зм |',
+           '| --- | ---: | ---: | ---: |']
+    for r in model['rows']:
+        buy=f"{r['cash_from_purchase']:.2f}" if r['cash_from_purchase'] is not None else 'цена рецепта не названа'
+        lines.append(f"| {r['recipe']} — {r['item']} | {r['hours_from_research']:.2f} | {r['cash_from_research']:.2f} | {buy} |")
+    return '\n'.join(lines)
+
+
 def build():
     from elixir_catalog_review import catalog_investments
     validate_sources()
@@ -602,6 +650,7 @@ def build():
         catalog_investments=catalog_investments(),
         scroll_supply_review=scroll_supply_review(),
         upcast_goals=upcast_goals(),
+        research_entry_comparison=research_entry_comparison(),
         assumptions=dict(lael_base_bonus=10,scroll_market=SCROLL_PRICES,
             scroll_sale_fraction=.75,crafted_scroll_sale_confirmed=True,
             sale_source="Полные правила, справочник цен: со слов игрока, собственные свитки Лаэля тоже 75%",
@@ -660,6 +709,12 @@ def main():
     expected=re.sub(re.escape(start)+r'.*?'+re.escape(end),
                     lambda _:start+'\n\n'+upcast_table(json.loads(content)['upcast_goals'])+'\n\n'+end,
                     source,flags=re.S)
+    start,end='<!-- m3-research-choice:start -->','<!-- m3-research-choice:end -->'
+    if source.count(start)!=1 or source.count(end)!=1:
+        raise ValueError('Не найдены границы сравнения исследований M3')
+    expected=re.sub(re.escape(start)+r'.*?'+re.escape(end),
+                    lambda _:start+'\n\n'+research_entry_table(json.loads(content)['research_entry_comparison'])+'\n\n'+end,
+                    expected,flags=re.S)
     if args.check:
         if not path.exists() or path.read_text()!=content or expected!=source:
             raise SystemExit('Устарел расчёт совместной стратегии: results.json')
