@@ -166,6 +166,26 @@ def write_materials(data):
     print(len(cards), "cards")
 
 
+def tx(s):
+    s = html.escape(s.replace("\\[", "[").replace("\\]", "]"))
+    return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
+
+
+def card_rows(c, *, interactive=False):
+    """Строки применения и варки для каталога и пульта."""
+    quick = [(key, tx(value)) for key, value in params(c)]
+    brew = [("Источник", tx(c["src"]))] + [(key, tx(value)) for key, value in recipe(c)]
+    if c["fam"]:
+        family = tx(c["fam"])
+        if interactive:
+            family = f'<button class="lnk" data-fam="{family}">{family}</button>'
+        brew.append(("Формула", family))
+    return quick, brew
+
+
+def render_definition_rows(rows):
+    return "".join(f"<dt>{key}</dt><dd>{value}</dd>" for key, value in rows)
+
 
 def render_html(data):
     C, md, cards, fams = (data[k] for k in ("C", "md", "cards", "fams"))
@@ -182,17 +202,9 @@ def render_html(data):
         return re.sub(r"(?<![\d.])(\d{1,2})\.(\d{1,2})(?![\d+])", lambda m: rep(m) if m.group(1) != m.group(2) else m.group(0), t)
 
 
-    def tx(s):
-        s = html.escape(s.replace("\\[", "[").replace("\\]", "]"))
-        return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
-
-
     def card_html(c):
         l = c["lvl"]
-        quick = [(k, tx(v)) for k, v in params(c)]
-        brew = [("Источник", tx(c["src"]))] + [(k, tx(v)) for k, v in recipe(c)]
-        if c["fam"]:
-            brew.append(("Формула", f'<button class="lnk" data-fam="{tx(c["fam"])}">{tx(c["fam"])}</button>'))
+        quick, brew = card_rows(c, interactive=True)
         tags = f'<span class="tag lv">{ROM[l]}</span><span class="tag">{RAR[l]}</span><span class="tag cls-{c["cls"]}">{CLS[c["cls"]]}</span>'
         if c["off"]:
             tags += '<span class="tag">официальный, изменён</span>' if c["changed"] else '<span class="tag">официальный</span>'
@@ -205,7 +217,7 @@ def render_html(data):
         out.append(f'<p class="tagline">{tx(" · ".join(card_tags(c)))}</p>')
         if c["changed"]:
             out.append(f'<p class="chgd">Изменено относительно источника: {tx(c["changed"])}.</p>')
-        out.append('<dl class="quick">' + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in quick) + "</dl>")
+        out.append('<dl class="quick">' + render_definition_rows(quick) + "</dl>")
         out.append(f'<p class="eff"><b>Эффект.</b> {tx(c["eff"])}</p>')
         if c["mech"]:
             out.append(f'<p class="mech"><b>Особые правила.</b> {tx(c["mech"])}</p>')
@@ -215,7 +227,7 @@ def render_html(data):
             out.append(f'<p class="mech"><b>Рецепт.</b> {tx(PSN_RECIPE.format(fam=c["fam"]))}</p>')
         if c["alt"]:
             out.append(f'<p class="alt"><i>Альтернатива: {tx(c["alt"])}.</i></p>')
-        det = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in brew)
+        det = render_definition_rows(brew)
         note = f'<p class="note">{tx(c["note"])}</p>' if c["note"] else ""
         out.append(f'<details class="brew"><summary>Варка, источник{", примечание" if c["note"] else ""}</summary><dl>{det}</dl>{note}</details>')
         out.append('<a class="lnk top" href="#list">↑ к списку</a></article>')

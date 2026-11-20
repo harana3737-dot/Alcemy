@@ -2,7 +2,7 @@
 справка (ядро правил), каталог эликсиров, снимок алхимии Талиса, ремёсла Лаэля и Фаэнона.
 Запуск: python3 scripts/cards/master_panel.py → «Пульт мастера.html».
 Источники: «Для мастера — коротко на утверждение.md», «Алхимия Талиса — ядро правил.html»
-(собрать master_html.py), каталог (сначала cards/gen.py), лист персонажа (раздел «Алхимия»),
+(собрать master_html.py), общие строки карточек, лист персонажа (раздел «Алхимия»),
 «Образец — кровь шахтёра.md». Только то, что можно мастеру."""
 
 
@@ -42,7 +42,8 @@ def build():
     core = re.sub(r"<h1[^>]*>.*?</h1>", "", core, count=1, flags=re.S)
 
     # Карточки эликсиров
-    from cards_model import prepare_cards, ordered_cards, CLS, CLS_ORDER as ORDER
+    from cards_model import clean, prepare_cards, ordered_cards, CLS, CLS_ORDER as ORDER
+    from gen import card_rows, render_definition_rows
     C = ordered_cards(prepare_cards())
     def conc(c):  # как в каталоге (gen.py, conc_short): эффект — алхимическая по a89, заряды и склянки — обычная по полю conc
         if c["cls"] == "eff":
@@ -57,17 +58,9 @@ def build():
                   d=c["dur"], c=conc(c), g=c["tasks"], es=c["ess_types"], tx=tox_n(c), s=c.get("src_raw") or c["src"], x=c["eff"], o=c["note"] or "")
              for c in C]
 
-    # Применение и варка — готовые блоки из «Карточек эликсиров.html» (как видит мастер в каталоге)
-    cat = (ROOT / "Карточки эликсиров.html").read_text(encoding="utf-8")
-    blocks = {}
-    for m in re.finditer(r'<article class="card" id="(e\d+)".*?</article>', cat, re.S):
-        art = m.group(0)
-        q = re.search(r'<dl class="quick">.*?</dl>', art, re.S)
-        b = re.search(r'<details class="brew">.*?<dl>(.*?)</dl>', art, re.S)
-        clean = lambda h: re.sub(r'<button[^>]*>(.*?)</button>', r"\1", h)
-        blocks[m.group(1)] = (clean(q.group(0)) if q else "", "<dl>" + clean(b.group(1)) + "</dl>" if b else "")
-    def dl_dict(h):  # <dt>…</dt><dd>…</dd> → {dt: текст dd}
-        return {dt: re.sub(r"<[^>]+>", "", dd).strip() for dt, dd in re.findall(r"<dt>(.*?)</dt><dd>(.*?)</dd>", h, re.S)}
+    def plain_fields(rows):
+        return {key: re.sub(r"<[^>]+>", "", clean(value)).strip() for key, value in rows}
+
     def act_short(t):  # «выпить — бонусное действие; применить — действие (окно 1 час)» → «действие»: что тратится за столом
         if "применить — " in t:
             t = t.split("применить — ", 1)[1]
@@ -79,11 +72,13 @@ def build():
         m = re.match(r"объём работы (\d+)", t)
         return f"долгая, объём {m.group(1)}" if m else t
     for c, cd in zip(C, cards):
-        cd["q"], cd["b"] = blocks.get(c["id"], ("", ""))
-        if c["cls"] == "psn":  # контрольный яд своего рецепта не имеет — варится по рецепту зарядов и склянок своей эссенции (Ж-100)
-            cd["b"] = re.sub(r"(<dt>Формула</dt><dd>)(.*?)(</dd>)", r"\1\2 — общий рецепт зарядов и склянок; отдельного рецепта яда нет (Ж-100)\3", cd["b"])
-        # метки карточки: за столом — действие, СЛ, спасбросок; на подготовке — СЛ варки, время, катализатор (всё из готовых блоков каталога)
-        q, b = dl_dict(cd["q"]), dl_dict(cd["b"])
+        quick, brew = card_rows(c)
+        if c["cls"] == "psn":
+            brew = [(key, value + " — общий рецепт зарядов и склянок; отдельного рецепта яда нет (Ж-100)"
+                     if key == "Формула" else value) for key, value in brew]
+        cd["q"] = '<dl class="quick">' + clean(render_definition_rows(quick)) + '</dl>'
+        cd["b"] = '<dl>' + clean(render_definition_rows(brew)) + '</dl>'
+        q, b = plain_fields(quick), plain_fields(brew)
         cd["ac"] = act_short(q.get("Применение") or q.get("Нанесение") or "")
         dc = re.match(r"\s*(\d+)", q.get("СЛ / атака") or q.get("СЛ") or "")
         cd["dc"] = int(dc.group(1)) if dc else None

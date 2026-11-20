@@ -620,8 +620,21 @@ function trigCount(pid){return ST.trig.filter(t=>t.who===pid&&afterLR(t)&&!ST.re
 function toxOfP(pid){return ST.ent.filter(e=>e.who===pid).reduce((s,e)=>s+toxLive(e),0)}
 const P=id=>ST.people.find(p=>p.id===id);
 
-let UNDOJ={}, LASTMUT=0; // номер снимка UNDO → [{id,d}] рост в журнале, сделанный тем же действием
-function mutate(fn){UNDO.push(JSON.stringify(ST));if(UNDO.length>30){const o={};Object.keys(UNDOJ).forEach(k=>{if(+k>0)o[+k-1]=UNDOJ[k]});UNDOJ=o}if(UNDO.length>30)UNDO.shift();LASTMUT=Date.now();fn();tidy();ST.u=Date.now();save();renderBelt()}
+let journalWrites=0, undoing=false;
+function mutate(change){
+  const action={before:JSON.stringify(ST),journal:[]};
+  change();
+  UNDO.push(action);
+  if(UNDO.length>30)UNDO.shift();
+  tidy();
+  ST.u=Date.now();
+  save();
+  renderBelt();
+  return action;
+}
+function renderUndo(){
+  $('undo').disabled=!UNDO.length||journalWrites>0||undoing;
+}
 function logx(t){ST.log.unshift({T:ST.T,t});ST.log=ST.log.slice(0,80)}
 function tidy(){
   ST.people.forEach(p=>{if(p.intox&&toxOfP(p.id)<=p.limit)p.intox=false});
@@ -649,7 +662,7 @@ setTimeout(async()=>{
     const db=await window.claude.use('db'), user=await window.claude.use('user');
     if(!db||!user)return;
     const id=await user.id();if(!id)return;
-    JDB=db;db.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется автоматически.');renderJournal();renderBrewingPlan()},()=>jstat('Связь с журналом потеряна — обнови страницу.',true));
+    JDB=db;db.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется автоматически.');renderTrackViews()},()=>jstat('Связь с журналом потеряна — обнови страницу.',true));
     DOC=db.collection('belt').doc('state');
     let snap=await DOC.get();const shared=snap.exists, su=shared?(snap.data().u||0):-1;
     if(!shared){const old=await db.collection('data/users/'+id).doc('belt').get().catch(()=>null);if(old&&old.exists)snap=old}
@@ -659,7 +672,7 @@ setTimeout(async()=>{
     DOC.onSnapshot(sn=>{if(!sn.exists||saveT&&sn.metadata&&sn.metadata.hasPendingWrites)return;const d=sn.data();if(!d||!d.s||(d.u||0)<=(ST.u||0))return;try{const x=JSON.parse(d.s);if(x&&x.v===1){ST=x;ls.set('belt',d.s);UNDO=[];renderBelt()}}catch(e){}},()=>{});
     setSave('сохраняется в аккаунте');renderBelt();
   }catch(e){setSave('сохраняется в этом браузере')}
-  finally{if(!JDB){JDB=localDB();JDB.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется только в этом браузере (не на claude.ai).');renderJournal();renderBrewingPlan()})}
+  finally{if(!JDB){JDB=localDB();JDB.collection('tracks').onSnapshot(sn=>{TR=sn.docs.map(d=>({id:d.id,...d.data()}));jstat('Журнал сохраняется только в этом браузере (не на claude.ai).');renderTrackViews()})}
     if(matInit()){ST.u=Date.now();save()}migrate();if(ST.seed===undefined)applySeed();else renderBelt()}
 },0);
 function migrate(){
@@ -691,9 +704,36 @@ $('restS').onclick=()=>mutate(()=>{ST.T+=60;ST.rests.push(ST.T);logx('Корот
 $('restL').onclick=()=>mutate(()=>{ST.T+=480;ST.lrs.push(ST.T);ST.rests.push(ST.T);ST.n=(ST.n||0)+1;ST.lrN=ST.n;ST.people.forEach(p=>{p.exh=Math.max(0,p.exh-1)});OD=null;
   const left=ST.people.filter(p=>p.intox&&toxOfP(p.id)>p.limit).map(p=>p.name);
   logx('Долгий отдых завершён: остаточная токсичность пересчитана (действующие эффекты держат свою), истощение −1'+(left.length?'. Интоксикация остаётся: '+left.join(', '):''))});
-$('undo').onclick=()=>{if(!UNDO.length)return;const jn=UNDOJ[UNDO.length-1];delete UNDOJ[UNDO.length-1];
-  if(jn)jn.forEach(({id,d})=>{const t=TR.find(x=>x.id===id);if(t){const cur=Math.max(0,(+t.current||0)-d),log=(Array.isArray(t.log)?t.log:[]).concat([{t:Date.now(),d:-d,note:'отмена'}]).slice(-30);jUpdate(id,{current:cur,log,done:cur>=(+t.target||1)})}});
-  ST=JSON.parse(UNDO.pop());ST.u=Date.now();OD=null;save();renderBelt()};
+$('undo').onclick=async()=>{
+  const action=UNDO.at(-1);
+  if(!action||journalWrites||undoing)return;
+  undoing=true;
+  if(action.journal.length)document.body.inert=true;
+  renderUndo();
+  try{
+    while(action.journal.length){
+      const {id,d,extra,fields,note}=action.journal.at(-1);
+      const reverted=await changeTrack(id,t=>trackProgress(t,-d,note===null?null:'отмена',-extra,fields,true),{allowMissing:true});
+      if(!reverted)return;
+      action.journal.pop();
+    }
+    if(UNDO.at(-1)!==action)return;
+    UNDO.pop();
+    ST=JSON.parse(action.before);
+    ST.u=Date.now();
+    OD=null;
+    save();
+    renderBelt();
+  }catch(error){
+    jstat('Отмена не сохранена. Повтори после восстановления связи.',true);
+    if($('tab-jour').hidden)setSave('Отмена не сохранена. Повтори после восстановления связи.');
+  }finally{
+    document.body.inert=false;
+    if(!$('tab-jour').hidden)renderJournal();
+    undoing=false;
+    renderUndo();
+  }
+};
 $('setTime').onclick=()=>{
   const box=document.createElement('div');box.className='btns';
   box.innerHTML=`<input id="tday" type="number" min="1" style="width:80px" value="${dayOf(ST.T)}"><input id="thm" type="time" style="width:auto;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px" value="${pad(Math.floor(ST.T%1440/60))}:${pad(ST.T%60)}"><button type="button" class="btn soft">Поставить</button>`;
@@ -857,18 +897,27 @@ function renderPeople(){
     box.appendChild(card)});
 }
 function renderBelt(){
-  if(typeof renderJournal==='function'&&!$('tab-jour').hidden)renderJournal();
-  if(typeof renderPlan==='function'&&!$('tab-plan').hidden)renderPlan();
-  talis();fight();if(ST.mat)pools();
+  talis();
+  fight();
+  if(ST.mat)pools();
   $('now').textContent=fmtT(ST.T);
-  // Скрытый пояс обновится при tab('belt'); данные сохраняются при каждой мутации.
-  if(!$('tab-belt').hidden){
-    renderPeople();renderBag();renderMat();renderOD();preview();renderFight();
-    $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
-    $('undo').disabled=!UNDO.length;
+  renderUndo();
+  const t=ST.people[0];
+  if(t){
+    const tox=toxOfP(t.id),badge=$('beltBadge');
+    badge.textContent=tox?`${tox}/${t.limit}`:'';
+    badge.classList.toggle('hot',tox>t.limit);
   }
-  renderAvailability();renderActiveBrews();renderCombo();renderBrewingPlan();
-  const t=ST.people[0];if(t){const x=toxOfP(t.id);const b=$('beltBadge');b.textContent=x?`${x}/${t.limit}`:'';b.classList.toggle('hot',x>t.limit)}
+  renderActiveTab();
+}
+function renderBeltTab(){
+  renderPeople();
+  renderBag();
+  renderMat();
+  renderOD();
+  preview();
+  renderFight();
+  $('log').innerHTML=ST.log.length?ST.log.map(l=>`<div><span>${fmtT(l.T)}</span>${esc(l.t)}</div>`).join(''):'<div class="note">Пока пусто</div>';
 }
 
 // ===== Бой: «Мой ход» раз в раунд; лечение зелий по раундам (7.2, Ж-91), яд на оружии (7.5, 8.6). Чужие ходы и цели — у мастера =====
@@ -1056,9 +1105,38 @@ function renderPlan(){
   $('plSum').innerHTML=open.length?`<div class="note">Не получено: ${open.length} поз. · деньги <b>${fmtZ(money)} зм</b>${noP?` (+${noP} без цены)`:''} из ${fmtZ(gold)} у Талиса${money>gold?' <span style="color:var(--bad)">— не хватает</span>':''} · варка <b>${fmtZ(hrs)} ч</b>${noH?` (+${noH} без часов)`:''} — часы по позиции считаются на все её дозы с партиями (6.2), если все попытки удачны.</div>`:'';
 }
 
-// вкладки
-function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('tab-brew').hidden=t!=='brew';$('tab-belt').hidden=t!=='belt';$('tab-jour').hidden=t!=='jour';$('tab-plan').hidden=t!=='plan';$('tab-scroll').hidden=t!=='scroll';$('tab-smith').hidden=t!=='smith';$('tab-combo').hidden=t!=='combo';$('tab-brewing-plan').hidden=t!=='brewing-plan';if(t==='brewing-plan')renderBrewingPlan();if(t==='brew'){renderAvailability();renderActiveBrews()}if(t==='combo')renderCombo();ls.set('tab',t);document.body.classList.toggle('battle-mobile',t==='belt'&&$('tab-belt').classList.contains('combat'));if(t==='plan')renderPlan();if(t==='belt')renderBelt();if(t==='jour'){renderJournal();if($('jink')._upd)$('jink')._upd();if($('janti')._upd)$('janti')._upd();['jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())}}
+// Вкладка отвечает за свой экран. Данные и общие индикаторы обновляются отдельно.
+const TAB_RENDERERS={
+  brew(){renderAvailability();renderActiveBrews()},
+  belt:renderBeltTab,
+  jour:renderJournal,
+  plan:renderPlan,
+  combo:renderCombo,
+  'brewing-plan':renderBrewingPlan,
+};
+function renderActiveTab(){
+  const active=document.querySelector('.tabs button[aria-selected="true"]');
+  TAB_RENDERERS[active?.dataset.tab]?.();
+}
+function renderTrackViews(){
+  const active=document.querySelector('.tabs button[aria-selected="true"]')?.dataset.tab;
+  if(active==='brew'){
+    renderAvailability();
+    if(BASIC_SELECTED?.k==='ink')renderBasicRecipe(BASIC_SELECTED);
+  }else if(active==='jour'||active==='brewing-plan'){
+    renderActiveTab();
+  }
+}
+function tab(t){
+  for(const button of document.querySelectorAll('.tabs button')){
+    const selected=button.dataset.tab===t;
+    button.setAttribute('aria-selected',selected);
+    $('tab-'+button.dataset.tab).hidden=!selected;
+  }
+  ls.set('tab',t);
+  document.body.classList.toggle('battle-mobile',t==='belt'&&$('tab-belt').classList.contains('combat'));
+  renderActiveTab();
+}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
@@ -1074,34 +1152,95 @@ const JQ={marks:[[1,"успех +1"],[2,"на 5+ +2"],[3,"нат. 20 +3"]],count
 const MGOAL=m=>PLAN_RULES.growth[m]||25;
 const jstat=(t,err)=>{const s=$('jstat');if(s){s.textContent=t;s.style.color=err?'var(--bad)':''}};
 const fmtDay=t=>{try{return new Date(t).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'})}catch(e){return''}};
-async function jUpdate(id,patch){
-  if(!JDB||JBUSY.has(id))return false;JBUSY.add(id);renderJournal();
-  try{await JDB.collection('tracks').doc(id).update(patch);jstat('Сохранено');return true}
-  catch(e){jstat(e&&(e.code==='quota_exceeded'||e.name==='QuotaExceededError')?'Не сохранено: хранилище переполнено. Скачай сохранение перед освобождением места.':'Не сохранилось, попробуй ещё раз.',true);return false}
-  finally{JBUSY.delete(id);renderJournal()}
+function jUpdate(id,patch){
+  return queueJournal(()=>changeTrack(id,()=>patch),id);
 }
-async function jAdd(t,d,note){
-  const k=d&&UNDO.length&&Date.now()-LASTMUT<5000&&!String(note||'').startsWith('отмена')?UNDO.length-1:-1,entry=UNDO[k];
-  const cur=(+t.current||0)+d, log=(Array.isArray(t.log)?t.log:[]).concat([{t:Date.now(),d,note}]).slice(-30);
-  const patch={current:cur,log};if(cur>=(+t.target||1))patch.done=true;const ok=await jUpdate(t.id,patch);
-  if(ok&&k>=0&&UNDO[k]===entry)(UNDOJ[k]=UNDOJ[k]||[]).push({id:t.id,d});return ok;
+let journalQueue=Promise.resolve();
+const pendingTracks=new Map();
+const trackBusy=id=>JBUSY.has(id)||pendingTracks.has(id);
+function queueJournal(write,id){
+  journalWrites++;
+  if(id)pendingTracks.set(id,(pendingTracks.get(id)||0)+1);
+  renderUndo();
+  const result=journalQueue.then(write).catch(error=>{
+    jstat(error?.code==='quota_exceeded'||error?.name==='QuotaExceededError'?'Не сохранено: хранилище переполнено. Скачай сохранение перед освобождением места.':'Журнал не сохранён. Проверь связь и попробуй ещё раз.',true);
+    return false;
+  }).finally(()=>{
+    journalWrites--;
+    if(id){
+      const count=pendingTracks.get(id)-1;
+      if(count)pendingTracks.set(id,count);
+      else pendingTracks.delete(id);
+    }
+    if(!$('tab-jour').hidden)renderJournal();
+    renderUndo();
+  });
+  journalQueue=result;
+  return result;
+}
+async function changeTrack(id,patchFor,{allowMissing=false}={}){
+  if(!JDB||JBUSY.has(id))return false;
+  JBUSY.add(id);
+  if(!$('tab-jour').hidden)renderJournal();
+  try{
+    const doc=JDB.collection('tracks').doc(id), stored=await doc.get();
+    if(!stored.exists){
+      if(!allowMissing)jstat('Запись журнала не найдена.',true);
+      return allowMissing;
+    }
+    const patch=patchFor(stored.data());
+    if(!patch)return false;
+    await doc.update(patch);
+    jstat('Сохранено');
+    return true;
+  }finally{
+    JBUSY.delete(id);
+  }
+}
+function trackProgress(t,d,note,extra=0,fields={},reverse=false){
+  const current=(+t.current||0)+d;
+  const log=note===null?{}:{log:(Array.isArray(t.log)?t.log:[]).concat([{t:Date.now(),d,note}]).slice(-30)};
+  const done=current>=(+t.target||1);
+  return {current,...log,...(done||reverse?{done}:{}),...(extra?{extra:(+t.extra||0)+extra}:{}),...fields};
+}
+function recordProgress(id,d,note,action,{extra=0,fields={}}={}){
+  let previousFields;
+  return changeTrack(id,t=>{
+    previousFields=Object.fromEntries(Object.keys(fields).map(key=>[key,t[key]??false]));
+    return trackProgress(t,d,note,extra,fields);
+  }).then(ok=>{
+    if(ok&&action)action.journal.push({id,d,extra,note,fields:previousFields});
+    return ok;
+  });
+}
+function jAdd(t,d,note,action,options){
+  return queueJournal(()=>recordProgress(t.id,d,note,action,options),t.id);
+}
+function addPractice(action,mastery,d,note){
+  return queueJournal(async()=>{
+    const track=await masteryTrack(mastery);
+    return track?recordProgress(track.id,d,note,action):false;
+  });
 }
 async function masteryTrack(M){
   const name=`Мастерство ${M} → ${M+1}`;let t=TR.find(x=>x.group==='mastery'&&x.name===name);
   if(t||!JDB)return t;
-  const id=`mastery-${M}-${M+1}`;
+  const id=`mastery-${M}-${M+1}`, doc=JDB.collection('tracks').doc(id);
+  const saved=await doc.get();
+  if(saved.exists)return {id,...saved.data()};
   const data={name,group:'mastery',mode:'count',target:MGOAL(M),current:0,done:false,log:[],order:M,
     rule:`Успешные зелья ${M}.${M} (каждая доза партии), натуральная 20 = 2. Эликсир ${ROM[M]} = зелье ${M}.`};
-  await JDB.collection('tracks').doc(id).set(data);return {id,...data};
+  await doc.set(data);return {id,...data};
 }
 function renderJournal(){
-  renderAvailability();
-  if(BASIC_SELECTED?.k==='ink'&&!$('tab-brew').hidden)renderBasicRecipe(BASIC_SELECTED);
-  const keepJ={};document.querySelectorAll('#jgroups .jc[data-id]').forEach(c=>{keepJ[c.dataset.id]=[...c.querySelectorAll('input,select')].map(x=>x.type==='checkbox'?x.checked:x.value)});
-  setTimeout(()=>document.querySelectorAll('#jgroups .jc[data-id]').forEach(c=>{const k=keepJ[c.dataset.id];if(!k)return;[...c.querySelectorAll('input,select')].forEach((x,i)=>{if(k[i]===undefined)return;if(x.type==='checkbox')x.checked=k[i];else if(k[i]!=='')x.value=k[i]})}),0);
-  renderVol();renderHours();
-  if($('jink')&&$('jink')._upd&&!$('tab-jour').hidden)setTimeout(()=>{$('jink')._upd();['janti','jcat','jess'].forEach(i=>$(i)._upd&&$(i)._upd())},0);
-  const root=$('jgroups');if(!root)return;root.innerHTML='';
+  const root=$('jgroups');
+  const fields=new Map([...root.querySelectorAll('.jc[data-id]')].map(card=>[
+    card.dataset.id,[...card.querySelectorAll('input,select')].map(field=>field.type==='checkbox'?field.checked:field.value),
+  ]));
+  renderVol();
+  renderHours();
+  for(const id of ['jink','janti','jcat','jess'])$(id)._upd?.();
+  root.replaceChildren();
   if(!JDB){root.innerHTML='<p class="note">Журнал загружается…</p>';return}
   if(!TR.length){root.innerHTML='<p class="note">Записей пока нет — добавь первую внизу.</p>';return}
   JG.forEach(([g,label])=>{
@@ -1109,6 +1248,14 @@ function renderJournal(){
     if(!items.length)return;
     const sec=document.createElement('div');sec.id='journal-'+g;sec.innerHTML=`<div class="sect">${label} · ${items.length}</div>`;
     items.forEach(t=>sec.appendChild(jCard(t)));root.appendChild(sec)});
+  for(const card of root.querySelectorAll('.jc[data-id]')){
+    const previous=fields.get(card.dataset.id);
+    if(!previous)continue;
+    card.querySelectorAll('input,select').forEach((field,index)=>{
+      if(field.type==='checkbox')field.checked=Boolean(previous[index]);
+      else if(previous[index])field.value=previous[index];
+    });
+  }
 }
 // ожидание по исследованию при нынешнем бонусе и месте (рабочее место +1 или Анариэль +3)
 $('projectsOpen').onclick=()=>{tab('jour');const target=$('journal-project')||$('jgroups');target.scrollIntoView({block:'start'});};
@@ -1127,7 +1274,7 @@ function jExpect(t){
   return ''}
 function jCard(t){
   const c=document.createElement('div');c.className='card jc'+(t.done?' done':'');c.dataset.id=t.id;
-  const cur=+t.current||0, tgt=Math.max(1,+t.target||1), dis=JBUSY.has(t.id);
+  const cur=+t.current||0, tgt=Math.max(1,+t.target||1), dis=trackBusy(t.id);
   c.innerHTML=`<div class="phead"><b class="jn"></b><span class="tox">${t.done?'готово':fmtZ(cur)+' / '+tgt}</span></div>
    <div class="track" style="margin:8px 0"><span class="fill" style="display:block;width:${Math.min(100,cur/tgt*100)}%;background:${t.done?'var(--gold)':'var(--acc)'}"></span></div>
    <p class="note jr" style="margin:0 0 6px"></p>`;
@@ -1140,14 +1287,13 @@ function jCard(t){
     const hv=t.cost&&t.cost.type==='herbval', stg=t.cost&&t.cost.type==='stage';
     row.insertAdjacentHTML('beforeend',`<input type="number" placeholder="${t.mode==='roll'?'бросок':'число'}" aria-label="Сколько добавить" style="width:84px;padding:4px 8px">${hv?'<select aria-label="Исход" style="width:auto;padding:4px 6px;font-size:13px"><option value="1">обычный</option><option value="0">нат. 20</option><option value="2">нат. 1</option></select>':''}${stg?'<select aria-label="Исход подхода" style="width:auto;padding:4px 6px;font-size:13px"><option value="ok">успех</option><option value="hi">успех 5+</option><option value="un">провал 1–4</option><option value="fl">провал 5+</option><option value="n20">нат. 20</option><option value="n1">нат. 1</option></select>':''}<input type="search" placeholder="заметка" aria-label="Заметка" style="flex:1;min-width:90px;width:auto;padding:4px 8px"><button type="button" class="btn sm soft">Добавить</button>`);
     const ins=row.querySelectorAll('input'), n=ins[0], m=ins[ins.length-1], ms=row.querySelector('select'), go=row.lastElementChild;go.disabled=dis;
-    go.onclick=()=>{const v=+n.value;if(!n.value||!isFinite(v))return n.focus();
-      if(hv){const mult=+ms.value;let spent='';mutate(()=>{spent=spendProbe(t,mult);addHours(2,`попытка «${t.name}»`);logx(`Попытка «${t.name}»: +${v}${spent?'. Расход: '+spent:''}`)});
-        jAdd(t,v,[m.value.trim(),mult===0?'нат. 20, травы не тратились':'',spent].filter(Boolean).join(' · '))}
+    go.onclick=()=>{if(trackBusy(t.id))return;const v=+n.value;if(!n.value||!isFinite(v))return n.focus();
+      if(hv){const mult=+ms.value;let spent='';const action=mutate(()=>{spent=spendProbe(t,mult);addHours(2,`попытка «${t.name}»`);logx(`Попытка «${t.name}»: +${v}${spent?'. Расход: '+spent:''}`)});
+        jAdd(t,v,[m.value.trim(),mult===0?'нат. 20, травы не тратились':'',spent].filter(Boolean).join(' · '),action)}
       else if(stg){const o=ms.value,L=t.cost.loss||[0,0,0];const add=o==='ok'?v:o==='hi'?v+5:o==='un'?v/2:o==='n20'?2*v:0;const loss=o==='un'?L[0]:o==='fl'?L[1]:o==='n1'?L[2]:0;
-        let txt=`итог ${v}: ${ms.options[ms.selectedIndex].text}`;if(loss)txt+=`, +${loss} зм к стоимости этапа`;mutate(()=>{addHours(2,`подход «${t.name}»`);logx(`${t.name}: ${txt}`)});
+        let txt=`итог ${v}: ${ms.options[ms.selectedIndex].text}`;if(loss)txt+=`, +${loss} зм к стоимости этапа`;const action=mutate(()=>{addHours(2,`подход «${t.name}»`);logx(`${t.name}: ${txt}`)});
         const note=[m.value.trim(),txt,o==='hi'&&t.cost.mark?t.cost.mark:'',['fl','n1'].includes(o)&&t.cost.harm?t.cost.harm[o]:''].filter(Boolean).join(' · ');
-        const cur=(+t.current||0)+add, lg=(Array.isArray(t.log)?t.log:[]).concat([{t:Date.now(),d:add,note}]).slice(-30);
-        jUpdate(t.id,{current:cur,log:lg,extra:(+t.extra||0)+loss,...(cur>=(+t.target||1)?{done:true}:{})})}
+        jAdd(t,add,note,action,{extra:loss})}
       else if(t.cost)probe(t,v,m.value.trim()||'проба');else jAdd(t,v,m.value.trim())};
     c.appendChild(row);
     if(t.cost){const ct=document.createElement('p');ct.className='note';ct.style.margin='6px 0 0';const w=costShort(t);
@@ -1159,13 +1305,25 @@ function jCard(t){
     const ct=document.createElement('p');ct.className='note';ct.style.margin='6px 0 0';
     ct.textContent=t.paid?`Этап оплачен: материалы ${t.cost.mat} зм${ex?` + потери ${ex} зм`:''}.`:`Стоимость этапа сейчас: материалы ${t.cost.mat} зм${ex?` + потери ${ex} зм = ${t.cost.mat+ex} зм`:''}. Списывается при завершении этапа.`;c.appendChild(ct);
     if(t.done&&!t.paid){const it=t.cost.matItem&&ST.mat&&ST.mat.other.find(o=>o.q>0&&o.n===t.cost.matItem);
-      const pb=document.createElement('button');pb.type='button';pb.className='btn sm soft';pb.disabled=JBUSY.has(t.id);
+      const pb=document.createElement('button');pb.type='button';pb.className='btn sm soft';pb.disabled=trackBusy(t.id);
       pb.textContent=`Завершить этап: ${it?`«${it.n}»`:`${t.cost.mat} зм`}${ex?` + ${ex} зм потерь`:''}`;
-      pb.onclick=async()=>{let txt='';const need=(it?0:t.cost.mat)+ex;
-        mutate(()=>{if((ST.mat.gold||0)<need){txt='не хватает монет: нужно '+need+' зм';return}if(it){it.q--}if(need)spendGold(need,'этап '+t.name);txt=[it?`«${it.n}»`:'',need?`${need} зм`:''].filter(Boolean).join(' + ');logx(`${t.name} завершён: списано ${txt}`)});
-        if(/не хватает/.test(txt)){jstat(txt,true);return}await jUpdate(t.id,{paid:true});
-        // каждый завершённый этап — одна практика в рост мастерства (памятка мастера)
-        const M=Math.max(1,Math.min(10,+$('m').value||1)), mt=await masteryTrack(M);if(mt)await jAdd(TR.find(x=>x.id===mt.id)||mt,1,`${t.name} завершён — практика`)};
+      pb.onclick=()=>{
+        if(trackBusy(t.id))return;
+        const need=(it?0:t.cost.mat)+ex;
+        if((ST.mat.gold||0)<need){jstat('не хватает монет: нужно '+need+' зм',true);return}
+        const mastery=Math.max(1,Math.min(10,+$('m').value||1));
+        const action=mutate(()=>{
+          if(it)it.q--;
+          if(need)spendGold(need,'этап '+t.name);
+          const spent=[it?`«${it.n}»`:'',need?`${need} зм`:''].filter(Boolean).join(' + ');
+          logx(`${t.name} завершён: списано ${spent}`);
+        });
+        return queueJournal(async()=>{
+          if(!await recordProgress(t.id,0,null,action,{fields:{paid:true}}))return false;
+          const track=await masteryTrack(mastery);
+          return track?recordProgress(track.id,1,`${t.name} завершён — практика`,action):false;
+        },t.id);
+      };
       const r3=document.createElement('div');r3.className='btns';r3.appendChild(pb);c.appendChild(r3)}}
   const log=Array.isArray(t.log)?t.log.slice(-5).reverse():[];
   if(log.length){const l=document.createElement('div');l.className='log';l.style.marginTop='8px';
@@ -1299,20 +1457,26 @@ function recForm(box,opts){
         doses.push({n,note:[...new Set([a,b])].filter(x=>x&&!KEEP_OFF.has(x)).join(' + ')})}
       else doses.push({n,note:v})});
     let spent='';
-    mutate(()=>{
+    const action=mutate(()=>{
       const add=(nm,q,note,card)=>{if(!q)return;const b=ST.bag.find(b=>b.who==='p1'&&b.n===nm&&(b.note||'')===(note||''));if(b)b.q+=q;else ST.bag.push({n:nm,q,who:'p1',...(note?{note}:{}),...(card?{card}:{})})};
       doses.forEach(d=>add(d.n,1,d.note));
       const dfs=[...box.querySelectorAll('.dfs')].map(x=>x.value);for(let i=0;i<k.un;i++){const d=dfs[i];add(n+' (нестабильное)',1,d?'дефект: '+defShort(d):'дефект: ещё не назначен',c?c.n:null)}
       spent=opts.noUse?'':applyUse(box);
       if(!opts.noUse)addHours(brewHours(n,lvl,c,k.n20+k.hi+k.ok+k.un+k.fl,M),`варка «${n}»`);
       box.querySelectorAll('.mis').forEach((s2,i)=>logx(`Осечка №${i+1} («${n}»): ${s2.value||'мастер ещё не назначил'}`));
-      logx(`Сварено «${n}»: ${doses.length} годных${k.un?`, ${k.un} нестабильных`:''}${k.fl?`, провалов ${k.fl}`:''}${spent?'. Расход: '+spent:''}`)});
+      logx(`Сварено «${n}»: ${doses.length} годных${k.un?`, ${k.un} нестабильных`:''}${k.fl?`, провалов ${k.fl}`:''}${spent?'. Расход: '+spent:''}`);
+      opts.finish?.();
+    });
+    box.querySelectorAll('[data-k]').forEach(i=>i.value=0);
+    box.querySelector('.rn1').value=0;
+    if(!opts.finish)upd();
     const notes=doses.filter(d=>d.note||d.n!==n).map(d=>d.n!==n?d.n:d.note);
     let msg=(spent?`Расход: ${spent}. `:'')+`В сумку Талиса: ${doses.length}${k.un?` + ${k.un} нестабильных`:''}${notes.length?` (${notes.join(', ')})`:''}.`;
     const grow=k.ok+k.hi+2*k.n20;
-    if(lvl===M&&grow){const t=await masteryTrack(M);if(t&&await jAdd(TR.find(x=>x.id===t.id)||t,grow,`${n}: ${good} успешных${k.n20?`, нат. 20 ×${k.n20}`:''}`))msg+=` В рост мастерства ${M} → ${M+1}: +${grow}.`;else if(!JDB)msg+=' Журнал ещё не загрузился.'}
+    if(lvl===M&&grow){if(await addPractice(action,M,grow,`${n}: ${good} успешных${k.n20?`, нат. 20 ×${k.n20}`:''}`))msg+=` В рост мастерства ${M} → ${M+1}: +${grow}.`;else if(!JDB)msg+=' Журнал ещё не загрузился.'}
     else if(grow)msg+=` В рост мастерства не идёт: уровень ${lvl}, мастерство ${M}.`;
-    box.querySelector('.rmsg').textContent=msg;box.querySelectorAll('[data-k]').forEach(i=>i.value=0);box.querySelector('.rn1').value=0;upd();if(opts.onDone)opts.onDone(msg);
+    box.querySelector('.rmsg').textContent=msg;
+    opts.onDone?.(msg);
   };
 }
 
@@ -1525,9 +1689,10 @@ function spendProbe(t,mult){ // внутри mutate; возвращает тек
 }
 const probeHours=t=>{const c=t.cost,l=c&&c.l||1;return c&&c.type==='probe'&&(c.ess||c.gold)?(l>=10?12:l>=8?6:2):2};
 function probe(t,d,label,mult=1){
-  let spent='';
-  if(t.cost&&ST.mat)mutate(()=>{spent=spendProbe(t,mult);addHours(probeHours(t),`проба «${t.name}»`);logx(`Проба «${t.name}»: ${label}${spent?'. Расход: '+spent:''}`)});
-  return jAdd(t,d,label+(spent?' · '+spent:''));
+  if(trackBusy(t.id))return;
+  let spent='',action;
+  if(t.cost&&ST.mat)action=mutate(()=>{spent=spendProbe(t,mult);addHours(probeHours(t),`проба «${t.name}»`);logx(`Проба «${t.name}»: ${label}${spent?'. Расход: '+spent:''}`)});
+  return jAdd(t,d,label+(spent?' · '+spent:''),action);
 }
 // натуральная 1 на пробе (8.4): проба потеряна, мастер выбирает одно из трёх
 function n1Pick(card,t){
@@ -1543,10 +1708,12 @@ function sampleBtn(t){
   const s=t.cost&&t.cost.sample;if(!s||t.sampleUsed)return null;
   const b=ST.bag.find(x=>x.who==='p1'&&x.n===s&&x.q>0);
   const btn=document.createElement('button');btn.type='button';btn.className='btn sm soft';
-  btn.textContent=b?`Разобрать образец «${s}» (+1)`:`Образца «${s}» нет в сумке`;btn.disabled=!b||JBUSY.has(t.id);
-  btn.onclick=async()=>{if(!b)return;mutate(()=>{b.q--;logx(`Разобран образец «${s}» для «${t.name}»`)});
-    const lg=(Array.isArray(t.log)?t.log:[]).concat([{t:Date.now(),d:1,note:`образец «${s}» разобран`}]).slice(-30);const cur=(+t.current||0)+1;
-    await jUpdate(t.id,{current:cur,log:lg,sampleUsed:true,...(cur>=(+t.target||1)?{done:true}:{})})};
+  btn.textContent=b?`Разобрать образец «${s}» (+1)`:`Образца «${s}» нет в сумке`;btn.disabled=!b||trackBusy(t.id);
+  btn.onclick=()=>{
+    if(!b||trackBusy(t.id))return;
+    const action=mutate(()=>{b.q--;logx(`Разобран образец «${s}» для «${t.name}»`)});
+    return jAdd(t,1,`образец «${s}» разобран`,action,{fields:{sampleUsed:true}});
+  };
   return btn;
 }
 
@@ -1605,7 +1772,7 @@ function inkForm(box){
     const o=b.dataset.o, l=+il.value, M=Math.max(1,Math.min(10,+$('m').value||1)), half=INK.price[l]/6, minL=Math.max(1,l);
     const sp=box.querySelector('.isp').value.trim(), ieV=box.querySelector('.ie')?.value, icV=box.querySelector('.ic')?.value;
     let spent='', res='';
-    mutate(()=>{const out=[];
+    const action=mutate(()=>{const out=[];
       ['heal','poison'].forEach(k=>{if(herbValue(k,minL)>=half-1e-9)out.push(`${KIND[k].toLowerCase()} ${takeValue(k,half,minL)}`);else out.push(`${KIND[k].toLowerCase()} не списаны: нужно на ${fmtZ(half)} зм`)});
       let essT='';if(ieV){const e=ST.mat.ess.find(x=>x.id===ieV);if(e){const t=Math.min(e.q,l?1:0.5);e.q=+(e.q-t).toFixed(2);essT=e.types[0];out.push(`эссенция «${e.n}» −${fmtZ(t)}`)}}
       if(icV){const x=ST.mat.cat.find(y=>y.id===icV);if(x){x.used=Math.min(cmax(x),x.used+1);if(!crackCat(box,x,out))out.push(`катализатор ${ROM[x.o]} — ${x.used}/${cmax(x)}`)}}
@@ -1620,7 +1787,7 @@ function inkForm(box){
     // рост мастерства: 2 набора своего уровня = 1 зелье, нат. 20 — сам по себе 1 (3.2)
     let msg=res+' Расход: '+spent+'.';
     const g=o==='n20'?1:(o==='hi'||o==='ok')?0.5:0;
-    if(g&&l===M){const t=await masteryTrack(M);if(t&&await jAdd(TR.find(x=>x.id===t.id)||t,g,`${inkName(l)}: ${b.textContent}`))msg+=` В рост мастерства ${M} → ${M+1}: +${fmtZ(g)}.`}
+    if(g&&l===M){if(await addPractice(action,M,g,`${inkName(l)}: ${b.textContent}`))msg+=` В рост мастерства ${M} → ${M+1}: +${fmtZ(g)}.`}
     else if(g)msg+=` В рост мастерства не идёт: чернила ${l?ROM[l]:'заговора'}, мастерство ${M}.`;
     box.querySelector('.imsg').textContent=msg;upd();
   });
@@ -1705,7 +1872,7 @@ function antiForm(box){
   box.querySelectorAll('.aout .chip').forEach(b=>b.onclick=async()=>{
     const o=b.dataset.o, a=ANTI[+al.value], M=Math.max(1,Math.min(10,+$('m').value||1)), half=a.p/6, acV=box.querySelector('.ac')?.value;
     let spent='',res='';
-    mutate(()=>{const out=[];
+    const action=mutate(()=>{const out=[];
       const B0=box.querySelector('.abon')?.value, save=(o==='hi'&&B0==='Экономия трав')||(o==='n20'&&(B0==='Экономия трав'||(B0==='Два бонуса'&&[box.querySelector('.abon2').value,box.querySelector('.abon3').value].includes('Экономия трав'))));
       ['heal','poison'].forEach(k=>{if(save){out.push(`${KIND[k].toLowerCase()}: экономия — тратится половина`)}if(herbValue(k,a.m)>=(save?half/2:half)-1e-9)out.push(`${KIND[k].toLowerCase()} ${takeValue(k,save?half/2:half,a.m)}`);else out.push(`${KIND[k].toLowerCase()} ур. ${a.m}+ не списаны: нужно на ${fmtZ(save?half/2:half)} зм`)});
       if(acV){const x=ST.mat.cat.find(y=>y.id===acV);if(x){x.used=Math.min(cmax(x),x.used+1);if(!crackCat(box,x,out))out.push(`катализатор ${ROM[x.o]} — ${x.used}/${cmax(x)}`)}}
@@ -1723,7 +1890,7 @@ function antiForm(box){
     let msg=res+' Расход: '+spent+'.';
     // рост: два противоядия = одно зелье уровня ступени (7.9); нат. 20 — как у чернил, сама по себе одно
     const g=o==='n20'?1:(o==='hi'||o==='ok')?0.5:0;
-    if(g&&a.m===M){const t=await masteryTrack(M);if(t&&await jAdd(TR.find(x=>x.id===t.id)||t,g,`${antiName(a)}: ${b.textContent}`))msg+=` В рост мастерства ${M} → ${M+1}: +${fmtZ(g)}.`}
+    if(g&&a.m===M){if(await addPractice(action,M,g,`${antiName(a)}: ${b.textContent}`))msg+=` В рост мастерства ${M} → ${M+1}: +${fmtZ(g)}.`}
     else if(g)msg+=` В рост мастерства не идёт: ступень ${a.m}.${a.m}, мастерство ${M}.`;
     box.querySelector('.amsg').textContent=msg;upd();
   });
@@ -1883,13 +2050,13 @@ function renderVol(){
       body.innerHTML=`<p class="note" style="margin:6px 0">Объём набран. Завершающая проверка — СЛ ${v.dc}, модификатор ${mod>=0?'+':''}${mod} (метки − дефекты, от −2 до +2); с помощником — ещё +2. Бонусы 5+ и 20, дефекты и осечка — только по ней.</p><div class="vfin"></div>`;
       const fin=body.querySelector('.vfin');
       {const B=(+$('b').value||0)+mod, ch=chancesTxt(v.dc,B);body.querySelector('p').insertAdjacentHTML('beforeend',` Шансы при бонусе ${B>=0?'+':''}${B}: успех ${pct(ch.n20+ch.hi+ch.ok)} (5+ ${pct(ch.hi)}, нат. 20 5%), нестабильный ${pct(ch.un)}, провал ${pct(ch.fl)}.`)}
-      if(v.kind==='elixir'){const card=byName(v.n);recForm(fin,{name:v.n,lvl:v.l,card,noUse:true,single:true,onDone:(msg)=>{VOLMSG=`«${v.n}»: ${msg}`;mutate(()=>{ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» завершена`)})},guard:()=>volIdle(v).ruined?'Варка испорчена (месяц простоя) — завершить нельзя.':''})}
+      if(v.kind==='elixir'){const card=byName(v.n);recForm(fin,{name:v.n,lvl:v.l,card,noUse:true,single:true,finish:()=>{ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» завершена`)},onDone:msg=>{VOLMSG=`«${v.n}»: ${msg}`;if(!$('tab-jour').hidden)renderVol()},guard:()=>volIdle(v).ruined?'Варка испорчена (месяц простоя) — завершить нельзя.':''})}
       else{fin.innerHTML=`<div class="chips">${[['n20','нат. 20'],['hi','успех 5+'],['ok','успех'],['un','провал 1–4'],['fl','провал 5+'],['n1','нат. 1']].map(([k,t])=>`<button type="button" class="chip" data-o="${k}">${t}</button>`).join('')}</div>`;
         fin.querySelectorAll('.chip').forEach(b=>b.onclick=async()=>{if(volIdle(v).ruined)return;const o=b.dataset.o,M=Math.max(1,Math.min(10,+$('m').value||1));
-          mutate(()=>{if(INKQ[o]){const [q,md]=INKQ[o];const nm=`${inkName(v.l)} — ${q} (${md})`;const note=[v.ess?`эссенция: ${v.ess}`:'',v.spell?`для «${v.spell}»`:''].filter(Boolean).join(' · ');
+          const action=mutate(()=>{if(INKQ[o]){const [q,md]=INKQ[o];const nm=`${inkName(v.l)} — ${q} (${md})`;const note=[v.ess?`эссенция: ${v.ess}`:'',v.spell?`для «${v.spell}»`:''].filter(Boolean).join(' · ');
               const bb=ST.bag.find(x=>x.who==='p1'&&x.n===nm&&(x.note||'')===note);if(bb)bb.q++;else ST.bag.push({n:nm,q:1,who:'p1',...(note?{note}:{})})}
             ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» завершена: ${b.textContent}`)});
-          const g=o==='n20'?1:(o==='hi'||o==='ok')?0.5:0;if(g&&v.l===M){const t=await masteryTrack(M);if(t)await jAdd(TR.find(x=>x.id===t.id)||t,g,`${inkName(v.l)}: ${b.textContent}`)}})}
+          const g=o==='n20'?1:(o==='hi'||o==='ok')?0.5:0;if(g&&v.l===M){await addPractice(action,M,g,`${inkName(v.l)}: ${b.textContent}`)}})}
     }
     c.querySelector('.vdel').onclick=()=>{if(c.querySelector('.vdel').dataset.sure){mutate(()=>{ST.vol=vols().filter(x=>x!==v);logx(`Долгая варка «${v.n}» брошена`)})}else{c.querySelector('.vdel').dataset.sure=1;c.querySelector('.vdel').textContent='Точно бросить? Материалы не вернутся'}};
     box.appendChild(c);
@@ -2055,7 +2222,7 @@ function refreshRestoredUI(crafts){
   if(ls.get('theme'))document.documentElement.dataset.theme=ls.get('theme');else delete document.documentElement.dataset.theme;
   S.sel=D.findIndex(c=>c.n===ls.get('sel'));if(S.sel<0)S.sel=null;
   if(crafts)document.dispatchEvent(new CustomEvent('alcemy-crafts-restored',{detail:crafts}));
-  renderBelt();renderJournal();list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+  list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');renderBelt();
 }
 function snapshot(){
   return {crafts:craftSnapshot(),plans:{combo:JSON.parse(JSON.stringify(COMBO)),brewing:{...BP}},format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(SAVE_SETTINGS.map(k=>[k,ls.get(k)]))};
@@ -2142,7 +2309,7 @@ function validateSnapshot(data){
   return data;
 }
 let PENDING_SAVE=null;
-$('backupExport').onclick=async()=>{if(!JDB||JBUSY.size){$('backupStatus').textContent='Дождись загрузки и сохранения журнала.';return}try{$('backupStatus').textContent=await downloadSnapshot(snapshot())?'Сохранение скачано: сумки, материалы, журнал, кузня, свитки и настройки.':'Файл не сохранён.'}catch(err){$('backupStatus').textContent='Файл не сохранён: '+err.message}};
+$('backupExport').onclick=async()=>{if(!JDB||JBUSY.size||journalWrites||undoing){$('backupStatus').textContent='Дождись загрузки и сохранения журнала.';return}try{$('backupStatus').textContent=await downloadSnapshot(snapshot())?'Сохранение скачано: сумки, материалы, журнал, кузня, свитки и настройки.':'Файл не сохранён.'}catch(err){$('backupStatus').textContent='Файл не сохранён: '+err.message}};
 $('backupImport').onclick=()=>{$('backupFile').value='';$('backupFile').click()};
 $('backupFile').onchange=async e=>{
   try{const file=e.target.files[0];if(!file)return;if(file.size>5*1024*1024)throw Error('Файл больше 5 МБ');PENDING_SAVE=validateSnapshot(JSON.parse(await file.text()));
@@ -2152,10 +2319,10 @@ $('backupFile').onchange=async e=>{
 $('restoreCancel').onclick=()=>{PENDING_SAVE=null;$('restoreDialog').close()};
 $('restoreDialog').oncancel=e=>{if($('restoreApply').disabled)e.preventDefault();else PENDING_SAVE=null};
 $('restoreApply').onclick=async()=>{
-  if(!PENDING_SAVE||!JDB||JBUSY.size){$('restoreSummary').textContent='Дождись загрузки и сохранения журнала.';return}
+  if(!PENDING_SAVE||!JDB||JBUSY.size||journalWrites||undoing){$('restoreSummary').textContent='Дождись загрузки и сохранения журнала.';return}
   const next=PENDING_SAVE,col=JDB.collection('tracks');let old,stored;
   try{old=snapshot();stored=Object.fromEntries(['belt','combo','brewing-plan',...SAVE_SETTINGS,...Object.values(CRAFT_KEYS)].map(k=>[k,localStorage.getItem(k)]))}catch(err){$('restoreSummary').textContent='Не удалось прочитать текущее сохранение: '+err.message;return}
-  const undo=UNDO,undoJ=UNDOJ;$('restoreApply').disabled=true;$('restoreCancel').disabled=true;
+  const undo=UNDO;$('restoreApply').disabled=true;$('restoreCancel').disabled=true;
   clearTimeout(saveT);
   if(!await downloadSnapshot(old,'alcemy-before-restore')){$('restoreSummary').textContent='Копия текущего состояния не сохранена — восстановление отменено.';$('restoreApply').disabled=false;$('restoreCancel').disabled=false;return}
   try{
@@ -2170,7 +2337,7 @@ $('restoreApply').onclick=async()=>{
     if(next.plans){localStorage.setItem('combo',JSON.stringify(next.plans.combo));localStorage.setItem('brewing-plan',JSON.stringify(next.plans.brewing))}
     for(const key of SAVE_SETTINGS)if(Object.hasOwn(next.settings,key)){const value=next.settings[key];if(value==null)localStorage.removeItem(key);else localStorage.setItem(key,String(value))}
     if(DOC){clearTimeout(saveT);await DOC.set({s:JSON.stringify(restored),u:restored.u})}
-    ST=restored;TR=next.tracks;S.t={...(next.situation||{})};UNDO=[];UNDOJ={};
+    ST=restored;TR=next.tracks;S.t={...(next.situation||{})};UNDO=[];
     if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));BP={...next.plans.brewing}}
     refreshRestoredUI(next.crafts);
     PENDING_SAVE=null;$('restoreDialog').close();$('backupStatus').textContent='Сохранение восстановлено.';
@@ -2179,7 +2346,7 @@ $('restoreApply').onclick=async()=>{
     for(const t of old.tracks){try{const {id,...data}=t;await col.doc(id).set(data)}catch(e){rolled=false}}
     for(const t of next.tracks)if(!old.tracks.some(o=>o.id===t.id)){try{await col.doc(t.id).delete()}catch(e){rolled=false}}
     for(const [key,value] of Object.entries(stored)){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value)}catch(e){rolled=false}}
-    ST=old.state;TR=old.tracks;S.t={...old.situation};COMBO=old.plans.combo;BP=old.plans.brewing;UNDO=undo;UNDOJ=undoJ;
+    ST=old.state;TR=old.tracks;S.t={...old.situation};COMBO=old.plans.combo;BP=old.plans.brewing;UNDO=undo;
     if(DOC){try{await DOC.set({s:JSON.stringify(ST),u:Date.now()})}catch(e){rolled=false}}
     try{refreshRestoredUI(old.crafts)}catch(e){rolled=false}
     $('restoreSummary').textContent='Не восстановлено: '+err.message+(rolled?'. Предыдущее состояние возвращено.':'. Откат не завершён: восстанови скачанную копию после восстановления связи.');
@@ -2563,8 +2730,9 @@ function renderBrewingPlan(){
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=RECIPES.find(c=>['basic','ink'].includes(c.k)&&c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
-list();render();renderBelt();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+renderBelt();
 </script>
-<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 9c501b95bb24</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_storage.js; scripts/cards/table_combat.js; scripts/cards/table_materials.js; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
+<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 905335cbad70</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_storage.js; scripts/cards/table_combat.js; scripts/cards/table_materials.js; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
 </body>
 </html>
