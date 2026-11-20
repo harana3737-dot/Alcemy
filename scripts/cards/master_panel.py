@@ -53,7 +53,7 @@ def build():
     def tox_n(c):  # токсичность выпитой дозы числом; склянки, масла, мази и яд через рану — 0
         m = re.match(r"\s*(\d+)", c["tox"])
         return 0 if c["cls"] == "psn" or not m else int(m.group(1))
-    cards = [dict(n=c["name"], l=c["lvl"], k=c["cls"], f=c["fam"] or "", e=c["ess"], p=c["price"], t=c["tox"],
+    cards = [dict(n=c["name"], l=c["lvl"], k=c["cls"], f=c["fam"] or "", e=c["ess"], p=c["price"],
                   d=c["dur"], c=conc(c), g=c["tasks"], es=c["ess_types"], tx=tox_n(c), s=c.get("src_raw") or c["src"], x=c["eff"], o=c["note"] or "")
              for c in C]
 
@@ -161,14 +161,14 @@ def build():
     updates += '</ul><p>Порог — более 20% прибыли сверх лучших доступных чернил II и выше. Заряды, склянки и масла кары сохраняют модель чернил.</p>'
 
     tpl = (HERE / "master_tpl.html").read_text(encoding="utf-8")
-    dump = lambda o: json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
+    dump = lambda o: json.dumps(o, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     out = (tpl.replace("__PRICE_UPDATES__", updates).replace("__GROUPS__", dump(groups)).replace("__EXTRA__", dump(extra)).replace("__NQ__", str(nq))
               .replace("__CARDS__", dump(cards)).replace("__CLS__", dump(CLS)).replace("__ORDER__", dump(ORDER))
               .replace("__TALIS__", dump(talis)).replace("__ROOT__", dump(root)).replace("__QUICK__", dump(quick)).replace("__SAMPLE__", dump(sample)).replace("__CORE__", core).replace("__CRAFTS__", crafts))
     from generated_files import generated_html
     out = generated_html(out, "scripts/cards/master_panel.py", "scripts/cards/master_tpl.html", version=True)
     (ROOT / "Пульт мастера.html").write_text(out, encoding="utf-8")
-    print("Пульт мастера.html", nq, "вопросов,", len(cards), "карточек,", len(out), "байт")
+    print("Пульт мастера.html", nq, "вопросов,", len(cards), "карточек,", len(out.encode("utf-8")), "байт")
 
 
 if __name__ == '__main__':
