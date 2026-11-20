@@ -44,6 +44,19 @@ def outdated(before, after):
     return sorted(p for p in before.keys() | after.keys() if before.get(p) != after.get(p))
 
 
+def temporary_workspace(root):
+    """Выбрать внешний каталог до копирования проекта."""
+    try:
+        parent = Path(tempfile.gettempdir()).resolve()
+        if parent.is_relative_to(root.resolve()):
+            raise OSError(f'{parent} находится внутри проекта')
+        return tempfile.TemporaryDirectory(prefix='alcemy-check-', dir=parent)
+    except OSError as error:
+        print(f'ОШИБКА: не удалось создать временный каталог вне проекта ({error}). '
+              'Укажите доступный внешний каталог через TMPDIR.', file=sys.stderr)
+        return None
+
+
 def execute(command, root, env):
     start = time.monotonic()
     result = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True)
@@ -109,9 +122,12 @@ def run_browsers(scripts, root, env, failures, jobs):
 
 def check_full(root=ROOT, *, slow=False, browser=False, sources=False, jobs=4):
     started = time.monotonic()
-    before = snapshot(root)
     failures = []
-    with tempfile.TemporaryDirectory(prefix='alcemy-check-all-') as directory:
+    workspace = temporary_workspace(root)
+    if workspace is None:
+        return 1
+    with workspace as directory:
+        before = snapshot(root)
         copy = Path(directory)/'repo'
         shutil.copytree(root, copy, ignore=shutil.ignore_patterns('.git', '__pycache__', '*.zip'))
         env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1',
@@ -283,8 +299,12 @@ def check(root=ROOT, *, slow=False, browser=False, sources=False, quick=False,
     if not (builders or checks or browsers):
         print('ПРОПУЩЕНО: автоматические проверки не выбраны. Нужна ручная сверка текста; это не успешный прогон.')
         return 2
-    before, failures = snapshot(root), []
-    with tempfile.TemporaryDirectory(prefix='alcemy-scope-') as directory:
+    failures = []
+    workspace = temporary_workspace(root)
+    if workspace is None:
+        return 1
+    with workspace as directory:
+        before = snapshot(root)
         copy = Path(directory)/'repo'
         shutil.copytree(root, copy, ignore=shutil.ignore_patterns('.git','__pycache__','*.zip'))
         env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1', PYTHONPATH=os.pathsep.join((str(copy/'scripts'),str(copy/'scripts/cards'))))

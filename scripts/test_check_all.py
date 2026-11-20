@@ -30,6 +30,36 @@ class CheckAllTests(unittest.TestCase):
                 path.write_bytes(b'x')
             self.assertEqual(snapshot(root), {'x.md': hashlib.sha256(b'x').digest()})
 
+    def test_checks_reject_temporary_locations_inside_project_before_copying(self):
+        with tempfile.TemporaryDirectory() as directory:
+            parent = Path(directory)
+            root = parent/'project'
+            nested = root/'tmp'
+            nested.mkdir(parents=True)
+            alias = parent/'alias'
+            alias.symlink_to(nested, target_is_directory=True)
+            for location in (root, nested, alias):
+                with self.subTest(location=location), \
+                        patch('check_all.tempfile.gettempdir', return_value=str(location)), \
+                        patch('check_all.shutil.copytree') as copy, \
+                        contextlib.redirect_stderr(io.StringIO()) as errors:
+                    self.assertEqual(check(root), 1)
+                    self.assertEqual(check(root, scope='checks', files=[]), 1)
+                    copy.assert_not_called()
+                    self.assertIn('внутри проекта', errors.getvalue())
+                    self.assertIn('TMPDIR', errors.getvalue())
+            self.assertEqual(list(nested.iterdir()), [])
+
+    def test_checks_report_unavailable_temporary_directory(self):
+        with patch('check_all.tempfile.TemporaryDirectory', side_effect=PermissionError('нет доступа')), \
+                patch('check_all.shutil.copytree') as copy, \
+                contextlib.redirect_stderr(io.StringIO()) as errors:
+            self.assertEqual(check(), 1)
+            self.assertEqual(check(scope='checks', files=[]), 1)
+            copy.assert_not_called()
+            self.assertIn('нет доступа', errors.getvalue())
+            self.assertIn('TMPDIR', errors.getvalue())
+
     def test_build_mutates_only_temporary_copy_and_fails_on_stale_file(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
