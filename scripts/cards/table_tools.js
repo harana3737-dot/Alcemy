@@ -114,7 +114,7 @@ function refreshRestoredUI(crafts){
   if(ls.get('theme'))document.documentElement.dataset.theme=ls.get('theme');else delete document.documentElement.dataset.theme;
   S.sel=D.findIndex(c=>c.n===ls.get('sel'));if(S.sel<0)S.sel=null;
   if(crafts)document.dispatchEvent(new CustomEvent('alcemy-crafts-restored',{detail:crafts}));
-  renderBelt();renderJournal();list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+  list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');renderBelt();
 }
 function snapshot(){
   return {crafts:craftSnapshot(),plans:{combo:JSON.parse(JSON.stringify(COMBO)),brewing:{...BP}},format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(SAVE_SETTINGS.map(k=>[k,ls.get(k)]))};
@@ -201,7 +201,7 @@ function validateSnapshot(data){
   return data;
 }
 let PENDING_SAVE=null;
-$('backupExport').onclick=async()=>{if(!JDB||JBUSY.size){$('backupStatus').textContent='Дождись загрузки и сохранения журнала.';return}try{$('backupStatus').textContent=await downloadSnapshot(snapshot())?'Сохранение скачано: сумки, материалы, журнал, кузня, свитки и настройки.':'Файл не сохранён.'}catch(err){$('backupStatus').textContent='Файл не сохранён: '+err.message}};
+$('backupExport').onclick=async()=>{if(!JDB||JBUSY.size||journalWrites||undoing){$('backupStatus').textContent='Дождись загрузки и сохранения журнала.';return}try{$('backupStatus').textContent=await downloadSnapshot(snapshot())?'Сохранение скачано: сумки, материалы, журнал, кузня, свитки и настройки.':'Файл не сохранён.'}catch(err){$('backupStatus').textContent='Файл не сохранён: '+err.message}};
 $('backupImport').onclick=()=>{$('backupFile').value='';$('backupFile').click()};
 $('backupFile').onchange=async e=>{
   try{const file=e.target.files[0];if(!file)return;if(file.size>5*1024*1024)throw Error('Файл больше 5 МБ');PENDING_SAVE=validateSnapshot(JSON.parse(await file.text()));
@@ -211,10 +211,10 @@ $('backupFile').onchange=async e=>{
 $('restoreCancel').onclick=()=>{PENDING_SAVE=null;$('restoreDialog').close()};
 $('restoreDialog').oncancel=e=>{if($('restoreApply').disabled)e.preventDefault();else PENDING_SAVE=null};
 $('restoreApply').onclick=async()=>{
-  if(!PENDING_SAVE||!JDB||JBUSY.size){$('restoreSummary').textContent='Дождись загрузки и сохранения журнала.';return}
+  if(!PENDING_SAVE||!JDB||JBUSY.size||journalWrites||undoing){$('restoreSummary').textContent='Дождись загрузки и сохранения журнала.';return}
   const next=PENDING_SAVE,col=JDB.collection('tracks');let old,stored;
   try{old=snapshot();stored=Object.fromEntries(['belt','combo','brewing-plan',...SAVE_SETTINGS,...Object.values(CRAFT_KEYS)].map(k=>[k,localStorage.getItem(k)]))}catch(err){$('restoreSummary').textContent='Не удалось прочитать текущее сохранение: '+err.message;return}
-  const undo=UNDO,undoJ=UNDOJ;$('restoreApply').disabled=true;$('restoreCancel').disabled=true;
+  const undo=UNDO;$('restoreApply').disabled=true;$('restoreCancel').disabled=true;
   clearTimeout(saveT);
   if(!await downloadSnapshot(old,'alcemy-before-restore')){$('restoreSummary').textContent='Копия текущего состояния не сохранена — восстановление отменено.';$('restoreApply').disabled=false;$('restoreCancel').disabled=false;return}
   try{
@@ -229,7 +229,7 @@ $('restoreApply').onclick=async()=>{
     if(next.plans){localStorage.setItem('combo',JSON.stringify(next.plans.combo));localStorage.setItem('brewing-plan',JSON.stringify(next.plans.brewing))}
     for(const key of SAVE_SETTINGS)if(Object.hasOwn(next.settings,key)){const value=next.settings[key];if(value==null)localStorage.removeItem(key);else localStorage.setItem(key,String(value))}
     if(DOC){clearTimeout(saveT);await DOC.set({s:JSON.stringify(restored),u:restored.u})}
-    ST=restored;TR=next.tracks;S.t={...(next.situation||{})};UNDO=[];UNDOJ={};
+    ST=restored;TR=next.tracks;S.t={...(next.situation||{})};UNDO=[];
     if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));BP={...next.plans.brewing}}
     refreshRestoredUI(next.crafts);
     PENDING_SAVE=null;$('restoreDialog').close();$('backupStatus').textContent='Сохранение восстановлено.';
@@ -238,7 +238,7 @@ $('restoreApply').onclick=async()=>{
     for(const t of old.tracks){try{const {id,...data}=t;await col.doc(id).set(data)}catch(e){rolled=false}}
     for(const t of next.tracks)if(!old.tracks.some(o=>o.id===t.id)){try{await col.doc(t.id).delete()}catch(e){rolled=false}}
     for(const [key,value] of Object.entries(stored)){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value)}catch(e){rolled=false}}
-    ST=old.state;TR=old.tracks;S.t={...old.situation};COMBO=old.plans.combo;BP=old.plans.brewing;UNDO=undo;UNDOJ=undoJ;
+    ST=old.state;TR=old.tracks;S.t={...old.situation};COMBO=old.plans.combo;BP=old.plans.brewing;UNDO=undo;
     if(DOC){try{await DOC.set({s:JSON.stringify(ST),u:Date.now()})}catch(e){rolled=false}}
     try{refreshRestoredUI(old.crafts)}catch(e){rolled=false}
     $('restoreSummary').textContent='Не восстановлено: '+err.message+(rolled?'. Предыдущее состояние возвращено.':'. Откат не завершён: восстанови скачанную копию после восстановления связи.');

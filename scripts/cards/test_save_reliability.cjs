@@ -29,8 +29,66 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
   await failWrites(page,'tracks');
   const quota=await page.evaluate(async()=>({ok:await jUpdate('quota-test',{current:2}),current:TR.find(t=>t.id==='quota-test').current,status:$('jstat').textContent}));
   assert.equal(quota.ok,false);assert.equal(quota.current,1);assert.match(quota.status,/Не сохранено.*переполнено/);
-  const ghost=await page.evaluate(async()=>{mutate(()=>logx('проверка отмены'));const ok=await jAdd(TR.find(t=>t.id==='quota-test'),1,'проверка');return {ok,ghost:Object.values(UNDOJ).flat().some(x=>x.id==='quota-test')}});
+  const ghost=await page.evaluate(async()=>{const action=mutate(()=>logx('проверка отмены'));const ok=await jAdd(TR.find(t=>t.id==='quota-test'),1,'проверка',action);return {ok,ghost:action.journal.length>0}});
   assert.deepEqual(ghost,{ok:false,ghost:false});await allowWrites(page);
+  // Две быстрые варки и ручная запись образуют три независимых изменения журнала.
+  // Первую запись задерживаем до регистрации второй варки.
+  const undoPage=await open();
+  const writes=await undoPage.evaluate(async()=>{
+   const id='mastery-2-3', db=JDB, col=db.collection('tracks');
+   await col.doc(id).set({name:'Мастерство 2 → 3',group:'mastery',target:15,current:4,log:[]});
+   let release;
+   const waiting=new Promise(resolve=>{release=resolve});
+   let signal;
+   const started=new Promise(resolve=>{signal=resolve});
+   let first=true;
+   JDB={collection:()=>({...col,doc:key=>{
+    const doc=col.doc(key);
+    return {...doc,update:async patch=>{
+     if(first&&key===id){first=false;signal();await waiting}
+     return doc.update(patch);
+    }};
+   }})};
+   try{
+    hrs().clock=true;
+    const start=ST.T;
+    const brew=()=>{
+     const form=$('jrec'), submit=form.querySelector('.rgo').onclick;
+     const pending=submit();
+     return form.dataset.armed==='1'?submit():pending;
+    };
+    const prepare=()=>{
+     const input=document.querySelector('#jrec .rn');
+     input.value='Зелье лечения 2.2';
+     input.dispatchEvent(new Event('input'));
+     const count=document.querySelector('#jrec [data-k=ok]');
+     count.value='1';
+     count.dispatchEvent(new Event('input'));
+    };
+    prepare();const firstBrew=brew();
+    await Promise.race([started,firstBrew.then(()=>{throw Error("Первая варка не записалась в журнал")})]);
+    prepare();const secondBrew=brew();
+    const manual=jAdd(TR.find(t=>t.id===id),1,'Отдельная ручная запись');
+    const locked=$('undo').disabled;
+    await $('undo').onclick();
+    release();await Promise.all([firstBrew,secondBrew,manual]);
+    return {start,locked,current:TR.find(t=>t.id===id).current,elapsed:ST.T-start,
+      linked:UNDO.slice(-2).map(action=>action.journal.length)};
+   }finally{JDB=db}
+  });
+  assert.deepEqual(writes,{start:writes.start,locked:true,current:7,elapsed:240,linked:[1,1]});
+  await failWrites(undoPage,'tracks',true);
+  await undoPage.evaluate(()=>$('undo').onclick());
+  assert.equal(await undoPage.evaluate(()=>ST.T),writes.start+240,'отказ журнала сохраняет состояние для повторной отмены');
+  assert.equal(await undoPage.evaluate(()=>TR.find(t=>t.id==='mastery-2-3').current),7);
+  await allowWrites(undoPage);
+  await undoPage.evaluate(()=>$('undo').onclick());
+  assert.equal(await undoPage.evaluate(()=>ST.T),writes.start+120);
+  assert.equal(await undoPage.evaluate(()=>TR.find(t=>t.id==='mastery-2-3').current),6);
+  await undoPage.evaluate(()=>$('undo').onclick());
+  assert.equal(await undoPage.evaluate(()=>ST.T),writes.start);
+  assert.equal(await undoPage.evaluate(()=>TR.find(t=>t.id==='mastery-2-3').current),5,'ручная запись остаётся');
+  assert.deepEqual(undoPage.errors,[]);
   const oldGold=await page.evaluate(()=>JSON.parse(localStorage.getItem('belt')).mat.gold);
   await failWrites(page,'belt');
   await page.evaluate(()=>mutate(()=>{ST.mat.gold=12.34}));
@@ -102,6 +160,6 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
   assert.match(await fresh.locator('#craft-scroll [role="status"]').innerText(),/Не удалось сохранить свитки/);
   assert.equal(await fresh.evaluate(()=>snapshot().crafts.scroll.when),'short');await allowWrites(fresh);
   assert.deepEqual(page.errors,[]);assert.deepEqual(fresh.errors,[]);
-  console.log('PASS: storage failures, truthful status, no ghost undo, craft export to fresh browser, legacy/null, rollback and reload, imported HTML stays text');
+  console.log('PASS: storage failures, truthful status, linked and retried undo, craft export to fresh browser, legacy/null, rollback and reload, imported HTML stays text');
  }finally{for(const c of contexts)await c.close();await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
