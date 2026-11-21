@@ -14,7 +14,12 @@ const shots=process.env.TABLE_TOOLS_SCREENSHOTS;
     const fits=async()=>assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth),width,'Страница выходит за границы '+width);
     await page.goto(base+'/'+encodeURIComponent('Помощник варки.html'));await page.waitForFunction(()=>JDB&&ST.mat);
     assert.match(await page.locator('#buildInfo summary').innerText(),/^Сборка [0-9a-f]{12}$/);
-    await fits();await page.locator('[data-tab="smith"]').click();
+    const sections=page.getByRole('navigation',{name:'Разделы помощника'});
+    assert.deepEqual((await sections.getByRole('button').allTextContents()).map(text=>text.trim()),['Варка','Пояс','Журнал','Ремёсла']);
+    assert.equal(await page.getByRole('button',{name:'Кузня',exact:true}).isVisible(),false);
+    await fits();await sections.getByRole('button',{name:'Ремёсла',exact:true}).click();
+    assert.equal(await page.locator('#tab-scroll').isVisible(),true);
+    await page.locator('[data-tab="smith"]').click();
     const smith=page.locator('#craft-smith');
     assert.equal(await smith.locator('#o-p').innerText(),'0/100');assert.match(await smith.locator('#o-left').innerText(),/подходов нет/);
     await smith.locator('#sample').click();
@@ -28,7 +33,10 @@ const shots=process.env.TABLE_TOOLS_SCREENSHOTS;
     // Отказ очищать пример оставляет его нетронутым.
     page.once('dialog',d=>d.dismiss());await smith.locator('#d20').fill('10');await smith.locator('#add').click();
     assert.equal(await smith.locator('#sample-banner').isVisible(),true);assert.equal(await smith.locator('#log tbody tr').count(),4);
-    await page.reload();await page.locator('[data-tab="smith"]').click();assert.equal(await smith.locator('#sample-banner').isVisible(),true);
+    await page.reload();await page.waitForFunction(()=>JDB&&ST.mat);
+    assert.equal(await sections.getByRole('button',{name:'Ремёсла',exact:true}).getAttribute('aria-current'),'true');
+    assert.equal(await page.locator('[data-tab="smith"]').getAttribute('aria-current'),'page');
+    assert.equal(await smith.locator('#sample-banner').isVisible(),true);
     await page.locator('[data-tab="belt"]').click();await page.locator('#fStart').click();
     const head=page.locator('body > .wrap > header');
     if(width<=480){
@@ -65,8 +73,15 @@ const shots=process.env.TABLE_TOOLS_SCREENSHOTS;
     await page.locator('#recipeSearch').click();
     assert.equal(await search.evaluate(el=>el===document.activeElement),true);
     await fits();
-    for(const tab of ['belt','jour','plan','scroll','smith','combo','brewing-plan','brew']){
-      await page.locator(`[data-tab="${tab}"]`).click();await fits();
+    for(const [section,views] of [['belt',['combo','plan']],['craft',['scroll','smith']],['jour',[]],['brew',[]]]){
+      await sections.locator(`[data-section="${section}"]`).click();await fits();
+      for(const view of views){
+        const button=page.locator(`[data-tab="${view}"]`);
+        await button.click();
+        assert.equal(await button.getAttribute('aria-current'),'page');
+        assert.equal(await page.locator(`#tab-${view}`).isVisible(),true);
+        await fits();
+      }
     }
     assert.deepEqual(errors,[]);await context.close();
   }console.log('PASS: 360/375/390/414/1280, все вкладки, версии сборки, пустая кузня, пример и отказ очищать, журнал без прокрутки, компактная шапка, закреплённые вкладки, границы страницы');}

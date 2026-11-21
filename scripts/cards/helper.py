@@ -132,21 +132,19 @@ def build():
     from generated_files import generated_html, pack_records
     js = json.dumps(pack_records(data), ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     html = (HERE / "helper_tpl.html").read_text(encoding="utf-8")
-    from rules_data import P_SL, NEED, CAT_PRICE
+    from rules_data import NEED, helper_values
     for marker, name in [('STORAGE', 'table_storage.js'), ('COMBAT', 'table_combat.js'), ('MATERIALS', 'table_materials.js')]:
         html = html.replace("__TABLE_" + marker + "__\n", (HERE / name).read_text(encoding="utf-8"))
-    html = html.replace("__TABLE_PLANNING__", (HERE / "table_planning.js").read_text(encoding="utf-8"))
-    html = html.replace("__PLANNING_RULES__", json.dumps(dict(potionDC=P_SL, growth=NEED, catalyst=CAT_PRICE)))
+    html = html.replace("__MASTERY_GROWTH__", json.dumps(NEED, separators=(",", ":")))
     html = html.replace("__TABLE_COMBINATIONS__", (HERE / "table_combinations.js").read_text(encoding="utf-8"))
     html = html.replace("__TABLE_TOOLS__", (HERE / "table_tools.js").read_text(encoding="utf-8")).replace("__CRAFTS__", CRAFTS)
-    from rules_data import helper_values
     for marker, value in helper_values().items():
         html = html.replace(marker, value)
     html = html.replace("__COMBAT_LIMITS__", json.dumps(limits, ensure_ascii=False))
     html = html.replace("__DATA__", js).replace("__CLS__", json.dumps(CLS, ensure_ascii=False)).replace("__N__", str(len(data)))
     html = html.replace("__SEED__", json.dumps(dict(id=seed_id, items=seed, mat=MAT, mid=hashlib.sha1(json.dumps(MAT, ensure_ascii=False).encode()).hexdigest()[:10]), ensure_ascii=False).replace("</", "<\\/"))
     out = pathlib.Path(ROOT) / "Помощник варки.html"
-    html = generated_html(html, "scripts/cards/helper.py", "scripts/cards/helper_tpl.html; scripts/cards/table_storage.js; scripts/cards/table_combat.js; scripts/cards/table_materials.js; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js", version=True)
+    html = generated_html(html, "scripts/cards/helper.py", "scripts/cards/helper_tpl.html; scripts/cards/table_storage.js; scripts/cards/table_combat.js; scripts/cards/table_materials.js; scripts/cards/table_tools.js; scripts/cards/table_combinations.js", version=True)
     out.write_text(html, encoding="utf-8")
     print(out, len(data), len(html), seed_id)
 

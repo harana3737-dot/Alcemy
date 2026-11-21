@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY; BUILDER: scripts/cards/helper.py; SOURCE: scripts/cards/helper_tpl.html; scripts/cards/table_storage.js; scripts/cards/table_combat.js; scripts/cards/table_materials.js; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js -->
+<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY; BUILDER: scripts/cards/helper.py; SOURCE: scripts/cards/helper_tpl.html; scripts/cards/table_storage.js; scripts/cards/table_combat.js; scripts/cards/table_materials.js; scripts/cards/table_tools.js; scripts/cards/table_combinations.js -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -88,9 +88,12 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
 .eff{font-size:14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .empty{color:var(--muted);padding:30px 0;text-align:center}
 .tbtn{float:right;font:inherit;font-size:12px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:3px 10px;cursor:pointer}
-.tabs{display:flex;gap:4px;margin-top:12px;border-bottom:1px solid var(--line);overflow-x:auto;position:sticky;top:0;z-index:20;background:var(--bg);scrollbar-width:thin}
-.tabs button{font:inherit;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:6px 12px;min-height:44px;cursor:pointer;white-space:nowrap;flex:none}
-.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--acc);font-weight:600}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:12px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;background:var(--bg)}
+.tabs button,.tab-views button{font:inherit;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:6px;min-height:44px;cursor:pointer}
+.tabs button[aria-current],.tab-views button[aria-current]{color:var(--ink);border-color:var(--acc);font-weight:600}
+.tab-views{display:flex;flex-wrap:wrap;gap:4px 16px;margin:4px 0 10px;border-bottom:1px solid var(--line)}
+.tab-views[hidden]{display:none}
+.tab-views button{font-size:14px}
 .tb{font:500 11px "JetBrains Mono",monospace;background:var(--acc);color:var(--panel);border-radius:999px;padding:1px 6px;margin-left:3px}
 .tb:empty{display:none}
 .tb.hot{background:var(--bad)}
@@ -129,8 +132,9 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
   .mobile-tools{grid-column:2;grid-row:1;display:block;font-size:12px;min-height:36px;padding:5px 8px}
   #headerDetails{display:none;grid-column:1/-1}
   body.header-tools-open #headerDetails{display:block}
-  .tabs{margin-top:6px;gap:0}
-  .tabs button{font-size:13px;padding-inline:10px}
+  .tabs{margin-top:6px}
+  .tabs button,.tab-views button{font-size:13px}
+  .tab-views{gap:2px 8px}
   .grid,.side{gap:8px}
   .card{padding:10px 11px}
   #cls{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding:2px 2px 5px}
@@ -233,15 +237,20 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 <dialog id="restoreDialog"><h2>Восстановление сохранения</h2><p id="restoreSummary"></p><p class="note">Заменит сумки, материалы, деньги, журнал и настройки. Перед заменой скачивается копия текущего состояния.</p><div class="btns"><button type="button" class="btn" id="restoreApply">Восстановить</button><button type="button" class="btn ghost" id="restoreCancel" autofocus>Отмена</button></div></dialog>
 <dialog id="lssDialog" aria-labelledby="lssH"><h2 id="lssH">Блоки для листа LSS</h2><p class="note">Текст собран из сумки, материалов и журнала помощника. Скопируй блок и вставь в указанный раздел листа. Порядок разделов и журнал переносов — в «Талис — карта листа LSS».</p><div id="lssBody"></div><div class="btns"><button type="button" class="btn ghost" id="lssClose" autofocus>Закрыть</button></div></dialog>
 </header>
-<nav class="tabs" role="tablist">
-  <button type="button" role="tab" data-tab="brew" aria-selected="true">Варка</button>
-  <button type="button" role="tab" data-tab="belt" aria-selected="false">Пояс <span id="beltBadge" class="tb"></span></button>
-  <button type="button" role="tab" data-tab="jour" aria-selected="false">Журнал</button>
-  <button type="button" role="tab" data-tab="brewing-plan" aria-selected="false">План варки</button>
-  <button type="button" role="tab" data-tab="combo" aria-selected="false">Сочетания</button>
-  <button type="button" role="tab" data-tab="plan" aria-selected="false">Вылазка</button>
-  <button type="button" role="tab" data-tab="scroll" aria-selected="false">Свитки</button>
-  <button type="button" role="tab" data-tab="smith" aria-selected="false">Кузня</button>
+<nav class="tabs" aria-label="Разделы помощника">
+  <button type="button" data-section="brew" data-tab="brew" aria-current="page">Варка</button>
+  <button type="button" data-section="belt" data-tab="belt">Пояс <span id="beltBadge" class="tb"></span></button>
+  <button type="button" data-section="jour" data-tab="jour">Журнал</button>
+  <button type="button" data-section="craft" data-view="scroll">Ремёсла</button>
+</nav>
+<nav class="tab-views" data-views="belt" aria-label="Пояс" hidden>
+  <button type="button" data-view="belt">Сумка и бой</button>
+  <button type="button" data-tab="combo">Сочетания</button>
+  <button type="button" data-tab="plan">Вылазка</button>
+</nav>
+<nav class="tab-views" data-views="craft" aria-label="Ремёсла" hidden>
+  <button type="button" data-tab="scroll">Свитки</button>
+  <button type="button" data-tab="smith">Кузня</button>
 </nav>
 <div class="grid" id="tab-brew">
   <div class="card" id="activeBrews" style="grid-column:1/-1" hidden></div>
@@ -356,7 +365,6 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <div class="btns"><button type="button" class="btn soft" id="plCopy">Скопировать список</button><button type="button" class="btn ghost" id="plClear">Убрать полученное и пустое</button></div>
   </div>
 </div>
-<div id="tab-brewing-plan" hidden><div id="brewingPlanning"></div></div>
 <div id="tab-combo" hidden><div class="card">
   <h2>Проверить сочетание</h2>
   <p class="note">План для одного персонажа: учитывает текущую токсичность и действующую алхимическую концентрацию. Для зарядов проверяется концентрация после применения. Выбор здесь сохраняется как план.</p>
@@ -1153,37 +1161,43 @@ const TAB_RENDERERS={
   jour:renderJournal,
   plan:renderPlan,
   combo:renderCombo,
-  'brewing-plan':renderBrewingPlan,
 };
+const mainTabs=[...document.querySelectorAll('[data-section]')];
+const tabViews=[...document.querySelectorAll('[data-views]')];
+const tabButtons=[...document.querySelectorAll('[data-tab],[data-view]')];
+const tabPanels=new Map([...document.querySelectorAll('button[data-tab]')].map(button=>[button.dataset.tab,$('tab-'+button.dataset.tab)]));
+let activeTab='brew';
 function renderActiveTab(){
-  const active=document.querySelector('.tabs button[aria-selected="true"]');
-  TAB_RENDERERS[active?.dataset.tab]?.();
+  TAB_RENDERERS[activeTab]?.();
 }
 function renderTrackViews(){
-  const active=document.querySelector('.tabs button[aria-selected="true"]')?.dataset.tab;
-  if(active==='brew'){
+  if(activeTab==='brew'){
     renderAvailability();
     if(BASIC_SELECTED?.k==='ink')renderBasicRecipe(BASIC_SELECTED);
-  }else if(active==='jour'||active==='brewing-plan'){
+  }else if(activeTab==='jour'){
     renderActiveTab();
   }
 }
 function tab(t){
-  for(const button of document.querySelectorAll('.tabs button')){
-    const selected=button.dataset.tab===t;
-    button.setAttribute('aria-selected',selected);
-    $('tab-'+button.dataset.tab).hidden=!selected;
+  activeTab=tabPanels.has(t)?t:'brew';
+  const group=tabViews.find(views=>views.querySelector(`[data-tab="${activeTab}"],[data-view="${activeTab}"]`));
+  const section=group?.dataset.views||activeTab;
+  for(const [name,panel] of tabPanels)panel.hidden=name!==activeTab;
+  for(const button of mainTabs){
+    if(button.dataset.section===section)button.setAttribute('aria-current',group?'true':'page');
+    else button.removeAttribute('aria-current');
   }
-  const selected=document.querySelector('.tabs button[aria-selected="true"]');
-  if(selected){
-    const tabs=selected.parentElement, left=selected.getBoundingClientRect().left-tabs.getBoundingClientRect().left;
-    if(left<0)tabs.scrollLeft+=left;
-    else if(left+selected.offsetWidth>tabs.clientWidth)tabs.scrollLeft+=left+selected.offsetWidth-tabs.clientWidth;
+  for(const views of tabViews){
+    views.hidden=views.dataset.views!==section;
+    for(const button of views.querySelectorAll('button')){
+      if((button.dataset.tab||button.dataset.view)===activeTab)button.setAttribute('aria-current','page');
+      else button.removeAttribute('aria-current');
+    }
   }
-  ls.set('tab',t);
+  ls.set('tab',activeTab);
   renderActiveTab();
 }
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab(b.dataset.tab);window.scrollTo(0,0)});
+tabButtons.forEach(button=>button.onclick=()=>{tab(button.dataset.tab||button.dataset.view);window.scrollTo(0,0)});
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
 let JDB=null, TR=[], JBUSY=new Set(), JDEL=null;
@@ -1195,7 +1209,8 @@ function localDB(){const rd=()=>{try{return JSON.parse(ls.get('tracks')||'{}')}c
   return {collection:()=>col}}
 const JG=[["mastery","Мастерство"],["recipe","Рецепты"],["research","Исследования"],["project","Сюжетные проекты"]];
 const JQ={marks:[[1,"успех +1"],[2,"на 5+ +2"],[3,"нат. 20 +3"]],count:[[1,"успех +1"],[2,"нат. 20 +2"]],roll:[]};
-const MGOAL=m=>PLAN_RULES.growth[m]||25;
+const MASTERY_GROWTH={"1":10,"2":15,"3":20,"4":25,"5":25,"6":25,"7":25,"8":25,"9":25};
+const MGOAL=m=>MASTERY_GROWTH[m]||25;
 const jstat=(t,err)=>{const s=$('jstat');if(s){s.textContent=t;s.style.color=err?'var(--bad)':''}};
 const fmtDay=t=>{try{return new Date(t).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'})}catch(e){return''}};
 function jUpdate(id,patch){
@@ -2268,10 +2283,17 @@ function refreshRestoredUI(crafts){
   if(ls.get('theme'))document.documentElement.dataset.theme=ls.get('theme');else delete document.documentElement.dataset.theme;
   S.sel=D.findIndex(c=>c.n===ls.get('sel'));if(S.sel<0)S.sel=null;
   if(crafts)document.dispatchEvent(new CustomEvent('alcemy-crafts-restored',{detail:crafts}));
-  list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');renderBelt();
+  list();render();tab(ls.get('tab'));renderBelt();
 }
+// Настройки старого расчёта остаются в JSON версии 1 для переноса между сборками.
+const LEGACY_BREWING_NEEDS=['','Лечение','Защита','Контроль','Мобильность','Разведка','Урон','Рост мастерства'];
+let legacyBrewingPlan={budget:null,hours:2,need:'Лечение',stockOnly:false,search:'',week:12,progress:null};
+try{
+  const saved=JSON.parse(ls.get('brewing-plan')||'null');
+  if(saved&&typeof saved==='object')for(const key of Object.keys(legacyBrewingPlan))if(Object.hasOwn(saved,key))legacyBrewingPlan[key]=saved[key];
+}catch(e){}
 function snapshot(){
-  return {crafts:craftSnapshot(),plans:{combo:JSON.parse(JSON.stringify(COMBO)),brewing:{...BP}},format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(SAVE_SETTINGS.map(k=>[k,ls.get(k)]))};
+  return {crafts:craftSnapshot(),plans:{combo:JSON.parse(JSON.stringify(COMBO)),brewing:{...legacyBrewingPlan}},format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(SAVE_SETTINGS.map(k=>[k,ls.get(k)]))};
 }
 let DL;  // в опубликованном помощнике — capability downloads; вне Claude — обычная ссылка
 async function downloadSnapshot(data,prefix='alcemy-save'){
@@ -2335,7 +2357,7 @@ function validateSnapshot(data){
       if(item.other!=null&&(!Array.isArray(item.other)||item.other.some(v=>typeof v!=='string')))fail();
     }
     for(const key of ['budget','hours','week','progress'])if(b[key]!=null&&(!Number.isFinite(b[key])||b[key]<0))fail();
-    if(typeof b.search!=='string'||typeof b.stockOnly!=='boolean'||!['',...PLAN_NEEDS].includes(b.need))fail();
+    if(typeof b.search!=='string'||typeof b.stockOnly!=='boolean'||!LEGACY_BREWING_NEEDS.includes(b.need))fail();
   }
   if(data.crafts!=null){
     const c=data.crafts,obj=x=>x&&typeof x==='object'&&!Array.isArray(x),scalar=x=>typeof x==='string'||typeof x==='number'&&Number.isFinite(x);
@@ -2384,7 +2406,7 @@ $('restoreApply').onclick=async()=>{
     for(const key of SAVE_SETTINGS)if(Object.hasOwn(next.settings,key)){const value=next.settings[key];if(value==null)localStorage.removeItem(key);else localStorage.setItem(key,String(value))}
     if(DOC){clearTimeout(saveT);await DOC.set({s:JSON.stringify(restored),u:restored.u})}
     ST=restored;TR=next.tracks;S.t={...(next.situation||{})};UNDO=[];
-    if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));BP={...next.plans.brewing}}
+    if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));legacyBrewingPlan={...next.plans.brewing}}
     refreshRestoredUI(next.crafts);
     PENDING_SAVE=null;$('restoreDialog').close();$('backupStatus').textContent='Сохранение восстановлено.';
   }catch(err){
@@ -2392,7 +2414,7 @@ $('restoreApply').onclick=async()=>{
     for(const t of old.tracks){try{const {id,...data}=t;await col.doc(id).set(data)}catch(e){rolled=false}}
     for(const t of next.tracks)if(!old.tracks.some(o=>o.id===t.id)){try{await col.doc(t.id).delete()}catch(e){rolled=false}}
     for(const [key,value] of Object.entries(stored)){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value)}catch(e){rolled=false}}
-    ST=old.state;TR=old.tracks;S.t={...old.situation};COMBO=old.plans.combo;BP=old.plans.brewing;UNDO=undo;
+    ST=old.state;TR=old.tracks;S.t={...old.situation};COMBO=old.plans.combo;legacyBrewingPlan=old.plans.brewing;UNDO=undo;
     if(DOC){try{await DOC.set({s:JSON.stringify(ST),u:Date.now()})}catch(e){rolled=false}}
     try{refreshRestoredUI(old.crafts)}catch(e){rolled=false}
     $('restoreSummary').textContent='Не восстановлено: '+err.message+(rolled?'. Предыдущее состояние возвращено.':'. Откат не завершён: восстанови скачанную копию после восстановления связи.');
@@ -2558,94 +2580,6 @@ function renderActiveBrews(){
 }
 
 
-// Сценарии планирования хранятся отдельно от фактических ресурсов и журнала.
-const PLAN_RULES={"potionDC": {"1": 10, "2": 10, "3": 11, "4": 13, "5": 15, "6": 17, "7": 19, "8": 21, "9": 23, "10": 25}, "growth": {"1": 10, "2": 15, "3": 20, "4": 25, "5": 25, "6": 25, "7": 25, "8": 25, "9": 25}, "catalyst": {"1": 0, "2": 0, "3": 70, "4": 70, "5": 70, "6": 350, "7": 350, "8": 1750, "9": 1750, "10": 7500}};
-let BP={budget:null,hours:2,need:'Лечение',stockOnly:false,search:'',week:12,progress:null};
-try{const saved=JSON.parse(ls.get('brewing-plan')||'null');if(saved&&typeof saved==='object')for(const key of Object.keys(BP))if(Object.hasOwn(saved,key))BP[key]=saved[key]}catch(e){}
-const PLAN_NEEDS=['Лечение','Защита','Контроль','Мобильность','Разведка','Урон','Рост мастерства'];
-function recipeNeeds(c){
-  if(c.k==='basic')return c.b==='лечебная'?['Лечение']:['Урон'];
-  const tags=c.tk||[],text=(Array.isArray(tags)?tags.join(' '):String(tags)).toLowerCase();
-  const map={'Лечение':/лечен|восстанов|хиты|исцелен/,'Защита':/защит|сопротив|кд|спасброс|временн/,'Контроль':/контрол|обездвиж|оглуш|опут|очаров|ослеп|страх/,'Мобильность':/мобиль|движ|скорост|полёт|телепорт/,'Разведка':/развед|восприят|скрыт|зрен|общен|обнаруж/,'Урон':/урон/};
-  return Object.entries(map).filter(([,re])=>re.test(text)).map(([n])=>n);
-}
-function planChance(c,bonus,unstable=S.t.ess){
-  const dc=(c.k==='basic'?PLAN_RULES.potionDC[c.l]:DC[c.l-1])+(unstable&&c.k!=='basic'?2:0)+(S.t.metamagic&&!['basic','psn'].includes(c.k)?2:0);
-  const p=chancesTxt(dc,bonus+(S.t.help?2:0));
-  return {dc,p,success:p.ok+p.hi+p.n20,growth:p.ok+p.hi+2*p.n20};
-}
-// Точное ожидание числа полных партий до цели: прибавки 0/1/2 за дозу.
-// Включает избыток прогресса в последней партии, но не создаёт реальные успехи.
-function expectedBatches(remaining,size,success,natural20=.05){
-  if(remaining<=0)return 0;
-  let pmf=[1];
-  for(let i=0;i<size;i++){const next=Array(pmf.length+2).fill(0);pmf.forEach((p,j)=>{next[j]+=p*(1-success);next[j+1]+=p*(success-natural20);next[j+2]+=p*natural20});pmf=next}
-  if(pmf[0]>=1-1e-12)return Infinity;
-  const expected=Array(remaining+1).fill(0);
-  for(let r=1;r<=remaining;r++){let value=1;for(let gain=1;gain<pmf.length;gain++)value+=pmf[gain]*expected[Math.max(0,r-gain)];expected[r]=value/(1-pmf[0])}
-  return expected[remaining];
-}
-// Ожидание подходов по 6.3: учитывает половину прогресса, нат. 1 и границу нуля.
-// Метки/дефекты меняют завершающую проверку, а не объём; простой здесь отсутствует.
-const VOLUME_CACHE=new Map();
-function volumeHours(level,dc,bonus){
-  const volume=VOLUME(level),key=[volume,dc,bonus].join(':');if(VOLUME_CACHE.has(key))return VOLUME_CACHE.get(key);
-  const transitions=[];
-  for(let r=2;r<=20;r++){const total=r+bonus;transitions.push([r===20?2*total:total>=dc?total:total>=dc-4?Math.floor(total/2):0,.05])}
-  for(let n=1;n<=20;n++)transitions.push([-n,.0025]);
-  const E=Array(volume+1).fill(0);
-  for(let sweep=0;sweep<1000;sweep++){
-    let change=0;
-    for(let i=volume-1;i>=0;i--){let value=1,self=0;for(const [delta,p] of transitions){const j=Math.max(0,Math.min(volume,i+delta));if(j===i)self+=p;else value+=p*E[j]}value/=1-self;change=Math.max(change,Math.abs(value-E[i]));E[i]=value}
-    if(change<1e-8)break;
-  }
-  const result=E[0]*2;VOLUME_CACHE.set(key,result);return result;
-}
-function masteryForecast(M,B,progress,week){
-  if(M>=10)return null;
-  const target=PLAN_RULES.growth[M],remaining=Math.max(0,target-progress),c={k:'basic',l:M};
-  const chance=planChance(c,B),batch=batchInfo('',M,null,M,S.t.lab),batches=expectedBatches(remaining,batch.size,chance.success),attempts=batches*batch.size;
-  // Консервативно: полная стоимость трав, без выбора экономии за качество.
-  // Катализатор — 5 стабильных применений; ремонт и риск сверх ресурса исключены.
-  const perDose=M*HERB_P[M]+PLAN_RULES.catalyst[M]/5;
-  return {target,remaining,dc:chance.dc,bonus:B+(S.t.help?2:0),success:chance.success,size:batch.size,batches,attempts,hours:batches*batch.t,gold:attempts*perDose,herbs:attempts*M,catalystUses:M>=3?attempts:0,weeks:week>0?batches*batch.t/week:null};
-}
-function recommendBrews(config){
-  const M=Math.max(1,Math.min(10,+$('m').value||1)),B=+$('b').value||0,budget=Math.max(0,+config.budget||0),hours=Math.max(0,+config.hours||0),result=[];
-  for(const c of RECIPES){
-    if(c.k==='ink'||!knows(c)||c.l>M||c.l>(S.t.lab?10:$('anar').checked?8:5))continue;
-    if(config.search&&!c.n.toLowerCase().includes(String(config.search).toLowerCase()))continue;
-    const needs=recipeNeeds(c),growth=c.l===M;
-    if(config.need==='Рост мастерства'?!growth:config.need&&!needs.includes(config.need))continue;
-    const check=supply(c),unknown=check.deficits.some(d=>d.price==null),cost=check.deficits.reduce((s,d)=>s+(d.price||0),0);
-    if(unknown||cost>budget+1e-8||config.stockOnly&&check.deficits.length)continue;
-    const chance=planChance(c,B,S.t.ess||check.warnings.some(w=>w.startsWith('нестабильная эссенция'))),batch=batchInfo(c.n,c.l,c.k==='basic'?null:c,M,S.t.lab);
-    const long=c.k!=='basic'&&c.l>=6;
-    const time=long?volumeHours(c.l,chance.dc,B+(S.t.help?2:0)):batch.t;
-    if(time>hours+1e-8)continue;
-        // Рекомендация — отдельная альтернатива, не общий комплект с общими материалами.
-    result.push({c,check,cost,time,long,chance,needs,growth});
-  }
-  // Рекомендации Codex: сначала без докупки, затем цена; при равной цене —
-  // шанс годной дозы, время и название. Не выдумываем численную «силу» эффекта.
-  return result.sort((a,b)=>a.cost-b.cost||b.chance.success-a.chance.success||a.time-b.time||a.c.n.localeCompare(b.c.n,'ru'));
-}
-function saveBrewingPlan(){ls.set('brewing-plan',JSON.stringify(BP));renderBrewingPlan()}
-function renderBrewingPlan(){
-  const box=$('brewingPlanning');if(!box||$('tab-brewing-plan').hidden)return;
-  const M=Math.max(1,Math.min(10,+$('m').value||1)),B=+$('b').value||0;
-  const track=TR.find(t=>t.group==='mastery'&&(t.id===`mastery-${M}-${M+1}`||t.name===`Мастерство ${M} → ${M+1}`));
-  const progress=BP.progress==null?Math.max(0,+track?.current||0):Math.max(0,Math.floor(+BP.progress||0)),week=Math.max(0,+BP.week||0),forecast=masteryForecast(M,B,progress,week);
-  const budget=BP.budget==null?ST.mat.gold||0:Math.max(0,+BP.budget||0),options=recommendBrews({...BP,budget});
-  box.innerHTML=`<div class="card"><h2>До следующего мастерства</h2><p>Мастерство ${M} · общий бонус варки ${B>=0?'+':''}${B}${S.t.help?' +2 от помощника':''}. Бонус и мастерство берутся с вкладки «Варка».</p><div class="row"><div><label class="f">Уже набрано успехов <small>Пусто — брать из журнала</small></label><input id="bpProgress" type="number" min="0" max="25" value="${BP.progress==null?'':progress}" placeholder="${progress}"></div><div><label class="f">Часов варки в неделю</label><input id="bpWeek" type="number" min="0" max="168" value="${week}"></div></div><div id="bpForecast">${M<10&&!knows(BASIC.find(c=>c.l===M&&c.b==='лечебная'))?'<p class="note">Рецепт зелья лечения этого уровня не отмечен известным: прогноз — сценарий после освоения рецепта (либо для известного яда того же уровня).</p>':''}${!forecast?'<p>Мастерство X: следующей ступени нет.</p>':`<p>До ${M+1}: <b>${forecast.remaining} из ${forecast.target}</b> успехов. Зелья уровня ${M}, СЛ ${forecast.dc}, годная доза ${pct(forecast.success)}, партия ${forecast.size}.</p><p>В среднем: <b>${fmtZ(forecast.hours)} ч</b> · ${fmtZ(forecast.batches)} партий · ${fmtZ(forecast.attempts)} попыток${forecast.weeks==null?'':' · '+fmtZ(forecast.weeks)+' недель'}.</p><p>Стоимость расхода: <b>${fmtZ(forecast.gold)} зм</b>; травы ур. ${M}: ${fmtZ(forecast.herbs)} шт${forecast.catalystUses?' · применений катализатора: '+fmtZ(forecast.catalystUses):''}.</p>`}</div><p class="note">Ожидание, не срок с гарантией: каждую дозу проверяют отдельно, натуральная 20 даёт два успеха. Модель — освоенные зелья текущего уровня, обычные партии, неизменный бонус, без ремонтных осечек, нестабильных катализаторов, руководства и перерывов. Полная ценность расхода включает уже имеющиеся материалы; это не список докупки. Экономия трав за 5+ не заложена. Будущий уровень персонажа автоматически не повышается.</p></div>
-  <div class="card" style="margin-top:16px"><h2>Что варить сегодня</h2><p class="note">Рекомендации Codex. Пять отдельных альтернатив на одну дозу / попытку, каждая проверяется по текущему запасу. Порядок: минимум докупки, затем шанс годной дозы и время. Известные рецепты отметь в «Что могу сварить».</p><div class="row"><div><label class="f">Бюджет докупки, зм <small>Пусто — деньги из материалов</small></label><input id="bpBudget" type="number" min="0" value="${BP.budget==null?'':budget}" placeholder="${budget}"></div><div><label class="f">Есть часов</label><input id="bpHours" type="number" min="0" max="10000" step="0.5" value="${Math.max(0,+BP.hours||0)}"></div><div><label class="f">Нужда группы</label><select id="bpNeed"><option value="">Любая</option>${PLAN_NEEDS.map(n=>`<option>${n}</option>`).join('')}</select></div></div><div class="row"><div><label class="f">Поиск рецепта</label><input id="bpSearch" type="search" value="${esc(String(BP.search||''))}"></div><label class="tg"><input id="bpStock" type="checkbox" ${BP.stockOnly?'checked':''}><span>Только имеющиеся материалы</span></label></div><div id="bpOptions">${!options.length?'<p>Подходящих варок нет: проверь известные рецепты, мастерство, оборудование, время, бюджет и материалы. Позиции с неизвестной ценой не считаются доступными за деньги.</p>':`<p>Подходит: ${options.length}. Показаны первые пять.</p>`+options.slice(0,5).map((r,i)=>`<div class="card"><h3>${esc(r.c.n)} · ${ROM[r.c.l]}</h3><p>Докупка ${fmtZ(r.cost)} зм · ${r.long?'ожидаемая работа ≈':'время '}${fmtZ(r.time)} ч · ${r.long?'шанс завершающей проверки до меток и дефектов':'годная доза'} ${pct(r.chance.success)}${r.growth?' · ожидаемый рост '+fmtZ(r.chance.growth)+' на проверку':''}.</p>${r.long?'<p class="note">VI+: время без простоев, с заминками и потерей прогресса. Метки и дефекты меняют финальный шанс; часы — среднее, фактическая варка может не уложиться.</p>':''}${r.check.deficits.length?'<ul>'+r.check.deficits.map(d=>`<li>${esc(d.n)}: ${fmtZ(d.q)} · ${fmtZ(d.price)} зм</li>`).join('')+'</ul>':'<p>Материалы на попытку есть.</p>'}${r.check.warnings.length?'<p class="note">'+r.check.warnings.map(esc).join(' · ')+'</p>':''}<button type="button" class="btn soft bpOpen" data-index="${i}">Открыть рецепт</button></div>`).join('')}</div><p class="note">Докупка — справочные цены; наличие у продавца проверяет мастер. Нестабильная эссенция добавляет +2 к СЛ в прогнозе; риск катализатора не включён в шанс. Подбор не расходует материалы, деньги и часы и не обещает готовую дозу. Категории берутся из задач карточек; эффекты сверяй по рецепту.</p></div>`;
-  $('bpNeed').value=BP.need;
-  for(const [id,key] of [['bpProgress','progress'],['bpBudget','budget'],['bpWeek','week'],['bpHours','hours']])$(id).onchange=e=>{BP[key]=e.target.value===''&&['progress','budget'].includes(key)?null:Math.max(0,Math.min(key==='progress'?25:key==='week'?168:1000000,+e.target.value||0));saveBrewingPlan()};
-  $('bpNeed').onchange=e=>{BP.need=e.target.value;saveBrewingPlan()};$('bpStock').onchange=e=>{BP.stockOnly=e.target.checked;saveBrewingPlan()};
-  $('bpSearch').onchange=e=>{BP.search=e.target.value;saveBrewingPlan()};
-  box.querySelectorAll('.bpOpen').forEach(el=>el.onclick=()=>{tab('brew');chooseAvailableRecipe(options[+el.dataset.index].c);$('out').scrollIntoView({block:'start'})});
-}
-
 
 (()=>{const h=document.getElementById('craft-scroll');if(!h||!h.attachShadow)return;const r=h.attachShadow({mode:'open'});r.innerHTML="<style>\n/* Памятка союзнику: сверху счётчик «назови условия — получи СЛ и шансы», ниже шаги быстрого начертания по порядку розыгрыша.\n   Та же система, что «Шпаргалка варки», но цвет — чернильный синий вместо алхимической зелени. */\n:host{\n  --bg:#eceef3; --panel:#f8f9fc; --ink:#1b2130; --muted:#586078; --line:#ccd2e0;\n  --accent:#34508f; --accent-soft:#dbe2f2; --good:#2a7664; --mid:#8f6f1f; --bad:#a13d2d; --warn-soft:#f4ead2;\n  --display:\"Alegreya SC\",Georgia,serif; --body:\"Alegreya Sans\",system-ui,sans-serif; --mono:\"IBM Plex Mono\",ui-monospace,monospace;\n}\n@media (prefers-color-scheme:dark){:host(:not([data-theme=\"light\"])){\n  --bg:#11141c; --panel:#191e29; --ink:#e1e6f0; --muted:#949db3; --line:#2c3446;\n  --accent:#8aa6e8; --accent-soft:#222d47; --good:#5dbba3; --mid:#d3b066; --bad:#e07b69; --warn-soft:#3a3220; color-scheme:dark}}\n:host([data-theme=\"dark\"]){\n  --bg:#11141c; --panel:#191e29; --ink:#e1e6f0; --muted:#949db3; --line:#2c3446;\n  --accent:#8aa6e8; --accent-soft:#222d47; --good:#5dbba3; --mid:#d3b066; --bad:#e07b69; --warn-soft:#3a3220; color-scheme:dark}\n[hidden]{display:none!important}\n:host{display:block;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body)}\n.wrap{max-width:820px;margin:0 auto;padding-inline:16px;padding-block:24px 48px;display:grid;gap:18px}\nh1{font:700 clamp(1.7rem,5vw,2.3rem)/1.1 var(--display);margin:0;text-wrap:balance}\n.lead{margin:6px 0 0;color:var(--muted)}\n.step{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px;min-width:0}\n.step h2{font:500 1.15rem var(--display);letter-spacing:.03em;margin:0;display:flex;gap:10px;align-items:baseline;text-wrap:balance}\n.step h2 b{font:500 .85rem var(--mono);color:var(--accent);min-width:1.6em}\n.step p,.step ul,.step ol{margin:0}\n.step ul,.step ol{padding-left:1.2em;display:grid;gap:2px}\n.muted{color:var(--muted);font-size:.92rem}\n.tw{overflow-x:auto}\ntable{border-collapse:collapse;font-size:.94rem;font-variant-numeric:tabular-nums}\nth,td{border-bottom:1px solid var(--line);padding:4px 12px 4px 0;text-align:left;vertical-align:top}\nth{font-weight:500;color:var(--muted)}\ntd.n,th.n{font-family:var(--mono);text-align:right;padding-right:14px}\n.formula{font:500 1rem var(--mono);background:var(--accent-soft);border-radius:6px;padding:6px 10px;overflow-x:auto}\n.res td:first-child{white-space:nowrap;font-weight:700}\n.dot{display:inline-block;width:.6em;height:.6em;border-radius:50%;margin-right:6px;vertical-align:.05em}\n.g{background:var(--good)} .m{background:var(--mid)} .b{background:var(--bad)}\n.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}\n.two>div{min-width:0}\n.ex{border-left:3px solid var(--accent);padding-left:10px}\n.q{background:var(--warn-soft);border-radius:8px;padding:8px 12px}\n.q li{font-size:.94rem}\n.mark{font:500 .72rem var(--mono);color:var(--mid);border:1px solid var(--mid);border-radius:4px;padding:0 4px;white-space:nowrap}\nfooter{color:var(--muted);font-size:.88rem}\n/* Счётчик */\n.calc{border-color:var(--accent)}\n.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}\n.fields label{display:grid;gap:2px;font-size:.88rem;color:var(--muted);min-width:0}\nselect,input[type=number]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 6px;min-width:0;width:100%;box-sizing:border-box}\n.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:2px 14px;font-size:.93rem}\n.checks label{display:flex;gap:6px;align-items:baseline}\n:focus-visible{outline:2px solid var(--accent);outline-offset:2px}\n.out{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}\n.tile{background:var(--accent-soft);border-radius:8px;padding:6px 10px;display:grid;gap:0;min-width:0}\n.tile span{font-size:.8rem;color:var(--muted)}\n.tile b{font:500 1.35rem var(--mono)}\n.bar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--line)}\n.bar i{display:block;height:100%}\n.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.88rem}\n@media print{:host{--bg:#fff;--panel:#fff;--ink:#111;--muted:#555;--line:#bbb;--accent-soft:#eee;color-scheme:light}.step{break-inside:avoid}.calc{display:none}}\n\n:host{--display:\"Prata\",Georgia,serif;--body:\"Golos Text\",system-ui,sans-serif;--mono:\"JetBrains Mono\",ui-monospace,monospace;background:transparent;font-size:15px}\n.wrap{padding:18px 0 0;max-width:none}<\/style><div class=\"wrap\">\n  <header>\n    <h1>Шпаргалка свитков<\/h1>\n    <p class=\"lead\">Домашняя система начертания свитков; у группы свитки делает Лаэль. Быстрое начертание — по шагам, как разыгрывают за столом. Правила не менялись, только переложены; спорные места помечены <span class=\"mark\">спорно<\/span> и собраны внизу.<\/p>\n  <\/header>\n\n  <section class=\"step calc\" aria-labelledby=\"calc-h\">\n    <h2 id=\"calc-h\"><b>⌖<\/b>Счётчик: СЛ, бонус и шансы<\/h2>\n    <div class=\"fields\">\n      <label for=\"lvl\">Уровень свитка\n        <select id=\"lvl\">\n          <option value=\"0\">Заговор<\/option><option value=\"1\" selected>1<\/option><option value=\"2\">2<\/option><option value=\"3\">3<\/option>\n          <option value=\"4\">4 (с разрешения мастера)<\/option><option value=\"5\">5 (с разрешения мастера)<\/option>\n        <\/select><\/label>\n      <label for=\"when\">Когда\n        <select id=\"when\">\n          <option value=\"2h\">2 часа работы<\/option>\n          <option value=\"long\">Во время большого отдыха<\/option>\n          <option value=\"short\">Малый отдых (СЛ +3)<\/option>\n          <option value=\"rush\">Срочно, 1 час (СЛ +5, помеха)<\/option>\n        <\/select><\/label>\n      <label for=\"nth\">Какой быстрый свиток с большого отдыха\n        <select id=\"nth\"><option value=\"0\">1-й (0)<\/option><option value=\"2\">2-й (−2)<\/option><option value=\"4\">3-й (−4)<\/option><option value=\"6\">4-й (−6)<\/option><option value=\"8\">5-й (−8)<\/option><\/select><\/label>\n      <label for=\"base\">Бонус Инт (Магия) персонажа <small>Лаэль: 5-й уровень после Гильдии; если не изменено<\/small>\n        <input id=\"base\" type=\"number\" value=\"7\" step=\"1\"><\/label>\n      <label for=\"ink\">Чернила\n        <select id=\"ink\">\n          <option value=\"1|0\">Обычные, набор уровня<\/option>\n          <option value=\"1.5|2\">Качественные, цена ×1,5 (+2)<\/option>\n          <option value=\"2|4\">Отличные, цена ×2 (+4)<\/option>\n          <option value=\"0.75|-2\">Дешёвые, цена ×0,75 (−2)<\/option>\n          <option value=\"1|-2\">Импровизированные (−2)<\/option>\n        <\/select><\/label>\n      <label for=\"place\">Связанное место\n        <select id=\"place\"><option value=\"0\">нет<\/option><option value=\"1\">+1<\/option><option value=\"2\">+2<\/option><\/select><\/label>\n    <\/div>\n    <div class=\"checks\">\n      <label><input type=\"checkbox\" id=\"c-guild\" data-b=\"2\"> Мастерская Гильдии, архив Бренны, лаборатория +2<\/label>\n      <label><input type=\"checkbox\" id=\"c-desk\" data-b=\"1\" checked> Хорошее место: стол, свет, сухо, тихо +1 <small>(начальный выбор; проверь)<\/small><\/label>\n      <label><input type=\"checkbox\" id=\"c-book\" data-b=\"1\" checked> Книга, формула или образец свитка +1 <small>(начальный выбор; проверь)<\/small><\/label>\n      <label><input type=\"checkbox\" id=\"c-calli\" data-b=\"1\" checked> Каллиграф сверх Магии +1 <small>(начальный выбор; проверь)<\/small><\/label>\n      <label><input type=\"checkbox\" id=\"c-help\" data-b=\"1\"> Помощник с Магией или каллиграфией +1<\/label>\n      <label><input type=\"checkbox\" id=\"c-more\" data-b=\"1\"> Материалов на 25% больше +1<\/label>\n      <label><input type=\"checkbox\" id=\"c-time\" data-b=\"2\"> Времени вдвое больше +2<\/label>\n      <label><input type=\"checkbox\" id=\"c-bad\" data-b=\"-2\"> Плохой свет, сырость, шум −2<\/label>\n      <label><input type=\"checkbox\" id=\"c-nodesk\" data-b=\"-2\"> Без стола и инструментов −2<\/label>\n      <label><input type=\"checkbox\" id=\"c-cath\" data-b=\"-3\"> Опасная зона Собора −3<\/label>\n      <label><input type=\"checkbox\" id=\"c-int\" data-b=\"-2\"> Прерывали −2 (или помеха)<\/label>\n      <label><input type=\"checkbox\" id=\"c-exh\" data-dis=\"1\"> Создатель истощён — помеха<\/label>\n    <\/div>\n    <p class=\"muted\">Числа ниже — расчёт выбранных условий, не записанная работа Лаэля.<\/p>\n    <div class=\"out\" aria-live=\"polite\">\n      <div class=\"tile\"><span>СЛ<\/span><b id=\"o-dc\">12<\/b><\/div>\n      <div class=\"tile\"><span>Бонус к d20<\/span><b id=\"o-bonus\">+6<\/b><\/div>\n      <div class=\"tile\"><span>Успех на d20 от<\/span><b id=\"o-need\">6<\/b><\/div>\n      <div class=\"tile\"><span>Материалы<\/span><b id=\"o-cost\">30 зм<\/b><\/div>\n    <\/div>\n    <div class=\"bar\" id=\"o-bar\" role=\"img\" aria-label=\"Распределение исходов\"><\/div>\n    <div class=\"legend\" id=\"o-leg\"><\/div>\n    <p class=\"muted\" id=\"o-note\"><\/p>\n    <p class=\"muted\">По умолчанию отмечено то, что есть у Лаэля: хорошее место дома (+1), Магия и набор каллиграфа (+1), книга заклинаний (+1). Инт (Магия) +7: Интеллект 18 (+4) и владение +3 на 5-м уровне (после Гильдии, Ж-130); на 4-м уровне было +6. С ростом уровня поправь поле.<\/p>\n  <\/section>\n\n  <section class=\"step\" id=\"s1\">\n    <h2><b>1<\/b>Можно ли начертать<\/h2>\n    <ol>\n      <li>Заклинание подготовлено.<\/li>\n      <li>Есть ячейка нужного уровня.<\/li>\n      <li>Материалы куплены (набор чернил нужного уровня).<\/li>\n      <li>Свиток 1–3 уровня. Для 4+ нужны хорошее место, дорогие чернила, редкие компоненты и разрешение мастера.<\/li>\n    <\/ol>\n    <p class=\"muted\">Классическое начертание — без броска (шаг 9 ниже): время по «Руководству Занатара», цены мастера.<\/p>\n  <\/section>\n\n  <section class=\"step\" id=\"s2\">\n    <h2><b>2<\/b>Когда и что с ячейкой<\/h2>\n    <div class=\"tw\"><table>\n      <tr><th>Способ<\/th><th>Время<\/th><th>СЛ<\/th><th>Ячейка<\/th><\/tr>\n      <tr><td>Полноценная работа<\/td><td>2 часа<\/td><td>без штрафа<\/td><td>тратится сразу<\/td><\/tr>\n      <tr><td>Во время большого отдыха<\/td><td>часть отдыха<\/td><td>без штрафа<\/td><td>тратится, но восстанавливается в конце отдыха<\/td><\/tr>\n      <tr><td>Малый отдых<\/td><td>1 малый отдых<\/td><td>+3<\/td><td>тратится сразу<\/td><\/tr>\n      <tr><td>Срочно<\/td><td>1 час<\/td><td>+5 и помеха<\/td><td>тратится сразу<\/td><\/tr>\n    <\/table><\/div>\n    <p class=\"muted\">За один большой отдых — только один свиток. Он не даёт усталости письма на следующий день: утром будут и свиток, и ячейка.<\/p>\n  <\/section>\n\n  <section class=\"step\" id=\"s3\">\n    <h2><b>3<\/b>Сложность и материалы<\/h2>\n    <div class=\"formula\">СЛ = 10 + 2 × уровень заклинания<\/div>\n    <div class=\"tw\"><table>\n      <tr><th>Уровень<\/th><th class=\"n\">Загов.<\/th><th class=\"n\">1<\/th><th class=\"n\">2<\/th><th class=\"n\">3<\/th><th class=\"n\">4<\/th><th class=\"n\">5<\/th><th class=\"n\">6<\/th><th class=\"n\">7<\/th><th class=\"n\">8<\/th><th class=\"n\">9<\/th><\/tr>\n      <tr><td>СЛ<\/td><td class=\"n\">10<\/td><td class=\"n\">12<\/td><td class=\"n\">14<\/td><td class=\"n\">16<\/td><td class=\"n\">18<\/td><td class=\"n\">20<\/td><td class=\"n\">22<\/td><td class=\"n\">24<\/td><td class=\"n\">26<\/td><td class=\"n\">28<\/td><\/tr>\n      <tr><td>Малый отдых<\/td><td class=\"n\">13<\/td><td class=\"n\">15<\/td><td class=\"n\">17<\/td><td class=\"n\">19<\/td><td class=\"n\">—<\/td><td class=\"n\">—<\/td><td class=\"n\">—<\/td><td class=\"n\">—<\/td><td class=\"n\">—<\/td><td class=\"n\">—<\/td><\/tr>\n      <tr><td>Срочно, с помехой<\/td><td class=\"n\">15<\/td><td class=\"n\">17<\/td><td class=\"n\">19<\/td><td class=\"n\">21<\/td><td class=\"n\">—<\/td><td class=\"n\">—<\/td><td class=\"n\">—<\/td><td class=\"n\">—<\/td><td class=\"n\">—<\/td><td class=\"n\">—<\/td><\/tr>\n      <tr><td>Материалы, зм<\/td><td class=\"n\">15<\/td><td class=\"n\">30<\/td><td class=\"n\">120<\/td><td class=\"n\">300<\/td><td class=\"n\">1 200<\/td><td class=\"n\">2 500<\/td><td class=\"n\">7 500<\/td><td class=\"n\">12 500<\/td><td class=\"n\">25 000<\/td><td class=\"n\">50 000<\/td><\/tr>\n      <tr><td>Готовый свиток, зм<\/td><td class=\"n\">30<\/td><td class=\"n\">60<\/td><td class=\"n\">250<\/td><td class=\"n\">600<\/td><td class=\"n\">2 500<\/td><td class=\"n\">5 500<\/td><td class=\"n\">15 000<\/td><td class=\"n\">25 000<\/td><td class=\"n\">50 000<\/td><td class=\"n\">100 000<\/td><\/tr>\n    <\/table><\/div>\n    <div class=\"two\">\n      <div class=\"tw\"><table>\n        <tr><th>Чернила<\/th><th>Цена<\/th><th class=\"n\">Бонус<\/th><\/tr>\n        <tr><td>Набор (малый для заговора; I–IV)<\/td><td>15 / 30 / 120 / 300 / 1 200 зм<\/td><td class=\"n\">0<\/td><\/tr>\n        <tr><td>Качественные<\/td><td>×1,5<\/td><td class=\"n\">+2<\/td><\/tr>\n        <tr><td>Отличные<\/td><td>×2<\/td><td class=\"n\">+4<\/td><\/tr>\n        <tr><td>Дешёвые<\/td><td>×0,75<\/td><td class=\"n\">−2<\/td><\/tr>\n      <\/table><\/div>\n      <div>\n        <p><b>Дорогой компонент заклинания<\/b> — сверх материалов.<\/p>\n        <ul>\n          <li>Расходуется заклинанием — тратится при создании. «Оживление»: 300 + алмазы 300 = <b>600 зм<\/b>.<\/li>\n          <li>Не расходуется — нужен при создании, плюс 10% его цены на привязку. «Опознание»: 30 + 10 = <b>40 зм<\/b>, жемчужина остаётся.<\/li>\n        <\/ul>\n      <\/div>\n    <\/div>\n    <p class=\"muted\">Набор чернил нужного уровня — это все материалы свитка: купили набор и сразу чертят (так играют за столом). Множители качества чернил берутся от цены набора.<\/p>\n    <p class=\"muted\">Наборы 5+ уровня на полке у Марты не лежат: заказ у Анариэль, Бренны, Лорена Векса или через Гильдию. Части монстров для свитков не нужны — их продают алхимику, косторезу, кузнецу, травнице, артефактору или Гильдии и покупают готовые наборы.<\/p>\n  <\/section>\n\n  <section class=\"step\" id=\"s4\">\n    <h2><b>4<\/b>Бонус проверки<\/h2>\n    <div class=\"formula\">d20 + Инт + владение Магией + бонусы − штрафы<\/div>\n    <p class=\"muted\">Без Магии, но с инструментами каллиграфа — Инт + владение инструментами. Есть и то и другое — +1. Бонусы складываются, верхнего предела нет; одинаковые источники мастер может не складывать.<\/p>\n    <div class=\"two\">\n      <div class=\"tw\"><table>\n        <tr><th>Бонус<\/th><th class=\"n\"><\/th><\/tr>\n        <tr><td>Мастерская Гильдии, архив Бренны, лаборатория<\/td><td class=\"n\">+2<\/td><\/tr>\n        <tr><td>Хорошее место: стол, свет, сухость, тишина<\/td><td class=\"n\">+1<\/td><\/tr>\n        <tr><td>Качественные / отличные («очень дорогие») чернила<\/td><td class=\"n\">+2 / +4<\/td><\/tr>\n        <tr><td>Книга заклинаний, формула или образец<\/td><td class=\"n\">+1<\/td><\/tr>\n        <tr><td>Каллиграф сверх Магии<\/td><td class=\"n\">+1<\/td><\/tr>\n        <tr><td>Помощник с Магией или каллиграфией всё время<\/td><td class=\"n\">+1<\/td><\/tr>\n        <tr><td>Материалов на 25% больше<\/td><td class=\"n\">+1<\/td><\/tr>\n        <tr><td>Времени вдвое больше<\/td><td class=\"n\">+2<\/td><\/tr>\n        <tr><td>Место связано с заклинанием<\/td><td class=\"n\">+1–2<\/td><\/tr>\n      <\/table><\/div>\n      <div class=\"tw\"><table>\n        <tr><th>Штраф<\/th><th class=\"n\"><\/th><\/tr>\n        <tr><td>Плохой свет, сырость, шум<\/td><td class=\"n\">−2<\/td><\/tr>\n        <tr><td>Без нормального стола и инструментов<\/td><td class=\"n\">−2<\/td><\/tr>\n        <tr><td>Опасная зона Собора<\/td><td class=\"n\">−3<\/td><\/tr>\n        <tr><td>Импровизированные или дешёвые чернила<\/td><td class=\"n\">−2<\/td><\/tr>\n        <tr><td>Прерывали<\/td><td class=\"n\">−2 или помеха<\/td><\/tr>\n        <tr><td>Истощён<\/td><td class=\"n\">помеха<\/td><\/tr>\n        <tr><td>Усталость письма: 2-й / 3-й / 4-й / 5-й быстрый свиток<\/td><td class=\"n\">−2 / −4 / −6 / −8<\/td><\/tr>\n      <\/table><\/div>\n    <\/div>\n    <p class=\"muted\">Усталость письма считается с утра, после большого отдыха. Свиток, начерченный во время большого отдыха, получает усталость от свитков, сделанных за день, но на следующий день её не переносит: начертили, отдохнули, утром всё по новой (уточнение игрока, 08.10). Связанное место: «Защита от добра и зла» в часовне, «Подводное дыхание» у озера, «Обнаружение магии» в архиве.<\/p>\n  <\/section>\n\n  <section class=\"step\" id=\"s5\">\n    <h2><b>5<\/b>Результат<\/h2>\n    <p>Запланированный апкаст разрешён мастером: выбери старшую ячейку и материалы её уровня. Теневой клинок II, записанный ячейкой и чернилами III, даёт 3к8; для СЛ письма и проверки чтения это свиток III. Быстрое Начертание IV+ требует особых условий и разрешения мастера.<\/p>\n    <div class=\"tw\"><table class=\"res\">\n      <tr><th>Бросок<\/th><th>Итог<\/th><\/tr>\n      <tr><td><span class=\"dot g\"><\/span>Натуральная 20<\/td><td>идеальный свиток: два бонуса из списка или один усиленный<\/td><\/tr>\n      <tr><td><span class=\"dot g\"><\/span>СЛ + 5 и выше<\/td><td>особенно хороший: один бонус на выбор создателя<\/td><\/tr>\n      <tr><td><span class=\"dot g\"><\/span>СЛ и выше<\/td><td>свиток создан<\/td><\/tr>\n      <tr><td><span class=\"dot m\"><\/span>На 1–4 ниже<\/td><td>свиток создан, но <b>нестабильный<\/b> (пометить)<\/td><\/tr>\n      <tr><td><span class=\"dot b\"><\/span>На 5+ ниже<\/td><td>не создан, материалы испорчены, ячейка потрачена (во время большого отдыха вернётся), осечка к6<\/td><\/tr>\n      <tr><td><span class=\"dot b\"><\/span>Натуральная 1<\/td><td>как провал на 5+; мастер может усилить осечку, если свиток дорогой, срочный или в Соборе<\/td><\/tr>\n    <\/table><\/div>\n    <div class=\"tw\"><table>\n      <tr><th>Бонус<\/th><th>Обычный (5+)<\/th><th>Усиленный (натуральная 20)<\/th><\/tr>\n      <tr><td>Экономия<\/td><td>вернуть 25% материалов<\/td><td>вернуть 50%<\/td><\/tr>\n      <tr><td>Чистая формула<\/td><td>ячейка на 1 уровень выше*<\/td><td>на 2 уровня выше*<\/td><\/tr>\n      <tr><td>Сильная привязка<\/td><td>+1 к СЛ или атаке свитка<\/td><td>+2<\/td><\/tr>\n      <tr><td>Удобное чтение<\/td><td>преимущество на проверку чтения свитка высокого уровня<\/td><td>—<\/td><\/tr>\n      <tr><td>Тихое письмо<\/td><td>нет очевидного магического следа, если заклинание не громкое<\/td><td>—<\/td><\/tr>\n    <\/table><\/div>\n    <p class=\"muted\">* В документе — «уровень заклинателя +2/+4». Ответ мастера: уровни заклинателя здесь не используются, речь об уровнях ячейки — +2 даёт ячейку на 1 уровень выше, +4 — на 2. Мастер может запретить усиление, ломающее конкретное заклинание. Уточнение игрока 15.11.2026: «Чистая формула» повышает только силу эффекта; для проверки чтения сохраняется записанный уровень свитка. Например, Огненный шар III с усилением до V даёт 10к6, но читается как свиток III.<\/p>\n  <\/section>\n\n  <section class=\"step\" id=\"s6\">\n    <h2><b>6<\/b>Чтение нестабильного свитка<\/h2>\n    <p>Читающий проверяет заклинательную характеристику, <b>СЛ = 10 + уровень заклинания<\/b>. Успех — свиток работает. Провал — к6:<\/p>\n    <div class=\"tw\"><table>\n      <tr><th class=\"n\">к6<\/th><th>Что происходит<\/th><\/tr>\n      <tr><td class=\"n\">1<\/td><td>Свиток сгорает без эффекта; читающему 1к6 силового урона за уровень (заговор — 1)<\/td><\/tr>\n      <tr><td class=\"n\">2<\/td><td>Срабатывает, цель случайна среди подходящих в дистанции<\/td><\/tr>\n      <tr><td class=\"n\">3<\/td><td>Половина эффекта: урона, лечения, длительности или слабейший разумный<\/td><\/tr>\n      <tr><td class=\"n\">4<\/td><td>Срабатывает с магическим шумом; в Соборе может привлечь внимание<\/td><\/tr>\n      <tr><td class=\"n\">5<\/td><td>Срабатывает, читающему помеха на следующую проверку Магии до конца сцены<\/td><\/tr>\n      <tr><td class=\"n\">6<\/td><td>Срабатывает нормально, остаётся странный след: метка, шёпот, холод, озон<\/td><\/tr>\n    <\/table><\/div>\n    <p class=\"muted\">Ответ мастера: создатель знает, что свиток нестабилен, если перепроверил его после создания.<\/p>\n  <\/section>\n\n  <section class=\"step\" id=\"s7\">\n    <h2><b>7<\/b>Осечка при создании (провал на 5+ или натуральная 1)<\/h2>\n    <div class=\"tw\"><table>\n      <tr><th class=\"n\">к6<\/th><th>Осечка<\/th><\/tr>\n      <tr><td class=\"n\">1<\/td><td>Магический ожог: создателю 1к6 силового урона за уровень заклинания<\/td><\/tr>\n      <tr><td class=\"n\">2<\/td><td>Чернила вспыхивают: все в 5 фт — Ловкость СЛ 12 или 1к6 огнём<\/td><\/tr>\n      <tr><td class=\"n\">3<\/td><td>Магический шум: в городе внимание, в Соборе случайное событие<\/td><\/tr>\n      <tr><td class=\"n\">4<\/td><td>До конца следующего малого отдыха −1 к проверкам Магии<\/td><\/tr>\n      <tr><td class=\"n\">5<\/td><td>Свиток шепчет, ползёт, повторяет имя создателя. Без механики<\/td><\/tr>\n      <tr><td class=\"n\">6<\/td><td>Мастер может дать нестабильный свиток с побочным эффектом вместо провала<\/td><\/tr>\n    <\/table><\/div>\n  <\/section>\n\n  <section class=\"step\" id=\"s8\">\n    <h2><b>8<\/b>Примеры из документа<\/h2>\n    <div class=\"two\">\n      <p class=\"ex\"><b>«Щит» ночью:<\/b> 1 уровень, СЛ 12, 30 зм. Ячейка вернётся к утру вместе со свитком.<\/p>\n      <p class=\"ex\"><b>«Поглощение стихий» на малом отдыхе:<\/b> СЛ 12 + 3 = 15, 30 зм, ячейка не вернётся до большого отдыха. Сыро и шумно — ещё −2.<\/p>\n      <p class=\"ex\"><b>«Рассеивание магии» в Гильдии:<\/b> СЛ 16, 300 зм. Гильдия +2, формула +1, качественные чернила +2 — итого +5 сверх Магии.<\/p>\n    <\/div>\n  <\/section>\n\n  <section class=\"step\" id=\"s9\">\n    <h2><b>9<\/b>Классическое начертание<\/h2>\n    <p>Без проверки и без риска: свиток получается обычным. Нужно владеть Магией, иметь заклинание подготовленным или известным и предоставить материальные компоненты. Работа идёт днями простоя по 8 часов, рабочая неделя — 5 дней.<\/p>\n    <div class=\"tw\"><table>\n      <tr><th>Уровень<\/th><th class=\"n\">Загов.<\/th><th class=\"n\">1<\/th><th class=\"n\">2<\/th><th class=\"n\">3<\/th><th class=\"n\">4<\/th><th class=\"n\">5<\/th><th class=\"n\">6<\/th><th class=\"n\">7<\/th><th class=\"n\">8<\/th><th class=\"n\">9<\/th><\/tr>\n      <tr><td>Время (Занатар)<\/td><td class=\"n\">1 д.<\/td><td class=\"n\">1 д.<\/td><td class=\"n\">3 д.<\/td><td class=\"n\">1 нед.<\/td><td class=\"n\">2 нед.<\/td><td class=\"n\">4 нед.<\/td><td class=\"n\">8 нед.<\/td><td class=\"n\">16 нед.<\/td><td class=\"n\">32 нед.<\/td><td class=\"n\">48 нед.<\/td><\/tr>\n      <tr><td>Материалы, зм<\/td><td class=\"n\">15<\/td><td class=\"n\">30<\/td><td class=\"n\">120<\/td><td class=\"n\">300<\/td><td class=\"n\">1 200<\/td><td class=\"n\">2 500<\/td><td class=\"n\">7 500<\/td><td class=\"n\">12 500<\/td><td class=\"n\">25 000<\/td><td class=\"n\">50 000<\/td><\/tr>\n    <\/table><\/div>\n    <p class=\"muted\">Ячейка не тратится, усталости письма нет. За каждую рабочую неделю мастер может бросить осложнение (10%). Время — по «Руководству Занатара», материалы — по таблице мастера, как у быстрого начертания (шаг 3), плюс дорогие компоненты. Разница с быстрым только во времени и надёжности: свиток 1 уровня — 1 день вместо 2 часов и броска СЛ 12, свиток 3 уровня — неделя вместо 2 часов и броска СЛ 16.<\/p>\n    <p class=\"muted\">СЛ спасброска свитка — по заклинателю, как в полных правилах алхимии, §8.8 «Заряд и свиток». У Лаэля на 5-м уровне СЛ 15; его бонус заклинательной атаки +7. «Сильная привязка» из шага 5 даёт выбранные +1 или +2 к СЛ либо атаке. Повышение уровня эффекта само по себе не повышает СЛ. Фиксированная таблица DMG здесь не применяется.<\/p>\n  <\/section>\n\n  <section class=\"step\" id=\"q\">\n    <h2><b>?<\/b>Спорные места — уточнить у мастера<\/h2>\n    <div class=\"q\"><ul>\n      <li><b>Чтение нестабильного свитка<\/b> не заклинателем: какой характеристикой проверять — не сказано.<\/li>\n    <\/ul><\/div>\n  <\/section>\n\n  <footer>Источник: «Домашняя система начертания свитков» (PDF, 11 страниц), разделы 1–16; классическое начертание — время по «Руководству Занатара», цены мастера (уточнение игрока, 08.10); ответы мастера по свиткам — «Мир и сеттинг — от мастера». Шансы в счётчике — расчёт по d20, без учёта решений мастера.<\/footer>\n<\/div>\n\n";const th=()=>{const t=document.documentElement.getAttribute('data-theme');t?h.setAttribute('data-theme',t):h.removeAttribute('data-theme')};th();new MutationObserver(th).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});try{(function(R){
   const MAT={0:15,1:30,2:120,3:300,4:1200,5:2500};
@@ -2776,9 +2710,9 @@ function renderBrewingPlan(){
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=RECIPES.find(c=>['basic','ink'].includes(c.k)&&c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
-list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+list();render();tab(ls.get('tab'));
 renderBelt();
 </script>
-<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка 06b179c1621d</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_storage.js; scripts/cards/table_combat.js; scripts/cards/table_materials.js; scripts/cards/table_tools.js; scripts/cards/table_combinations.js; scripts/cards/table_planning.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
+<footer id="buildInfo" style="max-width:calc(100% - 32px);margin:24px auto;font-size:12px;overflow-wrap:anywhere"><details><summary>Сборка cdd045a62f42</summary><p>Идентификатор содержимого страницы. Для отзыва также укажите коммит репозитория.</p><p>Исходник: scripts/cards/helper_tpl.html; scripts/cards/table_storage.js; scripts/cards/table_combat.js; scripts/cards/table_materials.js; scripts/cards/table_tools.js; scripts/cards/table_combinations.js. Сборщик: scripts/cards/helper.py.</p></details></footer>
 </body>
 </html>

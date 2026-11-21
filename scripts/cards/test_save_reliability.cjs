@@ -104,7 +104,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
   assert.equal(await page.evaluate(()=>ST.mat.gold),oldGold);
   assert.equal(await page.evaluate(()=>TR.find(t=>t.id==='quota-test').current),1);
   // Заполняем ремёсла через настоящие формы и скачиваем общий JSON.
-  await page.locator('[data-tab="smith"]').click();const smith=page.locator('#craft-smith');
+  await page.locator('[data-section="craft"]').click();await page.locator('[data-tab="smith"]').click();const smith=page.locator('#craft-smith');
   await smith.locator('#d20').fill('10');await smith.locator('#add').click();
   const progress=await smith.locator('#o-p').innerText();assert.equal(progress,'21/100');
   await page.locator('[data-tab="scroll"]').click();const scroll=page.locator('#craft-scroll');
@@ -116,7 +116,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
   const fresh=await open();await restore(fresh,save);
   assert.equal(await fresh.locator('#craft-scroll #when').inputValue(),'rush');
   assert.equal(await fresh.locator('#craft-scroll #o-cost').innerText(),'60 зм');
-  await fresh.locator('[data-tab="smith"]').click();assert.equal(await fresh.locator('#craft-smith #o-p').innerText(),progress);
+  await fresh.locator('[data-section="craft"]').click();await fresh.locator('[data-tab="smith"]').click();assert.equal(await fresh.locator('#craft-smith #o-p').innerText(),progress);
   await fresh.reload();await fresh.waitForFunction(()=>JDB&&ST.mat);
   assert.equal(await fresh.locator('#craft-smith #o-p').innerText(),progress);
   // Старые JSON не очищают уже перенесённую работу. Явное null в новом очищает.
@@ -152,7 +152,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
    assert.equal(await fresh.locator('#restoreDialog').evaluate(d=>d.open),false);
   }
   // Ошибки записи встроенных ремёсел видны рядом с их формами.
-  await failWrites(fresh,'smith-log-5');await fresh.locator('[data-tab="smith"]').click();
+  await failWrites(fresh,'smith-log-5');await fresh.locator('[data-section="craft"]').click();await fresh.locator('[data-tab="smith"]').click();
   await fresh.locator('#craft-smith #d20').fill('10');await fresh.locator('#craft-smith #add').click();
   assert.match(await fresh.locator('#craft-smith [role="status"]').innerText(),/Не удалось сохранить кузню/);
   assert.equal(await fresh.evaluate(()=>snapshot().crafts.smith.rolls.length),2,'backup includes the unsaved new roll');await allowWrites(fresh);

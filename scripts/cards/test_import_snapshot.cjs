@@ -29,7 +29,7 @@ assert.equal(validate(valid),valid);
 const folder=require('node:path').resolve(__dirname,'../../Источники/Сохранения');
 const helper=fs.readFileSync(require('node:path').resolve(__dirname,'../../Помощник варки.html'),'utf8');
 context.TALIS_LIMITS=JSON.parse(helper.match(/const TALIS_LIMITS=(.*);/)[1]);
-vm.runInContext(helper.match(/^const PLAN_NEEDS=.*;$/m)[0],context);
+vm.runInContext(helper.match(/^const LEGACY_BREWING_NEEDS=.*;$/m)[0],context);
 const current=JSON.parse(fs.readFileSync(require('node:path').join(folder,'current.json'),'utf8'));
 assert.equal(require('node:path').basename(current.snapshot),current.snapshot);
 assert.doesNotThrow(()=>validate(JSON.parse(fs.readFileSync(require('node:path').join(folder,current.snapshot),'utf8'))));
