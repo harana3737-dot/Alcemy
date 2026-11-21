@@ -11,6 +11,8 @@ import posixpath
 import re
 import zipfile
 
+from cards.html_payload import embedded_texts
+
 ROOT = Path(__file__).resolve().parents[1]
 ARCHIVE = 'Материалы мастера — актуальный комплект.zip'
 FILES = (
@@ -56,7 +58,7 @@ def entries(root=ROOT):
     result = {}
     for filename in FILES:
         text = (root / filename).read_text()
-        if PRIVATE.search(text):
+        if PRIVATE.search(text) or any(PRIVATE.search(block) for block in embedded_texts(text)):
             raise ValueError(f'Сведения только игроку в комплекте: {filename}')
         if filename.endswith('.html'):
             text = portable_html(text, filename)
