@@ -13,14 +13,14 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
       await page.route('https://**/*',r=>r.abort());
       await page.goto(base+'/'+encodeURIComponent(embedded?'Помощник варки.html':'Шпаргалка кузнеца.html'));
       const smith=embedded?page.locator('#craft-smith'):page;
-      if(embedded)await page.locator('[data-tab="smith"]').click();
+      if(embedded){await page.locator('[data-section="craft"]').click();await page.locator('[data-tab="smith"]').click()}
       assert.equal(await smith.locator('#o-p').innerText(),'0/100');
       assert.equal(await smith.locator('#sample-banner').isVisible(),false);
       await smith.locator('#sample').click();
       assert.equal(await smith.locator('#sample-banner').isVisible(),true);
       assert.equal(await smith.locator('#log caption').count(),1);
       await page.reload();
-      if(embedded)await page.locator('[data-tab="smith"]').click();
+      if(embedded){await page.locator('[data-section="craft"]').click();await page.locator('[data-tab="smith"]').click()}
       assert.equal(await smith.locator('#log caption').count(),1,'Перезагрузка должна сохранить пометку примера');
       await smith.locator('#undo').click();
       assert.equal(await smith.locator('#log caption').count(),1,'Отмена демонстрационного подхода сохраняет пометку примера');
@@ -36,7 +36,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
       assert.match(await smith.locator('#log tbody tr').nth(1).innerText(),/провал на 5/);
       assert.equal(await smith.locator('#o-p').innerText(),'21/100');
       await page.reload();
-      if(embedded)await page.locator('[data-tab="smith"]').click();
+      if(embedded){await page.locator('[data-section="craft"]').click();await page.locator('[data-tab="smith"]').click()}
       assert.equal(await smith.locator('#log tbody tr').first().innerText(),first);
       await smith.locator('#undo').click();
       assert.equal(await smith.locator('#o-mk').innerText(),'1 / 0 / 0');
@@ -48,7 +48,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
       // Старый формат журнала мигрирует один раз, сохраняя броски и исходные настройки.
       await page.evaluate(()=>localStorage.setItem('smith-log-5',JSON.stringify({rolls:[{d:10}],ab:4,pb:2,ml:2,ws:3,dc:14,vol:100})));
       await page.reload();
-      if(embedded)await page.locator('[data-tab="smith"]').click();
+      if(embedded){await page.locator('[data-section="craft"]').click();await page.locator('[data-tab="smith"]').click()}
       assert.equal(await smith.locator('#o-p').innerText(),'20/100');
       await smith.locator('#ws').selectOption('0');
       assert.equal(await smith.locator('#o-p').innerText(),'20/100');

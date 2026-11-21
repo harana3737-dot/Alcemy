@@ -87,9 +87,12 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
 .eff{font-size:14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .empty{color:var(--muted);padding:30px 0;text-align:center}
 .tbtn{float:right;font:inherit;font-size:12px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:3px 10px;cursor:pointer}
-.tabs{display:flex;gap:4px;margin-top:12px;border-bottom:1px solid var(--line);overflow-x:auto;position:sticky;top:0;z-index:20;background:var(--bg);scrollbar-width:thin}
-.tabs button{font:inherit;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:6px 12px;min-height:44px;cursor:pointer;white-space:nowrap;flex:none}
-.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--acc);font-weight:600}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:12px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;background:var(--bg)}
+.tabs button,.tab-views button{font:inherit;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:6px;min-height:44px;cursor:pointer}
+.tabs button[aria-current],.tab-views button[aria-current]{color:var(--ink);border-color:var(--acc);font-weight:600}
+.tab-views{display:flex;flex-wrap:wrap;gap:4px 16px;margin:4px 0 10px;border-bottom:1px solid var(--line)}
+.tab-views[hidden]{display:none}
+.tab-views button{font-size:14px}
 .tb{font:500 11px "JetBrains Mono",monospace;background:var(--acc);color:var(--panel);border-radius:999px;padding:1px 6px;margin-left:3px}
 .tb:empty{display:none}
 .tb.hot{background:var(--bad)}
@@ -128,8 +131,9 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
   .mobile-tools{grid-column:2;grid-row:1;display:block;font-size:12px;min-height:36px;padding:5px 8px}
   #headerDetails{display:none;grid-column:1/-1}
   body.header-tools-open #headerDetails{display:block}
-  .tabs{margin-top:6px;gap:0}
-  .tabs button{font-size:13px;padding-inline:10px}
+  .tabs{margin-top:6px}
+  .tabs button,.tab-views button{font-size:13px}
+  .tab-views{gap:2px 8px}
   .grid,.side{gap:8px}
   .card{padding:10px 11px}
   #cls{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding:2px 2px 5px}
@@ -232,15 +236,20 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 <dialog id="restoreDialog"><h2>Восстановление сохранения</h2><p id="restoreSummary"></p><p class="note">Заменит сумки, материалы, деньги, журнал и настройки. Перед заменой скачивается копия текущего состояния.</p><div class="btns"><button type="button" class="btn" id="restoreApply">Восстановить</button><button type="button" class="btn ghost" id="restoreCancel" autofocus>Отмена</button></div></dialog>
 <dialog id="lssDialog" aria-labelledby="lssH"><h2 id="lssH">Блоки для листа LSS</h2><p class="note">Текст собран из сумки, материалов и журнала помощника. Скопируй блок и вставь в указанный раздел листа. Порядок разделов и журнал переносов — в «Талис — карта листа LSS».</p><div id="lssBody"></div><div class="btns"><button type="button" class="btn ghost" id="lssClose" autofocus>Закрыть</button></div></dialog>
 </header>
-<nav class="tabs" role="tablist">
-  <button type="button" role="tab" data-tab="brew" aria-selected="true">Варка</button>
-  <button type="button" role="tab" data-tab="belt" aria-selected="false">Пояс <span id="beltBadge" class="tb"></span></button>
-  <button type="button" role="tab" data-tab="jour" aria-selected="false">Журнал</button>
-  <button type="button" role="tab" data-tab="brewing-plan" aria-selected="false">План варки</button>
-  <button type="button" role="tab" data-tab="combo" aria-selected="false">Сочетания</button>
-  <button type="button" role="tab" data-tab="plan" aria-selected="false">Вылазка</button>
-  <button type="button" role="tab" data-tab="scroll" aria-selected="false">Свитки</button>
-  <button type="button" role="tab" data-tab="smith" aria-selected="false">Кузня</button>
+<nav class="tabs" aria-label="Разделы помощника">
+  <button type="button" data-section="brew" data-tab="brew" aria-current="page">Варка</button>
+  <button type="button" data-section="belt" data-tab="belt">Пояс <span id="beltBadge" class="tb"></span></button>
+  <button type="button" data-section="jour" data-tab="jour">Журнал</button>
+  <button type="button" data-section="craft" data-view="scroll">Ремёсла</button>
+</nav>
+<nav class="tab-views" data-views="belt" aria-label="Пояс" hidden>
+  <button type="button" data-view="belt">Сумка и бой</button>
+  <button type="button" data-tab="combo">Сочетания</button>
+  <button type="button" data-tab="plan">Вылазка</button>
+</nav>
+<nav class="tab-views" data-views="craft" aria-label="Ремёсла" hidden>
+  <button type="button" data-tab="scroll">Свитки</button>
+  <button type="button" data-tab="smith">Кузня</button>
 </nav>
 <div class="grid" id="tab-brew">
   <div class="card" id="activeBrews" style="grid-column:1/-1" hidden></div>
@@ -355,7 +364,6 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     <div class="btns"><button type="button" class="btn soft" id="plCopy">Скопировать список</button><button type="button" class="btn ghost" id="plClear">Убрать полученное и пустое</button></div>
   </div>
 </div>
-<div id="tab-brewing-plan" hidden><div id="brewingPlanning"></div></div>
 <div id="tab-combo" hidden><div class="card">
   <h2>Проверить сочетание</h2>
   <p class="note">План для одного персонажа: учитывает текущую токсичность и действующую алхимическую концентрацию. Для зарядов проверяется концентрация после применения. Выбор здесь сохраняется как план.</p>
@@ -995,37 +1003,43 @@ const TAB_RENDERERS={
   jour:renderJournal,
   plan:renderPlan,
   combo:renderCombo,
-  'brewing-plan':renderBrewingPlan,
 };
+const mainTabs=[...document.querySelectorAll('[data-section]')];
+const tabViews=[...document.querySelectorAll('[data-views]')];
+const tabButtons=[...document.querySelectorAll('[data-tab],[data-view]')];
+const tabPanels=new Map([...document.querySelectorAll('button[data-tab]')].map(button=>[button.dataset.tab,$('tab-'+button.dataset.tab)]));
+let activeTab='brew';
 function renderActiveTab(){
-  const active=document.querySelector('.tabs button[aria-selected="true"]');
-  TAB_RENDERERS[active?.dataset.tab]?.();
+  TAB_RENDERERS[activeTab]?.();
 }
 function renderTrackViews(){
-  const active=document.querySelector('.tabs button[aria-selected="true"]')?.dataset.tab;
-  if(active==='brew'){
+  if(activeTab==='brew'){
     renderAvailability();
     if(BASIC_SELECTED?.k==='ink')renderBasicRecipe(BASIC_SELECTED);
-  }else if(active==='jour'||active==='brewing-plan'){
+  }else if(activeTab==='jour'){
     renderActiveTab();
   }
 }
 function tab(t){
-  for(const button of document.querySelectorAll('.tabs button')){
-    const selected=button.dataset.tab===t;
-    button.setAttribute('aria-selected',selected);
-    $('tab-'+button.dataset.tab).hidden=!selected;
+  activeTab=tabPanels.has(t)?t:'brew';
+  const group=tabViews.find(views=>views.querySelector(`[data-tab="${activeTab}"],[data-view="${activeTab}"]`));
+  const section=group?.dataset.views||activeTab;
+  for(const [name,panel] of tabPanels)panel.hidden=name!==activeTab;
+  for(const button of mainTabs){
+    if(button.dataset.section===section)button.setAttribute('aria-current',group?'true':'page');
+    else button.removeAttribute('aria-current');
   }
-  const selected=document.querySelector('.tabs button[aria-selected="true"]');
-  if(selected){
-    const tabs=selected.parentElement, left=selected.getBoundingClientRect().left-tabs.getBoundingClientRect().left;
-    if(left<0)tabs.scrollLeft+=left;
-    else if(left+selected.offsetWidth>tabs.clientWidth)tabs.scrollLeft+=left+selected.offsetWidth-tabs.clientWidth;
+  for(const views of tabViews){
+    views.hidden=views.dataset.views!==section;
+    for(const button of views.querySelectorAll('button')){
+      if((button.dataset.tab||button.dataset.view)===activeTab)button.setAttribute('aria-current','page');
+      else button.removeAttribute('aria-current');
+    }
   }
-  ls.set('tab',t);
+  ls.set('tab',activeTab);
   renderActiveTab();
 }
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab(b.dataset.tab);window.scrollTo(0,0)});
+tabButtons.forEach(button=>button.onclick=()=>{tab(button.dataset.tab||button.dataset.view);window.scrollTo(0,0)});
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
 let JDB=null, TR=[], JBUSY=new Set(), JDEL=null;
@@ -1037,7 +1051,8 @@ function localDB(){const rd=()=>{try{return JSON.parse(ls.get('tracks')||'{}')}c
   return {collection:()=>col}}
 const JG=[["mastery","Мастерство"],["recipe","Рецепты"],["research","Исследования"],["project","Сюжетные проекты"]];
 const JQ={marks:[[1,"успех +1"],[2,"на 5+ +2"],[3,"нат. 20 +3"]],count:[[1,"успех +1"],[2,"нат. 20 +2"]],roll:[]};
-const MGOAL=m=>PLAN_RULES.growth[m]||25;
+const MASTERY_GROWTH=__MASTERY_GROWTH__;
+const MGOAL=m=>MASTERY_GROWTH[m]||25;
 const jstat=(t,err)=>{const s=$('jstat');if(s){s.textContent=t;s.style.color=err?'var(--bad)':''}};
 const fmtDay=t=>{try{return new Date(t).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'})}catch(e){return''}};
 function jUpdate(id,patch){
@@ -1831,13 +1846,12 @@ __TABLE_TOOLS__
 
 __TABLE_COMBINATIONS__
 
-__TABLE_PLANNING__
 
 __CRAFTS__
 
 const saved=ls.get('sel'), si=D.findIndex(c=>c.n===saved);
 if(si>=0){S.sel=si;AV.selected=saved;AV.mode='all'}else{BASIC_SELECTED=RECIPES.find(c=>['basic','ink'].includes(c.k)&&c.n===saved)||BASIC[0];AV.selected=BASIC_SELECTED.n;if(saved)AV.mode='all'}
-list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');
+list();render();tab(ls.get('tab'));
 renderBelt();
 </script>
 </body>

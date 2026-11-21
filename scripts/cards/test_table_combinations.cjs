@@ -50,7 +50,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
     assert.equal(live.expired.total,2);assert.equal(live.expired.warnings.length,0);
     assert.equal(live.active.total,2);assert.ok(live.active.warnings.some(x=>x.includes('Размытый образ')));
     // Сам план не расходует сумку, не меняет хиты, токсичность или журнал.
-    await page.locator('[data-tab="combo"]').click();
+    await page.locator('[data-tab="belt"]').click();await page.locator('[data-tab="combo"]').click();
     await page.locator('#comboCatalog').check();await page.locator('#comboAdd').click();
     await page.locator('.combo-name').selectOption('Щит веры');
     assert.match(await page.locator('#comboResult').innerText(),/не хватает/);

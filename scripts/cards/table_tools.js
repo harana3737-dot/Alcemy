@@ -114,10 +114,17 @@ function refreshRestoredUI(crafts){
   if(ls.get('theme'))document.documentElement.dataset.theme=ls.get('theme');else delete document.documentElement.dataset.theme;
   S.sel=D.findIndex(c=>c.n===ls.get('sel'));if(S.sel<0)S.sel=null;
   if(crafts)document.dispatchEvent(new CustomEvent('alcemy-crafts-restored',{detail:crafts}));
-  list();render();tab(['belt','jour','plan','scroll','smith','combo','brewing-plan'].includes(ls.get('tab'))?ls.get('tab'):'brew');renderBelt();
+  list();render();tab(ls.get('tab'));renderBelt();
 }
+// Настройки старого расчёта остаются в JSON версии 1 для переноса между сборками.
+const LEGACY_BREWING_NEEDS=['','Лечение','Защита','Контроль','Мобильность','Разведка','Урон','Рост мастерства'];
+let legacyBrewingPlan={budget:null,hours:2,need:'Лечение',stockOnly:false,search:'',week:12,progress:null};
+try{
+  const saved=JSON.parse(ls.get('brewing-plan')||'null');
+  if(saved&&typeof saved==='object')for(const key of Object.keys(legacyBrewingPlan))if(Object.hasOwn(saved,key))legacyBrewingPlan[key]=saved[key];
+}catch(e){}
 function snapshot(){
-  return {crafts:craftSnapshot(),plans:{combo:JSON.parse(JSON.stringify(COMBO)),brewing:{...BP}},format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(SAVE_SETTINGS.map(k=>[k,ls.get(k)]))};
+  return {crafts:craftSnapshot(),plans:{combo:JSON.parse(JSON.stringify(COMBO)),brewing:{...legacyBrewingPlan}},format:'alcemy-helper',version:1,created:new Date().toISOString(),state:JSON.parse(JSON.stringify(ST)),situation:{...S.t},tracks:JSON.parse(JSON.stringify(TR)),settings:Object.fromEntries(SAVE_SETTINGS.map(k=>[k,ls.get(k)]))};
 }
 let DL;  // в опубликованном помощнике — capability downloads; вне Claude — обычная ссылка
 async function downloadSnapshot(data,prefix='alcemy-save'){
@@ -181,7 +188,7 @@ function validateSnapshot(data){
       if(item.other!=null&&(!Array.isArray(item.other)||item.other.some(v=>typeof v!=='string')))fail();
     }
     for(const key of ['budget','hours','week','progress'])if(b[key]!=null&&(!Number.isFinite(b[key])||b[key]<0))fail();
-    if(typeof b.search!=='string'||typeof b.stockOnly!=='boolean'||!['',...PLAN_NEEDS].includes(b.need))fail();
+    if(typeof b.search!=='string'||typeof b.stockOnly!=='boolean'||!LEGACY_BREWING_NEEDS.includes(b.need))fail();
   }
   if(data.crafts!=null){
     const c=data.crafts,obj=x=>x&&typeof x==='object'&&!Array.isArray(x),scalar=x=>typeof x==='string'||typeof x==='number'&&Number.isFinite(x);
@@ -230,7 +237,7 @@ $('restoreApply').onclick=async()=>{
     for(const key of SAVE_SETTINGS)if(Object.hasOwn(next.settings,key)){const value=next.settings[key];if(value==null)localStorage.removeItem(key);else localStorage.setItem(key,String(value))}
     if(DOC){clearTimeout(saveT);await DOC.set({s:JSON.stringify(restored),u:restored.u})}
     ST=restored;TR=next.tracks;S.t={...(next.situation||{})};UNDO=[];
-    if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));BP={...next.plans.brewing}}
+    if(next.plans){COMBO=JSON.parse(JSON.stringify(next.plans.combo));legacyBrewingPlan={...next.plans.brewing}}
     refreshRestoredUI(next.crafts);
     PENDING_SAVE=null;$('restoreDialog').close();$('backupStatus').textContent='Сохранение восстановлено.';
   }catch(err){
@@ -238,7 +245,7 @@ $('restoreApply').onclick=async()=>{
     for(const t of old.tracks){try{const {id,...data}=t;await col.doc(id).set(data)}catch(e){rolled=false}}
     for(const t of next.tracks)if(!old.tracks.some(o=>o.id===t.id)){try{await col.doc(t.id).delete()}catch(e){rolled=false}}
     for(const [key,value] of Object.entries(stored)){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value)}catch(e){rolled=false}}
-    ST=old.state;TR=old.tracks;S.t={...old.situation};COMBO=old.plans.combo;BP=old.plans.brewing;UNDO=undo;
+    ST=old.state;TR=old.tracks;S.t={...old.situation};COMBO=old.plans.combo;legacyBrewingPlan=old.plans.brewing;UNDO=undo;
     if(DOC){try{await DOC.set({s:JSON.stringify(ST),u:Date.now()})}catch(e){rolled=false}}
     try{refreshRestoredUI(old.crafts)}catch(e){rolled=false}
     $('restoreSummary').textContent='Не восстановлено: '+err.message+(rolled?'. Предыдущее состояние возвращено.':'. Откат не завершён: восстанови скачанную копию после восстановления связи.');
