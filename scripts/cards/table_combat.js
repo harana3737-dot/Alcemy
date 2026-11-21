@@ -78,8 +78,8 @@ function myTurn(pid){const F=fight(),out=[];
   F.now=out.length?out:['Ничего не срабатывает'];logx(`Бой: ${pid==='p1'?'раунд '+F.round+', ход Талиса':'ход '+(P(pid)?P(pid).name:'')}`)}
 // вид пояса: auto — «Только бой», пока идёт бой; ручной выбор держится до начала или конца боя
 let BV=['auto','all','combat'].includes(ls.get('beltView'))?ls.get('beltView'):'auto', lastOn=null;
-function applyBV(on){const c=BV==='combat'||(BV==='auto'&&on),t=$('tab-belt'),b=$('beltView');if(t)t.classList.toggle('combat',c);if(b)b.setAttribute('aria-pressed',c);document.body.classList.toggle('battle-mobile',!!(c&&t&&!t.hidden))}
-$('mobileTools').onclick=()=>{const open=document.body.classList.toggle('battle-header-open');$('mobileTools').setAttribute('aria-expanded',open)};
+function applyBV(on){const c=BV==='combat'||(BV==='auto'&&on);$('tab-belt').classList.toggle('combat',c);$('beltView').setAttribute('aria-pressed',c)}
+$('mobileTools').onclick=()=>{const open=document.body.classList.toggle('header-tools-open');$('mobileTools').setAttribute('aria-expanded',open)};
 $('beltView').onclick=()=>{BV=$('beltView').getAttribute('aria-pressed')==='true'?'all':'combat';ls.set('beltView',BV);applyBV(fight().on)};
 {const lim=()=>{$('pl').value=Math.max(0,(+$('pcon').value||0)+(+$('ppb').value||0)+2)};$('pcon').oninput=lim;$('ppb').oninput=lim}
 function renderFight(){const box=$('fight');if(!box)return;const F=fight();

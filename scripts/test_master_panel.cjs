@@ -57,6 +57,16 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
       await scroll.locator('#lvl').selectOption('1');await scroll.locator('#when').selectOption('2h');
     }
     await page.locator('#t-el').click();
+    assert.equal(await page.locator('#els .el').count(),24);
+    await page.locator('#fnext').click();
+    assert.match(await page.locator('#fcount').innerText(),/^25–48 из 205$/);
+    await page.locator('#fq').fill('Закреплённая иллюзия');
+    assert.equal(await page.locator('#els .el').count(),1);
+    assert.equal(await page.locator('#fpage').isVisible(),false);
+    const illusion=page.locator('#els .el');
+    await illusion.locator(':scope > button').click();
+    assert.match(await illusion.locator('dl.quick').innerText(),/применить — 10 минут/);
+    assert.match(await illusion.locator('dl.quick').innerText(),/до рассеивания/);
     await page.locator('#fq').fill('Сфера Отилюка');
     const sphere=page.locator('#els .el').filter({has:page.getByText('Сфера Отилюка',{exact:true})});
     assert.equal(await sphere.count(),1);
