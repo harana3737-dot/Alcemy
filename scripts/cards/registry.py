@@ -148,7 +148,7 @@ def main():
                 pass
             elif lvl_sp != c["lvl"] and k != "oils":
                 ok = documented(c, "урон выше нормы", "уровень", "в реестре")
-                diffs.append(("уровень", f"заклинание {lvl_sp}", ROM[c["lvl"]], "намеренное (урон выше нормы, 8.8)" if ok else "не объяснено"))
+                diffs.append(("уровень", f"заклинание {lvl_sp}", ROM[c["lvl"]], "намеренное (основание указано в карточке)" if ok else "не объяснено"))
             if sd_min and cm is not None and abs(sd_min - cm) > 1e-6 and k not in ("oils", "oilw", "salve"):
                 ok = documented(c, "длительност", "минут", "час")
                 diffs.append(("длительность", sd_txt, c["dur"], "намеренное (записано в карточке)" if ok else "не объяснено"))

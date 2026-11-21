@@ -56,6 +56,16 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Пульт с ремеслом помещается на экран');
       await scroll.locator('#lvl').selectOption('1');await scroll.locator('#when').selectOption('2h');
     }
+    await page.locator('#t-el').click();
+    await page.locator('#fq').fill('Сфера Отилюка');
+    const sphere=page.locator('#els .el').filter({has:page.getByText('Сфера Отилюка',{exact:true})});
+    assert.equal(await sphere.count(),1);
+    await sphere.locator(':scope > button').click();
+    assert.match(await sphere.locator('dl.quick').innerText(),/Обычная концентрация\s+да/);
+    const sphereBrew=sphere.locator('details').filter({hasText:'Изготовление'});
+    await sphereBrew.locator('summary').click();
+    assert.match(await sphereBrew.innerText(),/Сложность варки\s+СЛ 15/);
+    assert.match(await sphereBrew.innerText(),/Эссенция\s+Эфир IV/);
     assert.deepEqual(errors,[]);await context.close();
     for(const width of [360,375,390,414,1280]){
       const context=await browser.newContext({viewport:{width,height:900}}),page=await context.newPage(),errors=[];
