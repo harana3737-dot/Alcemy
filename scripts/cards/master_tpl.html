@@ -29,12 +29,12 @@
   --warn:#dc8c55; --warn-soft:#3a2a1d; --bad:#d97373; --chip:#262d29; --shadow:none; color-scheme:dark;
 }
 *{box-sizing:border-box}
+html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);-webkit-text-size-adjust:100%}
-.wrap{max-width:920px;margin:0 auto;padding-inline:16px;padding-block:20px 56px}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:clamp(12px,2vw,24px);padding-block:16px 48px}
 header h1{font:400 30px/1.15 var(--f-display);margin:0 0 4px;text-wrap:balance}
-header p{margin:0;color:var(--muted);font-size:14px;max-width:62ch}
-.tabs{display:flex;gap:2px;margin:18px 0 16px;border-bottom:1px solid var(--line);overflow-x:auto}
-.tabs button{font:inherit;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:8px 12px;cursor:pointer;white-space:nowrap}
+.tabs{display:flex;gap:4px;margin:10px 0 12px;border-bottom:1px solid var(--line);overflow-x:auto;position:sticky;top:0;z-index:4;background:var(--bg);scrollbar-width:thin}
+.tabs button{font:inherit;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:6px 12px;min-height:44px;cursor:pointer;white-space:nowrap;flex:none}
 .tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--acc);font-weight:600}
 button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
@@ -45,7 +45,7 @@ h2{font:400 20px/1.2 var(--f-display);margin:22px 0 10px;text-wrap:balance}
 .btn.pri{background:var(--acc);border-color:var(--acc);color:var(--panel);font-weight:600}
 
 /* Утвердить */
-.sum{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;position:sticky;top:env(safe-area-inset-top,0px);z-index:2;margin:0 -4px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.sum{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;position:sticky;top:52px;z-index:2;margin:0 -4px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
 .sum .big{font:400 22px/1 var(--f-display)}
 .sum .grow{flex:1;min-width:180px;font-size:13px;color:var(--muted)}
 .bar{height:6px;border-radius:99px;background:var(--chip);overflow:hidden;margin-top:6px}
@@ -108,7 +108,29 @@ dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:10p
 .chip[aria-pressed=true] small{color:var(--panel)}
 .chip:disabled{opacity:.4;cursor:default}
 .frow{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:4px 0 8px}
-.frow .note{flex:1;min-width:120px}
+.frow .note{flex:1;min-width:0}
+#fpage{display:flex;align-items:center;gap:6px}
+#fpage .btn:disabled{opacity:.5;cursor:default}
+#fpage[hidden]{display:none}
+#fs{max-width:100%}
+#p-el .modebar{margin:6px 0}
+#fgd>summary{min-height:38px}
+#els .el>button{min-height:44px}
+@media(max-width:600px){
+  .wrap{padding-block-start:8px}
+  header h1{font-size:23px;margin:0}
+  .tabs{margin:6px 0 8px;gap:0}
+  .tabs button{font-size:13px;padding-inline:9px}
+  .sum{position:static}
+  .filters input{flex-basis:100%}
+  .filters select{font-size:13px}
+  #p-el .modebar{gap:6px}
+  #emodeN,.legend{display:none}
+  .frow{gap:6px}
+  #fpage .btn,#freset{padding:6px 8px;min-height:36px;font-size:12px}
+  #fpage .note{font-size:11px;white-space:nowrap}
+  #els .el>button{grid-template-columns:28px minmax(0,1fr) auto;gap:6px}
+}
 .tgl{display:flex;gap:6px;align-items:center;font-size:14px;cursor:pointer}.tgl input{accent-color:var(--acc)}
 @media(max-width:520px){.fgr{grid-template-columns:1fr}}
 .el{border-top:1px solid var(--line)}
@@ -187,7 +209,6 @@ details.grp>summary h2{margin:0;flex:0 1 auto}
 <div class="wrap">
 <header>
   <h1>Пульт мастера</h1>
-  <p>Осталось шесть уточнений после ответа 08.11.2026. Начните с вкладки «Уточнить». Для проверки конкретного случая откройте «Справку» или «Эликсиры». Вкладка «Талис» показывает срез персонажа. В «Свитках Лаэля» и «Кузне Фаэнона» — правила ремёсел, расчёты и спорные места.</p>
 </header>
 <nav class="tabs" role="tablist">
   <button type="button" role="tab" id="t-ok" data-t="ok" aria-selected="true">Уточнить</button>
@@ -227,17 +248,25 @@ details.grp>summary h2{margin:0;flex:0 1 auto}
 </section>
 
 <section id="p-el" hidden>
+  <div class="filters">
+    <input id="fq" type="search" placeholder="Название, эссенция или эффект" aria-label="Поиск эликсира" autocomplete="off">
+    <select id="fs" aria-label="Сортировка"><option value="l">По уровню</option><option value="n">По названию</option><option value="p">По цене</option></select>
+  </div>
   <div class="modebar"><span class="seg mode" role="group" aria-label="Режим" id="emode">
     <button type="button" data-v="table">За столом</button><button type="button" data-v="prep">Подготовка</button></span>
     <span class="note" id="emodeN"></span></div>
-  <div class="filters">
-    <input id="fq" type="search" placeholder="Название, эссенция или слово из эффекта" aria-label="Поиск эликсира" autocomplete="off">
-    <select id="fs" aria-label="Сортировка"><option value="l">по уровню</option><option value="n">по названию</option><option value="p">по цене</option></select>
+  <details class="fdet" id="fgd"><summary id="fgs">Фильтры</summary>
+    <div class="presets" id="pre" role="group" aria-label="Быстрые фильтры"></div>
+    <div class="fgroups" id="fg"></div>
+  </details>
+  <div class="frow">
+    <span class="note" id="fcount" aria-live="polite"></span>
+    <div id="fpage" aria-label="Страницы каталога" role="group" hidden>
+      <button type="button" class="btn" id="fprev">Назад</button><span class="note" id="fpageLabel"></span><button type="button" class="btn" id="fnext">Дальше</button>
+    </div>
+    <button type="button" class="btn" id="freset">Сбросить</button>
   </div>
-  <div class="presets" id="pre" role="group" aria-label="Быстрые фильтры"></div>
-  <details class="fdet" id="fgd"><summary id="fgs">Все фильтры</summary><div class="fgroups" id="fg"></div></details>
-  <div class="frow"><span class="note" id="fcount"></span><button type="button" class="btn" id="freset">Сбросить фильтры</button></div>
-  <div class="legend"><span><i style="background:var(--help)"></i>помощь: лечение, защита, усиление</span><span><i style="background:var(--harm)"></i>вред: урон, контроль, яды</span><span><i style="background:var(--misc)"></i>разведка, передвижение, общение, утилита</span></div>
+  <div class="legend"><span><i style="background:var(--help)"></i>помощь и защита</span><span><i style="background:var(--harm)"></i>урон, контроль и яды</span><span><i style="background:var(--misc)"></i>разведка и утилита</span></div>
   <div id="els"></div>
 </section>
 
@@ -281,8 +310,12 @@ const G=J('d-groups'), NQ=G.reduce((s,g)=>s+g.q.length,0), PRICE_Q=19;
 
 // вкладки
 function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===t));
-  ['ok','ref','el','ta','scroll','smith'].forEach(k=>$('p-'+k).hidden=k!==t);ls.set('mtab',t)}
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
+  ['ok','ref','el','ta','scroll','smith'].forEach(k=>$('p-'+k).hidden=k!==t);ls.set('mtab',t);
+  const selected=$('t-'+t),tabs=selected.parentElement,left=selected.getBoundingClientRect().left-tabs.getBoundingClientRect().left;
+  if(left<0)tabs.scrollLeft+=left;
+  else if(left+selected.offsetWidth>tabs.clientWidth)tabs.scrollLeft+=left+selected.offsetWidth-tabs.clientWidth;
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab(b.dataset.t);window.scrollTo(0,0)});
 {const h=location.hash.slice(1),s=ls.get('mtab');tab(['ok','ref','el','ta','scroll','smith'].includes(h)?h:['ok','ref','el','ta','scroll','smith'].includes(s)?s:'ok')}
 
 // ===== Утвердить: ответы — в общей базе (answers/qN), иначе — только в этом браузере =====
@@ -364,7 +397,9 @@ setTimeout(async()=>{try{
 }catch(e){$('saveSt').textContent='Ответы сохраняются только в этом браузере.'}},0);
 
 // ===== Эликсиры: группы фильтров — внутри группы «или», между группами «и» =====
-const CARDS=J('d-cards'), CLS=J('d-cls'), ORDER=J('d-order'), ROM=['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
+const catalog=J('d-cards');
+const CARDS=catalog.rows.map(row=>Object.fromEntries(catalog.fields.map((key,i)=>[key,row[i]])));
+const CLS=J('d-cls'), ORDER=J('d-order'), ROM=['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
 const TIER=l=>l<=2?'обычный (I–II)':l<=5?'необычный (III–V)':l<=7?'редкий (VI–VII)':l<=9?'очень редкий (VIII–IX)':'легендарный (X)';
 const TX=t=>t>=3?'3 и больше':String(t);
 const PR=c=>+String(c.p).replace(/[^\d]/g,'')||0;
@@ -390,7 +425,7 @@ const PRE=[
   {t:'Яды',on:()=>setIs(SEL.k,PSN),go:()=>{const on=setIs(SEL.k,PSN);SEL.k.clear();if(!on)PSN.forEach(v=>SEL.k.add(v))}},
   {t:'Масла',on:()=>setIs(SEL.k,OILS),go:()=>{const on=setIs(SEL.k,OILS);SEL.k.clear();if(!on)OILS.forEach(v=>SEL.k.add(v))}}];
 function renderPre(){$('pre').innerHTML='';PRE.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='chip pre';b.setAttribute('aria-pressed',x.on());
-  b.textContent=x.t;if(x.hint)b.title=x.hint;b.onclick=()=>{x.go();renderEls()};$('pre').appendChild(b)})}
+  b.textContent=x.t;if(x.hint)b.title=x.hint;b.onclick=()=>{x.go();firstCatalogPage()};$('pre').appendChild(b)})}
 // режим: за столом — что бросать и тратить; подготовка — варка
 let EMODE=ls.get('emode')==='prep'?'prep':'table';
 $('emode').querySelectorAll('button').forEach(b=>b.onclick=()=>{EMODE=b.dataset.v;ls.set('emode',EMODE);renderEls()});
@@ -410,21 +445,35 @@ function renderFG(){const box=$('fg');box.innerHTML='';
     const row=document.createElement('div');row.className='fgr';row.innerHTML=`<span>${f.t}</span><div class="chips"></div>`;
     f.order.forEach(v=>{const n=base.filter(c=>f.vals(c).includes(v)).length,on=SEL[f.id].has(v);if(!n&&!on&&!CARDS.some(c=>f.vals(c).includes(v)))return;
       const b=document.createElement('button');b.type='button';b.className='chip';b.setAttribute('aria-pressed',on);b.disabled=!n&&!on;
-      b.innerHTML=`${esc(v)}<small>${n}</small>`;b.onclick=()=>{on?SEL[f.id].delete(v):SEL[f.id].add(v);renderEls()};row.querySelector('.chips').appendChild(b)});
+      b.innerHTML=`${esc(v)}<small>${n}</small>`;b.onclick=()=>{on?SEL[f.id].delete(v):SEL[f.id].add(v);firstCatalogPage()};row.querySelector('.chips').appendChild(b)});
     box.appendChild(row)})}
 const CARD_ROW_LABELS=__CARD_ROW_LABELS__;
 function cardFields(rows,quick=false){
   const fields=rows.map(([key,value])=>`<dt>${esc(CARD_ROW_LABELS[key])}</dt><dd>${value}</dd>`).join('');
   return `<dl${quick?' class="quick"':''}>${fields}</dl>`;
 }
+const CATALOG_PAGE_SIZE=24;
+let catalogPage=0;
+function firstCatalogPage(){catalogPage=0;renderEls()}
 function renderEls(){
   const list=CARDS.filter(c=>textOk(c)&&nowOk(c)&&passOthers(c,null));
   const s=$('fs').value;list.sort((a,b)=>s==='n'?a.n.localeCompare(b.n,'ru'):s==='p'?PR(a)-PR(b)||a.l-b.l:a.l-b.l||a.n.localeCompare(b.n,'ru'));
-  $('fcount').textContent=`Найдено ${list.length} из ${CARDS.length}`;renderFG();renderPre();
+  const pages=Math.max(1,Math.ceil(list.length/CATALOG_PAGE_SIZE));
+  catalogPage=Math.min(catalogPage,pages-1);
+  const start=catalogPage*CATALOG_PAGE_SIZE;
+  const shown=list.slice(start,start+CATALOG_PAGE_SIZE);
+  $('fcount').textContent=list.length?`${start+1}–${start+shown.length} из ${list.length}`:'Ничего не найдено';
+  const activeFilters=NOW||LV3||$('fq').value.trim()||FG.some(f=>SEL[f.id].size);
+  $('freset').hidden=!activeFilters;
+  $('fpage').hidden=pages===1;
+  $('fpageLabel').textContent=`${catalogPage+1} / ${pages}`;
+  $('fprev').disabled=catalogPage===0;
+  $('fnext').disabled=catalogPage===pages-1;
+  renderFG();renderPre();
   $('emode').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===EMODE));
-  $('emodeN').textContent=EMODE==='table'?'Метки: действие, СЛ и спасбросок, концентрация, токсичность, длительность. Варка — в раскрытой карточке, свёрнута.':'Метки: СЛ варки, время, катализатор, эссенция, цена. Применение — в раскрытой карточке, свёрнуто.';{const n=FG.reduce((s,f)=>s+SEL[f.id].size,0);$('fgs').textContent='Все фильтры'+(n?` · выбрано ${n}`:'')}
+  $('emodeN').textContent=EMODE==='table'?'Метки: действие, СЛ и спасбросок, концентрация, токсичность, длительность. Варка — в раскрытой карточке, свёрнута.':'Метки: СЛ варки, время, катализатор, эссенция, цена. Применение — в раскрытой карточке, свёрнуто.';{const n=FG.reduce((s,f)=>s+SEL[f.id].size,0);$('fgs').textContent='Фильтры'+(n?` · выбрано ${n}`:'')}
   const box=$('els');box.innerHTML='';
-  list.forEach(c=>{const d=document.createElement('div');d.className='el '+tone(c)+(c.k==='psn'?' psn':'');
+  shown.forEach(c=>{const d=document.createElement('div');d.className='el '+tone(c)+(c.k==='psn'?' psn':'');
     const use=cardFields(c.q,true)+`<dl><dt>Задачи</dt><dd>${esc(c.g.join(', '))}</dd></dl>`,brew=cardFields(c.b);
     d.innerHTML=`<button type="button" aria-expanded="false"><span class="lv">${ROM[c.l]}</span><span><span class="nm">${esc(c.n)}</span><span class="bdgs">${badges(c)}</span></span><span class="k">${esc(c.p)} зм</span></button>
       <div class="d" hidden>${EMODE==='table'
@@ -433,8 +482,10 @@ function renderEls(){
         ${c.o?`<details class="sub"><summary>Примечание и редкие случаи</summary><p class="note">${md(c.o)}</p></details>`:''}</div>`;
     const b=d.querySelector('button'),dd=d.querySelector('.d');b.onclick=()=>{dd.hidden=!dd.hidden;b.setAttribute('aria-expanded',!dd.hidden)};box.appendChild(d)})}
 function resetF(){FG.forEach(f=>SEL[f.id].clear());$('fq').value='';NOW=false;LV3=false}
-$('fq').addEventListener('input',renderEls);$('fs').onchange=renderEls;
-$('freset').onclick=()=>{resetF();renderEls()};
+$('fq').addEventListener('input',firstCatalogPage);$('fs').onchange=firstCatalogPage;
+$('freset').onclick=()=>{resetF();firstCatalogPage();$('fq').focus()};
+$('fprev').onclick=()=>{catalogPage--;renderEls()};
+$('fnext').onclick=()=>{catalogPage++;renderEls()};
 renderEls();
 
 // ===== Справка: быстрые таблицы и оглавление =====

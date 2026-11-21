@@ -4,6 +4,12 @@ import html
 import re
 
 
+def pack_records(records):
+    """Хранить имена полей один раз для встроенного каталога."""
+    fields = list(dict.fromkeys(key for record in records for key in record))
+    return {"fields": fields, "rows": [[record.get(key) for key in fields] for record in records]}
+
+
 def marker(builder, source, *, partial=False):
     """Относительные пути помогают найти исходник в распакованном архиве."""
     if any('--' in value or '\n' in value for value in (builder, source)):

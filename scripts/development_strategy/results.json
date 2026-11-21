@@ -3,16 +3,16 @@
   "confirmed_cash": 108.18,
   "catalog_investments": {
     "counts": {
-      "eff": 108,
+      "eff": 109,
       "rea": 4,
-      "chg": 40,
+      "chg": 41,
       "salve": 3,
       "fl": 24,
       "oilw": 4,
       "psn": 14,
       "oils": 6
     },
-    "total": 203,
+    "total": 205,
     "assumptions": {
       "bonuses": [
         7,
@@ -15735,6 +15735,114 @@
         ]
       },
       {
+        "name": "Экспертность: Магия V",
+        "card": "e216",
+        "level": 5,
+        "cls": "eff",
+        "recipes": [
+          "Эликсир Разума"
+        ],
+        "minimum_mastery": 5,
+        "minimum_place_bonus": 1,
+        "review": [
+          "По ситуации",
+          "Талис/Лаэль",
+          "Час удвоенного владения Магией с токсичностью 2, серия проверок при обследовании"
+        ],
+        "tasks": [
+          "Усиление",
+          "Разведка"
+        ],
+        "recipe_tier": "необычная (III–V)",
+        "source_price": 75.0,
+        "herb_base": 20,
+        "essence_price_range": [
+          4,
+          4
+        ],
+        "consumed_component": 0,
+        "reusable_tool": 0,
+        "raw_per_attempt": [
+          24,
+          24
+        ],
+        "first_attempt_cash_with_new_catalyst": [
+          94,
+          94
+        ],
+        "unpriced_essence": false,
+        "known_batches_ordinary_lab": {
+          "5": 2,
+          "6": 2,
+          "7": 2,
+          "8": 2,
+          "9": 2,
+          "10": 2
+        },
+        "ordinary_concentration": false,
+        "alchemy_concentration": false,
+        "toxicity": "2",
+        "profiles": [
+          {
+            "bonus": 7,
+            "known": {
+              "success": 0.55,
+              "attempt_hours": 4,
+              "stable_hours": 7.2727272727272725,
+              "method": "exact"
+            },
+            "first": {
+              "success": 0.45,
+              "attempt_hours": 4,
+              "stable_hours": 8.88888888888889,
+              "method": "exact"
+            },
+            "allocated_gold_per_known_stable": [
+              69.09090909090908,
+              69.09090909090908
+            ]
+          },
+          {
+            "bonus": 11,
+            "known": {
+              "success": 0.75,
+              "attempt_hours": 4,
+              "stable_hours": 5.333333333333333,
+              "method": "exact"
+            },
+            "first": {
+              "success": 0.65,
+              "attempt_hours": 4,
+              "stable_hours": 6.153846153846153,
+              "method": "exact"
+            },
+            "allocated_gold_per_known_stable": [
+              50.666666666666664,
+              50.666666666666664
+            ]
+          },
+          {
+            "bonus": 15,
+            "known": {
+              "success": 0.95,
+              "attempt_hours": 4,
+              "stable_hours": 4.2105263157894735,
+              "method": "exact"
+            },
+            "first": {
+              "success": 0.85,
+              "attempt_hours": 4,
+              "stable_hours": 4.705882352941177,
+              "method": "exact"
+            },
+            "allocated_gold_per_known_stable": [
+              40.0,
+              40.0
+            ]
+          }
+        ]
+      },
+      {
         "name": "Эликсир здоровья",
         "card": "e098",
         "level": 5,
@@ -16498,6 +16606,119 @@
             "allocated_gold_per_known_stable": [
               133.4368822366594,
               133.4368822366594
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Закреплённая иллюзия",
+        "card": "e217",
+        "level": 6,
+        "cls": "chg",
+        "recipes": [
+          "Заряды и склянки Покрова"
+        ],
+        "minimum_mastery": 6,
+        "minimum_place_bonus": 3,
+        "review": [
+          "По ситуации",
+          "база",
+          "Неподвижный образ до рассеивания, только одна опора базы; нужен допуск мастера"
+        ],
+        "tasks": [
+          "Утилита",
+          "Разведка"
+        ],
+        "recipe_tier": "общий рецепт",
+        "source_price": 7500.0,
+        "herb_base": 2500.0,
+        "essence_price_range": [
+          8,
+          8
+        ],
+        "consumed_component": 0,
+        "reusable_tool": 0,
+        "raw_per_attempt": [
+          2508.0,
+          2508.0
+        ],
+        "first_attempt_cash_with_new_catalyst": [
+          2858.0,
+          2858.0
+        ],
+        "unpriced_essence": false,
+        "known_batches_ordinary_lab": {
+          "6": 1,
+          "7": 1,
+          "8": 1,
+          "9": 1,
+          "10": 1
+        },
+        "ordinary_concentration": false,
+        "alchemy_concentration": false,
+        "toxicity": "0 (мягкий, 8.7)",
+        "profiles": [
+          {
+            "bonus": 7,
+            "known": {
+              "success": 0.41594999999999976,
+              "attempt_hours": 15.934666666666667,
+              "stable_hours": 38.309091637616724,
+              "method": "seeded simulation; final die exact",
+              "runs": 3000
+            },
+            "first": {
+              "success": 0.2804999999999993,
+              "attempt_hours": 18.53,
+              "stable_hours": 66.06060606060623,
+              "method": "seeded simulation; final die exact",
+              "runs": 3000
+            },
+            "allocated_gold_per_known_stable": [
+              6197.860319749973,
+              6197.860319749973
+            ]
+          },
+          {
+            "bonus": 11,
+            "known": {
+              "success": 0.71203333333334,
+              "attempt_hours": 10.908666666666667,
+              "stable_hours": 15.32044379944745,
+              "method": "seeded simulation; final die exact",
+              "runs": 3000
+            },
+            "first": {
+              "success": 0.5628499999999996,
+              "attempt_hours": 12.181333333333333,
+              "stable_hours": 21.64223742264074,
+              "method": "seeded simulation; final die exact",
+              "runs": 3000
+            },
+            "allocated_gold_per_known_stable": [
+              3620.617012312124,
+              3620.617012312124
+            ]
+          },
+          {
+            "bonus": 15,
+            "known": {
+              "success": 0.9442666666666449,
+              "attempt_hours": 8.424666666666667,
+              "stable_hours": 8.921914713358014,
+              "method": "seeded simulation; final die exact",
+              "runs": 3000
+            },
+            "first": {
+              "success": 0.8371499999999642,
+              "attempt_hours": 8.683333333333334,
+              "stable_hours": 10.372493977583115,
+              "method": "seeded simulation; final die exact",
+              "runs": 3000
+            },
+            "allocated_gold_per_known_stable": [
+              2730.1609714770466,
+              2730.1609714770466
             ]
           }
         ]
@@ -22330,7 +22551,8 @@
           "Склянка покрова: туман",
           "Склянка покрова: тишина",
           "Склянка покрова: тьма",
-          "Большая иллюзия"
+          "Большая иллюзия",
+          "Закреплённая иллюзия"
         ],
         "acquisition": {
           "method": "100 прогресса; бонус +7, без перебросов",
@@ -22726,7 +22948,8 @@
           "Языки",
           "Любовный напиток",
           "Чтение мыслей",
-          "Героизм"
+          "Героизм",
+          "Экспертность: Магия V"
         ],
         "acquisition": {
           "method": "отметки; бонус +7, одна подсказка +2, без перебросов",

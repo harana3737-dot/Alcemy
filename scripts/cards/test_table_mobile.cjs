@@ -44,8 +44,27 @@ const shots=process.env.TABLE_TOOLS_SCREENSHOTS;
     }
     await page.evaluate(()=>window.scrollTo(0,0));await fits();
     if(shots)await page.screenshot({path:path.join(shots,`battle-${width}.png`)});
-    // Не переносить режим мобильной шапки на другие вкладки.
-    await page.locator('[data-tab="brew"]').click();assert.equal(await page.locator('#headerDetails').isVisible(),true);await fits();
+    await page.locator('[data-tab="brew"]').click();
+    assert.equal(await page.locator('#headerDetails').isVisible(),width>600);
+    if(width<=600){
+      assert.equal(await page.locator('#brewSetup').evaluate(el=>el.open),false);
+      assert.equal(await page.locator('#availabilityPanel').evaluate(el=>el.open),false);
+      assert.ok((await page.locator('#brewCatalog').boundingBox()).y<160,'Поиск виден в начале экрана');
+      await page.locator('#mobileTools').click();
+      assert.equal(await page.locator('#backupExport').isVisible(),true);
+      await page.locator('#mobileTools').click();
+    }
+    const search=page.getByRole('searchbox',{name:'Поиск по каталогу'});
+    await search.fill('Экспертность: Магия V');
+    await page.locator('#list .item').click();
+    assert.match(await page.locator('#out h2').innerText(),/Экспертность: Магия V/);
+    assert.equal(await page.locator('#tx').innerText(),'2');
+    assert.equal(await page.locator('#du').innerText(),'1 час');
+    await page.locator('#recipeMaterials').click();
+    assert.equal(await page.locator('#avMode').isVisible(),true);
+    await page.locator('#recipeSearch').click();
+    assert.equal(await search.evaluate(el=>el===document.activeElement),true);
+    await fits();
     for(const tab of ['belt','jour','plan','scroll','smith','combo','brewing-plan','brew']){
       await page.locator(`[data-tab="${tab}"]`).click();await fits();
     }

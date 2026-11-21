@@ -109,6 +109,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
   const progress=await smith.locator('#o-p').innerText();assert.equal(progress,'21/100');
   await page.locator('[data-tab="scroll"]').click();const scroll=page.locator('#craft-scroll');
   await scroll.locator('#when').selectOption('rush');await scroll.locator('#ink').selectOption('2|4');
+  if(await page.locator('#backupExport').isHidden())await page.locator('#mobileTools').click();
   const downloaded=page.waitForEvent('download');await page.locator('#backupExport').click();
   const save=JSON.parse(fs.readFileSync(await (await downloaded).path(),'utf8'));
   assert.equal(save.crafts.version,1);assert.equal(save.crafts.smith.rolls[0].d,10);assert.equal(save.crafts.scroll.when,'rush');

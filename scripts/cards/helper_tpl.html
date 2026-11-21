@@ -30,11 +30,12 @@
 [hidden]{display:none!important}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 "Golos Text",system-ui,sans-serif;-webkit-text-size-adjust:100%}
-.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
+.wrap{max-width:1180px;margin:0 auto;padding:16px clamp(12px,2vw,24px) 48px}
 header h1{font:400 28px/1.15 Prata,serif;margin:0 0 4px}
 header p{margin:0;color:var(--muted);font-size:14px}
-.grid{display:grid;gap:16px;margin-top:18px}
-@media(min-width:880px){.grid{grid-template-columns:360px 1fr;align-items:start}.side{position:sticky;top:12px}}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:12px}
+.side{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-width:0}
+@media(min-width:880px){.grid{grid-template-columns:minmax(280px,340px) minmax(0,1fr);align-items:start}.side{position:sticky;top:64px}}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
 .card h2{font:400 18px/1.2 Prata,serif;margin:0 0 10px}
 label.f{display:block;font-size:12px;color:var(--muted);margin:0 0 4px;text-transform:uppercase;letter-spacing:.04em}
@@ -42,10 +43,10 @@ input[type=search],input[type=number]{width:100%;font:inherit;color:var(--ink);b
 input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
 .row{display:flex;gap:10px}
 .row>div{flex:1;min-width:0}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:4px 10px;cursor:pointer}
 .chip[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:var(--panel)}
-.list{max-height:340px;overflow:auto;margin:0 -6px;padding:0 6px}
+.list{max-height:min(340px,40svh);overflow:auto;margin:0 -6px;padding:0 6px;overscroll-behavior:contain}
 .item{display:flex;gap:8px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-radius:8px;padding:7px 8px;cursor:pointer}
 .item:hover{background:var(--chip)}
 .item[aria-current=true]{background:var(--acc-soft)}
@@ -86,8 +87,8 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
 .eff{font-size:14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .empty{color:var(--muted);padding:30px 0;text-align:center}
 .tbtn{float:right;font:inherit;font-size:12px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:3px 10px;cursor:pointer}
-.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;border-bottom:1px solid var(--line)}
-.tabs button{font:inherit;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:8px 12px;cursor:pointer;margin-bottom:-1px}
+.tabs{display:flex;gap:4px;margin-top:12px;border-bottom:1px solid var(--line);overflow-x:auto;position:sticky;top:0;z-index:20;background:var(--bg);scrollbar-width:thin}
+.tabs button{font:inherit;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:6px 12px;min-height:44px;cursor:pointer;white-space:nowrap;flex:none}
 .tabs button[aria-selected=true]{color:var(--ink);border-color:var(--acc);font-weight:600}
 .tb{font:500 11px "JetBrains Mono",monospace;background:var(--acc);color:var(--panel);border-radius:999px;padding:1px 6px;margin-left:3px}
 .tb:empty{display:none}
@@ -106,17 +107,40 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-of
 .talis{border-block:1px solid var(--line);margin:12px 0;padding:10px 0;min-width:0}
 .talis h3{margin:0;font-size:17px}.fresources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0}.fresources>div{min-width:0}.fresources b{font-size:20px}.talis .btns{flex-wrap:wrap}.talis label{min-width:0;flex:1 1 130px;font-size:12px}.talis input{margin-top:4px}
 
+#recipeTools{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.brew-work{min-width:0}
+#brewWork,#brewCatalog,#availabilityPanel{scroll-margin-top:58px}
+#out:focus{outline:none}
+.recipe-options>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px}
+.recipe-options[open]>summary{margin-bottom:8px}
+.recipe-options>summary::before{content:'▸';flex:none;color:var(--acc)}
+.recipe-options[open]>summary::before{transform:rotate(90deg)}
+.recipe-options .summary-title{flex:1}
+#brewSettingsState{font:500 12px "JetBrains Mono",monospace;color:var(--muted);white-space:nowrap}
+#availabilityPanel{margin-top:10px}
+#availabilityPanel .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) minmax(80px,.4fr)}
 .mobile-tools{display:none}
+@media(max-width:600px){
+  body>.wrap{padding-top:8px}
+  body>.wrap>header{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px}
+  body>.wrap>header h1{font-size:19px;margin:0;grid-column:1;grid-row:1}
+  #theme{grid-column:3;grid-row:1;float:none;margin:0;min-height:36px}
+  .mobile-tools{grid-column:2;grid-row:1;display:block;font-size:12px;min-height:36px;padding:5px 8px}
+  #headerDetails{display:none;grid-column:1/-1}
+  body.header-tools-open #headerDetails{display:block}
+  .tabs{margin-top:6px;gap:0}
+  .tabs button{font-size:13px;padding-inline:10px}
+  .grid,.side{gap:8px}
+  .card{padding:10px 11px}
+  #cls{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding:2px 2px 5px}
+  #cls .chip{white-space:nowrap;flex:none;min-height:35px}
+  #list{max-height:clamp(96px,24svh,170px)}
+  #list .item{min-height:38px}
+  #list .item .kl{display:none}
+  #availabilityPanel .row{grid-template-columns:minmax(0,1fr) minmax(70px,.45fr)}
+  #availabilityPanel .row>div:nth-child(2){grid-column:1/-1;grid-row:2}
+}
 @media(max-width:480px){
-  body.battle-mobile .wrap{padding-top:8px}
-  body.battle-mobile header{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px}
-  body.battle-mobile header h1{font-size:16px;margin:0;grid-column:1;grid-row:1}
-  body.battle-mobile #theme{grid-column:3;grid-row:1;float:none!important;margin:0!important;padding:6px;font-size:11px}
-  body.battle-mobile .mobile-tools{grid-column:2;grid-row:1;display:block;font-size:11px;padding:6px;max-width:120px}
-  body.battle-mobile #headerDetails{display:none;grid-column:1/-1}
-  body.battle-mobile.battle-header-open #headerDetails{display:block}
-  body.battle-mobile .tabs{position:sticky;top:0;z-index:20;background:var(--bg);margin-top:8px;gap:0}
-  body.battle-mobile .tabs button{font-size:12px;padding:7px 6px;flex:1 1 auto}
   #tab-belt.combat{display:flex;flex-direction:column;gap:10px}
   #tab-belt.combat #fight{order:-1;margin-top:8px!important}
   #tab-belt.combat .clock .btns{gap:4px}
@@ -200,10 +224,9 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 <header>
   <button class="tbtn" id="theme" type="button">тема</button>
   <h1>Помощник варки</h1>
-  <button type="button" class="btn ghost mobile-tools" id="mobileTools" aria-expanded="false" aria-controls="headerDetails">Сохранения и описание</button>
+  <button type="button" class="btn ghost mobile-tools" id="mobileTools" aria-expanded="false" aria-controls="headerDetails">Данные</button>
   <div id="headerDetails">
-  <p>Выбери рецепт из __N__ и отметь условия варки. Страница посчитает шансы и подскажет бонусы качества. Наличие карточки ещё не означает известный рецепт.</p>
-  <p>«Пояс» — сумка, бой, токсичность и отдых. «Журнал» — мастерство, рецепты и запись варок. «План варки» — прогноз роста и подбор под бюджет. «Сочетания» — проверка комплектов. «Вылазка» — заказы и запасы группы. Правила v0.3; материал игрока.</p>
+  <p>В каталоге __N__ карточек. Известные рецепты и доступные материалы смотри в разделе «Доступ и докупка».</p>
 <div class="btns"><button type="button" class="btn soft" id="backupExport">Скачать сохранение</button><button type="button" class="btn ghost" id="backupImport">Восстановить из файла</button><button type="button" class="btn ghost" id="lssOpen">Блоки для LSS</button><button type="button" class="btn ghost" id="projectsOpen">Мои проекты</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p class="note" id="backupStatus" aria-live="polite"></p>
 </div>
 <dialog id="restoreDialog"><h2>Восстановление сохранения</h2><p id="restoreSummary"></p><p class="note">Заменит сумки, материалы, деньги, журнал и настройки. Перед заменой скачивается копия текущего состояния.</p><div class="btns"><button type="button" class="btn" id="restoreApply">Восстановить</button><button type="button" class="btn ghost" id="restoreCancel" autofocus>Отмена</button></div></dialog>
@@ -221,28 +244,38 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 </nav>
 <div class="grid" id="tab-brew">
   <div class="card" id="activeBrews" style="grid-column:1/-1" hidden></div>
-  <div class="card" id="availability" style="grid-column:1/-1"></div>
   <div class="side">
-    <div class="card">
-      <div class="row">
-        <div><label class="f" for="m">Мастерство <small>по листу, 5 уровень; если не изменено</small></label><input id="m" type="number" min="1" max="10" value="2"></div>
-        <div><label class="f" for="b">Бонус проверки <small>по листу, 5 уровень; если не изменено</small></label><input id="b" type="number" min="-5" max="30" value="5"></div>
-      </div>
-      <label class="tg" style="margin-top:6px"><input type="checkbox" id="anar"><span><span class="t">Варю у Анариэль</span><small>полная лаборатория +3 вместо рабочего места +1: бонус +2, уровни до 8; на что пускает и сколько берёт — решает мастер</small></span></label>
-      <p class="note">Бонус — с Интеллектом, инструментами, мастерством и местом (у Талиса +5 на рабочем месте, +7 у Анариэль). При смене мастерства и места бонус сдвигается сам и действует на всех вкладках.</p>
-      <div class="sect">Рецепт</div>
+    <div class="card" id="brewCatalog">
+      <label class="f" for="q">Поиск по каталогу</label>
       <input id="q" type="search" placeholder="Название, эссенция, формула…" autocomplete="off">
       <div class="chips" id="cls"></div>
       <div class="list" id="list" role="listbox" aria-label="Рецепты"></div>
-      <div class="count" id="count"></div>
+      <div class="count" id="count" aria-live="polite"></div>
     </div>
+    <details class="card recipe-options" id="brewSetup" open>
+      <summary><span class="summary-title">Параметры варки</span><span id="brewSettingsState"></span></summary>
+      <div class="row">
+        <div><label class="f" for="m">Мастерство</label><input id="m" type="number" min="1" max="10" value="2"></div>
+        <div><label class="f" for="b">Бонус проверки</label><input id="b" type="number" min="-5" max="30" value="5"></div>
+      </div>
+      <label class="tg"><input type="checkbox" id="anar"><span>Полная лаборатория +3<small>Место у Анариэль. Бонус проверки на 2 выше, чем за рабочим столом +1.</small></span></label>
+      <p class="note">Суммарный бонус действует на всех вкладках и меняется вместе с мастерством и местом.</p>
+    </details>
   </div>
-  <div>
-    <div class="card" id="out"><div class="empty">Выбери рецепт слева</div></div>
-    <div class="card" id="sit" style="margin-top:16px"></div>
+  <div class="brew-work" id="brewWork">
+    <div id="recipeTools">
+      <button type="button" class="btn sm" id="recipeSearch">К поиску</button>
+      <button type="button" class="btn sm" id="recipeMaterials">Доступ и докупка</button>
+    </div>
+    <div class="card" id="out" tabindex="-1"><div class="empty">Выбери рецепт из каталога</div></div>
+    <details class="card recipe-options" id="brewConditions" style="margin-top:10px" open><summary><span class="summary-title">Условия и бонусы</span></summary><div id="sit"></div></details>
+    <details class="card recipe-options" id="availabilityPanel" open>
+      <summary><span class="summary-title">Доступ и докупка</span></summary>
+      <div id="availability"></div>
+    </details>
   </div>
 </div>
-<div id="tab-belt" hidden><div class="card"><b>Конец сессии 17 — пересказ и LSS</b><p>Призраки упокоены. После перехода в лес группа с Эйлин разделилась у двух якорей: Лаэль и Фаэнон слева, Талис и Эйлин справа. Охрана побеждена; разрушение машин и бой с настоятельницей ещё не описаны. Талис: 41 / 42 ХП; ячейки I–III — 1 / 1 / 0; общий остаток единиц чародейства — 3, подтверждено игроком. Опыт 8 995, монеты по номиналам 108,18 зм. Зелья: 3.3 ×2, 2.2 ×2, 1.1 ×2; два 2.2 получены от освобождённого лекаря. Игровые часы не названы, отдых по одному намерению не начисляется. Это сверка, а не автоматическая замена сохранённых счётчиков. JSON конца сессии 16 остаётся историческим; не восстанавливай его как актуальные остатки после сессии 17.</p></div><div class="card clock">
+<div id="tab-belt" hidden><details class="card prep recipe-options"><summary><span class="summary-title">Снимок конца сессии 17</span></summary><p>Призраки упокоены. После перехода в лес группа с Эйлин разделилась у двух якорей: Лаэль и Фаэнон слева, Талис и Эйлин справа. Охрана побеждена; разрушение машин и бой с настоятельницей ещё не описаны. Талис: 41 / 42 ХП; ячейки I–III — 1 / 1 / 0; общий остаток единиц чародейства — 3, подтверждено игроком. Опыт 8 995, монеты по номиналам 108,18 зм. Зелья: 3.3 ×2, 2.2 ×2, 1.1 ×2; два 2.2 получены от освобождённого лекаря. Игровые часы не названы, отдых по одному намерению не начисляется. Это сверка, а не автоматическая замена сохранённых счётчиков. JSON конца сессии 16 остаётся историческим; не восстанавливай его как актуальные остатки после сессии 17.</p></details><div class="card clock">
   <div class="ctop"><div><div class="k">Время в игре</div><div class="now" id="now"></div></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="savest" id="savest"></div>
     <button type="button" class="btn" id="beltView" aria-pressed="false" title="Прячет материалы, добавление пьющих и пояснения. Включается само, когда начат бой">Только бой</button></div></div>
@@ -380,7 +413,8 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 <script id="seed" type="application/json">__SEED__</script>
 <script id="data" type="application/json">__DATA__</script>
 <script>
-const D=JSON.parse(document.getElementById('data').textContent), CLS=__CLS__;
+const cardData=JSON.parse(document.getElementById('data').textContent);
+const D=cardData.rows.map(row=>Object.fromEntries(row.map((value,index)=>[cardData.fields[index],value]))), CLS=__CLS__;
 const ORDER=["eff","chg","psn","rea","fl","oilw","oils","salve"];
 const ROM=__RULE_ROM__;
 const DC=__RULE_DC__;
@@ -407,13 +441,18 @@ $('anar').onchange=()=>{const on=$('anar').checked;$('b').value=(+$('b').value||
 // фильтр
 const cls=$('cls');
 [["all","все"],...ORDER.map(k=>[k,CLS[k]])].forEach(([k,t])=>{const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;b.dataset.k=k;b.setAttribute('aria-pressed',k==='all');b.onclick=()=>{S.cls=k;[...cls.children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.k===k));list()};cls.appendChild(b)});
-$('q').oninput=list;
+$('q').oninput=()=>{list();$('list').scrollTop=0};
+$('recipeSearch').onclick=()=>{$('q').focus({preventScroll:true});$('brewCatalog').scrollIntoView({block:'start'})};
+$('recipeMaterials').onclick=()=>{const panel=$('availabilityPanel');panel.open=true;panel.scrollIntoView({block:'start'});$('avMode').focus({preventScroll:true})};
+if(matchMedia('(max-width:600px)').matches){
+  for(const id of ['brewSetup','brewConditions','availabilityPanel'])$(id).open=false;
+}
 function list(){
   const q=$('q').value.trim().toLowerCase(), L=$('list'); L.innerHTML='';
   const r=D.map((c,i)=>[c,i]).filter(([c])=>(S.cls==='all'||c.k===S.cls)&&(!q||(c.n+' '+c.e+' '+c.f+' '+c.tk.join(' ')).toLowerCase().includes(q)));
   r.forEach(([c,i])=>{const b=document.createElement('button');b.type='button';b.className='item';b.setAttribute('role','option');
     b.setAttribute('aria-current',S.sel===i);b.innerHTML=`<span class="lv">${ROM[c.l]}</span><span class="nm"></span><span class="kl">${CLS[c.k]}</span>`;
-    b.querySelector('.nm').textContent=c.n;b.onclick=()=>{BASIC_SELECTED=null;AV.selected=c.n;AV.mode='all';S.sel=i;ls.set('sel',c.n);list();render();if(innerWidth<880)$('out').scrollIntoView({behavior:'smooth'})};L.appendChild(b)});
+    b.querySelector('.nm').textContent=c.n;b.onclick=()=>{BASIC_SELECTED=null;AV.selected=c.n;AV.mode='all';S.sel=i;ls.set('sel',c.n);list();render();if(innerWidth<880){$('out').focus({preventScroll:true});$('brewWork').scrollIntoView({block:'start'})}};L.appendChild(b)});
   $('count').textContent=r.length?`${r.length} из ${D.length}`:'Ничего не нашлось';
 }
 
@@ -464,7 +503,7 @@ const B20={long:["Двойной срок","длительность ×2, не �
  spare:["Ещё одна доза","+1 флакон"]};
 
 function sitList(c){
-  const box=$('sit');box.innerHTML='<h2>Ситуация</h2>';
+  const box=$('sit');box.textContent='';
   const g=document.createElement('div');g.className='toggles';box.appendChild(g);
   SIT.forEach(([k,t,h,f])=>{
     if(k==='--'){const s=document.createElement('div');s.className='sect';s.textContent=t;g.appendChild(s);return}
@@ -520,6 +559,8 @@ function pickBonuses(c,t){
 
 const pct=x=>Math.round(x*100)+'%';
 function render(keepSit){
+  const bonus=+$('b').value||0;
+  $('brewSettingsState').textContent=`М${$('m').value} · ${bonus>=0?'+':''}${bonus}`;
   renderAvailability();
   if(BASIC_SELECTED){renderBasicRecipe(BASIC_SELECTED);return}
   if(S.sel===null){sitList(null);return}
@@ -975,11 +1016,16 @@ function tab(t){
     button.setAttribute('aria-selected',selected);
     $('tab-'+button.dataset.tab).hidden=!selected;
   }
+  const selected=document.querySelector('.tabs button[aria-selected="true"]');
+  if(selected){
+    const tabs=selected.parentElement, left=selected.getBoundingClientRect().left-tabs.getBoundingClientRect().left;
+    if(left<0)tabs.scrollLeft+=left;
+    else if(left+selected.offsetWidth>tabs.clientWidth)tabs.scrollLeft+=left+selected.offsetWidth-tabs.clientWidth;
+  }
   ls.set('tab',t);
-  document.body.classList.toggle('battle-mobile',t==='belt'&&$('tab-belt').classList.contains('combat'));
   renderActiveTab();
 }
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab(b.dataset.tab);window.scrollTo(0,0)});
 
 // ===== Журнал алхимии: мастерство, рецепты, исследования, проекты (общая база страницы, коллекция tracks) =====
 let JDB=null, TR=[], JBUSY=new Set(), JDEL=null;

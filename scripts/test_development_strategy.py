@@ -146,9 +146,9 @@ class CatalogInvestmentTests(unittest.TestCase):
         cls.by = {r['name']: r for r in cls.model['items']}
 
     def test_complete_catalog_and_shared_recipes(self):
-        self.assertEqual(self.model['total'], 203)
-        self.assertEqual(sum(self.model['counts'].values()), 203)
-        self.assertEqual(self.model['counts']['eff'], 108)
+        self.assertEqual(self.model['total'], 205)
+        self.assertEqual(sum(self.model['counts'].values()), 205)
+        self.assertEqual(self.model['counts']['eff'], 109)
         self.assertEqual(self.model['counts']['psn'], 14)
         self.assertEqual(self.by['Яд: удержание чудовища']['recipes'], ['Заряды и склянки Разума'])
         self.assertEqual(self.by['Масло скольжения']['recipes'], ['Масла и мази'])
