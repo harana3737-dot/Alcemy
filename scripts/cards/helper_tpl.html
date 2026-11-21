@@ -412,7 +412,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
 </div>
 <script id="seed" type="application/json">__SEED__</script>
 <script id="data" type="application/json">__DATA__</script>
-<script>
+<script id="helperScript">
 const cardData=JSON.parse(document.getElementById('data').textContent);
 const D=cardData.rows.map(row=>Object.fromEntries(row.map((value,index)=>[cardData.fields[index],value]))), CLS=__CLS__;
 const ORDER=["eff","chg","psn","rea","fl","oilw","oils","salve"];
