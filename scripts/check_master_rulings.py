@@ -16,6 +16,8 @@ INDEPENDENT = {
     'Трансформация Тензера': 9,
     'Потусторонний облик': 8,
 }
+# Здесь сужен сам эффект исходного заклинания, а не только снята концентрация.
+NARROWER_EFFECTS = {'Экспертность: Магия': (3, '1 час (на одну проверку)')}
 DOCUMENTS = (
     'Алхимия Талиса — полные правила v0.3.md',
     'Алхимия Талиса — ядро правил.md',
@@ -54,9 +56,14 @@ def check(root=ROOT, cards=None):
         m = re.search(r'(\d+) ур\.', c['src_raw'])
         if not m:
             continue
-        expected = INDEPENDENT.get(c['name'], int(m[1]))
+        narrower = NARROWER_EFFECTS.get(c['name'])
+        expected = narrower[0] if narrower else INDEPENDENT.get(c['name'], int(m[1]))
         if c['lvl'] != expected:
             errors.append(f"№41: {c['name']}: уровень {c['lvl']}, требуется {expected}; неперенесённое решение или незафиксированная отдельная надбавка")
+        if narrower:
+            if c['dur'] != narrower[1]:
+                errors.append(f"№3/4: {c['name']}: срок облегчённой версии должен быть {narrower[1]}")
+            continue
         # Концентрация снята, но длительность уже указана в самом источнике.
         duration = re.search(r'(\d+) (минут\w*|час\w*)\)', c['src_raw'])
         if duration and c['dur'] != duration[0][:-1]:

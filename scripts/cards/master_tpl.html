@@ -412,6 +412,11 @@ function renderFG(){const box=$('fg');box.innerHTML='';
       const b=document.createElement('button');b.type='button';b.className='chip';b.setAttribute('aria-pressed',on);b.disabled=!n&&!on;
       b.innerHTML=`${esc(v)}<small>${n}</small>`;b.onclick=()=>{on?SEL[f.id].delete(v):SEL[f.id].add(v);renderEls()};row.querySelector('.chips').appendChild(b)});
     box.appendChild(row)})}
+const CARD_ROW_LABELS=__CARD_ROW_LABELS__;
+function cardFields(rows,quick=false){
+  const fields=rows.map(([key,value])=>`<dt>${esc(CARD_ROW_LABELS[key])}</dt><dd>${value}</dd>`).join('');
+  return `<dl${quick?' class="quick"':''}>${fields}</dl>`;
+}
 function renderEls(){
   const list=CARDS.filter(c=>textOk(c)&&nowOk(c)&&passOthers(c,null));
   const s=$('fs').value;list.sort((a,b)=>s==='n'?a.n.localeCompare(b.n,'ru'):s==='p'?PR(a)-PR(b)||a.l-b.l:a.l-b.l||a.n.localeCompare(b.n,'ru'));
@@ -420,7 +425,7 @@ function renderEls(){
   $('emodeN').textContent=EMODE==='table'?'Метки: действие, СЛ и спасбросок, концентрация, токсичность, длительность. Варка — в раскрытой карточке, свёрнута.':'Метки: СЛ варки, время, катализатор, эссенция, цена. Применение — в раскрытой карточке, свёрнуто.';{const n=FG.reduce((s,f)=>s+SEL[f.id].size,0);$('fgs').textContent='Все фильтры'+(n?` · выбрано ${n}`:'')}
   const box=$('els');box.innerHTML='';
   list.forEach(c=>{const d=document.createElement('div');d.className='el '+tone(c)+(c.k==='psn'?' psn':'');
-    const use=`${c.q||''}<dl><dt>Задачи</dt><dd>${esc(c.g.join(', '))}</dd></dl>`,brew=c.b||'';
+    const use=cardFields(c.q,true)+`<dl><dt>Задачи</dt><dd>${esc(c.g.join(', '))}</dd></dl>`,brew=cardFields(c.b);
     d.innerHTML=`<button type="button" aria-expanded="false"><span class="lv">${ROM[c.l]}</span><span><span class="nm">${esc(c.n)}</span><span class="bdgs">${badges(c)}</span></span><span class="k">${esc(c.p)} зм</span></button>
       <div class="d" hidden>${EMODE==='table'
         ?`<p>${md(c.x)}</p><h4>Применение</h4>${use}<details class="sub"><summary>Изготовление</summary>${brew}</details>`

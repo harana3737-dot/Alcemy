@@ -43,7 +43,7 @@ def build():
 
     # Карточки эликсиров
     from cards_model import clean, prepare_cards, ordered_cards, CLS, CLS_ORDER as ORDER
-    from gen import card_rows, render_definition_rows
+    from gen import card_rows
     C = ordered_cards(prepare_cards())
     def conc(c):  # как в каталоге (gen.py, conc_short): эффект — алхимическая по a89, заряды и склянки — обычная по полю conc
         if c["cls"] == "eff":
@@ -57,6 +57,17 @@ def build():
     cards = [dict(n=c["name"], l=c["lvl"], k=c["cls"], f=c["fam"] or "", e=c["ess"], p=c["price"],
                   d=c["dur"], c=conc(c), g=c["tasks"], es=c["ess_types"], tx=tox_n(c), s=c.get("src_raw") or c["src"], x=c["eff"], o=c["note"] or "")
              for c in C]
+
+    row_labels, row_indices = [], {}
+
+    def compact_rows(rows):
+        encoded = []
+        for label, value in rows:
+            if label not in row_indices:
+                row_indices[label] = len(row_labels)
+                row_labels.append(label)
+            encoded.append([row_indices[label], clean(value)])
+        return encoded
 
     def plain_fields(rows):
         return {key: re.sub(r"<[^>]+>", "", clean(value)).strip() for key, value in rows}
@@ -76,8 +87,8 @@ def build():
         if c["cls"] == "psn":
             brew = [(key, value + " — общий рецепт зарядов и склянок; отдельного рецепта яда нет (Ж-100)"
                      if key == "Формула" else value) for key, value in brew]
-        cd["q"] = '<dl class="quick">' + clean(render_definition_rows(quick)) + '</dl>'
-        cd["b"] = '<dl>' + clean(render_definition_rows(brew)) + '</dl>'
+        cd["q"] = compact_rows(quick)
+        cd["b"] = compact_rows(brew)
         q, b = plain_fields(quick), plain_fields(brew)
         cd["ac"] = act_short(q.get("Применение") or q.get("Нанесение") or "")
         dc = re.match(r"\s*(\d+)", q.get("СЛ / атака") or q.get("СЛ") or "")
@@ -158,7 +169,7 @@ def build():
     tpl = (HERE / "master_tpl.html").read_text(encoding="utf-8")
     dump = lambda o: json.dumps(o, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     out = (tpl.replace("__PRICE_UPDATES__", updates).replace("__GROUPS__", dump(groups)).replace("__EXTRA__", dump(extra)).replace("__NQ__", str(nq))
-              .replace("__CARDS__", dump(cards)).replace("__CLS__", dump(CLS)).replace("__ORDER__", dump(ORDER))
+              .replace("__CARDS__", dump(cards)).replace("__CARD_ROW_LABELS__", dump(row_labels)).replace("__CLS__", dump(CLS)).replace("__ORDER__", dump(ORDER))
               .replace("__TALIS__", dump(talis)).replace("__ROOT__", dump(root)).replace("__QUICK__", dump(quick)).replace("__SAMPLE__", dump(sample)).replace("__CORE__", core).replace("__CRAFTS__", crafts))
     from generated_files import generated_html
     out = generated_html(out, "scripts/cards/master_panel.py", "scripts/cards/master_tpl.html", version=True)

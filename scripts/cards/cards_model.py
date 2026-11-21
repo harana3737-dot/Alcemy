@@ -51,6 +51,12 @@ USE_OVR = {
 }
 
 EN = {  # русское название заклинания → английское (PHB 2014 и др.)
+    "Создание или уничтожение воды": "Create or Destroy Water", "Огонь фей": "Faerie Fire",
+    "Открывание": "Knock", "Вихревое перемещение": "Vortex Warp", "Чувства зверя": "Beast Sense",
+    "Заимствованное знание": "Borrowed Knowledge", "Усиление навыка": "Skill Empowerment",
+    "Большая иллюзия": "Major Image", "Послание": "Sending", "Слияние с камнем": "Meld into Stone",
+    "Каменная форма": "Stone Shape", "Магический глаз": "Arcane Eye",
+    "Упругая сфера Отилюка": "Otiluke's Resilient Sphere",
     "Скороход": "Longstrider", "Прыжок": "Jump", "Падение пёрышком": "Feather Fall", "Щит": "Shield",
     "Поглощение стихий": "Absorb Elements", "Огненные ладони": "Burning Hands", "Волна грома": "Thunderwave",
     "Руки Хадара": "Arms of Hadar", "Нанесение ран": "Inflict Wounds", "Жуткий смех Таши": "Tasha's Hideous Laughter",
