@@ -167,12 +167,14 @@ def build():
     updates += '</ul><p>Порог — более 20% прибыли сверх лучших доступных чернил II и выше. Заряды, склянки и масла кары сохраняют модель чернил.</p>'
 
     from generated_files import generated_html, pack_records
+    from html_payload import compressed_json, payload_reader
     tpl = (HERE / "master_tpl.html").read_text(encoding="utf-8")
     dump = lambda o: json.dumps(o, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    out = (tpl.replace("__PRICE_UPDATES__", updates).replace("__GROUPS__", dump(groups)).replace("__EXTRA__", dump(extra)).replace("__NQ__", str(nq))
-              .replace("__CARDS__", dump(pack_records(cards))).replace("__CARD_ROW_LABELS__", dump(row_labels)).replace("__CLS__", dump(CLS)).replace("__ORDER__", dump(ORDER))
-              .replace("__TALIS__", dump(talis)).replace("__ROOT__", dump(root)).replace("__QUICK__", dump(quick)).replace("__SAMPLE__", dump(sample)).replace("__CORE__", core).replace("__CRAFTS__", crafts))
-    out = generated_html(out, "scripts/cards/master_panel.py", "scripts/cards/master_tpl.html", version=True)
+    out = (tpl.replace("__HTML_PAYLOAD_READER__", payload_reader())
+              .replace("__PRICE_UPDATES__", updates).replace("__GROUPS__", dump(groups)).replace("__EXTRA__", dump(extra)).replace("__NQ__", str(nq))
+              .replace("__CARDS__", compressed_json(pack_records(cards))).replace("__CARD_ROW_LABELS__", dump(row_labels)).replace("__CLS__", dump(CLS)).replace("__ORDER__", dump(ORDER))
+              .replace("__TALIS__", dump(talis)).replace("__ROOT__", dump(root)).replace("__QUICK__", compressed_json(quick)).replace("__SAMPLE__", dump(sample)).replace("__CORE__", core).replace("__CRAFTS__", crafts))
+    out = generated_html(out, "scripts/cards/master_panel.py", "scripts/cards/master_tpl.html; scripts/cards/html_payload.py", version=True)
     (ROOT / "Пульт мастера.html").write_text(out, encoding="utf-8")
     print("Пульт мастера.html", nq, "вопросов,", len(cards), "карточек,", len(out.encode("utf-8")), "байт")
 

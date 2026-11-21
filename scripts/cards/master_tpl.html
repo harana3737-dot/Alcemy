@@ -300,6 +300,7 @@ details.grp>summary h2{margin:0;flex:0 1 auto}
 <script id="d-root" type="application/json">__ROOT__</script>
 <script id="d-quick" type="application/json">__QUICK__</script>
 <script>
+__HTML_PAYLOAD_READER__
 const $=id=>document.getElementById(id);
 const J=id=>JSON.parse($(id).textContent);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -397,7 +398,7 @@ setTimeout(async()=>{try{
 }catch(e){$('saveSt').textContent='Ответы сохраняются только в этом браузере.'}},0);
 
 // ===== Эликсиры: группы фильтров — внутри группы «или», между группами «и» =====
-const catalog=J('d-cards');
+const catalog=readCompressedJson('d-cards');
 const CARDS=catalog.rows.map(row=>Object.fromEntries(catalog.fields.map((key,i)=>[key,row[i]])));
 const CLS=J('d-cls'), ORDER=J('d-order'), ROM=['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
 const TIER=l=>l<=2?'обычный (I–II)':l<=5?'необычный (III–V)':l<=7?'редкий (VI–VII)':l<=9?'очень редкий (VIII–IX)':'легендарный (X)';
@@ -489,7 +490,7 @@ $('fnext').onclick=()=>{catalogPage++;renderEls()};
 renderEls();
 
 // ===== Справка: быстрые таблицы и оглавление =====
-$('qtabs').innerHTML=J('d-quick').map((q,i)=>`<details class="qt" id="qt${i}"><summary>${esc(q.t)}</summary><div class="ref">${q.h}</div></details>`).join('');
+$('qtabs').innerHTML=readCompressedJson('d-quick').map((q,i)=>`<details class="qt" id="qt${i}"><summary>${esc(q.t)}</summary><div class="ref">${q.h}</div></details>`).join('');
 {const items=[['#qt0','Цены'],['#quick','Быстрые таблицы'],...[...document.querySelectorAll('#p-ref > .ref > h2[id]')].map(h=>['#'+h.id,h.textContent.replace(/^\d+\.\s*/,'')])];
   $('toc').innerHTML=items.map(([h,t])=>`<a href="${h}">${esc(t)}</a>`).join('');
   $('toc').querySelectorAll('a').forEach(a=>a.onclick=e=>{e.preventDefault();const el=document.querySelector(a.getAttribute('href'));if(el){let d=el.tagName==='DETAILS'?el:el.closest('details');while(d){d.open=true;d=d.parentElement&&d.parentElement.closest('details')}el.scrollIntoView({behavior:'smooth',block:'start'})}})}

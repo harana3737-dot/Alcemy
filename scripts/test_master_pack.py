@@ -4,6 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 import zipfile
+from cards.html_payload import compressed_text
 from master_pack import FILES, archive_bytes, portable_html
 
 
@@ -25,6 +26,15 @@ class MasterPackTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             (root / FILES[0]).write_text('Аэлитриакс')
+            with self.assertRaisesRegex(ValueError, 'только игроку'):
+                archive_bytes(root)
+
+    def test_private_information_inside_compressed_data_is_rejected(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / FILES[0]).write_text(
+                '<script type="application/json">' + compressed_text('Аэлитриакс') + '</script>'
+            )
             with self.assertRaisesRegex(ValueError, 'только игроку'):
                 archive_bytes(root)
 

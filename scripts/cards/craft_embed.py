@@ -1,6 +1,7 @@
 """Встроить существующую шпаргалку ремесла со своими стилями и элементами."""
-import json
 import pathlib
+
+from html_payload import compressed_text
 
 
 def embed_craft(root, fname, host):
@@ -17,8 +18,8 @@ def embed_craft(root, fname, host):
         "\n.wrap{padding:18px 0 0;max-width:none}")
     assert code.startswith("(function(R){") and code.endswith("})(document);"), f"{fname}: скрипт должен быть (function(R){{…}})(document);"
     code = (code[:-len("(document);")] + "(r);").replace("</", "<\\/")
-    doc = json.dumps("<style>" + css + "</style>" + body, ensure_ascii=False).replace("</", "<\\/")
-    return (f"(()=>{{const h=document.getElementById('{host}');if(!h||!h.attachShadow)return;const r=h.attachShadow({{mode:'open'}});r.innerHTML={doc};"
+    doc = compressed_text("<style>" + css + "</style>" + body)
+    return (f"(()=>{{const h=document.getElementById('{host}');if(!h||!h.attachShadow)return;const r=h.attachShadow({{mode:'open'}});r.innerHTML=unpackHtmlPayload({doc});"
         "const th=()=>{const t=document.documentElement.getAttribute('data-theme');t?h.setAttribute('data-theme',t):h.removeAttribute('data-theme')};th();"
         "new MutationObserver(th).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});"
         f"try{{{code}}}catch(e){{console.error(e)}}}})();")
