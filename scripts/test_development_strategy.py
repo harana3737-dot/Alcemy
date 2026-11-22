@@ -3,8 +3,51 @@ import json
 import random
 import unittest
 
-from development_strategy import (build, chain, growth, ink, joint_cycle,
+from current_inventory import load
+from development_strategy import (C, build, chain, growth, ink, joint_cycle,
                                   mixed_two_cycles, mixed_program, rolls, scroll_rolls)
+from mastery_timing import compare_timing
+
+
+class MasteryTimingTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.result = compare_timing(load(), C, rolls)
+
+    def test_equal_experiments_under_ordinary_success(self):
+        routes = self.result['ordinary']
+        # Обычный успех даёт одну отметку, поэтому сроки всех
+        # исследований и первых варок одинаковы при любом мастерстве.
+        self.assertEqual([r['research'] for r in routes], [68, 68, 68])
+        self.assertEqual([r['first'] for r in routes], [50, 50, 50])
+        self.assertEqual([r['optional']['early_practice'] for r in routes], [0, 10, 21])
+        self.assertEqual([r['until_m5'] for r in routes], [52, 96, 142])
+
+    def test_waiting_saves_research_hours_but_costs_series(self):
+        fast, mixed, early = self.result['standard']
+        self.assertLess(fast['first'], early['first'])
+        self.assertGreater(fast['serial'], early['serial'])
+        self.assertLess(fast['until_m5'], mixed['until_m5'])
+        self.assertLess(early['all_hours'], mixed['all_hours'])
+        self.assertLess(mixed['all_hours'], fast['all_hours'])
+        self.assertEqual([r['optional']['late_openings'] for r in (fast, mixed, early)], [7, 4, 0])
+        for route in (fast, mixed, early):
+            self.assertAlmostEqual(sum(r['coincident']+r['serial_practice'] for r in route['stages']), 56)
+            self.assertAlmostEqual(sum(route[k] for k in ('research', 'first', 'serial', 'inks')), route['all_hours'])
+        self.assertGreater(fast['night_ready'], fast['until_m5'])
+        self.assertEqual(fast['weeks']['22']['night_until_m5'], fast['weeks']['22']['until_m5'])
+        self.assertLess(mixed['weeks']['22']['night_until_m5'], mixed['weeks']['22']['until_m5'])
+
+    def test_missing_sample_and_skipped_formula_are_separate_endpoints(self):
+        self.assertEqual(self.result['samples'], {2: 2, 3: 2, 4: 0})
+        fast = self.result['standard'][0]
+        cheaper = self.result['without_redundant']
+        self.assertAlmostEqual(cheaper['first'], fast['first'])
+        self.assertEqual(cheaper['optional']['late_openings'], 6)
+        self.assertLess(cheaper['all_hours'], fast['all_hours'])
+        for route, original in zip(self.result['without_sample'], self.result['standard']):
+            self.assertGreater(route['until_m5'], original['until_m5'])
+            self.assertGreater(route['stages'][-1]['serial'], original['stages'][-1]['serial'])
 
 
 class DevelopmentStrategyTests(unittest.TestCase):

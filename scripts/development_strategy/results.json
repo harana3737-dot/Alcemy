@@ -1,6 +1,1027 @@
 {
   "goal": "M5 и устойчивое снабжение группы; коммерция — дополнительный источник",
   "confirmed_cash": 108.18,
+  "mastery_timing": {
+    "start": 4,
+    "samples": {
+      "2": 2,
+      "3": 2,
+      "4": 0
+    },
+    "known": [
+      "Зелье лечения 1.1"
+    ],
+    "bonuses": {
+      "2": 7,
+      "3": 7,
+      "4": 8,
+      "5": 8
+    },
+    "experiments": [
+      [
+        2,
+        "Разум I–II",
+        [
+          "Бдительный отдых"
+        ],
+        true
+      ],
+      [
+        2,
+        "Движение I–II",
+        [
+          "Шаг сквозь туман",
+          "Кинетический рывок"
+        ],
+        true
+      ],
+      [
+        3,
+        "Разум III–V",
+        [
+          "Дрёма",
+          "Психическая стойкость"
+        ],
+        true
+      ],
+      [
+        3,
+        "Тело III–V",
+        [
+          "Рост",
+          "Уменьшение"
+        ],
+        true
+      ],
+      [
+        3,
+        "Смерть/душа III–V",
+        [
+          "Защита от добра и зла",
+          "Снятие проклятия"
+        ],
+        true
+      ],
+      [
+        4,
+        "Разум III–V",
+        [
+          "Чтение мыслей"
+        ],
+        false
+      ],
+      [
+        4,
+        "Тело III–V",
+        [
+          "Усиленная подмога"
+        ],
+        false
+      ],
+      [
+        4,
+        "Смерть/душа III–V",
+        [
+          "Защита от смерти"
+        ],
+        false
+      ],
+      [
+        4,
+        "Чувства III–V",
+        [
+          "Обнаружение существ"
+        ],
+        true
+      ],
+      [
+        4,
+        "Эфир III–V",
+        [
+          "Преимущество"
+        ],
+        true
+      ]
+    ],
+    "standard": [
+      {
+        "label": "Быстрый",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 2.5484764542936285,
+            "first": 0.0,
+            "inks": 4.999999999999999,
+            "serial": 10.051069538587315,
+            "total": 17.59954599288094,
+            "optional_practice": 0.0,
+            "coincident": 2.0625,
+            "serial_practice": 8.9375
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 4.245516839189385,
+            "first": 0.0,
+            "inks": 0.0,
+            "serial": 11.32967606783035,
+            "total": 15.575192907019735,
+            "optional_practice": 0.0,
+            "coincident": 1.0,
+            "serial_practice": 19.0
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 4.492455418381346,
+            "first": 0.0,
+            "inks": 0.0,
+            "serial": 14.902644747699373,
+            "total": 19.39510016608072,
+            "optional_practice": 0.0,
+            "coincident": 1.0,
+            "serial_practice": 24.0
+          }
+        ],
+        "until_m5": 52.5698390659814,
+        "all_hours": 165.73367673539997,
+        "research": 48.83123876223531,
+        "first": 75.61904761904762,
+        "serial": 36.28339035411704,
+        "inks": 4.999999999999999,
+        "optional": {
+          "probes": 37.54479005037095,
+          "first": 75.61904761904762,
+          "early_practice": 0.0,
+          "late_openings": 7
+        },
+        "night_ready": 59.48202257183745,
+        "weeks": {
+          "22": {
+            "until_m5": 2.389538139362791,
+            "all": 7.53334894251818,
+            "night_until_m5": 2.389538139362791,
+            "night_all": 6.498430233132831,
+            "night_all_if_two_in_base": 6.790330381933828
+          },
+          "30": {
+            "until_m5": 1.7523279688660467,
+            "all": 5.524455891179999,
+            "night_until_m5": 1.7523279688660467,
+            "night_all": 4.934168923604652,
+            "night_all_if_two_in_base": 5.107782737597401
+          }
+        }
+      },
+      {
+        "label": "Смешанный",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 7.040931872674975,
+            "first": 2.8571428571428568,
+            "inks": 4.999999999999999,
+            "serial": 7.887545594325119,
+            "total": 22.78562032414295,
+            "optional_practice": 2.071428571428571,
+            "coincident": 4.133928571428571,
+            "serial_practice": 6.866071428571429
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 15.975261454316119,
+            "first": 24.615384615384613,
+            "inks": 0.0,
+            "serial": 7.856713893809344,
+            "total": 48.447359963510074,
+            "optional_practice": 6.307692307692306,
+            "coincident": 7.307692307692306,
+            "serial_practice": 12.692307692307693
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 4.492455418381346,
+            "first": 13.333333333333334,
+            "inks": 0.0,
+            "serial": 13.62710720455928,
+            "total": 31.45289595627396,
+            "optional_practice": 2.1666666666666665,
+            "coincident": 3.1666666666666665,
+            "serial_practice": 21.833333333333332
+          }
+        ],
+        "until_m5": 102.68587624392698,
+        "all_hours": 161.77387939610185,
+        "research": 49.83474713564255,
+        "first": 77.56776556776556,
+        "serial": 29.371366692693744,
+        "inks": 4.999999999999999,
+        "optional": {
+          "probes": 38.54829842377819,
+          "first": 77.56776556776556,
+          "early_practice": 10.545787545787542,
+          "late_openings": 4
+        },
+        "night_ready": 7.349598275524203,
+        "weeks": {
+          "22": {
+            "until_m5": 4.667539829269408,
+            "all": 7.353358154368266,
+            "night_until_m5": 3.738939719187563,
+            "night_all": 5.849225546050951,
+            "night_all_if_two_in_base": 6.273468076601988
+          },
+          "30": {
+            "until_m5": 3.422862541464233,
+            "all": 5.392462646536728,
+            "night_until_m5": 2.893216552750884,
+            "night_all": 4.53454997364463,
+            "night_all_if_two_in_base": 4.7868772303776
+          }
+        }
+      },
+      {
+        "label": "Исследовательский",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 11.533387291056322,
+            "first": 8.57142857142857,
+            "inks": 4.999999999999999,
+            "serial": 4.453391445902845,
+            "total": 29.558207308387736,
+            "optional_practice": 5.2142857142857135,
+            "coincident": 7.276785714285712,
+            "serial_practice": 3.7232142857142883
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 21.840133761879486,
+            "first": 36.92307692307692,
+            "inks": 0.0,
+            "serial": 6.104924971723396,
+            "total": 64.8681356566798,
+            "optional_practice": 9.461538461538458,
+            "coincident": 10.461538461538458,
+            "serial_practice": 9.538461538461542
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 17.086449559006347,
+            "first": 33.333333333333336,
+            "inks": 0.0,
+            "serial": 10.541552868704239,
+            "total": 60.96133576104392,
+            "optional_practice": 7.416666666666667,
+            "coincident": 8.416666666666666,
+            "serial_practice": 16.583333333333336
+          }
+        ],
+        "until_m5": 155.38767872611146,
+        "all_hours": 155.38767872611146,
+        "research": 50.459970611942154,
+        "first": 78.82783882783883,
+        "serial": 21.09986928633048,
+        "inks": 4.999999999999999,
+        "optional": {
+          "probes": 39.173521900077795,
+          "first": 78.82783882783883,
+          "early_practice": 22.09249084249084,
+          "late_openings": 0
+        },
+        "night_ready": 7.349598275524203,
+        "weeks": {
+          "22": {
+            "until_m5": 7.063076305732339,
+            "all": 7.063076305732339,
+            "night_until_m5": 5.621146950694151,
+            "night_all": 5.621146950694151,
+            "night_all_if_two_in_base": 6.02784497391005
+          },
+          "30": {
+            "until_m5": 5.179589290870382,
+            "all": 5.179589290870382,
+            "night_until_m5": 4.357155510589342,
+            "night_all": 4.357155510589342,
+            "night_all_if_two_in_base": 4.599047798907295
+          }
+        }
+      }
+    ],
+    "ordinary": [
+      {
+        "label": "Быстрый",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 4.0,
+            "first": 0.0,
+            "inks": 4.0,
+            "serial": 10.0,
+            "total": 18.0,
+            "optional_practice": 0.0,
+            "coincident": 2.0,
+            "serial_practice": 9.0
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 6.0,
+            "first": 0.0,
+            "inks": 0.0,
+            "serial": 10.0,
+            "total": 16.0,
+            "optional_practice": 0.0,
+            "coincident": 1.0,
+            "serial_practice": 19.0
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 6.0,
+            "first": 0.0,
+            "inks": 0.0,
+            "serial": 12.0,
+            "total": 18.0,
+            "optional_practice": 0.0,
+            "coincident": 1.0,
+            "serial_practice": 24.0
+          }
+        ],
+        "until_m5": 52.0,
+        "all_hours": 154.0,
+        "research": 68.0,
+        "first": 50.0,
+        "serial": 32.0,
+        "inks": 4.0,
+        "optional": {
+          "probes": 52.0,
+          "first": 50.0,
+          "early_practice": 0.0,
+          "late_openings": 7
+        },
+        "night_ready": 60.0,
+        "weeks": {
+          "22": {
+            "until_m5": 2.3636363636363638,
+            "all": 7.0,
+            "night_until_m5": 2.3636363636363638,
+            "night_all": 6.084415584415584,
+            "night_all_if_two_in_base": 6.3426573426573425
+          },
+          "30": {
+            "until_m5": 1.7333333333333334,
+            "all": 5.133333333333334,
+            "night_until_m5": 1.7333333333333334,
+            "night_all": 4.611111111111111,
+            "night_all_if_two_in_base": 4.764705882352941
+          }
+        }
+      },
+      {
+        "label": "Смешанный",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 10.0,
+            "first": 2.0,
+            "inks": 4.0,
+            "serial": 8.0,
+            "total": 24.0,
+            "optional_practice": 2.0,
+            "coincident": 4.0,
+            "serial_practice": 7.0
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 22.0,
+            "first": 16.0,
+            "inks": 0.0,
+            "serial": 8.0,
+            "total": 46.0,
+            "optional_practice": 6.0,
+            "coincident": 7.0,
+            "serial_practice": 13.0
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 6.0,
+            "first": 8.0,
+            "inks": 0.0,
+            "serial": 12.0,
+            "total": 26.0,
+            "optional_practice": 2.0,
+            "coincident": 3.0,
+            "serial_practice": 22.0
+          }
+        ],
+        "until_m5": 96.0,
+        "all_hours": 150.0,
+        "research": 68.0,
+        "first": 50.0,
+        "serial": 28.0,
+        "inks": 4.0,
+        "optional": {
+          "probes": 52.0,
+          "first": 50.0,
+          "early_practice": 10.0,
+          "late_openings": 4
+        },
+        "night_ready": 8.0,
+        "weeks": {
+          "22": {
+            "until_m5": 4.363636363636363,
+            "all": 6.818181818181818,
+            "night_until_m5": 3.5064935064935066,
+            "night_all": 5.4350649350649345,
+            "night_all_if_two_in_base": 5.825174825174825
+          },
+          "30": {
+            "until_m5": 3.2,
+            "all": 5.0,
+            "night_until_m5": 2.7111111111111112,
+            "night_all": 4.211111111111111,
+            "night_all_if_two_in_base": 4.443137254901961
+          }
+        }
+      },
+      {
+        "label": "Исследовательский",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 16.0,
+            "first": 6.0,
+            "inks": 4.0,
+            "serial": 4.0,
+            "total": 30.0,
+            "optional_practice": 5.0,
+            "coincident": 7.0,
+            "serial_practice": 4.0
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 30.0,
+            "first": 24.0,
+            "inks": 0.0,
+            "serial": 6.0,
+            "total": 60.0,
+            "optional_practice": 9.0,
+            "coincident": 10.0,
+            "serial_practice": 10.0
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 22.0,
+            "first": 20.0,
+            "inks": 0.0,
+            "serial": 10.0,
+            "total": 52.0,
+            "optional_practice": 7.0,
+            "coincident": 8.0,
+            "serial_practice": 17.0
+          }
+        ],
+        "until_m5": 142.0,
+        "all_hours": 142.0,
+        "research": 68.0,
+        "first": 50.0,
+        "serial": 20.0,
+        "inks": 4.0,
+        "optional": {
+          "probes": 52.0,
+          "first": 50.0,
+          "early_practice": 21.0,
+          "late_openings": 0
+        },
+        "night_ready": 8.0,
+        "weeks": {
+          "22": {
+            "until_m5": 6.454545454545454,
+            "all": 6.454545454545454,
+            "night_until_m5": 5.149350649350649,
+            "night_all": 5.149350649350649,
+            "night_all_if_two_in_base": 5.5174825174825175
+          },
+          "30": {
+            "until_m5": 4.733333333333333,
+            "all": 4.733333333333333,
+            "night_until_m5": 3.988888888888889,
+            "night_all": 3.988888888888889,
+            "night_all_if_two_in_base": 4.207843137254902
+          }
+        }
+      }
+    ],
+    "rerolls": [
+      {
+        "label": "Быстрый",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 2.4271204326605984,
+            "first": 0.0,
+            "inks": 4.166666666666665,
+            "serial": 9.309461907774267,
+            "total": 15.90324900710153,
+            "optional_practice": 0.0,
+            "coincident": 2.0625,
+            "serial_practice": 8.9375
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 4.043349370656557,
+            "first": 0.0,
+            "inks": 0.0,
+            "serial": 9.963470683892078,
+            "total": 14.006820054548635,
+            "optional_practice": 0.0,
+            "coincident": 1.0,
+            "serial_practice": 19.0
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 4.084050380346678,
+            "first": 0.0,
+            "inks": 0.0,
+            "serial": 12.476471025879912,
+            "total": 16.56052140622659,
+            "optional_practice": 0.0,
+            "coincident": 1.0,
+            "serial_practice": 24.0
+          }
+        ],
+        "until_m5": 46.47059046787676,
+        "all_hours": 136.59885471986135,
+        "research": 44.09963425249825,
+        "first": 56.58315018315016,
+        "serial": 31.749403617546257,
+        "inks": 4.166666666666665,
+        "optional": {
+          "probes": 33.545114068834415,
+          "first": 56.58315018315016,
+          "early_practice": 0.0,
+          "late_openings": 7
+        },
+        "night_ready": 52.64727317186665,
+        "weeks": {
+          "22": {
+            "until_m5": 2.112299566721671,
+            "all": 6.209038850902789,
+            "night_until_m5": 2.112299566721671,
+            "night_all": 5.391328641019723,
+            "night_all_if_two_in_base": 5.621964854063664
+          },
+          "30": {
+            "until_m5": 1.5490196822625586,
+            "all": 4.553295157328711,
+            "night_until_m5": 1.5490196822625586,
+            "night_all": 4.086897482062074,
+            "night_all_if_two_in_base": 4.224073268905203
+          }
+        }
+      },
+      {
+        "label": "Смешанный",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 6.5111708130072765,
+            "first": 2.197802197802197,
+            "inks": 4.166666666666665,
+            "serial": 7.347781338338938,
+            "total": 20.223421015815077,
+            "optional_practice": 2.071428571428571,
+            "coincident": 4.133928571428569,
+            "serial_practice": 6.866071428571431
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 14.243127296853716,
+            "first": 18.233618233618227,
+            "inks": 0.0,
+            "serial": 6.9042657688501095,
+            "total": 39.381011299322054,
+            "optional_practice": 6.307692307692309,
+            "coincident": 7.307692307692309,
+            "serial_practice": 12.69230769230769
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 4.084050380346678,
+            "first": 9.52380952380952,
+            "inks": 0.0,
+            "serial": 11.549190237637658,
+            "total": 25.157050141793857,
+            "optional_practice": 2.166666666666667,
+            "coincident": 3.166666666666667,
+            "serial_practice": 21.833333333333332
+          }
+        ],
+        "until_m5": 84.76148245693099,
+        "all_hours": 131.6312234251427,
+        "research": 44.36449971482966,
+        "first": 57.29881969881968,
+        "serial": 25.801237344826706,
+        "inks": 4.166666666666665,
+        "optional": {
+          "probes": 33.80997953116583,
+          "first": 57.29881969881968,
+          "early_practice": 10.545787545787547,
+          "late_openings": 4
+        },
+        "night_ready": 6.281852578148875,
+        "weeks": {
+          "22": {
+            "until_m5": 3.8527946571332268,
+            "all": 5.983237428415578,
+            "night_until_m5": 3.0883826777944403,
+            "night_all": 4.7623019980877155,
+            "night_all_if_two_in_base": 5.106668401513523
+          },
+          "30": {
+            "until_m5": 2.8253827485643663,
+            "all": 4.387707447504757,
+            "night_until_m5": 2.389384804793355,
+            "night_all": 3.691322053910347,
+            "night_all_if_two_in_base": 3.8961412873204675
+          }
+        }
+      },
+      {
+        "label": "Исследовательский",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 10.595221193353954,
+            "first": 6.593406593406591,
+            "inks": 4.166666666666665,
+            "serial": 3.978817589538802,
+            "total": 25.334112042966012,
+            "optional_practice": 5.214285714285712,
+            "coincident": 7.27678571428571,
+            "serial_practice": 3.72321428571429
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 19.343016259952297,
+            "first": 27.350427350427342,
+            "inks": 0.0,
+            "serial": 5.588310704685373,
+            "total": 52.281754315065015,
+            "optional_practice": 9.461538461538463,
+            "coincident": 10.461538461538463,
+            "serial_practice": 9.538461538461537
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 14.579045497534178,
+            "first": 23.8095238095238,
+            "inks": 0.0,
+            "serial": 8.891500903324916,
+            "total": 47.280070210382895,
+            "optional_practice": 7.416666666666668,
+            "coincident": 8.416666666666668,
+            "serial_practice": 16.583333333333332
+          }
+        ],
+        "until_m5": 124.89593656841393,
+        "all_hours": 124.89593656841393,
+        "research": 44.517282950840425,
+        "first": 57.75335775335773,
+        "serial": 18.45862919754909,
+        "inks": 4.166666666666665,
+        "optional": {
+          "probes": 33.9627627671766,
+          "first": 57.75335775335773,
+          "early_practice": 22.092490842490843,
+          "late_openings": 0
+        },
+        "night_ready": 6.281852578148875,
+        "weeks": {
+          "22": {
+            "until_m5": 5.677088025836997,
+            "all": 5.677088025836997,
+            "night_until_m5": 4.521756038918831,
+            "night_all": 4.521756038918831,
+            "night_all_if_two_in_base": 4.847618907023954
+          },
+          "30": {
+            "until_m5": 4.163197885613798,
+            "all": 4.163197885613798,
+            "night_until_m5": 3.5042307523345473,
+            "night_all": 3.5042307523345473,
+            "night_all_if_two_in_base": 3.6980446150637385
+          }
+        }
+      }
+    ],
+    "without_redundant": {
+      "label": "Быстрый, одна ступень Разума",
+      "stages": [
+        {
+          "mastery": 2,
+          "bonus": 7,
+          "probes": 2.5484764542936285,
+          "first": 0.0,
+          "inks": 4.999999999999999,
+          "serial": 10.051069538587315,
+          "total": 17.59954599288094,
+          "optional_practice": 0.0,
+          "coincident": 2.0625,
+          "serial_practice": 8.9375
+        },
+        {
+          "mastery": 3,
+          "bonus": 7,
+          "probes": 4.245516839189385,
+          "first": 0.0,
+          "inks": 0.0,
+          "serial": 11.32967606783035,
+          "total": 15.575192907019735,
+          "optional_practice": 0.0,
+          "coincident": 1.0,
+          "serial_practice": 19.0
+        },
+        {
+          "mastery": 4,
+          "bonus": 8,
+          "probes": 4.492455418381346,
+          "first": 0.0,
+          "inks": 0.0,
+          "serial": 14.902644747699373,
+          "total": 19.39510016608072,
+          "optional_practice": 0.0,
+          "coincident": 1.0,
+          "serial_practice": 24.0
+        }
+      ],
+      "until_m5": 52.5698390659814,
+      "all_hours": 161.4881598962106,
+      "research": 44.585721923045924,
+      "first": 75.61904761904762,
+      "serial": 36.28339035411704,
+      "inks": 4.999999999999999,
+      "optional": {
+        "probes": 33.299273211181564,
+        "first": 75.61904761904762,
+        "early_practice": 0.0,
+        "late_openings": 6
+      },
+      "night_ready": 81.73051474419793,
+      "weeks": {
+        "22": {
+          "until_m5": 2.389538139362791,
+          "all": 7.340370904373208,
+          "night_until_m5": 2.389538139362791,
+          "night_all": 6.563510724321137,
+          "night_all_if_two_in_base": 6.782625134079414
+        },
+        "30": {
+          "until_m5": 1.7523279688660467,
+          "all": 5.382938663207019,
+          "night_until_m5": 1.7523279688660467,
+          "night_all": 4.939840634584727,
+          "night_all_if_two_in_base": 5.07016358417952
+        }
+      }
+    },
+    "without_sample": [
+      {
+        "label": "Быстрый",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 2.5484764542936285,
+            "first": 0.0,
+            "inks": 4.999999999999999,
+            "serial": 10.051069538587315,
+            "total": 17.59954599288094,
+            "optional_practice": 0.0,
+            "coincident": 2.0625,
+            "serial_practice": 8.9375
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 4.245516839189385,
+            "first": 0.0,
+            "inks": 0.0,
+            "serial": 11.32967606783035,
+            "total": 15.575192907019735,
+            "optional_practice": 0.0,
+            "coincident": 1.0,
+            "serial_practice": 19.0
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 6.2969970703125,
+            "first": 6.666666666666667,
+            "inks": 0.0,
+            "serial": 62.28888888984335,
+            "total": 75.25255262682252,
+            "optional_practice": 2.083333333333333,
+            "coincident": 2.083333333333333,
+            "serial_practice": 22.916666666666668
+          }
+        ],
+        "until_m5": 108.4272915267232,
+        "all_hours": 208.62746545916258,
+        "research": 44.33878334385396,
+        "first": 75.61904761904762,
+        "serial": 83.66963449626101,
+        "inks": 4.999999999999999,
+        "optional": {
+          "probes": 37.54479005037095,
+          "first": 75.61904761904762,
+          "early_practice": 2.083333333333333,
+          "late_openings": 6
+        },
+        "night_ready": 115.33947503257924,
+        "weeks": {
+          "22": {
+            "until_m5": 4.9285132512146905,
+            "all": 9.483066611780117,
+            "night_until_m5": 4.9285132512146905,
+            "night_all": 8.574417354378332,
+            "night_all_if_two_in_base": 8.830703042363451
+          },
+          "30": {
+            "until_m5": 3.614243050890773,
+            "all": 6.954248848638753,
+            "night_until_m5": 3.614243050890773,
+            "night_all": 6.435982235157734,
+            "night_all_if_two_in_base": 6.588413592063916
+          }
+        }
+      },
+      {
+        "label": "Смешанный",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 7.040931872674975,
+            "first": 2.8571428571428568,
+            "inks": 4.999999999999999,
+            "serial": 7.887545594325119,
+            "total": 22.78562032414295,
+            "optional_practice": 2.071428571428571,
+            "coincident": 4.133928571428571,
+            "serial_practice": 6.866071428571429
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 15.975261454316119,
+            "first": 24.615384615384613,
+            "inks": 0.0,
+            "serial": 7.856713893809344,
+            "total": 48.447359963510074,
+            "optional_practice": 6.307692307692306,
+            "coincident": 7.307692307692306,
+            "serial_practice": 12.692307692307693
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 0.0,
+            "first": 13.333333333333334,
+            "inks": 0.0,
+            "serial": 62.06666666734521,
+            "total": 75.40000000067855,
+            "optional_practice": 2.1666666666666665,
+            "coincident": 2.1666666666666665,
+            "serial_practice": 22.833333333333332
+          }
+        ],
+        "until_m5": 146.63298028833157,
+        "all_hours": 205.72098344050644,
+        "research": 45.342291717261205,
+        "first": 77.56776556776556,
+        "serial": 77.81092615547968,
+        "inks": 4.999999999999999,
+        "optional": {
+          "probes": 38.54829842377819,
+          "first": 77.56776556776556,
+          "early_practice": 10.545787545787542,
+          "late_openings": 4
+        },
+        "night_ready": 7.349598275524203,
+        "weeks": {
+          "22": {
+            "until_m5": 6.665135467651435,
+            "all": 9.350953792750293,
+            "night_until_m5": 5.308479149344869,
+            "night_all": 7.418764976208258,
+            "night_all_if_two_in_base": 7.963741309079088
+          },
+          "30": {
+            "until_m5": 4.8877660096110525,
+            "all": 6.857366114683548,
+            "night_until_m5": 4.113969442873233,
+            "night_all": 5.75530286376698,
+            "night_all_if_two_in_base": 6.079439114036559
+          }
+        }
+      },
+      {
+        "label": "Исследовательский",
+        "stages": [
+          {
+            "mastery": 2,
+            "bonus": 7,
+            "probes": 11.533387291056322,
+            "first": 8.57142857142857,
+            "inks": 4.999999999999999,
+            "serial": 4.453391445902845,
+            "total": 29.558207308387736,
+            "optional_practice": 5.2142857142857135,
+            "coincident": 7.276785714285712,
+            "serial_practice": 3.7232142857142883
+          },
+          {
+            "mastery": 3,
+            "bonus": 7,
+            "probes": 21.840133761879486,
+            "first": 36.92307692307692,
+            "inks": 0.0,
+            "serial": 6.104924971723396,
+            "total": 64.8681356566798,
+            "optional_practice": 9.461538461538458,
+            "coincident": 10.461538461538458,
+            "serial_practice": 9.538461538461542
+          },
+          {
+            "mastery": 4,
+            "bonus": 8,
+            "probes": 12.593994140625,
+            "first": 33.333333333333336,
+            "inks": 0.0,
+            "serial": 48.06666664430159,
+            "total": 93.99399411825993,
+            "optional_practice": 7.416666666666667,
+            "coincident": 7.416666666666667,
+            "serial_practice": 17.583333333333332
+          }
+        ],
+        "until_m5": 188.42033708332747,
+        "all_hours": 188.42033708332747,
+        "research": 45.96751519356081,
+        "first": 78.82783882783883,
+        "serial": 58.624983061927836,
+        "inks": 4.999999999999999,
+        "optional": {
+          "probes": 39.173521900077795,
+          "first": 78.82783882783883,
+          "early_practice": 22.09249084249084,
+          "late_openings": 0
+        },
+        "night_ready": 7.349598275524203,
+        "weeks": {
+          "22": {
+            "until_m5": 8.564560776514885,
+            "all": 8.564560776514885,
+            "night_until_m5": 6.800884749166151,
+            "night_all": 6.800884749166151,
+            "night_all_if_two_in_base": 7.2983318338029735
+          },
+          "30": {
+            "until_m5": 6.280677902777582,
+            "all": 6.280677902777582,
+            "night_until_m5": 5.274729353845342,
+            "night_all": 5.274729353845342,
+            "night_all_if_two_in_base": 5.57059657411953
+          }
+        }
+      }
+    ]
+  },
   "catalog_investments": {
     "counts": {
       "eff": 109,
