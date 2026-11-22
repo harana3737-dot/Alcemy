@@ -29,7 +29,7 @@ class CurrentInventoryTests(unittest.TestCase):
         # Everything outside the three blocks and coin total is handwritten.
         for text in ('Происхождение и особые условия', 'Корневая метка', 'Заметки', 'История'):
             self.assertEqual(before.count(text), after.count(text))
-        for name in ('Сгусток удержанной тени', 'Искра заблудшей души'):
+        for name in ('Зерно Угасания', 'Искра заблудшей души', 'безопасных применений осталось 3'):
             self.assertIn(name, after)
 
     def test_render_replaces_only_current_quantities(self):
@@ -46,7 +46,8 @@ class CurrentInventoryTests(unittest.TestCase):
             unchanged = snapshot.read_bytes()
             after = render_sheet((ROOT / SHEET).read_text(), root)
             self.assertIn('Монеты: 12,34 зм', after)
-            self.assertIn('травы 1 ур. ×91', after)
+            level = data['state']['mat']['herbs'][0]['l']
+            self.assertIn(f'травы {level} ур. ×91', after)
             self.assertEqual(snapshot.read_bytes(), unchanged)
             (root / POINTER).write_text('{"snapshot":"../test.json"}')
             with self.assertRaises(ValueError):

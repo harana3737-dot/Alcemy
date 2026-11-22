@@ -4,7 +4,7 @@ import random
 import unittest
 
 from current_inventory import load
-from development_strategy import (C, build, chain, growth, ink, joint_cycle,
+from development_strategy import (C, TIMING_BASELINE, build, chain, growth, ink, joint_cycle,
                                   mixed_two_cycles, mixed_program, rolls, scroll_rolls)
 from mastery_timing import compare_timing
 
@@ -12,7 +12,7 @@ from mastery_timing import compare_timing
 class MasteryTimingTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.result = compare_timing(load(), C, rolls)
+        cls.result = compare_timing(load(snapshot=TIMING_BASELINE), C, rolls)
 
     def test_equal_experiments_under_ordinary_success(self):
         routes = self.result['ordinary']

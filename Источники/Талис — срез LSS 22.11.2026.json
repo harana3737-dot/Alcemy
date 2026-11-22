@@ -1,0 +1,34 @@
+{
+  "format": "alcemy-lss-gameplay-extract",
+  "received": "2026-11-22",
+  "character": {
+    "level": 5,
+    "experience": 8995,
+    "hp": {
+      "current": 42,
+      "max": 42,
+      "temporary": 0
+    },
+    "slots_remaining": {
+      "1": 4,
+      "2": 3,
+      "3": 2
+    },
+    "sorcery_points_text_total": 6,
+    "sorcery_pool_split": null
+  },
+  "coins": {
+    "gp": 50,
+    "sp": 274,
+    "cp": 39,
+    "pp": 0,
+    "ep": 0,
+    "calculated_gp": 77.79,
+    "export_cached_total_gp": 157.79
+  },
+  "tough": {
+    "current": 44,
+    "target": 50
+  },
+  "game_clock": null
+}

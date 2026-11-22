@@ -284,7 +284,7 @@ details.card summary{cursor:pointer;font:400 16px Prata,serif}
     </details>
   </div>
 </div>
-<div id="tab-belt" hidden><details class="card prep recipe-options"><summary><span class="summary-title">Снимок конца сессии 17</span></summary><p>Призраки упокоены. После перехода в лес группа с Эйлин разделилась у двух якорей: Лаэль и Фаэнон слева, Талис и Эйлин справа. Охрана побеждена; разрушение машин и бой с настоятельницей ещё не описаны. Талис: 41 / 42 ХП; ячейки I–III — 1 / 1 / 0; общий остаток единиц чародейства — 3, подтверждено игроком. Опыт 8 995, монеты по номиналам 108,18 зм. Зелья: 3.3 ×2, 2.2 ×2, 1.1 ×2; два 2.2 получены от освобождённого лекаря. Игровые часы не названы, отдых по одному намерению не начисляется. Это сверка, а не автоматическая замена сохранённых счётчиков. JSON конца сессии 16 остаётся историческим; не восстанавливай его как актуальные остатки после сессии 17.</p></details><div class="card clock">
+<div id="tab-belt" hidden><details class="card prep recipe-options"><summary><span class="summary-title">Сверка 22.11.2026</span></summary><p>По LSS и уточнениям игрока: 42/42 ХП, ячейки I–III 4/3/2, общий пул чародейства 6, «Крепкий» 44/50, алхимия 5/15, 77,79 зм. Лечение 2.2 ×2 и 1.1 ×1. Игровые часы остаются последними подтверждёнными. Для переноса актуальных счётчиков используй JSON сверки 22.11.2026.</p></details><div class="card clock">
   <div class="ctop"><div><div class="k">Время в игре</div><div class="now" id="now"></div></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="savest" id="savest"></div>
     <button type="button" class="btn" id="beltView" aria-pressed="false" title="Прячет материалы, добавление пьющих и пояснения. Включается само, когда начат бой">Только бой</button></div></div>
@@ -635,7 +635,7 @@ const byName=n=>D.find(c=>c.n===n);
 const CAT_DC=__RULE_CAT_DC__;
 const CAT_PRICES=__RULE_CAT_PRICES__,PLACE_LIMIT=__RULE_PLACE_LIMIT__;
 const CAT_STABLE=__RULE_CAT_STABLE__,INSTAB_DCS=__RULE_INSTAB__;
-const stab=x=>x.stable||CAT_STABLE, cmax=x=>stab(x)+INSTAB_DCS.length; // после стабильных — до 5 рискованных (5.2)
+const stab=x=>x.stable||CAT_STABLE, cmax=x=>stab(x)+(x.risk??INSTAB_DCS.length);
 const instDC=(x,n)=>INSTAB_DCS[n-stab(x)-1]; // СЛ проверки нестабильности n-го применения
 const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 let DM={};
@@ -1813,6 +1813,7 @@ function renderHours(){
   const box=$('jhrs');if(!box)return;const H=hrs();
   const wk=H.log.filter(l=>l.T>ST.T-WEEK).reduce((s,l)=>s+l.h,0), day=H.log.filter(l=>Math.floor(l.T/1440)===Math.floor(ST.T/1440)).reduce((s,l)=>s+l.h,0);
   box.innerHTML=`<div class="facts" style="margin-top:0"><div class="fact"><div class="k">Всего</div><div class="v">${fmtH(H.total)}</div></div><div class="fact"><div class="k">Сегодня в игре</div><div class="v">${fmtH(day)}</div></div><div class="fact"><div class="k">За 7 дней</div><div class="v">${fmtH(wk)}</div></div></div>
+   ${H.undated?.length?`<div class="note">Часы без игрового дня уже в общем итоге. ${H.undated.map(row=>esc(row.w)+' · '+fmtH(row.h)).join(' · ')}</div>`:''}
    <label class="tg"><input type="checkbox" class="hclk" ${H.clock?'checked':''}><span>Двигать время в игре на эти часы<small>варка, пробы, подходы, переработка — время на «Поясе» сдвигается само</small></span></label>
    <div class="row" style="margin-top:6px"><div style="flex:0 0 90px"><input class="hn" type="number" step="0.5" placeholder="± часы" aria-label="Часы вручную"></div><div><input class="hw" type="search" placeholder="за что (учёба, разбор…)" aria-label="За что"></div><div style="flex:none"><button type="button" class="btn hadd">Учесть</button></div></div>
    <div class="log" style="margin-top:8px;max-height:160px">${H.log.slice(0,8).map(l=>`<div><span>${fmtT(l.T)}</span>${l.h>0?'+':''}${fmtZ(l.h)} ч — ${esc(l.w)}</div>`).join('')||'<div class="note">Пока пусто</div>'}</div>`;

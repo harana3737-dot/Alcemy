@@ -7,6 +7,7 @@ const assert=require('node:assert/strict');
  await page.route('https://**/*',r=>r.abort());
  await page.goto((process.env.ALCEMY_URL||'http://127.0.0.1:8770')+'/'+encodeURIComponent('Помощник варки.html'));
  await page.waitForFunction(()=>!!JDB&&!!ST.mat);
+ await page.evaluate(()=>mutate(()=>{ST.mat.herbs=[{k:'heal',l:1,q:5}];ST.mat.pools=[]}));
  assert.deepEqual(errors,[]);
  assert.match(await page.locator('#availability').innerText(),/Зелье лечения 1.1/);
  assert.equal(await page.locator('#avRecipe option').count(),1);
@@ -28,7 +29,7 @@ const assert=require('node:assert/strict');
  await page.locator('#avQty').fill('6');await page.locator('#avQty').dispatchEvent('change');
  assert.match(await page.locator('#avShopping').innerText(),/1.*0,1 зм/);
  const logic=await page.evaluate(()=>{
-  const old=JSON.stringify(ST);ST.knownRecipes=[recipeKey(D.find(c=>c.n==='Подмога'))];
+  const old=JSON.stringify(ST);ST.knownRecipes=[recipeKey(D.find(c=>c.n==='Подмога'))];ST.mat.herbs=[];
   // Для проверки двойного расхода нужна одна единица, независимо от настоящего запаса игрока.
   ST.mat.ess.find(e=>e.id==='e4').q=1;
   const aid=D.find(c=>c.n==='Подмога');const first=supply(aid,1);ST.mat.herbs.push({k:'heal',l:2,q:2});
