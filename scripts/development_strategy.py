@@ -15,6 +15,7 @@ import sys
 from alchemy_guidance import chances
 from current_inventory import load
 from economy_book import formula_research, progress_research
+from mastery_timing import compare_timing, timing_details, timing_overview
 from rules_data import (BATCH_T, CAT_PRICE, CAT_STABLE, ELIXIR_DC, HERB,
                         INK_PRICES, MB, P_PRICE, P_SL,
                         proficiency, elixir_batch)
@@ -700,8 +701,10 @@ def build():
     from elixir_catalog_review import catalog_investments
     validate_sources()
     catalog=catalog_investments()
+    snapshot=load()
     result=dict(goal='M5 и устойчивое снабжение группы; коммерция — дополнительный источник',
-        confirmed_cash=load()['state']['mat']['gold'],
+        confirmed_cash=snapshot['state']['mat']['gold'],
+        mastery_timing=compare_timing(snapshot,C,rolls),
         catalog_investments=catalog,
         scroll_supply_review=scroll_supply_review(),
         upcast_goals=upcast_goals(),
@@ -758,7 +761,19 @@ def main():
     parser.add_argument('--write',action='store_true');parser.add_argument('--check',action='store_true')
     args=parser.parse_args();content=build();path=OUTPUT/'results.json'
     report=ROOT/'Талис — стратегия развития алхимии — расчёты.md'
+    strategy=ROOT/'Талис — стратегия развития алхимии.md'
     source=report.read_text()
+    strategy_source=strategy.read_text()
+    timing=json.loads(content)['mastery_timing']
+
+    def update_timing(text, renderer):
+        start,end='<!-- mastery-timing:start -->','<!-- mastery-timing:end -->'
+        if text.count(start)!=1 or text.count(end)!=1:
+            raise ValueError('Не найдены границы сравнения сроков М2–М5')
+        return re.sub(re.escape(start)+r'.*?'+re.escape(end),
+                      lambda _:start+'\n\n'+renderer(timing)+'\n\n'+end,text,flags=re.S)
+
+    strategy_expected=update_timing(strategy_source,timing_overview)
     start,end='<!-- upcast-goals:start -->','<!-- upcast-goals:end -->'
     if source.count(start)!=1 or source.count(end)!=1:
         raise ValueError('Не найдены границы сравнительной таблицы апкаста')
@@ -777,13 +792,15 @@ def main():
     expected=re.sub(re.escape(start)+r'.*?'+re.escape(end),
                     lambda _:start+'\n\n'+mastery3_route_table(json.loads(content)['mastery3_elixir_routes'])+'\n\n'+end,
                     expected,flags=re.S)
+    expected=update_timing(expected,timing_details)
     if args.check:
-        if not path.exists() or path.read_text()!=content or expected!=source:
+        if not path.exists() or path.read_text()!=content or expected!=source or strategy_expected!=strategy_source:
             raise SystemExit('Устарел расчёт совместной стратегии: results.json')
         print('PASS: цепочка I–III, конечные ресурсы, параллельность, M5 и выбранные средства воспроизводятся')
     elif args.write:
         OUTPUT.mkdir(exist_ok=True);path.write_text(content)
         report.write_text(expected)
+        strategy.write_text(strategy_expected)
     else:
         print(content)
 
