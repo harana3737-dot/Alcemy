@@ -14,9 +14,9 @@ POINTER = Path('Источники/Сохранения/current.json')
 SHEET = Path('Талис — лист персонажа.md')
 
 
-def load(root=ROOT):
+def load(root=ROOT, *, snapshot=None):
     folder = root / POINTER.parent
-    name = json.loads((root / POINTER).read_text())['snapshot']
+    name = snapshot if snapshot is not None else json.loads((root / POINTER).read_text())['snapshot']
     if Path(name).name != name or not name.endswith('.json'):
         raise ValueError('Указатель должен содержать имя JSON в папке сохранений')
     data = json.loads((folder / name).read_text())
@@ -82,7 +82,12 @@ def render_sheet(text, root=ROOT):
         types = ' / '.join(essence['types'])
         rows.append(f"• {essence['n']} ×{number(essence['q'])} — {types}, уровень {essence['l']}; {essence.get('note', '')}".rstrip('; '))
     for catalyst in mat['cat']:
-        rows.append(f"• Катализатор порядка {catalyst['o']} — использовано {catalyst['used']} применений")
+        detail = f"использовано {catalyst['used']} применений"
+        if catalyst.get('risk') == 0:
+            remaining = max(0, catalyst['stable'] - catalyst['used'])
+            detail = f"безопасных применений осталось {remaining}; рискованных нет"
+        rows.append(f"• Катализатор порядка {catalyst['o']} — {detail}."
+                    + (f" {catalyst['note']}" if catalyst.get('note') else ''))
     for item in mat['other']:
         rows.append(f"• {item['n']} ×{number(item['q'])} — {item.get('note', '')}".rstrip(' —'))
     text = replace_block(text, 'materials', '\n'.join(rows), r'Ингредиенты\n.*?(?=\n\n(?:\*\*Происхождение и особые условия|Письмо и записи\n))')

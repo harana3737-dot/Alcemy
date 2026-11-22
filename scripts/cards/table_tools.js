@@ -161,6 +161,8 @@ function validateSnapshot(data){
   if(s.trig.some(t=>!t||!ids.has(t.who)||!Number.isFinite(t.T)))fail();
   if(s.plan&&(!Array.isArray(s.plan.items)||s.plan.items.some(i=>typeof i.n!=='string'||!ids.has(i.who)||!Number.isFinite(i.q)||i.q<0)))fail();
   if(s.hrs&&(!Number.isFinite(s.hrs.total)||!Array.isArray(s.hrs.log)||s.hrs.log.some(l=>typeof l.w!=='string'||!Number.isFinite(l.T)||!Number.isFinite(l.h))))fail();
+  if(s.hrs?.undated!=null&&(!Array.isArray(s.hrs.undated)||
+    s.hrs.undated.some(l=>!l||typeof l.w!=='string'||!Number.isFinite(l.h)||l.h<=0)))fail();
   if(s.fight){const f=s.fight,integer=(v,min,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
     if(typeof f.on!=='boolean'||!integer(f.round,0)||!Array.isArray(f.heals)||!Array.isArray(f.coats)||!Array.isArray(f.now)||f.now.some(t=>typeof t!=='string'))fail();
     if(f.sub!=null&&!integer(f.sub,0,9)||f.turned!=null&&typeof f.turned!=='boolean'||f.ctl!=null&&typeof f.ctl!=='boolean')fail();
@@ -174,7 +176,8 @@ function validateSnapshot(data){
   for(const b of s.bag)if(typeof b.n!=='string'||!ids.has(b.who)||!Number.isFinite(b.q)||b.q<0)fail();
   for(const h of s.mat.herbs)if(!['heal','poison'].includes(h.k)||!Number.isInteger(h.l)||h.l<1||h.l>10||!Number.isFinite(h.q)||h.q<0)fail();
   for(const e of s.mat.ess)if(typeof e.id!=='string'||typeof e.n!=='string'||!Array.isArray(e.types)||e.types.some(t=>typeof t!=='string')||!Number.isInteger(e.l)||e.l<1||e.l>10||!Number.isFinite(e.q)||e.q<0)fail();
-  for(const c of s.mat.cat)if(typeof c.id!=='string'||!Number.isInteger(c.o)||c.o<1||c.o>4||!Number.isFinite(c.used)||c.used<0)fail();
+  for(const c of s.mat.cat)if(typeof c.id!=='string'||!Number.isInteger(c.o)||c.o<1||c.o>4||!Number.isFinite(c.used)||c.used<0||
+    c.risk!=null&&(!Number.isInteger(c.risk)||c.risk<0||c.risk>5))fail();
   for(const o of s.mat.other)if(typeof o.n!=='string'||!Number.isFinite(o.q)||o.q<0)fail();
   if(s.knownRecipes&&(!Array.isArray(s.knownRecipes)||s.knownRecipes.some(k=>typeof k!=='string')))fail();
   if(s.mat.pools&&(!Array.isArray(s.mat.pools)||s.mat.pools.some(p=>!['heal','poison'].includes(p.k)||!Number.isInteger(p.min)||p.min<1||p.min>10||!Number.isFinite(p.v)||p.v<0)))fail();

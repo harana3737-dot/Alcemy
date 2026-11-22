@@ -11,6 +11,7 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
     await page.route('https://**/*',r=>r.fulfill({status:200,body:''}));
     await page.goto(base+'/'+encodeURIComponent('Помощник варки.html'));
     await page.waitForFunction(()=>JDB&&ST.mat);
+    await page.evaluate(()=>mutate(()=>ST.bag.push({id:uid(),n:'Зелье 3.3',q:2,who:'p1',note:''})));
     await page.locator('[data-tab="belt"]').click();await page.locator('#fStart').click();
     assert.equal(await page.locator('#fHp').innerText(),'42 / 42');
     const before=await page.evaluate(()=>ST.bag.find(b=>b.who==='p1'&&b.n==='Зелье 3.3').q);

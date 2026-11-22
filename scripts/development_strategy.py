@@ -25,6 +25,7 @@ from cards_data import C
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / 'scripts/development_strategy'
+TIMING_BASELINE = 'alcemy-save-2026-11-15-session17-tough.json'
 
 
 def rolls(bonus, dc, points):
@@ -701,7 +702,7 @@ def build():
     from elixir_catalog_review import catalog_investments
     validate_sources()
     catalog=catalog_investments()
-    snapshot=load()
+    snapshot=load(snapshot=TIMING_BASELINE)
     result=dict(goal='M5 и устойчивое снабжение группы; коммерция — дополнительный источник',
         confirmed_cash=snapshot['state']['mat']['gold'],
         mastery_timing=compare_timing(snapshot,C,rolls),

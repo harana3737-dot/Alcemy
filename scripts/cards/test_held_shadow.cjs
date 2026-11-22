@@ -41,11 +41,12 @@ const name='Сгусток удержанной тени',legacyName='Эктоп
   const legacyBackup=page.waitForEvent('download');await page.locator('#restoreApply').click();await legacyBackup;
   await page.locator('#restoreDialog').waitFor({state:'hidden'});
   actual=await read();assert.equal(actual.ess.length,1);assert.equal(actual.ess[0].q,1);assert.equal(actual.other.length,0);
-  // Сверяем весь перечень трофеев с актуальным учётом, а не только исправленный сгусток.
-  const parity=await page.evaluate(()=>{
+  // Сопоставляем старый импорт с поправленным историческим снимком.
+  const historical=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../../Источники/Сохранения/alcemy-save-2026-11-15-session17-tough.json'),'utf8'));
+  const parity=await page.evaluate(expected=>{
    const items=m=>['ess','other'].flatMap(k=>m[k].map(e=>({section:k,name:e.n,q:e.q}))).sort((a,b)=>a.name.localeCompare(b.name));
-   return {actual:items(ST.mat),expected:items(SEED.mat)};
-  });
+   return {actual:items(ST.mat),expected:items(expected.state.mat)};
+  },historical);
   assert.deepEqual(parity.actual,parity.expected,'Старый снимок после поправок содержит весь подтверждённый перечень трофеев');
   // Старый снимок не содержит Искру: исправление обязано вернуть оба подтверждённых трофея.
   const spark='Искра заблудшей души';
