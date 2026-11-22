@@ -7,6 +7,7 @@ import argparse
 from collections import defaultdict
 from functools import lru_cache
 import json
+import math
 from pathlib import Path
 import re
 import sys
@@ -642,15 +643,70 @@ def research_entry_table(model):
     return '\n'.join(lines)
 
 
+def mastery3_elixir_routes(catalog):
+    """Сравнить обычные успехи варки при разных наборах необычных формул."""
+    items={item['name']:item for item in catalog['items']}
+    recipes={row['recipe']:row['acquisition'] for row in catalog['recipes']}
+    core=(
+        'Дрёма','Крепость разума','Психическая стойкость','Экспертность: Магия',
+        'Рост','Уменьшение',
+        'Защита от добра и зла','Разговор с мёртвыми','Снятие проклятия',
+    )
+    routes=[]
+    for label, names, repeat, repeat_count in (
+        ('Три ступени и добор партиями',core,'Дрёма',8),
+        ('Пять ступеней и первые дозы',core+(
+            'Языки','Зеркальные образы','Мерцание',
+            'Бутилированное дыхание','Огненное дыхание','Сопротивление',
+        ),None,0),
+    ):
+        brew=[items[name] for name in names]
+        # У «Сопротивления» первая указанная в модели формула Тела;
+        # здесь варим стихийную разновидность.
+        keys={('Эликсир Стихии' if item['name']=='Сопротивление' else item['recipes'][0])
+              +'; '+item['recipe_tier'] for item in brew}
+        research=[recipes[key] for key in sorted(keys)]
+        assert all(item['level']==3 and item['cls']=='eff' for item in brew)
+        practice=len(research)+len(brew)+repeat_count
+        assert practice==20
+        repeated_batches=math.ceil(repeat_count/elixir_batch(3,3))
+        hours=4*(len(brew)+repeated_batches)
+        raw=sum(item['raw_per_attempt'][0] for item in brew)
+        if repeat:
+            raw+=items[repeat]['raw_per_attempt'][0]*repeat_count
+        catalysts=(len(brew)+repeat_count+CAT_STABLE-1)//CAT_STABLE
+        routes.append(dict(label=label, research_targets=[r['target'] for r in research],
+                           formulas=len(research), first_doses=names, repeat=repeat, repeat_count=repeat_count,
+                           practice=practice, brew_hours=hours, brew_cash=raw+catalysts*CAT_PRICE[3],
+                           catalysts=catalysts, research_hours=sum(r['hours'] for r in research),
+                           research_cash=sum(r['expected_research_cash_range'][0] for r in research)))
+    return routes
+
+
+def mastery3_route_table(routes):
+    lines=['| Маршрут | Практика | Исследования, среднее | Варка при обычных успехах |',
+           '| --- | --- | --- | --- |']
+    for row in routes:
+        first=len(row['first_doses'])
+        repeat=f" + {row['repeat_count']} повторных доз III" if row['repeat_count'] else ''
+        research_hours=f"{row['research_hours']:.1f}".replace('.',',')
+        lines.append(f"| {row['label']} | {row['formulas']} за открытия + {first} за первые дозы{repeat} | "
+                     f"{research_hours} ч / {row['research_cash']:.0f} зм | "
+                     f"{row['brew_hours']} ч / {row['brew_cash']:.0f} зм, катализаторы I ×{row['catalysts']} |")
+    return '\n'.join(lines)
+
+
 def build():
     from elixir_catalog_review import catalog_investments
     validate_sources()
+    catalog=catalog_investments()
     result=dict(goal='M5 и устойчивое снабжение группы; коммерция — дополнительный источник',
         confirmed_cash=load()['state']['mat']['gold'],
-        catalog_investments=catalog_investments(),
+        catalog_investments=catalog,
         scroll_supply_review=scroll_supply_review(),
         upcast_goals=upcast_goals(),
         research_entry_comparison=research_entry_comparison(),
+        mastery3_elixir_routes=mastery3_elixir_routes(catalog),
         assumptions=dict(lael_base_bonus=10,scroll_market=SCROLL_PRICES,
             scroll_sale_fraction=.75,crafted_scroll_sale_confirmed=True,
             sale_source="Полные правила, справочник цен: со слов игрока, собственные свитки Лаэля тоже 75%",
@@ -714,6 +770,12 @@ def main():
         raise ValueError('Не найдены границы сравнения исследований M3')
     expected=re.sub(re.escape(start)+r'.*?'+re.escape(end),
                     lambda _:start+'\n\n'+research_entry_table(json.loads(content)['research_entry_comparison'])+'\n\n'+end,
+                    expected,flags=re.S)
+    start,end='<!-- m3-elixir-routes:start -->','<!-- m3-elixir-routes:end -->'
+    if source.count(start)!=1 or source.count(end)!=1:
+        raise ValueError('Не найдены границы сравнения маршрутов M3')
+    expected=re.sub(re.escape(start)+r'.*?'+re.escape(end),
+                    lambda _:start+'\n\n'+mastery3_route_table(json.loads(content)['mastery3_elixir_routes'])+'\n\n'+end,
                     expected,flags=re.S)
     if args.check:
         if not path.exists() or path.read_text()!=content or expected!=source:
