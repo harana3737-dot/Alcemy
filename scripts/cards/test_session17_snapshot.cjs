@@ -43,6 +43,14 @@ const base=process.env.ALCEMY_URL||'http://127.0.0.1:8770';
    await page.locator('[data-tab="jour"]').click();
    assert.match(await page.locator('#jhrs').innerText(),/Часы без игрового дня.*10 ч/s);
   }
+  const session18=path.resolve(__dirname,'../../Источники/Сохранения/alcemy-save-2026-11-23-session18.json');
+  await restore(session18);
+  await page.reload();
+  await page.waitForFunction(()=>JDB&&ST.mat&&TR.length);
+  assert.deepEqual(await page.evaluate(()=>({
+    day:dayOf(ST.T),minute:ST.T%1440,hours:ST.hrs.total,gold:ST.mat.gold,
+    talisWarCaster:TR.find(t=>t.id==='project-war-caster').current,
+  })),{day:17,minute:480,hours:20,gold:77.79,talisWarCaster:6});
   assert.deepEqual(errors,[]);await context.close();
   console.log('PASS: session17 LSS resources, pooled points, gift once, no duplicate consumption, reload and repeated import');
  }finally{await browser.close()}
