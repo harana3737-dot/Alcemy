@@ -8,7 +8,7 @@ class CampaignLibraryTest(unittest.TestCase):
         self.assertEqual({item['source'] for item in items} | {NOTES}, INPUTS)
         self.assertEqual(len({item['id'] for item in items}), len(items))
         self.assertEqual([item['title'] for item in items if item['category'] == 'Логи'],
-                         [f'Сессия {i}' for i in range(1, 18)])
+                         [f'Сессия {i}' for i in range(1, 19)])
         self.assertEqual(sum(item['category'] == 'Опорные диалоги' for item in items), 6)
         for item in items:
             source = (ROOT/item['source']).read_text(encoding='utf-8')
@@ -27,7 +27,7 @@ class CampaignLibraryTest(unittest.TestCase):
         labels = [item['label'] for item in items]
         self.assertEqual(len(set(labels)), len(labels))
         self.assertEqual([item['label'] for item in items if item['category'] == 'Логи'],
-                         [f'S{i:02d}' for i in range(1, 18)])
+                         [f'S{i:02d}' for i in range(1, 19)])
         self.assertTrue(all(item['summary'] for item in items if item['category'] == 'Логи'))
         parts = [item for item in items if item['title'].startswith('Расширенный рассказ')]
         self.assertEqual([item['label'] for item in parts], ['КВ2', 'КВ3', 'КВ4'])
