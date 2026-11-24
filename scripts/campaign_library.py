@@ -12,6 +12,7 @@ from generated_files import generated_html
 ROOT = Path(__file__).resolve().parent.parent
 PAGE = 'Для игрока — логи, записки и предыстория.html'
 LOGS = 'Источники/Логи сессий 1–13 и записки Талиса.md'
+TALIS_NOTES = [('Источники/Записки Талиса о зельях, ч. 6.md', 'Сессия 18')]
 STORY = 'Источники/Талис — предыстория.md'
 HANDOUTS = 'Источники/Материалы мастера.md'
 NOTES = 'scripts/campaign_library_notes.json'
@@ -28,7 +29,8 @@ REPORTS = [('Источники/Сессия 9 — бой с гоблинами 
                             ('Источники/Сессия 5 — бой в голубятне.md', 'Сессия 5 — подробный бой в голубятне')]
 PACT = 'Источники/Пакт Покорителя Звенящего Собора (текст).txt'
 INPUTS = {LOGS, STORY, HANDOUTS, PACT, NOTES,
-          *(name for name, _ in SESSIONS), *(name for name, _ in REPORTS)}
+          *(name for name, _ in SESSIONS), *(name for name, _ in TALIS_NOTES),
+          *(name for name, _ in REPORTS)}
 
 # Квента приходила тремя частями; границы — как в «Талис — предыстория, часть 1–3».
 STORY_PARTS = (('ч. 1 — до гибели Аэлиуса', None),
@@ -86,6 +88,10 @@ def records(root=ROOT):
     for filename, title in SESSIONS:
         lines = (root/filename).read_text(encoding='utf-8').splitlines(keepends=True)
         add(filename, 'Логи', title, lines, 0, len(lines))
+
+    for filename, session in TALIS_NOTES:
+        lines = (root/filename).read_text(encoding='utf-8').splitlines(keepends=True)
+        add(filename, 'Записки Талиса', Path(filename).stem, lines, 0, len(lines), session)
 
     lines, heads = sections((root/STORY).read_text(encoding='utf-8'))
     selected = [h for h in heads if h[1] in (2, 3)]
