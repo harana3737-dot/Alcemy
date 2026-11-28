@@ -29,8 +29,14 @@ class CurrentInventoryTests(unittest.TestCase):
         # Everything outside the three blocks and coin total is handwritten.
         for text in ('Происхождение и особые условия', 'Корневая метка', 'Заметки', 'История'):
             self.assertEqual(before.count(text), after.count(text))
-        for name in ('Зерно Угасания', 'Искра заблудшей души', 'безопасных применений осталось 3'):
+        for name in ('Зерно Угасания', 'безопасных применений осталось 3'):
             self.assertIn(name, after)
+        materials = seed()[1]
+        has_spark = any(item['n'] == 'Искра заблудшей души'
+                        for item in materials['other'] + materials['ess'])
+        current = after.split('<!-- current-materials:start -->', 1)[1]
+        current = current.split('<!-- current-materials:end -->', 1)[0]
+        self.assertEqual('Искра заблудшей души' in current, has_spark)
 
     def test_render_replaces_only_current_quantities(self):
         with tempfile.TemporaryDirectory() as directory:
