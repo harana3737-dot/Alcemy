@@ -11,7 +11,7 @@ class ReplayTests(unittest.TestCase):
 
     def test_mastery_independent(self):
         s=self.state()
-        brew(s,2,[20,10])
+        brew(s,2,[20,5])
         self.assertEqual((s.level,s.mastery,s.practice,s.hours),(5,3,0,2))
         self.assertEqual(s.herbs[2],8)
 
